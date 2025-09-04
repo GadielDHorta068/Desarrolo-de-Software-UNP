@@ -1,4 +1,17 @@
 # Configuración específica para desarrollo
+
+# Configuración de BCrypt para desarrollo
+bcrypt:
+  strength: 10  # Más rápido para desarrollo
+
+# Configuración de JWT para desarrollo
+jwt:
+  secret: raffyjwtsecretkey2025supersecurefordevelopment
+  expiration: 86400000  # 24 horas
+  refresh-expiration: 604800000  # 7 días
+  issuer: raffy-backend
+  audience: raffy-frontend
+
 spring:
   datasource:
     # Configuración de pool de conexiones para desarrollo

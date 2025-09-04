@@ -60,6 +60,23 @@ spring:
       defaults:
         enabled: true
 
+# Configuración de BCrypt para hashing seguro de contraseñas
+bcrypt:
+  strength: ${BCRYPT_STRENGTH:12}  # Factor de trabajo (10-31, por defecto 12)
+  # Nota: strength 12 es un buen balance entre seguridad y rendimiento
+  # - 10: Más rápido, menos seguro (desarrollo)
+  # - 12: Balanceado (producción recomendado)
+  # - 14+: Más seguro, más lento (alta seguridad)
+
+# Configuración de JWT para autenticación y autorización
+jwt:
+  secret: ${JWT_SECRET:raffyjwtsecretkey2025supersecurefordevelopment}
+  expiration: ${JWT_EXPIRATION:86400000}  # 24 horas en milisegundos
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7 días en milisegundos
+  issuer: ${JWT_ISSUER:raffy-backend}
+  audience: ${JWT_AUDIENCE:raffy-frontend}
+  # Nota: En producción, JWT_SECRET debe ser una clave de al menos 256 bits (32 caracteres)
+
 # Configuración de logging para debug
 logging:
   level:

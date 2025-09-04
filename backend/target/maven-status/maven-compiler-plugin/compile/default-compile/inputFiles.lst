@@ -1,3 +1,4 @@
 /app/src/main/java/com/desarrollo/raffy/RaffyAplication.java
+/app/src/main/java/com/desarrollo/raffy/config/SecurityConfig.java
 /app/src/main/java/com/desarrollo/raffy/presenter/HealthController.java
 /app/src/main/java/com/desarrollo/raffy/presenter/InfoController.java
