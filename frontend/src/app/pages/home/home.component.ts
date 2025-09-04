@@ -6,157 +6,75 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="home-container">
-      <div class="welcome-section">
-        <h2>¡Bienvenido a Raffy!</h2>
-        <p class="subtitle">Sistema de Sorteos</p>
+    <!-- Contenedor principal con Tailwind CSS -->
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
-        <div class="features-grid">
+        <!-- Sección de rafy -->
+        <div class="text-center mb-16">
+          <h1 class="text-5xl md:text-6xl font-bold text-gradient mb-4">
+            ¡Bienvenido a rafiffy!
+          </h1>
+          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Sistema de Sorteos Inteligente y Seguro
+          </p>
+        </div>
+        
+        <!-- Grid de características -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           
-          <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <h3>Reportes en Tiempo Real</h3>
-            <p>Obtén insights valiosos sobre el rendimiento de tu empresa</p>
+          <!-- Tarjeta de Reportes -->
+          <div class="card group hover:scale-105 transition-all duration-300">
+            <div class="text-6xl mb-4">📊</div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Reportes Avanzados</h3>
+            <p class="text-gray-600 leading-relaxed">
+              Obtén insights valiosos sobre el rendimiento de tu empresa con análisis detallados
+            </p>
           </div>
           
-          <div class="feature-card">
-            <div class="feature-icon">🔒</div>
-            <h3>Seguridad Garantizada</h3>
-            <p>Tus datos están protegidos con las mejores prácticas de seguridad</p>
+          <!-- Tarjeta de Seguridad -->
+          <div class="card group hover:scale-105 transition-all duration-300">
+            <div class="text-6xl mb-4">🔒</div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Seguridad Garantizada</h3>
+            <p class="text-gray-600 leading-relaxed">
+              Tus datos están protegidos con las mejores prácticas de seguridad y encriptación
+            </p>
           </div>
           
-          <div class="feature-card">
-            <div class="feature-icon">💡</div>
-            <h3>Fácil de Usar</h3>
-            <p>Interfaz intuitiva diseñada para maximizar tu productividad</p>
+          <!-- Tarjeta de Facilidad de Uso -->
+          <div class="card group hover:scale-105 transition-all duration-300">
+            <div class="text-6xl mb-4">💡</div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Fácil de Usar</h3>
+            <p class="text-gray-600 leading-relaxed">
+              Interfaz intuitiva diseñada para maximizar tu productividad y eficiencia
+            </p>
           </div>
         </div>
         
-        <div class="cta-section">
-          <button class="cta-button primary">Comenzar</button>
-          <button class="cta-button secondary">Saber Más</button>
+        <!-- Sección de llamada a la acción -->
+        <div class="text-center space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+          <button class="btn-primary text-lg px-8 py-3">
+            Comenzar Ahora
+          </button>
+          <button class="btn-secondary text-lg px-8 py-3">
+            Saber Más
+          </button>
         </div>
+        
+        <!-- Información adicional -->
+        <div class="mt-16 text-center">
+          <p class="text-gray-500 text-sm">
+            Desarrollado con Angular 18 y Tailwind CSS
+          </p>
+        </div>
+        
       </div>
     </div>
   `,
-  styles: [`
-    .home-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-    
-    .welcome-section {
-      text-align: center;
-    }
-    
-    .welcome-section h2 {
-      font-size: 3rem;
-      color: #2c3e50;
-      margin-bottom: 0.5rem;
-      font-weight: 300;
-    }
-    
-    .subtitle {
-      font-size: 1.2rem;
-      color: #7f8c8d;
-      margin-bottom: 3rem;
-    }
-    
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 2rem;
-      margin: 3rem 0;
-    }
-    
-    .feature-card {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .feature-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-    
-    .feature-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-    }
-    
-    .feature-card h3 {
-      color: #2c3e50;
-      margin-bottom: 1rem;
-      font-weight: 600;
-    }
-    
-    .feature-card p {
-      color: #7f8c8d;
-      line-height: 1.6;
-    }
-    
-    .cta-section {
-      margin-top: 3rem;
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    
-    .cta-button {
-      padding: 0.75rem 2rem;
-      border: none;
-      border-radius: 25px;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .cta-button.primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    
-    .cta-button.primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .cta-button.secondary {
-      background: transparent;
-      color: #667eea;
-      border: 2px solid #667eea;
-    }
-    
-    .cta-button.secondary:hover {
-      background: #667eea;
-      color: white;
-    }
-    
-    @media (max-width: 768px) {
-      .welcome-section h2 {
-        font-size: 2rem;
-      }
-      
-      .features-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-      }
-      
-      .cta-section {
-        flex-direction: column;
-        align-items: center;
-      }
-    }
-  `],
-  changeDetection: ChangeDetectionStrategy.Default
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent {
-  // Componente de página de inicio
-  // Muestra información general sobre la aplicación
+  // Componente de página de inicio usando Tailwind CSS
+  // Diseño moderno y responsive con clases utilitarias de Tailwind
 }
+

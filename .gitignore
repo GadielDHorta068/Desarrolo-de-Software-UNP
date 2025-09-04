@@ -18,7 +18,48 @@
 *.zip
 *.tar.gz
 *.rar
-
+./frontend/node_modules
+./frontend/dist
+./frontend/tmp
+./frontend/out-tsc
+./frontend/bazel-out
+./frontend/npm-debug.log
+./frontend/yarn-error.log
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# NVMe files and exports
+*.nvme
+*.nvm
+*.nvme.*
+*.nvm.*
+nvme-*
+nvm-*
+
+# Export files
+*.export
+*.exp
+*.dump
+*.backup
+*.bak
+*.tmp
+*.temp
+
+# Database exports and dumps
+*.sql
+*.dump
+*.backup
+*.bak
+*.db
+*.sqlite
+*.sqlite3
+
+# Log exports
+*.log.*
+*.log.old
+*.log.backup
+
+# Environment variables files
+docker/*.env
+docker/.env

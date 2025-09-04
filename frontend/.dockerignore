@@ -1,3 +1,4 @@
+# Archivos y directorios que no se deben copiar al contenedor
 node_modules
 npm-debug.log
 .git
@@ -8,6 +9,9 @@ README.md
 coverage
 .nyc_output
 .coverage
-.cache
+.coverage/
+*.log
+.DS_Store
+Thumbs.db
 dist
 .angular

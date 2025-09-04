@@ -1,1 +1,38 @@
-/* You can add global styles to this file, and also import other style files */
+/* Directivas de Tailwind CSS - estas deben estar al inicio del archivo */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos personalizados globales */
+@layer base {
+  /* Estilos base personalizados */
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  /* Componentes personalizados reutilizables */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary hover:bg-secondary/90 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-lg p-6 border border-gray-100;
+  }
+}
+
+@layer utilities {
+  /* Utilidades personalizadas */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+  }
+}
