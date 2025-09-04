@@ -12,11 +12,6 @@ import { CommonModule } from '@angular/common';
         <p class="subtitle">Sistema de Sorteos</p>
         
         <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">🚀</div>
-            <h3>LTAA</h3>
-            <p>LTA KUKARDO</p>
-          </div>
           
           <div class="feature-card">
             <div class="feature-icon">📊</div>
