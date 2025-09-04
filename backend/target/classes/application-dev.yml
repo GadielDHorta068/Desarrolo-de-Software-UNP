@@ -1,0 +1,28 @@
+# Configuración específica para desarrollo
+spring:
+  datasource:
+    # Configuración de pool de conexiones para desarrollo
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 900000
+      leak-detection-threshold: 30000
+  
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+# Configuración de logging para desarrollo
+logging:
+  level:
+    root: INFO
+    com.desarrollo.raffy: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate: DEBUG

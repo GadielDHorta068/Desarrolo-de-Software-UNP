@@ -1,0 +1,90 @@
+services:
+  db:
+    image: postgres:16
+    container_name: raffy-db
+    env_file:
+      - docker/db.env
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U raffy_user -d raffy_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - raffy-network
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: raffy-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@raffy.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - raffy-network
+    restart: unless-stopped
+
+  backend:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: raffy-backend
+    working_dir: /app
+    command: >
+      sh -c "
+        echo 'Esperando a que la base de datos esté lista...' &&
+        sleep 5 &&
+        echo 'Iniciando aplicación...' &&
+        mvn spring-boot:run -Dspring-boot.run.profiles=${SPRING_PROFILES_ACTIVE:-dev} -Dspring-boot.run.jvmArguments='-Dspring.devtools.restart.enabled=true'
+      "
+    env_file:
+      - docker/backend.env
+      - docker/db.env
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      - ./backend:/app
+      - maven_repository:/root/.m2
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - raffy-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: raffy-frontend
+    working_dir: /app
+    command: npm start
+    ports:
+      - "4200:4200"
+    volumes:
+     - ./frontend:/app
+     - /app/node_modules
+    depends_on: []
+    restart: unless-stopped
+    networks:
+      - raffy-network
+  
+volumes:
+  postgres_data:
+  maven_repository:
+  db_data:
+  pgadmin_data:
+      
+networks:
+  raffy-network:
+    driver: bridge

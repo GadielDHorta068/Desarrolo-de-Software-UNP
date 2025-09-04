@@ -1,0 +1,140 @@
+
+# ===========================================
+# BACKEND - JAVA/MAVEN
+# ===========================================
+
+# Archivos compilados de Java
+*.class
+
+# Archivos de paquete
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Directorios de build de Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Archivos de configuración local
+application-local.yml
+application-local.properties
+
+# ===========================================
+# FRONTEND - ANGULAR/NODE.JS
+# ===========================================
+
+# Dependencias de Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+frontend/.angular/
+
+# Archivos de build de Angular
+dist/
+tmp/
+out-tsc/
+
+# Archivos de configuración de IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos de sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Archivos de entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Archivos de cache
+.cache/
+.parcel-cache/
+
+# Archivos de cobertura de código
+coverage/
+*.lcov
+
+# Archivos de reportes
+reports/
+
+# ===========================================
+# DOCKER
+# ===========================================
+
+# Archivos de Docker
+.dockerignore
+
+# ===========================================
+# ARCHIVOS GENERALES
+# ===========================================
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Archivos de lock (mantener package-lock.json y yarn.lock)
+# *.lock
+
+# Archivos de configuración local
+*.local
+
+# Archivos de logs
+logs/
+*.log
+
+# Archivos temporales
+temp/
+tmp/
+
+# ===========================================
+# ARCHIVOS ESPECÍFICOS DEL PROYECTO
+# ===========================================
+
+# Archivos de configuración de desarrollo local
+docker-compose.override.yml
+
+# Archivos de base de datos local
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos de certificados
+*.pem
+*.key
+*.crt
+*.p12
+
+# Archivos de configuración de IDE específicos
+.vscode/settings.json
+.idea/workspace.xml
