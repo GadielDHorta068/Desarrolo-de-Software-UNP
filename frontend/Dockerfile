@@ -1,5 +1,5 @@
 # Etapa de desarrollo optimizada para hot reload
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Directorio de trabajo
 WORKDIR /app
@@ -13,7 +13,7 @@ COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
 # Instalar dependencias
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Exponer puerto
 EXPOSE 4200
