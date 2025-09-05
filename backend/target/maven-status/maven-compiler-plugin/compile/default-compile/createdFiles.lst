@@ -1,2 +1,12 @@
 com/desarrollo/raffy/presenter/HealthController.class
+com/desarrollo/raffy/config/SecurityConfig.class
+com/desarrollo/raffy/model/EventTypes.class
+com/desarrollo/raffy/model/Events.class
+com/desarrollo/raffy/model/Giveaways.class
 com/desarrollo/raffy/presenter/InfoController.class
+com/desarrollo/raffy/model/Participants.class
+com/desarrollo/raffy/model/Users.class
+com/desarrollo/raffy/model/StatusEvent.class
+com/desarrollo/raffy/model/Categories.class
+com/desarrollo/raffy/model/UserTypes.class
+com/desarrollo/raffy/RaffyAplication.class

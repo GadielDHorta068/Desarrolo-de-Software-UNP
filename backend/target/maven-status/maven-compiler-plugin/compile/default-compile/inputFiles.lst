@@ -1,4 +1,12 @@
-/app/src/main/java/com/desarrollo/raffy/RaffyAplication.java
-/app/src/main/java/com/desarrollo/raffy/config/SecurityConfig.java
-/app/src/main/java/com/desarrollo/raffy/presenter/HealthController.java
-/app/src/main/java/com/desarrollo/raffy/presenter/InfoController.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/RaffyAplication.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/config/SecurityConfig.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/model/Categories.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/model/EventTypes.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/model/Events.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/model/Giveaways.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/model/Participants.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/model/StatusEvent.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/model/UserTypes.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/model/Users.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/presenter/HealthController.java
+/media/oem/Elements/Raffify-proyecto/Desarrolo-de-Software-UNP/backend/src/main/java/com/desarrollo/raffy/presenter/InfoController.java
