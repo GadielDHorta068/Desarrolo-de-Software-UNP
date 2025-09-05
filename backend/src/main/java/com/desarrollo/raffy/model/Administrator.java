@@ -7,6 +7,9 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-public class Participants extends Users{
+public class Administrator extends Users{
+    
+    private String password;
 
+    private String imagen;
 }

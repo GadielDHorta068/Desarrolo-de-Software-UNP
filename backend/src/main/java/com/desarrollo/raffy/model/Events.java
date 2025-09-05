@@ -1,6 +1,7 @@
 package com.desarrollo.raffy.model;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,5 +25,9 @@ public abstract class Events {
     private Categories categories;
 
     private StatusEvent statusEvent;
+
+    private List<Participants> participants;
+
+    private List<Participants> winners;
 
 }
