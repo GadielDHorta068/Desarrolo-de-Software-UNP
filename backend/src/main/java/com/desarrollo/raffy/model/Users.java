@@ -3,11 +3,13 @@ package com.desarrollo.raffy.model;
 import jakarta.persistence.Entity;
 
 @Entity
-public class Users {
+public abstract class Users {
 
     private Long id;
 
     private String name;
+
+    private String surname;
 
     private String email;
 

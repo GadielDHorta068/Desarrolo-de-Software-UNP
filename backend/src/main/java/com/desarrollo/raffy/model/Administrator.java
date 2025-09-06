@@ -9,7 +9,9 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @Entity
-public class Administrator extends Users{
+public class Administrator extends Users {
+
+    private String nickname;
     
     private String password;
 
