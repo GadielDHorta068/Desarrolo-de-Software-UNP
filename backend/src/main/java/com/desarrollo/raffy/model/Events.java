@@ -3,33 +3,78 @@ package com.desarrollo.raffy.model;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.AllArgsConstructor;
 
 @Setter
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
+@Table(name = "events")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Events {
-    // atributos
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
-    
+
+    @NotBlank(message = "El titulo debe estar completo")
+    @Size(min = 3, max = 50, message = "El titulo debe tener entre 3 y 50 caracteres")
+    @Column(name = "title")
     private String title;
-    
+
+    @NotBlank(message = "La descripción debe estar completa")
+    @Size(min = 3, max = 200, message = "La descripción debe tener entre 3 y 200 caracteres")
+    @Column(name = "description")
     private String description;
-    
+
+    @NotNull(message = "Se debe tener fecha de inicio")
+    @Future(message = "La fecha de inicio debe ser futura")
+    @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
-    
+
+    @NotNull(message = "Se debe tener una fecha de finalización")
+    @Future(message = "La fecha de finalización debe ser futura")
+    @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    private Categories categories;
+    @NotNull(message = "Debe tener categoría")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Categories category;
 
+    @NotNull(message = "El estado del evento no debe estar vacío")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_event", nullable = false)
     private StatusEvent statusEvent;
 
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Participants> participants;
 
+    @OneToMany(mappedBy = "winnerEvent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Participants> winners;
+
+    @NotNull(message = "Debe especificar el tipo de evento")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "event_type", nullable = false)
+    private EventTypes eventType;
+
+    /*
+     * En esta funcion se valida que la fecha de inicio no sea posterior a la fecha fin
+     * @throws IllegalArgumentException si la fecha de finalización es anterior a la fecha de inicio
+     */
+    @PrePersist
+    @PreUpdate
+    private void validateDates() {
+        if (startDate != null && endDate != null && !endDate.isAfter(startDate)) {
+            throw new IllegalArgumentException("La fecha de finalización debe ser posterior a la fecha de inicio");
+        }//atajar el pancho del error en el presenter y cear un GlobalExceptionHandler
+    }
 
 }
