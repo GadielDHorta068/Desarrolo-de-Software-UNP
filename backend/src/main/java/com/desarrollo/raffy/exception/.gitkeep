@@ -1,0 +1,3 @@
+# Esta carpeta contendrá las excepciones personalizadas del proyecto
+# Incluirá clases para manejo centralizado de errores y excepciones
+# como ResourceNotFoundException, ValidationException, etc.

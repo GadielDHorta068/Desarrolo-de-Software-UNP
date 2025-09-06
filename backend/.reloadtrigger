@@ -1,0 +1,7 @@
+# Archivo trigger para DevTools
+# Toca este archivo (modifica su timestamp) para activar el hot reload manualmente
+# Esto evita la doble compilación automática
+# 
+# Para activar el reload:
+# - En Windows: echo. >> .reloadtrigger
+# - En Linux/Mac: touch .reloadtrigger

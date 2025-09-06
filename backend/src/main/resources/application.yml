@@ -37,6 +37,13 @@ spring:
   devtools:
     restart:
       enabled: true
+      # Evita doble compilación configurando triggers específicos
+      trigger-file: .reloadtrigger
+      # Excluye directorios que causan bucles
+      exclude: "static/**,public/**,resources/**,META-INF/maven/**,META-INF/resources/**,resources/static/**,resources/public/**"
+    livereload:
+      enabled: true
+      port: 35729
   server:
     port: ${APP_PORT:-8080}
 
