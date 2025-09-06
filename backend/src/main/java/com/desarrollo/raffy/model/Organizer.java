@@ -11,6 +11,8 @@ import lombok.Setter;
 @Entity
 public class Organizer extends Users{
 
+    private String nickname;
+
     private String password;
 
     private String imagen;
