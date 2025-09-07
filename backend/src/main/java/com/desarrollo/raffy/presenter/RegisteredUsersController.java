@@ -1,5 +1,6 @@
 package com.desarrollo.raffy.presenter;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.desarrollo.raffy.business.services.RegisteredUsersService;
+import com.desarrollo.raffy.dto.RegisteredUserDTO;
 import com.desarrollo.raffy.model.RegisteredUsers;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/registered-users")
@@ -22,44 +26,40 @@ public class RegisteredUsersController {
     @Autowired
     private RegisteredUsersService registeredUsersService;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     @PostMapping
-    public ResponseEntity<RegisteredUsers> create(@RequestBody RegisteredUsers registeredUsers){
-        RegisteredUsers createRegisteredUsers = registeredUsersService.create(registeredUsers);
-        if (createRegisteredUsers != null) {
-            return new ResponseEntity<>(createRegisteredUsers, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(createRegisteredUsers, HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<RegisteredUserDTO> create(@Valid @RequestBody RegisteredUserDTO dto){
+        RegisteredUsers entity = modelMapper.map(dto, RegisteredUsers.class);
+        RegisteredUsers created = registeredUsersService.create(entity);
+        RegisteredUserDTO response = modelMapper.map(created, RegisteredUserDTO.class);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RegisteredUsers> getById(@PathVariable Long id){
+    public ResponseEntity<RegisteredUserDTO> getById(@PathVariable Long id){
         RegisteredUsers registeredUser = registeredUsersService.getById(id);
         if (registeredUser != null) {
-            return new ResponseEntity<>(registeredUser, HttpStatus.OK);
+            RegisteredUserDTO response = modelMapper.map(registeredUser, RegisteredUserDTO.class);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(registeredUser, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RegisteredUsers> update(@PathVariable Long id, @RequestBody RegisteredUsers registeredUsers) {
-        registeredUsers.setId(id);
-        RegisteredUsers updatedRegisteredUsers = registeredUsersService.update(registeredUsers);
-        if (updatedRegisteredUsers != null) {
-            return new ResponseEntity<>(updatedRegisteredUsers, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<RegisteredUserDTO> update(@PathVariable Long id, @Valid @RequestBody RegisteredUserDTO dto) {
+        dto.setId(id);
+        RegisteredUsers entity = modelMapper.map(dto, RegisteredUsers.class);
+        RegisteredUsers updated = registeredUsersService.update(entity);
+        RegisteredUserDTO response = modelMapper.map(updated, RegisteredUserDTO.class);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Boolean> delete(@PathVariable Long id) {
         boolean deleted = registeredUsersService.delete(id);
-        if (deleted) {
-            return new ResponseEntity<>(true, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
-        }
+        return new ResponseEntity<>(deleted, deleted ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 }

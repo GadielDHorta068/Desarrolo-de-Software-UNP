@@ -13,4 +13,8 @@ public interface RegisteredUsersRepository extends JpaRepository<RegisteredUsers
     
     //Busca si nickname existe
     public boolean existsByNickname( String nickname);
+
+    // Métodos para update: verifica existencia excluyendo un id dado
+    public boolean existsByEmailAndIdNot(String email, Long id);
+    public boolean existsByNicknameAndIdNot(String nickname, Long id);
 }

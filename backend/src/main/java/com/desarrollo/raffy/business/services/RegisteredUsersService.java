@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.business.repository.RegisteredUsersRepository;
 import com.desarrollo.raffy.model.RegisteredUsers;
+import com.desarrollo.raffy.model.UserTypes;
 
 @Service
 public class RegisteredUsersService {
@@ -16,6 +17,11 @@ public class RegisteredUsersService {
     @Transactional
     public RegisteredUsers create(RegisteredUsers registeredUsers){
         try{
+            // valor por defecto si no viene como Administrador
+            if (registeredUsers.getUserType() == null) {
+                registeredUsers.setUserType(UserTypes.NORMAL);
+            }
+
             if (registeredUsersRepository.existsByEmail(registeredUsers.getEmail()) || 
                 registeredUsersRepository.existsByNickname(registeredUsers.getNickname())) {
                 throw new IllegalArgumentException("El usuario con el mismo email o nickname ya existe.");
@@ -38,8 +44,13 @@ public class RegisteredUsersService {
     @Transactional
     public RegisteredUsers update(RegisteredUsers registeredUsers){
         try {
-            if (registeredUsersRepository.existsByEmail(registeredUsers.getEmail()) || 
-                registeredUsersRepository.existsByNickname(registeredUsers.getNickname())) {
+            Long id = registeredUsers.getId();
+            if (id == null) {
+                throw new IllegalArgumentException("El id del usuario es requerido para actualizar.");
+            }
+            // Verifica existencia de email/nickname en otros registros
+            if (registeredUsersRepository.existsByEmailAndIdNot(registeredUsers.getEmail(), id) || 
+                registeredUsersRepository.existsByNicknameAndIdNot(registeredUsers.getNickname(), id)) {
                 throw new IllegalArgumentException("El usuario con el mismo email o nickname ya existe.");
             }
             return registeredUsersRepository.save(registeredUsers);
