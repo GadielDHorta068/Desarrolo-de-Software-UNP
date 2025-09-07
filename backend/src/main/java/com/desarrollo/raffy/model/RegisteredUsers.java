@@ -10,13 +10,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Organizer")
+@Table(name = "RegisteredUser")
 
 @Getter
 @Setter
 @NoArgsConstructor
 
-public class UserParticipantOrganizer extends Users {
+public class RegisteredUsers extends AbstractUsers {
 
     @Column(unique = true)
     private String nickname;

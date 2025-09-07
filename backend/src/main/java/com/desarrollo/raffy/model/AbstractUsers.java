@@ -20,11 +20,11 @@ import lombok.Setter;
 @Getter
 @Setter
 
-public abstract class Users {
+public abstract class AbstractUsers {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_seq")
-    @SequenceGenerator(name = "user_id_seq", sequenceName = "user_id", initialValue = 0, allocationSize = 1)
+    @SequenceGenerator(name = "user_id_seq", sequenceName = "user_idseq", initialValue = 0, allocationSize = 1)
     private Long id;
 
     private String name;
@@ -38,4 +38,5 @@ public abstract class Users {
 
     @Column(unique = true)
     private String cellphone;
+    
 }
