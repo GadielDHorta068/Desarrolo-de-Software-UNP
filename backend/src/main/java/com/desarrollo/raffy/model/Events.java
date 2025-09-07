@@ -73,10 +73,6 @@ public  class Events {
     @Column(name = "status_event", nullable = false)
     private StatusEvent statusEvent;
 
-    @ManyToOne
-    @JoinColumn(name = "organizer_id")
-    private RegisteredUsers organizer;
-
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Participants> participants;
 
