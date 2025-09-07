@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 
-public class RegisteredUsers extends AbstractUsers {
+public class RegisteredUsers extends Users {
 
     @Column(unique = true)
     private String nickname;

@@ -13,6 +13,6 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 
-public class GuestUsers extends AbstractUsers {
+public class GuestUsers extends Users {
 
 }

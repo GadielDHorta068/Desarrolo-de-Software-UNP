@@ -33,7 +33,7 @@ public class Participants {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private AbstractUsers participant;
+    private Users participant;
 
     @ManyToOne
     @JoinColumn(name = "giveaway_id", nullable = false)
