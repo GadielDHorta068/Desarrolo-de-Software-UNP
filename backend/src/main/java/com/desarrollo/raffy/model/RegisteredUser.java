@@ -1,6 +1,11 @@
 package com.desarrollo.raffy.model;
 
-import org.hibernate.engine.jdbc.env.spi.NameQualifierSupport;
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,7 +23,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 
-public class RegisteredUser extends User {
+public class RegisteredUser extends User implements UserDetails {
 
     @Column(unique = true)
     private String nickname;
@@ -32,6 +37,18 @@ public class RegisteredUser extends User {
     @Column(nullable = false)
     private String imagen;
 
+    @Column(nullable = false)
+    private boolean enabled = true;
+
+    @Column(nullable = false)
+    private boolean accountNonExpired = true;
+
+    @Column(nullable = false)
+    private boolean accountNonLocked = true;
+
+    @Column(nullable = false)
+    private boolean credentialsNonExpired = true;
+
     public RegisteredUser(String name, String surname, String email, String cellphone, String nickname, String password) {
         this.setName(name);
         this.setSurname(surname);
@@ -40,6 +57,40 @@ public class RegisteredUser extends User {
         this.setNickname(nickname);
         this.setPassword(password);
         this.setUserType(UserType.NORMAL);
+        this.enabled = true;
+        this.accountNonExpired = true;
+        this.accountNonLocked = true;
+        this.credentialsNonExpired = true;
     }
 
+    // Implementación de UserDetails
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + userType.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return this.getEmail();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return accountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
 }

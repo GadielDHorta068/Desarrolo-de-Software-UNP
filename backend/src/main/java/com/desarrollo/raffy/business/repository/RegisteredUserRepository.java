@@ -1,5 +1,7 @@
 package com.desarrollo.raffy.business.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +15,11 @@ public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, 
     
     //Busca si nickname existe
     public boolean existsByNickname( String nickname);
+    
+    // Métodos para buscar usuarios
+    Optional<RegisteredUser> findByEmail(String email);
+    
+    Optional<RegisteredUser> findByNickname(String nickname);
 
     // Métodos para update: verifica existencia excluyendo un id dado
     public boolean existsByEmailAndIdNot(String email, Long id);

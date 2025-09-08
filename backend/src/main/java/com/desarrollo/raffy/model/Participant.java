@@ -32,7 +32,7 @@ public class Participant {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
     private User participant;
 
     @ManyToOne

@@ -1,60 +1,28 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { HeaderComponent } from './shared/components/header/header.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, HeaderComponent],
   template: `
-    <main class="app-container">
-      <header class="app-header">
-        <h1>Raffy - Sistema de Gestión</h1>
+    <main class="min-h-screen flex flex-col font-sans bg-gray-50 dark:bg-gray-900">
+      <header class="bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 text-white shadow-lg">
+        <app-header></app-header>
       </header>
       
-      <section class="app-content">
+      <section class="flex-1 bg-gray-50 dark:bg-gray-900">
         <router-outlet />
       </section>
       
-      <footer class="app-footer">
-        <p>&copy; 2024 Raffy. Todos los derechos reservados.</p>
+      <footer class="bg-gray-800 dark:bg-gray-900 text-white text-center py-4 mt-auto border-t border-gray-700 dark:border-gray-600">
+        <p class="text-sm text-gray-300 dark:text-gray-400">&copy; Cual es la diferencia entre un chiste y tres pijas ?
+          Tu vieja no se banca un chiste</p>
       </footer>
     </main>
   `,
-  styles: [`
-    .app-container {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    .app-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 1rem 2rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .app-header h1 {
-      margin: 0;
-      font-size: 1.8rem;
-      font-weight: 300;
-    }
-    
-    .app-content {
-      flex: 1;
-      padding: 2rem;
-      background-color: #f8f9fa;
-    }
-    
-    .app-footer {
-      background-color: #343a40;
-      color: white;
-      text-align: center;
-      padding: 1rem;
-      margin-top: auto;
-    }
-  `],
+  styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {

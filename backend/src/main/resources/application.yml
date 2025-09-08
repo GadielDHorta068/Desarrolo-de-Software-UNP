@@ -21,6 +21,9 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        # Configuración de nombres para PostgreSQL
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        globally_quoted_identifiers: true
         # Configuraciones adicionales para estabilidad
         jdbc:
           batch_size: 20

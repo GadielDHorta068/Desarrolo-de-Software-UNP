@@ -23,7 +23,6 @@ public class RegisteredUserDTO {
     @NotBlank(message = "Es requerido el apellido")
     private String surname;
     
-    @NotBlank(message = "Es requerido el número de celular")
     private String cellphone;
 
     @NotBlank(message = "Es requerido el mail")

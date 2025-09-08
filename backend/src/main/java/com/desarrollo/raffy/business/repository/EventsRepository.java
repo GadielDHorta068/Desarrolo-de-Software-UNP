@@ -24,7 +24,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     List<Events> findByCategoryId(@Param("categoryId") Long categoryId);
     
     // Buscar eventos activos (no finalizados ni bloqueados)
-    @Query("SELECT e FROM Events e WHERE e.statusEvent IN ('OPEN', 'CLOSED')")
+    @Query("SELECT e FROM Events e WHERE e.statusEvent IN (com.desarrollo.raffy.model.StatusEvent.OPEN, com.desarrollo.raffy.model.StatusEvent.CLOSED)")
     List<Events> findActiveEvents();
     
     // Buscar eventos por rango de fechas
