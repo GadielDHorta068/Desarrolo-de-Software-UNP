@@ -1,5 +1,7 @@
 package com.desarrollo.raffy.model;
 
+import org.hibernate.engine.jdbc.env.spi.NameQualifierSupport;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -29,5 +31,15 @@ public class RegisteredUser extends User {
     
     @Column(nullable = false)
     private String imagen;
+
+    public RegisteredUser(String name, String surname, String email, String cellphone, String nickname, String password) {
+        this.setName(name);
+        this.setSurname(surname);
+        this.setEmail(email);
+        this.setCellphone(cellphone);
+        this.setNickname(nickname);
+        this.setPassword(password);
+        this.setUserType(UserType.NORMAL);
+    }
 
 }

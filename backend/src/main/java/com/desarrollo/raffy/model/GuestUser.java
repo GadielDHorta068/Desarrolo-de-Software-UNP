@@ -15,4 +15,10 @@ import lombok.Setter;
 
 public class GuestUser extends User {
 
+    public GuestUser(String name, String surname, String email, String cellphone) {
+        this.setName(name);
+        this.setSurname(surname);
+        this.setEmail(email);
+        this.setCellphone(cellphone);
+    }
 }
