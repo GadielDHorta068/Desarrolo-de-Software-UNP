@@ -42,4 +42,9 @@ public class Participant {
     // position: 0 = no ganador, >0 = lugar en el ranking
     private short position = 0;
     
+    public Participant(User aUser, Giveaways aGiveaways) {
+        this.setParticipant(aUser);
+        this.setGiveaway(aGiveaways);
+        this.setPosition((short)0);
+    }
 }

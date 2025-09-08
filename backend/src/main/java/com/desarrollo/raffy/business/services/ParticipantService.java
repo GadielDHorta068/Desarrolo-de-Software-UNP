@@ -11,6 +11,4 @@ public class ParticipantService {
 
     @Autowired
     ParticipantRepository participantRepository;
-
-    
 }

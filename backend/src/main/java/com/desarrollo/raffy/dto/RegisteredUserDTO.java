@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisteredUserDTO {
+public class RegisteredUserDTO extends UserDTO {
     
     private Long id;
     
