@@ -35,7 +35,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "events")
+@Table(name = "event")
 @Inheritance(strategy = InheritanceType.JOINED)
 public  class Events {
     @Id
@@ -74,10 +74,10 @@ public  class Events {
     private StatusEvent statusEvent;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Participants> participants;
+    private List<User> participants;
 
     @OneToMany(mappedBy = "winnerEvent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Participants> winners;
+    private List<User> winners;
 
     @NotNull(message = "Debe especificar el tipo de evento")
     @Enumerated(EnumType.STRING)

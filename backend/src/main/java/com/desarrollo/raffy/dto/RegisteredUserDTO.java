@@ -1,6 +1,6 @@
 package com.desarrollo.raffy.dto;
 
-import com.desarrollo.raffy.model.UserTypes;
+import com.desarrollo.raffy.model.UserType;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -39,6 +39,6 @@ public class RegisteredUserDTO {
     @NotBlank(message = "Es requerido la imagen")
     private String imagen;
 
-    private UserTypes userType;
+    private UserType userType;
 
 }

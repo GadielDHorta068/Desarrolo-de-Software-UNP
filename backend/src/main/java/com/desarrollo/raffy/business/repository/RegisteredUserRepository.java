@@ -3,10 +3,10 @@ package com.desarrollo.raffy.business.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.desarrollo.raffy.model.RegisteredUsers;
+import com.desarrollo.raffy.model.RegisteredUser;
 
 @Repository
-public interface RegisteredUsersRepository extends JpaRepository<RegisteredUsers, Long>{
+public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, Long>{
     
     //Busca si el mail existe
     public boolean existsByEmail(String email);
