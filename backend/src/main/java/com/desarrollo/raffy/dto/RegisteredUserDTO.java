@@ -1,6 +1,7 @@
 package com.desarrollo.raffy.dto;
 
 import com.desarrollo.raffy.model.UserType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -33,9 +34,9 @@ public class RegisteredUserDTO {
     private String nickname;
 
     @NotBlank(message = "Es requerido la contraseña")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @NotBlank(message = "Es requerido la imagen")
     private String imagen;
 
     private UserType userType;

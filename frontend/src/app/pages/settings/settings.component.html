@@ -167,6 +167,37 @@
                 </div>
               </div>
 
+              <!-- Cellphone Field -->
+              <div>
+                <label for="cellphone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Número de Celular
+                </label>
+                <input
+                  id="cellphone"
+                  type="tel"
+                  formControlName="cellphone"
+                  placeholder="Ej: +595 981 123 456"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
+                />
+              </div>
+
+              <!-- Image URL Field -->
+              <div>
+                <label for="imagen" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  URL de Imagen de Perfil
+                </label>
+                <input
+                  id="imagen"
+                  type="url"
+                  formControlName="imagen"
+                  placeholder="https://ejemplo.com/mi-imagen.jpg"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
+                />
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Ingresa la URL de una imagen para tu foto de perfil
+                </p>
+              </div>
+
               <!-- Submit Button -->
               <div class="flex justify-end">
                 <button

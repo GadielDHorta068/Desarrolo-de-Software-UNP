@@ -7,27 +7,21 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@Table(name = "Users")
-
+@Table(name = "user")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
-
 public abstract class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_seq")
-    @SequenceGenerator(name = "user_id_seq", sequenceName = "user_idseq", initialValue = 0, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
@@ -35,11 +29,19 @@ public abstract class User {
     private String surname;
 
     @Column(unique = true)
-    @NotBlank(message = "El campo email es obligatorio") // pasar a ingles jaja
-    @Email(message = "El Email debe tener un formato valido") // pasar a ingles jaja x2
+    @NotBlank(message = "El campo email es obligatorio")
+    @Email(message = "El Email debe tener un formato valido")
     private String email;
 
-    @Column(unique = true)
     private String cellphone;
     
+    public User() {
+    }
+    
+    public User(String name, String surname, String email, String cellphone) {
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.cellphone = cellphone;
+    }
 }

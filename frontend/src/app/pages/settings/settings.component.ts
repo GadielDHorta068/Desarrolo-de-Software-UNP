@@ -43,7 +43,9 @@ export class SettingsComponent implements OnInit {
       name: ['', [Validators.required, Validators.minLength(2)]],
       surname: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      nickname: ['', [Validators.required, Validators.minLength(3)]]
+      nickname: ['', [Validators.required, Validators.minLength(3)]],
+      cellphone: [''],
+      imagen: ['']
     });
 
     this.passwordForm = this.fb.group({
@@ -73,7 +75,9 @@ export class SettingsComponent implements OnInit {
           name: user.name,
           surname: user.surname,
           email: user.email,
-          nickname: user.nickname
+          nickname: user.nickname,
+          cellphone: user.cellphone || '',
+          imagen: user.imagen || ''
         });
       },
       error: (error) => {
@@ -89,18 +93,26 @@ export class SettingsComponent implements OnInit {
       this.errorMessage = '';
       this.successMessage = '';
 
-      const formData = this.profileForm.value;
+      const profileData = this.profileForm.value;
       
-      // Simular actualización del perfil
-      setTimeout(() => {
-        this.isLoading = false;
-        this.successMessage = 'Perfil actualizado correctamente';
-        
-        // Limpiar mensaje después de 3 segundos
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
-      }, 1000);
+      this.authService.updateProfile(profileData).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.successMessage = 'Perfil actualizado correctamente';
+          // Actualizar los datos del usuario en el servicio
+          this.loadCurrentUser();
+          
+          // Limpiar mensaje después de 3 segundos
+          setTimeout(() => {
+            this.successMessage = '';
+          }, 3000);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Error al actualizar perfil:', error);
+          this.errorMessage = error.error || 'Error al actualizar el perfil';
+        }
+      });
     } else {
       this.markFormGroupTouched(this.profileForm);
     }
@@ -112,19 +124,28 @@ export class SettingsComponent implements OnInit {
       this.passwordErrorMessage = '';
       this.passwordSuccessMessage = '';
 
-      const formData = this.passwordForm.value;
+      const passwordData = {
+        currentPassword: this.passwordForm.value.currentPassword,
+        newPassword: this.passwordForm.value.newPassword
+      };
       
-      // Simular cambio de contraseña
-      setTimeout(() => {
-        this.isPasswordLoading = false;
-        this.passwordSuccessMessage = 'Contraseña actualizada correctamente';
-        this.passwordForm.reset();
-        
-        // Limpiar mensaje después de 3 segundos
-        setTimeout(() => {
-          this.passwordSuccessMessage = '';
-        }, 3000);
-      }, 1000);
+      this.authService.changePassword(passwordData).subscribe({
+        next: (response) => {
+          this.isPasswordLoading = false;
+          this.passwordSuccessMessage = 'Contraseña actualizada correctamente';
+          this.passwordForm.reset();
+          
+          // Limpiar mensaje después de 3 segundos
+          setTimeout(() => {
+            this.passwordSuccessMessage = '';
+          }, 3000);
+        },
+        error: (error) => {
+          this.isPasswordLoading = false;
+          console.error('Error al cambiar contraseña:', error);
+          this.passwordErrorMessage = error.error || 'Error al cambiar la contraseña';
+        }
+      });
     } else {
       this.markFormGroupTouched(this.passwordForm);
     }

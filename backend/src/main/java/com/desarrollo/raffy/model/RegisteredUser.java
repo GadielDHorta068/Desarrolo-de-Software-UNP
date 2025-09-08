@@ -11,18 +11,18 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "RegisteredUser")
-
+@Table(name = "registered_user")
+@PrimaryKeyJoinColumn(name = "id")
 @Getter
 @Setter
 @NoArgsConstructor
-
 public class RegisteredUser extends User implements UserDetails {
 
     @Column(unique = true)
@@ -32,31 +32,28 @@ public class RegisteredUser extends User implements UserDetails {
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "user_type")
     private UserType userType;
     
-    @Column(nullable = false)
     private String imagen;
 
     @Column(nullable = false)
     private boolean enabled = true;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "account_non_expired")
     private boolean accountNonExpired = true;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "account_non_locked")
     private boolean accountNonLocked = true;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "credentials_non_expired")
     private boolean credentialsNonExpired = true;
 
     public RegisteredUser(String name, String surname, String email, String cellphone, String nickname, String password) {
-        this.setName(name);
-        this.setSurname(surname);
-        this.setEmail(email);
-        this.setCellphone(cellphone);
-        this.setNickname(nickname);
-        this.setPassword(password);
-        this.setUserType(UserType.NORMAL);
+        super(name, surname, email, cellphone);
+        this.nickname = nickname;
+        this.password = password;
+        this.userType = UserType.NORMAL;
         this.enabled = true;
         this.accountNonExpired = true;
         this.accountNonLocked = true;
@@ -92,5 +89,10 @@ public class RegisteredUser extends User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
     }
 }

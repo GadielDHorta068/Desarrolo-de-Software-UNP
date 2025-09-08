@@ -32,7 +32,7 @@ spring:
         order_updates: true
         # Configuración de conexión
         connection:
-          provider_disables_autocommit: true
+          provider_disables_autocommit: false
         # Configuración de caché
         cache:
           use_second_level_cache: false
@@ -94,3 +94,5 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.springframework.jdbc: DEBUG
     com.zaxxer.hikari: DEBUG
+    org.springframework.security: DEBUG
+    com.desarrollo.raffy: DEBUG

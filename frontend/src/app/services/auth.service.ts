@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 export interface LoginRequest {
   email: string;
@@ -45,7 +46,7 @@ export interface RefreshTokenRequest {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:8080/auth';
+  private readonly API_URL = `${environment.apiUrl}/auth`;
   private readonly TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   
@@ -54,18 +55,26 @@ export class AuthService {
   
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  
+  private isLoggingOut = false;
 
   constructor(
     private http: HttpClient,
     private router: Router
   ) {
-    this.checkAuthStatus();
+    // Diferir la verificación del estado de autenticación para evitar dependencia circular
+    setTimeout(() => this.checkAuthStatus(), 0);
   }
 
   /**
    * Verifica si el usuario está autenticado al inicializar el servicio
    */
   private checkAuthStatus(): void {
+    // No verificar si estamos en proceso de logout
+    if (this.isLoggingOut) {
+      return;
+    }
+    
     const token = this.getToken();
     if (token) {
       this.getCurrentUser().subscribe({
@@ -134,6 +143,7 @@ export class AuthService {
    * Cierra la sesión del usuario
    */
   logout(): Observable<any> {
+    this.isLoggingOut = true;
     const refreshToken = this.getRefreshToken();
     
     if (refreshToken) {
@@ -174,7 +184,8 @@ export class AuthService {
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
-    this.router.navigate(['/login']);
+    this.isLoggingOut = false;
+    this.router.navigate(['/home']);
   }
 
   /**
@@ -214,6 +225,28 @@ export class AuthService {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     });
+  }
+
+  /**
+   * Actualiza el perfil del usuario
+   */
+  updateProfile(profileData: any): Observable<UserResponse> {
+    return this.http.post<UserResponse>(`${this.API_URL}/update-profile`, profileData, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Cambia la contraseña del usuario
+   */
+  changePassword(passwordData: { currentPassword: string; newPassword: string }): Observable<any> {
+    return this.http.post(`${this.API_URL}/change-password`, passwordData, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
   }
 
   /**

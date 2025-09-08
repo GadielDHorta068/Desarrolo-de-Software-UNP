@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.dto.AuthResponse;
+import com.desarrollo.raffy.dto.ChangePasswordRequest;
 import com.desarrollo.raffy.dto.LoginRequest;
 import com.desarrollo.raffy.dto.RefreshTokenRequest;
 import com.desarrollo.raffy.dto.RegisteredUserDTO;
+import com.desarrollo.raffy.dto.UpdateProfileRequest;
 import com.desarrollo.raffy.dto.UserResponse;
 import com.desarrollo.raffy.model.RefreshToken;
 import com.desarrollo.raffy.model.RegisteredUser;
@@ -88,11 +90,13 @@ public class AuthService {
         String accessToken = jwtService.generateToken(user);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
+        UserResponse userResponse = mapToUserResponse(user);
+
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
                 .expiresIn(jwtService.getJwtExpiration())
-                .user(mapToUserResponse(user))
+                .user(userResponse)
                 .build();
     }
 
@@ -124,6 +128,56 @@ public class AuthService {
     public void logout(String refreshToken) {
         refreshTokenService.findByToken(refreshToken)
                 .ifPresent(token -> refreshTokenService.deleteByUser(token.getUser()));
+    }
+
+    public UserResponse updateProfile(UpdateProfileRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        
+        RegisteredUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        // Verificar si el nuevo email ya existe (si es diferente al actual)
+        if (!user.getEmail().equals(request.getEmail()) && 
+            userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("El email ya está registrado");
+        }
+        
+        // Verificar si el nuevo nickname ya existe (si es diferente al actual)
+        if (!user.getNickname().equals(request.getNickname()) && 
+            userRepository.existsByNickname(request.getNickname())) {
+            throw new RuntimeException("El nickname ya está en uso");
+        }
+        
+        // Actualizar los campos
+        user.setName(request.getName());
+        user.setSurname(request.getSurname());
+        user.setEmail(request.getEmail());
+        user.setCellphone(request.getCellphone());
+        user.setNickname(request.getNickname());
+        user.setImagen(request.getImagen());
+        
+        RegisteredUser updatedUser = userRepository.save(user);
+        return mapToUserResponse(updatedUser);
+    }
+    
+    public void changePassword(ChangePasswordRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        
+        RegisteredUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        // Verificar que la contraseña actual sea correcta
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("La contraseña actual es incorrecta");
+        }
+        
+        // Hashear y guardar la nueva contraseña
+        String hashedNewPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(hashedNewPassword);
+        
+        userRepository.save(user);
     }
 
     private UserResponse mapToUserResponse(RegisteredUser user) {
