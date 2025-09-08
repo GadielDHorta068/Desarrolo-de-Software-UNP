@@ -48,5 +48,9 @@ public class ParticipantService {
         .filter(p -> p.getPosition() > 0)
         .toList();
     }
+
+    public Participant save(Participant aParticipant){
+        return participantRepository.save(aParticipant);
+    }
     
 }
