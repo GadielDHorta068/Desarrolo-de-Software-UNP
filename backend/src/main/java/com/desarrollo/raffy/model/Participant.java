@@ -15,7 +15,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "participants",
     uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "giveaway_id"})
+        @UniqueConstraint(columnNames = {"user_id", "event_id"})
     }
 )
 @Setter
@@ -32,8 +32,8 @@ public class Participant {
     private User participant;
 
     @ManyToOne
-    @JoinColumn(name = "giveaway_id", nullable = false)
-    private Giveaways giveaway;
+    @JoinColumn(name = "event_id", nullable = false)
+    private Events event;
 
     // position: 0 = no ganador, >0 = lugar en el ranking
     private short position = 0;
