@@ -1,22 +1,36 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService, RegisterRequest } from '../../services/auth.service';
+import { fadeInUp, inputFocus } from '../../animations/route-animations';
 
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './register.html',
-  styleUrl: './register.css'
+  styleUrl: './register.css',
+  animations: [fadeInUp, inputFocus]
 })
-export class Register implements OnInit {
+export class Register implements OnInit, OnDestroy {
+  @ViewChild('mascot', { static: false }) mascot!: ElementRef;
+  
   registerForm!: FormGroup;
   isLoading = false;
   errorMessage = '';
   showPassword = false;
   showConfirmPassword = false;
+  
+  // Propiedades para la mascota
+  mascotX = 50;
+  mascotY = 50;
+  targetX = 50;
+  targetY = 50;
+  animationId: number | null = null;
+  
+  // Estados de focus para animaciones
+  focusedField = '';
 
   constructor(
     private fb: FormBuilder,
@@ -26,6 +40,13 @@ export class Register implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+    this.startMascotAnimation();
+  }
+  
+  ngOnDestroy(): void {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+    }
   }
 
   private initForm(): void {
@@ -130,5 +151,36 @@ export class Register implements OnInit {
       }
     }
     return '';
+  }
+  
+  @HostListener('mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+    const rect = (event.currentTarget as Element).getBoundingClientRect();
+    this.targetX = ((event.clientX - rect.left) / rect.width) * 100;
+    this.targetY = ((event.clientY - rect.top) / rect.height) * 100;
+  }
+  
+  private startMascotAnimation(): void {
+    const animate = () => {
+      // Suavizar el movimiento de la mascota
+      const easing = 0.1;
+      this.mascotX += (this.targetX - this.mascotX) * easing;
+      this.mascotY += (this.targetY - this.mascotY) * easing;
+      
+      this.animationId = requestAnimationFrame(animate);
+    };
+    animate();
+  }
+  
+  onFieldFocus(fieldName: string): void {
+    this.focusedField = fieldName;
+  }
+  
+  onFieldBlur(): void {
+    this.focusedField = '';
+  }
+  
+  isFieldFocused(fieldName: string): boolean {
+    return this.focusedField === fieldName;
   }
 }

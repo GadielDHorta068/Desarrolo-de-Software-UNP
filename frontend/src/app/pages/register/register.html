@@ -1,8 +1,41 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full space-y-8">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden" (mousemove)="onMouseMove($event)">
+  <!-- Mascota animada para register -->
+  <div class="absolute pointer-events-none z-10 transition-all duration-300 ease-out"
+       [style.left.%]="mascotX - 5"
+       [style.top.%]="mascotY - 5"
+       #mascot>
+    <svg width="80" height="80" viewBox="0 0 100 100" class="drop-shadow-lg">
+      <!-- Cuerpo de la mascota (verde para register) -->
+      <ellipse cx="50" cy="60" rx="25" ry="20" fill="#10B981" class="animate-pulse"/>
+      
+      <!-- Cabeza -->
+      <circle cx="50" cy="35" r="18" fill="#059669"/>
+      
+      <!-- Ojos que siguen al mouse -->
+      <circle cx="45" cy="32" r="3" fill="white"/>
+      <circle cx="55" cy="32" r="3" fill="white"/>
+      <circle cx="45" cy="32" r="1.5" fill="black" class="transition-transform duration-200"
+              [style.transform]="'translate(' + (mascotX > 50 ? '0.5px' : '-0.5px') + ', ' + (mascotY > 50 ? '0.5px' : '-0.5px') + ')'"/>
+      <circle cx="55" cy="32" r="1.5" fill="black" class="transition-transform duration-200"
+              [style.transform]="'translate(' + (mascotX > 50 ? '0.5px' : '-0.5px') + ', ' + (mascotY > 50 ? '0.5px' : '-0.5px') + ')'"/>
+      
+      <!-- Sonrisa -->
+      <path d="M 42 38 Q 50 42 58 38" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+      
+      <!-- Hojas en lugar de antenas -->
+      <path d="M 45 20 Q 40 15 45 10 Q 50 15 45 20" fill="#22C55E"/>
+      <path d="M 55 20 Q 60 15 55 10 Q 50 15 55 20" fill="#22C55E"/>
+      
+      <!-- Brazos -->
+      <ellipse cx="30" cy="55" rx="8" ry="4" fill="#059669" transform="rotate(-20 30 55)"/>
+      <ellipse cx="70" cy="55" rx="8" ry="4" fill="#059669" transform="rotate(20 70 55)"/>
+    </svg>
+  </div>
+  
+  <div class="max-w-md w-full space-y-8 relative z-20" [@fadeInUp]>
     <!-- Header -->
-    <div class="text-center">
-      <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+    <div class="text-center" [@fadeInUp]>
+      <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white transform transition-all duration-500 hover:scale-105">
         Crear Cuenta
       </h2>
       <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
@@ -24,8 +57,12 @@
               id="name"
               type="text"
               formControlName="name"
-              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-colors"
+              (focus)="onFieldFocus('name')"
+              (blur)="onFieldBlur()"
+              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
               [class.border-red-500]="getFieldError('name')"
+              [class.ring-4]="isFieldFocused('name')"
+              [class.ring-emerald-200]="isFieldFocused('name')"
               placeholder="Tu nombre"
             />
             <div *ngIf="getFieldError('name')" class="mt-1 text-sm text-red-600">
@@ -42,8 +79,12 @@
               id="surname"
               type="text"
               formControlName="surname"
-              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-colors"
+              (focus)="onFieldFocus('surname')"
+              (blur)="onFieldBlur()"
+              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
               [class.border-red-500]="getFieldError('surname')"
+              [class.ring-4]="isFieldFocused('surname')"
+              [class.ring-emerald-200]="isFieldFocused('surname')"
               placeholder="Tu apellido"
             />
             <div *ngIf="getFieldError('surname')" class="mt-1 text-sm text-red-600">
@@ -59,11 +100,15 @@
           </label>
           <input
             id="email"
-            type="email"
-            formControlName="email"
-            class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-colors"
-            [class.border-red-500]="getFieldError('email')"
-            placeholder="tu@email.com"
+              type="email"
+              formControlName="email"
+              (focus)="onFieldFocus('email')"
+              (blur)="onFieldBlur()"
+              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
+              [class.border-red-500]="getFieldError('email')"
+              [class.ring-4]="isFieldFocused('email')"
+              [class.ring-emerald-200]="isFieldFocused('email')"
+              placeholder="tu@email.com"
           />
           <div *ngIf="getFieldError('email')" class="mt-1 text-sm text-red-600">
             {{ getFieldError('email') }}
@@ -77,11 +122,15 @@
           </label>
           <input
             id="cellphone"
-            type="tel"
-            formControlName="cellphone"
-            class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-colors"
-            [class.border-red-500]="getFieldError('cellphone')"
-            placeholder="+1234567890"
+              type="tel"
+              formControlName="cellphone"
+              (focus)="onFieldFocus('cellphone')"
+              (blur)="onFieldBlur()"
+              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
+              [class.border-red-500]="getFieldError('cellphone')"
+              [class.ring-4]="isFieldFocused('cellphone')"
+              [class.ring-emerald-200]="isFieldFocused('cellphone')"
+              placeholder="+1234567890"
           />
           <div *ngIf="getFieldError('cellphone')" class="mt-1 text-sm text-red-600">
             {{ getFieldError('cellphone') }}
@@ -95,11 +144,15 @@
           </label>
           <input
             id="nickname"
-            type="text"
-            formControlName="nickname"
-            class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-colors"
-            [class.border-red-500]="getFieldError('nickname')"
-            placeholder="Tu nickname único"
+              type="text"
+              formControlName="nickname"
+              (focus)="onFieldFocus('nickname')"
+              (blur)="onFieldBlur()"
+              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
+              [class.border-red-500]="getFieldError('nickname')"
+              [class.ring-4]="isFieldFocused('nickname')"
+              [class.ring-emerald-200]="isFieldFocused('nickname')"
+              placeholder="Tu apodo único"
           />
           <div *ngIf="getFieldError('nickname')" class="mt-1 text-sm text-red-600">
             {{ getFieldError('nickname') }}
@@ -116,8 +169,12 @@
               id="password"
               [type]="showPassword ? 'text' : 'password'"
               formControlName="password"
-              class="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-colors"
+              (focus)="onFieldFocus('password')"
+              (blur)="onFieldBlur()"
+              class="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
               [class.border-red-500]="getFieldError('password')"
+              [class.ring-4]="isFieldFocused('password')"
+              [class.ring-emerald-200]="isFieldFocused('password')"
               placeholder="Tu contraseña"
             />
             <button
@@ -149,8 +206,12 @@
               id="confirmPassword"
               [type]="showConfirmPassword ? 'text' : 'password'"
               formControlName="confirmPassword"
-              class="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-colors"
+              (focus)="onFieldFocus('confirmPassword')"
+              (blur)="onFieldBlur()"
+              class="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
               [class.border-red-500]="getFieldError('confirmPassword')"
+              [class.ring-4]="isFieldFocused('confirmPassword')"
+              [class.ring-emerald-200]="isFieldFocused('confirmPassword')"
               placeholder="Confirma tu contraseña"
             />
             <button
@@ -190,7 +251,8 @@
         <button
           type="submit"
           [disabled]="isLoading"
-          class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          [@buttonHover]
+          class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95"
         >
           <span *ngIf="isLoading" class="absolute left-0 inset-y-0 flex items-center pl-3">
             <svg class="animate-spin h-5 w-5 text-emerald-300" fill="none" viewBox="0 0 24 24">
@@ -209,7 +271,7 @@
           <button
             type="button"
             (click)="navigateToLogin()"
-            class="font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition-colors"
+            class="font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition-all duration-300 transform hover:scale-110 hover:underline"
           >
             Inicia sesión aquí
           </button>

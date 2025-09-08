@@ -1,8 +1,43 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full space-y-8">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden" (mousemove)="onMouseMove($event)">
+  <!-- Mascota animada -->
+  <div class="absolute pointer-events-none z-10 transition-all duration-300 ease-out"
+       [style.left.%]="mascotX - 5"
+       [style.top.%]="mascotY - 5"
+       #mascot>
+    <svg width="80" height="80" viewBox="0 0 100 100" class="drop-shadow-lg">
+      <!-- Cuerpo de la mascota -->
+      <ellipse cx="50" cy="60" rx="25" ry="20" fill="#4F46E5" class="animate-pulse"/>
+      
+      <!-- Cabeza -->
+      <circle cx="50" cy="35" r="18" fill="#6366F1"/>
+      
+      <!-- Ojos que siguen al mouse -->
+      <circle cx="45" cy="32" r="3" fill="white"/>
+      <circle cx="55" cy="32" r="3" fill="white"/>
+      <circle cx="45" cy="32" r="1.5" fill="black" class="transition-transform duration-200"
+              [style.transform]="'translate(' + (mascotX > 50 ? '0.5px' : '-0.5px') + ', ' + (mascotY > 50 ? '0.5px' : '-0.5px') + ')'"/>
+      <circle cx="55" cy="32" r="1.5" fill="black" class="transition-transform duration-200"
+              [style.transform]="'translate(' + (mascotX > 50 ? '0.5px' : '-0.5px') + ', ' + (mascotY > 50 ? '0.5px' : '-0.5px') + ')'"/>
+      
+      <!-- Sonrisa -->
+      <path d="M 42 38 Q 50 42 58 38" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+      
+      <!-- Antenas -->
+      <line x1="45" y1="20" x2="43" y2="15" stroke="#4F46E5" stroke-width="2" stroke-linecap="round"/>
+      <line x1="55" y1="20" x2="57" y2="15" stroke="#4F46E5" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="43" cy="15" r="2" fill="#F59E0B"/>
+      <circle cx="57" cy="15" r="2" fill="#F59E0B"/>
+      
+      <!-- Brazos -->
+      <ellipse cx="30" cy="55" rx="8" ry="4" fill="#6366F1" transform="rotate(-20 30 55)"/>
+      <ellipse cx="70" cy="55" rx="8" ry="4" fill="#6366F1" transform="rotate(20 70 55)"/>
+    </svg>
+  </div>
+  
+  <div class="max-w-md w-full space-y-8 relative z-20" [@fadeInUp]>
     <!-- Header -->
-    <div class="text-center">
-      <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+    <div class="text-center" [@fadeInUp]>
+      <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white transform transition-all duration-500 hover:scale-105">
         Iniciar Sesión
       </h2>
       <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
@@ -22,8 +57,12 @@
             id="email"
             type="email"
             formControlName="email"
-            class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-colors"
+            (focus)="onEmailFocus()"
+            (blur)="onEmailBlur()"
+            class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
             [class.border-red-500]="getFieldError('email')"
+            [class.ring-4]="emailFocused"
+            [class.ring-indigo-200]="emailFocused"
             placeholder="tu@email.com"
           />
           <div *ngIf="getFieldError('email')" class="mt-1 text-sm text-red-600">
@@ -41,8 +80,12 @@
               id="password"
               [type]="showPassword ? 'text' : 'password'"
               formControlName="password"
-              class="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-colors"
+              (focus)="onPasswordFocus()"
+              (blur)="onPasswordBlur()"
+              class="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
               [class.border-red-500]="getFieldError('password')"
+              [class.ring-4]="passwordFocused"
+              [class.ring-indigo-200]="passwordFocused"
               placeholder="Tu contraseña"
             />
             <button
@@ -82,7 +125,7 @@
         <button
           type="submit"
           [disabled]="isLoading"
-          class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95"
         >
           <span *ngIf="isLoading" class="absolute left-0 inset-y-0 flex items-center pl-3">
             <svg class="animate-spin h-5 w-5 text-indigo-300" fill="none" viewBox="0 0 24 24">
@@ -101,7 +144,7 @@
           <button
             type="button"
             (click)="navigateToRegister()"
-            class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
+            class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-all duration-300 transform hover:scale-105 hover:underline"
           >
             Regístrate aquí
           </button>

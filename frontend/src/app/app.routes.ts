@@ -16,13 +16,15 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('./pages/login/login').then(m => m.Login),
     canActivate: [GuestGuard],
-    title: 'Iniciar Sesión - Raffy'
+    title: 'Iniciar Sesión - Raffy',
+    data: { animation: 'login' }
   },
   {
     path: 'register',
     loadComponent: () => import('./pages/register/register').then(m => m.Register),
     canActivate: [GuestGuard],
-    title: 'Registrarse - Raffy'
+    title: 'Registrarse - Raffy',
+    data: { animation: 'register' }
   },
   {
     path: 'settings',
