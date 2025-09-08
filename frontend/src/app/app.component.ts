@@ -13,7 +13,7 @@ import { slideInAnimation } from './animations/route-animations';
         <app-header></app-header>
       </header>
       
-      <section class="flex-1 bg-gray-50 dark:bg-gray-900 overflow-hidden" [@slideInAnimation]="getRouteAnimationData()">
+      <section class="flex-1 bg-gray-50 dark:bg-gray-900 overflow-hidden" [@routeAnimations]="getRouteAnimationData()">
         <router-outlet />
       </section>
       

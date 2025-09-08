@@ -127,7 +127,7 @@
       <div class="md:hidden">
         <button 
           (click)="toggleMenu()"
-          class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+          class="relative z-50 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
         >
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path *ngIf="!isMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -139,7 +139,7 @@
   </div>
 
   <!-- Mobile Menu -->
-  <div *ngIf="isMenuOpen" class="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+  <div *ngIf="isMenuOpen" class="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 animate-slide-down">
     <div class="px-2 pt-2 pb-3 space-y-1">
       <button 
           (click)="navigateToHome()"
@@ -198,10 +198,3 @@
     </div>
   </div>
 </div>
-
-<!-- Overlay for closing menus when clicking outside -->
-<div 
-  *ngIf="isMenuOpen || isUserMenuOpen" 
-  (click)="closeMenus()"
-  class="fixed inset-0 z-40 bg-black bg-opacity-25 dark:bg-opacity-50 md:hidden"
-></div>

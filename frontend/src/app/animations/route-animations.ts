@@ -26,10 +26,10 @@ export const slideInAnimation = trigger('routeAnimations', [
     query(':leave', animateChild(), { optional: true }),
     group([
       query(':leave', [
-        animate('300ms ease-out', style({ left: '100%', opacity: 0 }))
+        animate('200ms ease-out', style({ left: '100%', opacity: 0 }))
       ], { optional: true }),
       query(':enter', [
-        animate('300ms ease-out', style({ left: '0%' }))
+        animate('200ms ease-out', style({ left: '0%' }))
       ], { optional: true }),
     ]),
   ]),
@@ -54,7 +54,7 @@ export const slideInAnimation = trigger('routeAnimations', [
     query(':leave', animateChild(), { optional: true }),
     group([
       query(':leave', [
-        animate('400ms cubic-bezier(0.25, 0.8, 0.25, 1)', 
+        animate('250ms ease-out', 
           style({ 
             transform: 'translateX(-100%) scale(0.8)',
             opacity: 0
@@ -62,7 +62,7 @@ export const slideInAnimation = trigger('routeAnimations', [
         )
       ], { optional: true }),
       query(':enter', [
-        animate('400ms cubic-bezier(0.25, 0.8, 0.25, 1)', 
+        animate('250ms ease-out', 
           style({ 
             transform: 'translateX(0%) scale(1)',
             opacity: 1
@@ -92,7 +92,7 @@ export const slideInAnimation = trigger('routeAnimations', [
     query(':leave', animateChild(), { optional: true }),
     group([
       query(':leave', [
-        animate('400ms cubic-bezier(0.25, 0.8, 0.25, 1)', 
+        animate('250ms ease-out', 
           style({ 
             transform: 'translateX(100%) scale(0.8)',
             opacity: 0
@@ -100,7 +100,7 @@ export const slideInAnimation = trigger('routeAnimations', [
         )
       ], { optional: true }),
       query(':enter', [
-        animate('400ms cubic-bezier(0.25, 0.8, 0.25, 1)', 
+        animate('250ms ease-out', 
           style({ 
             transform: 'translateX(0%) scale(1)',
             opacity: 1
@@ -116,9 +116,9 @@ export const fadeInUp = trigger('fadeInUp', [
   transition(':enter', [
     style({ 
       opacity: 0, 
-      transform: 'translateY(30px)' 
+      transform: 'translateY(20px)' 
     }),
-    animate('600ms cubic-bezier(0.25, 0.8, 0.25, 1)', 
+    animate('200ms ease-out', 
       style({ 
         opacity: 1, 
         transform: 'translateY(0)' 

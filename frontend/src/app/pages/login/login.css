@@ -110,13 +110,13 @@
 
 /* Animación de entrada suave */
 .fade-in-up {
-  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  animation: fadeInUp 0.2s ease-out forwards;
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
