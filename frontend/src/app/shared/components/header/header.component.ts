@@ -58,9 +58,14 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-    this.closeMenus();
+    this.authService.logout().subscribe({
+      next: () => {
+        this.closeMenus();
+      },
+      error: () => {
+        this.closeMenus();
+      }
+    });
   }
 
   navigateToProfile(): void {

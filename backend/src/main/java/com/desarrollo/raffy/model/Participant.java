@@ -6,7 +6,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
@@ -14,21 +13,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Participants",
+@Table(name = "participants",
     uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "giveaway_id"})
-    } // Asegura q la combinacion usuario+sorteo no se repita 
+        @UniqueConstraint(columnNames = {"user_id", "event_id"})
+    }
 )
-
 @Setter
 @Getter
 @NoArgsConstructor
-
 public class Participant {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "participant_id_seq")
-    @SequenceGenerator(name = "participant_id_seq", sequenceName = "participant_idseq", initialValue = 0, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
@@ -36,15 +32,15 @@ public class Participant {
     private User participant;
 
     @ManyToOne
-    @JoinColumn(name = "giveaway_id", nullable = false)
-    private Giveaways giveaway;
+    @JoinColumn(name = "event_id", nullable = false)
+    private Events event;
 
     // position: 0 = no ganador, >0 = lugar en el ranking
     private short position = 0;
     
     public Participant(User aUser, Giveaways aGiveaways) {
         this.setParticipant(aUser);
-        this.setGiveaway(aGiveaways);
+        this.setEvent(aGiveaways);
         this.setPosition((short)0);
     }
 }

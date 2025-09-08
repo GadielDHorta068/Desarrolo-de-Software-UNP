@@ -1,6 +1,7 @@
 package com.desarrollo.raffy.business.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,9 @@ public class RegisteredUsersService {
     
     @Autowired
     private RegisteredUserRepository registeredUserRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Transactional
     public RegisteredUser create(RegisteredUser registeredUsers){
@@ -53,6 +57,15 @@ public class RegisteredUsersService {
                 registeredUserRepository.existsByNicknameAndIdNot(registeredUsers.getNickname(), id)) {
                 throw new IllegalArgumentException("El usuario con el mismo email o nickname ya existe.");
             }
+            
+            // Hashear la contraseña si se está actualizando
+            if (registeredUsers.getPassword() != null && !registeredUsers.getPassword().isEmpty()) {
+                System.out.println("DEBUG: Contraseña antes del hash: " + registeredUsers.getPassword());
+                String hashedPassword = passwordEncoder.encode(registeredUsers.getPassword());
+                System.out.println("DEBUG: Contraseña después del hash: " + hashedPassword);
+                registeredUsers.setPassword(hashedPassword);
+            }
+            
             return registeredUserRepository.save(registeredUsers);
         } catch (Exception e) {
             throw new RuntimeException("Error al actualizar el usuario: " + e.getMessage());

@@ -79,6 +79,20 @@ public class ModelMapperConfig {
         // mapper.createTypeMap(SourceClass.class, DestinationClass.class)
         //       .addMapping(src -> src.getField(), DestinationClass::setMappedField);
         
+        // Configuración específica para RegisteredUserDTO -> RegisteredUser
+        mapper.createTypeMap(com.desarrollo.raffy.dto.RegisteredUserDTO.class, com.desarrollo.raffy.model.RegisteredUser.class)
+                .setProvider(request -> {
+                    com.desarrollo.raffy.dto.RegisteredUserDTO dto = (com.desarrollo.raffy.dto.RegisteredUserDTO) request.getSource();
+                    return new com.desarrollo.raffy.model.RegisteredUser(
+                            dto.getName(),
+                            dto.getSurname(), 
+                            dto.getEmail(),
+                            dto.getCellphone(),
+                            dto.getNickname(),
+                            dto.getPassword()
+                    );
+                });
+        
         return mapper;
     }
     

@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, ChildrenOutletContexts } from '@angular/router';
 import { HeaderComponent } from './shared/components/header/header.component';
+import { slideInAnimation } from './animations/route-animations';
 
 @Component({
   selector: 'app-root',
@@ -12,20 +13,26 @@ import { HeaderComponent } from './shared/components/header/header.component';
         <app-header></app-header>
       </header>
       
-      <section class="flex-1 bg-gray-50 dark:bg-gray-900">
+      <section class="flex-1 bg-gray-50 dark:bg-gray-900 overflow-hidden" [@routeAnimations]="getRouteAnimationData()">
         <router-outlet />
       </section>
       
       <footer class="bg-gray-800 dark:bg-gray-900 text-white text-center py-4 mt-auto border-t border-gray-700 dark:border-gray-600">
-        <p class="text-sm text-gray-300 dark:text-gray-400">&copy; Cual es la diferencia entre un chiste y tres pijas ?
-          Tu vieja no se banca un chiste</p>
+        <p class="text-sm text-gray-300 dark:text-gray-400">&copy;footer xd</p>
       </footer>
     </main>
   `,
   styles: [],
+  animations: [slideInAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
   // Componente principal de la aplicación
   // Utiliza OnPush para mejor rendimiento
+  
+  constructor(private contexts: ChildrenOutletContexts) {}
+  
+  getRouteAnimationData() {
+    return this.contexts.getContext('primary')?.route?.snapshot?.data?.['animation'];
+  }
 }

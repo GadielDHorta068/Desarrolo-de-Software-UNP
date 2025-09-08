@@ -32,12 +32,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
 
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "event")
+@Setter @Getter
+@NoArgsConstructor @AllArgsConstructor
+@Entity @Table(name = "event")
 @Inheritance(strategy = InheritanceType.JOINED)
 public  class Events {
     @Id
@@ -82,14 +79,6 @@ public  class Events {
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> participants;
-
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "event_winners",
-        joinColumns = @JoinColumn(name = "event_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<User> winners;
 
     @NotNull(message = "Debe especificar el tipo de evento")
     @Enumerated(EnumType.STRING)
