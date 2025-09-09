@@ -5,13 +5,14 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
-@Table(name = "giveaways")
-@Getter
-@Setter
+@Entity @Table(name = "giveaways")
+@Getter @Setter
 public class Giveaways extends Events {
     
     public Giveaways() {
         super();
     }
+
+    //Cuantos ganadores va a tener el sorteo
+    private int winnersCount = 0;
 }
