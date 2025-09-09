@@ -33,6 +33,14 @@ export const routes: Routes = [
     title: 'Configuración - Raffy'
   },
   {
+    path: 'event',
+    loadComponent: () => import('./pages/event/event').then(m => m.Event),
+    canActivate: [GuestGuard],
+    title: 'Eventos - Raffy',
+    data: {animation: 'event'}
+  },
+  
+  {
     path: '**',
     redirectTo: '/home'
   }
