@@ -3,6 +3,8 @@ package com.desarrollo.raffy.business.repository;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.desarrollo.raffy.model.RegisteredUser;
@@ -22,6 +24,9 @@ public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, 
     Optional<RegisteredUser> findByNickname(String nickname);
 
     // Métodos para update: verifica existencia excluyendo un id dado
-    public boolean existsByEmailAndIdNot(String email, Long id);
-    public boolean existsByNicknameAndIdNot(String nickname, Long id);
+    @Query("SELECT COUNT(r) > 0 FROM RegisteredUser r WHERE r.email = :email AND r.id != :id")
+    public boolean existsByEmailAndIdNot(@Param("email") String email, @Param("id") Long id);
+    
+    @Query("SELECT COUNT(r) > 0 FROM RegisteredUser r WHERE r.nickname = :nickname AND r.id != :id")
+    public boolean existsByNicknameAndIdNot(@Param("nickname") String nickname, @Param("id") Long id);
 }

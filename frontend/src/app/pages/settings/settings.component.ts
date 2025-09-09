@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -41,11 +41,11 @@ export class SettingsComponent implements OnInit {
 
   private initializeForms(): void {
     this.profileForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      surname: ['', [Validators.required, Validators.minLength(2)]],
+      name: ['', [Validators.required, Validators.minLength(2), this.onlyLettersValidator]],
+      surname: ['', [Validators.required, Validators.minLength(2), this.onlyLettersValidator]],
       email: ['', [Validators.required, Validators.email]],
       nickname: ['', [Validators.required, Validators.minLength(3)]],
-      cellphone: [''],
+      cellphone: ['', [this.onlyNumbersValidator]],
       imagen: ['']
     });
 
@@ -66,6 +66,26 @@ export class SettingsComponent implements OnInit {
     }
     
     return null;
+  }
+
+  // Validador personalizado para solo letras
+  private onlyLettersValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) {
+      return null; // No validar si está vacío (required se encarga de eso)
+    }
+    const lettersOnlyRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+    const valid = lettersOnlyRegex.test(control.value);
+    return valid ? null : { onlyLetters: true };
+  }
+
+  // Validador personalizado para solo números
+  private onlyNumbersValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) {
+      return null; // No validar si está vacío (campo opcional)
+    }
+    const numbersOnlyRegex = /^[0-9+\s-]+$/;
+    const valid = numbersOnlyRegex.test(control.value);
+    return valid ? null : { onlyNumbers: true };
   }
 
   private loadCurrentUser(): void {
@@ -188,6 +208,12 @@ export class SettingsComponent implements OnInit {
       }
       if (field.errors['passwordMismatch']) {
         return 'Las contraseñas no coinciden';
+      }
+      if (field.errors['onlyLetters']) {
+        return 'Solo se permiten letras';
+      }
+      if (field.errors['onlyNumbers']) {
+        return 'Solo se permiten números, espacios, guiones y el símbolo +';
       }
     }
     return null;
