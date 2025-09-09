@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.ParticipantRepository;
@@ -49,6 +50,7 @@ public class ParticipantService {
         .toList();
     }
 
+    @Transactional
     public Participant save(Participant aParticipant){
         return participantRepository.save(aParticipant);
     }
