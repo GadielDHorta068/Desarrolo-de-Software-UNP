@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ngbActive }
 
 @Component({
   selector: 'app-questionary',
