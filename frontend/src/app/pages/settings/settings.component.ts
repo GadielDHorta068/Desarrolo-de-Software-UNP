@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -29,7 +29,8 @@ export class SettingsComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.initializeForms();
   }
@@ -79,10 +80,14 @@ export class SettingsComponent implements OnInit {
           cellphone: user.cellphone || '',
           imagen: user.imagen || ''
         });
+        // Forzar detección de cambios después de cargar datos
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading user:', error);
         this.errorMessage = 'Error al cargar los datos del usuario';
+        // Forzar detección de cambios en caso de error
+        this.cdr.detectChanges();
       }
     });
   }
@@ -99,18 +104,24 @@ export class SettingsComponent implements OnInit {
         next: (response) => {
           this.isLoading = false;
           this.successMessage = 'Perfil actualizado correctamente';
+          // Forzar detección de cambios
+          this.cdr.detectChanges();
+          
           // Actualizar los datos del usuario en el servicio
           this.loadCurrentUser();
           
           // Limpiar mensaje después de 3 segundos
           setTimeout(() => {
             this.successMessage = '';
+            this.cdr.detectChanges();
           }, 3000);
         },
         error: (error) => {
           this.isLoading = false;
           console.error('Error al actualizar perfil:', error);
           this.errorMessage = error.error || 'Error al actualizar el perfil';
+          // Forzar detección de cambios
+          this.cdr.detectChanges();
         }
       });
     } else {
@@ -134,16 +145,21 @@ export class SettingsComponent implements OnInit {
           this.isPasswordLoading = false;
           this.passwordSuccessMessage = 'Contraseña actualizada correctamente';
           this.passwordForm.reset();
+          // Forzar detección de cambios
+          this.cdr.detectChanges();
           
           // Limpiar mensaje después de 3 segundos
           setTimeout(() => {
             this.passwordSuccessMessage = '';
+            this.cdr.detectChanges();
           }, 3000);
         },
         error: (error) => {
           this.isPasswordLoading = false;
           console.error('Error al cambiar contraseña:', error);
           this.passwordErrorMessage = error.error || 'Error al cambiar la contraseña';
+          // Forzar detección de cambios
+          this.cdr.detectChanges();
         }
       });
     } else {
@@ -199,6 +215,8 @@ export class SettingsComponent implements OnInit {
     this.errorMessage = '';
     this.passwordSuccessMessage = '';
     this.passwordErrorMessage = '';
+    // Forzar detección de cambios al limpiar mensajes
+    this.cdr.detectChanges();
   }
 
   goBack(): void {

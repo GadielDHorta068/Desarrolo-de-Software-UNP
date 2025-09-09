@@ -7,7 +7,9 @@ import { HeaderComponent } from '../../shared/components/header/header.component
   standalone: true,
   imports: [CommonModule, HeaderComponent],
   template: `
-  
+  <h1>
+    Aca cnstruir un inicio fachero jijo
+  </h1>
   `
 })
 export class HomeComponent {
