@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
@@ -60,7 +60,8 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone
   ) {
     // Diferir la verificación del estado de autenticación para evitar dependencia circular
     setTimeout(() => this.checkAuthStatus(), 0);
@@ -83,9 +84,13 @@ export class AuthService {
           this.isAuthenticatedSubject.next(true);
         },
         error: () => {
-          this.logout();
+          // Limpiar estado sin hacer logout recursivo
+          this.clearAuthState();
         }
       });
+    } else {
+      // Asegurar que el estado esté limpio si no hay token
+      this.clearAuthState();
     }
   }
 
@@ -167,25 +172,43 @@ export class AuthService {
   }
 
   /**
-   * Maneja el éxito de autenticación
+   * Maneja la respuesta exitosa de autenticación
    */
   private handleAuthSuccess(response: AuthResponse): void {
     localStorage.setItem(this.TOKEN_KEY, response.accessToken);
     localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-    this.currentUserSubject.next(response.user);
-    this.isAuthenticatedSubject.next(true);
+    
+    // Actualizar estado de forma síncrona para evitar problemas de timing
+    setTimeout(() => {
+      this.currentUserSubject.next(response.user);
+      this.isAuthenticatedSubject.next(true);
+    }, 0);
+  }
+
+  /**
+   * Limpia el estado de autenticación sin redirección
+   */
+  private clearAuthState(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    this.currentUserSubject.next(null);
+    this.isAuthenticatedSubject.next(false);
   }
 
   /**
    * Maneja el cierre de sesión
    */
   private handleLogout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
-    this.currentUserSubject.next(null);
-    this.isAuthenticatedSubject.next(false);
+    this.clearAuthState();
     this.isLoggingOut = false;
-    this.router.navigate(['/home']);
+    
+    // Usar NgZone para asegurar que la navegación se ejecute en el contexto de Angular
+    this.ngZone.run(() => {
+      this.router.navigate(['/home']).then(() => {
+        // Forzar recarga de la página para asegurar que el estado se actualice completamente
+        window.location.reload();
+      });
+    });
   }
 
   /**

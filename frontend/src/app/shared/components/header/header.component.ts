@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -18,7 +18,8 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -30,6 +31,8 @@ export class HeaderComponent implements OnInit {
       } else {
         this.currentUser = null;
       }
+      // Forzar detección de cambios
+      this.cdr.detectChanges();
     });
   }
 
@@ -58,12 +61,13 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
+    this.closeMenus();
     this.authService.logout().subscribe({
       next: () => {
-        this.closeMenus();
+        // El AuthService ya maneja la redirección
       },
       error: () => {
-        this.closeMenus();
+        // El AuthService ya maneja la redirección incluso en caso de error
       }
     });
   }
