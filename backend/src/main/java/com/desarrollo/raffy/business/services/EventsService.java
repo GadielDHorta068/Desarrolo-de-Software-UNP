@@ -13,12 +13,8 @@ import java.time.LocalDate;
 @Service
 public class EventsService {
 
-    public Events create(Events events) {
-        try {
-            return eventsRepository.save(events);
-        } catch (Exception e) {
-            return null;
-        }
+    public <T extends Events> T create(T event) {
+        return eventsRepository.save(event);
     }
 
     public Events getById(Long id) {

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.desarrollo.raffy.model.Events;
+import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.business.services.EventsService;
@@ -42,6 +43,12 @@ public class EventsController {
         } else {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/giveaways")
+    public ResponseEntity<Giveaways> createGiveaway(@RequestBody Giveaways giveaway) {
+        Giveaways giveaways = eventsService.create(giveaway);
+        return new ResponseEntity<>(giveaways, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -248,4 +255,5 @@ public class EventsController {
         boolean exists = eventsService.existsByTitle(title.trim());
         return new ResponseEntity<>(exists, HttpStatus.OK);
     }
+
 }
