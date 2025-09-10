@@ -20,6 +20,7 @@ export class Profile implements OnInit, OnDestroy {
   userEvents: Events[] = [];
   loading = true;
   error = '';
+  showCopiedMessage = false;
   private subscription: Subscription | null = null;
   private eventsSubscription: Subscription | null = null;
 
@@ -32,6 +33,9 @@ export class Profile implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Inicializar datos del usuario si están disponibles
+    this.authService.initializeUserData();
+    
     this.route.params.subscribe(params => {
       const nickname = params['nickname'];
       if (nickname) {
@@ -81,8 +85,14 @@ export class Profile implements OnInit, OnDestroy {
     if (this.userProfile) {
       const url = `${window.location.origin}/profile/${this.userProfile.nickname}`;
       navigator.clipboard.writeText(url).then(() => {
-        // Opcional: Mostrar un mensaje de éxito
-        console.log('URL copiada al portapapeles');
+        this.showCopiedMessage = true;
+        setTimeout(() => {
+          this.showCopiedMessage = false;
+          this.cdr.detectChanges();
+        }, 2000);
+        this.cdr.detectChanges();
+      }).catch(() => {
+        console.error('Error al copiar URL');
       });
     }
   }

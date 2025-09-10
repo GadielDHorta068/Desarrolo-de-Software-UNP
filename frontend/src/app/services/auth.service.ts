@@ -81,12 +81,26 @@ export class AuthService {
     private router: Router,
     private ngZone: NgZone
   ) {
-    // Verificar estado de autenticación inmediatamente
-    this.checkAuthStatus();
+    // Inicializar estado basado en token local sin hacer peticiones HTTP
+    this.initializeAuthState();
   }
 
   /**
-   * Verifica si el usuario está autenticado al inicializar el servicio
+   * Inicializa el estado de autenticación basado en tokens locales
+   */
+  private initializeAuthState(): void {
+    const token = this.getToken();
+    if (token) {
+      // Solo marcar como autenticado si hay token, sin hacer peticiones HTTP
+      this.isAuthenticatedSubject.next(true);
+    } else {
+      // Asegurar que el estado esté limpio si no hay token
+      this.clearAuthState();
+    }
+  }
+
+  /**
+   * Verifica si el usuario está autenticado haciendo una petición al servidor
    */
   private checkAuthStatus(): void {
     // No verificar si estamos en proceso de logout
@@ -160,6 +174,17 @@ export class AuthService {
       }),
       catchError(this.handleError)
     );
+  }
+
+  /**
+   * Inicializa los datos del usuario si están disponibles
+   * Este método debe ser llamado por componentes que necesiten datos del usuario
+   */
+  initializeUserData(): void {
+    // Solo cargar datos si hay token y no hay usuario cargado
+    if (this.getToken() && !this.currentUserSubject.value) {
+      this.checkAuthStatus();
+    }
   }
 
   /**

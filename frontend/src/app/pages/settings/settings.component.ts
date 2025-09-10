@@ -47,6 +47,9 @@ export class SettingsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Inicializar datos del usuario si están disponibles
+    this.authService.initializeUserData();
+    
     this.loadCurrentUser();
     this.check2FAStatus();
   }

@@ -23,6 +23,9 @@ export class HeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Inicializar datos del usuario si están disponibles
+    this.authService.initializeUserData();
+    
     // Suscribirse al estado de autenticación
     this.authService.isAuthenticated$.subscribe(isAuth => {
       this.isAuthenticated = isAuth;
