@@ -1,11 +1,138 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AuthService, UserResponse } from '../../services/auth.service';
+import { EventsService } from '../../services/events.service';
+import { HttpClientModule } from '@angular/common/http';
+import { Subscription } from 'rxjs';
+import { Events } from '../../models/events.model';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ClipboardModule } from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'app-profile',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, HttpClientModule, ClipboardModule],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })
-export class Profile {
+export class Profile implements OnInit, OnDestroy {
+  userProfile: UserResponse | null = null;
+  userEvents: Events[] = [];
+  loading = true;
+  error = '';
+  private subscription: Subscription | null = null;
+  private eventsSubscription: Subscription | null = null;
 
+  constructor(
+    private authService: AuthService,
+    private eventsService: EventsService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit() {
+    this.route.params.subscribe(params => {
+      const nickname = params['nickname'];
+      if (nickname) {
+        // Cargar perfil por nickname
+        this.loadUserByNickname(nickname);
+      } else {
+        // Cargar perfil del usuario actual
+        const currentUser = this.authService.getCurrentUserValue();
+        if (currentUser) {
+          this.userProfile = currentUser;
+          this.loading = false;
+          this.loadUserEvents(currentUser.id);
+        } else {
+          this.loadUserProfile();
+        }
+      }
+    });
+  }
+
+  private loadUserByNickname(nickname: string) {
+    this.loading = true;
+    this.error = '';
+    this.authService.getUserByNickname(nickname).subscribe({
+      next: (user) => {
+        if (user) {
+          // Limpiar espacios en blanco de la URL de la imagen
+          if (user.imagen) {
+            user.imagen = user.imagen.trim();
+          }
+          this.userProfile = user;
+          this.loadUserEvents(user.id);
+          this.cdr.detectChanges();
+        }
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: Error) => {
+        console.error('Error loading user profile:', err);
+        this.error = 'Error al cargar el perfil del usuario';
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  copyProfileUrl() {
+    if (this.userProfile) {
+      const url = `${window.location.origin}/profile/${this.userProfile.nickname}`;
+      navigator.clipboard.writeText(url).then(() => {
+        // Opcional: Mostrar un mensaje de éxito
+        console.log('URL copiada al portapapeles');
+      });
+    }
+  }
+
+  private loadUserProfile() {
+    this.loading = true;
+    this.error = '';
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    this.subscription = this.authService.getCurrentUser().subscribe({
+      next: (user) => {
+        if (user) {
+          this.userProfile = user;
+          this.loading = false;
+          this.loadUserEvents(user.id);
+        } else {
+          this.error = 'No se pudo cargar el perfil del usuario';
+          this.loading = false;
+        }
+      },
+      error: (err: Error) => {
+        console.error('Error loading user profile:', err);
+        this.error = 'Error al cargar el perfil del usuario';
+        this.loading = false;
+      }
+    });
+  }
+
+  private loadUserEvents(userId: number) {
+    this.eventsService.getEventsByParticipantId(userId).subscribe({
+      next: (events) => {
+        this.userEvents = events;
+        this.cdr.detectChanges();
+      },
+      error: (err: Error) => {
+        console.error('Error loading user events:', err);
+        // Inicializar eventos como array vacío para evitar errores en la vista
+        this.userEvents = [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    if (this.eventsSubscription) {
+      this.eventsSubscription.unsubscribe();
+    }
+  }
 }

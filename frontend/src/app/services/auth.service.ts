@@ -81,8 +81,8 @@ export class AuthService {
     private router: Router,
     private ngZone: NgZone
   ) {
-    // Diferir la verificación del estado de autenticación para evitar dependencia circular
-    setTimeout(() => this.checkAuthStatus(), 0);
+    // Verificar estado de autenticación inmediatamente
+    this.checkAuthStatus();
   }
 
   /**
@@ -96,7 +96,10 @@ export class AuthService {
     
     const token = this.getToken();
     if (token) {
-      this.getCurrentUser().subscribe({
+      // Obtener el usuario actual y actualizar el estado
+      this.http.get<UserResponse>(`${this.API_URL}/me`, {
+        headers: this.getAuthHeaders()
+      }).subscribe({
         next: (user) => {
           this.currentUserSubject.next(user);
           this.isAuthenticatedSubject.next(true);
@@ -138,9 +141,23 @@ export class AuthService {
    * Obtiene los datos del usuario actual
    */
   getCurrentUser(): Observable<UserResponse> {
+    // Si ya tenemos un usuario en el estado y es válido, lo devolvemos
+    const currentUser = this.currentUserSubject.value;
+    if (currentUser) {
+      return new Observable<UserResponse>(observer => {
+        observer.next(currentUser);
+        observer.complete();
+      });
+    }
+    
+    // Si no hay usuario en el estado o es null, hacemos la petición
     return this.http.get<UserResponse>(`${this.API_URL}/me`, {
       headers: this.getAuthHeaders()
     }).pipe(
+      tap(user => {
+        this.currentUserSubject.next(user);
+        this.isAuthenticatedSubject.next(true);
+      }),
       catchError(this.handleError)
     );
   }
@@ -346,6 +363,15 @@ export class AuthService {
     return this.http.post(`${environment.apiUrl}/api/2fa/disable/${username}`, {}, {
       headers: this.getAuthHeaders()
     }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Obtiene un usuario por su nickname
+   */
+  getUserByNickname(nickname: string): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${this.API_URL}/users/${nickname}`).pipe(
       catchError(this.handleError)
     );
   }

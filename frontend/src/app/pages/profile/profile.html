@@ -1,6 +1,18 @@
 <div class="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
   <div class="container mx-auto px-4 py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Estado de Carga -->
+    <div *ngIf="loading" class="flex justify-center items-center h-64">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+      <p class="ml-4 text-gray-600 dark:text-gray-300">Cargando perfil...</p>
+    </div>
+
+    <!-- Estado de Error -->
+    <div *ngIf="error" class="bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded relative mb-6">
+      <span class="block sm:inline">{{ error }}</span>
+    </div>
+
+    <!-- Contenido del Perfil -->
+    <div *ngIf="!loading && !error && userProfile" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       
       <!-- Perfil del Usuario - Lado Izquierdo -->
       <div class="lg:col-span-1">
@@ -10,78 +22,79 @@
           <div class="relative mb-6">
             <div class="aspect-[2/3] w-full max-w-xs mx-auto relative overflow-hidden rounded-2xl">
               <img 
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=face" 
-                alt="Foto de perfil" 
+                [src]="userProfile.imagen?.trim() || 'assets/default-profile.jpg'" 
+                [alt]="'Foto de perfil de ' + userProfile.name + ' ' + userProfile.surname" 
                 class="w-full h-full object-cover"
+                (error)="userProfile.imagen = 'assets/default-profile.jpg'"
               >
-              <!-- Efecto Degradado Gloss -->
-              <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30 pointer-events-none"></div>
+              <!-- Efecto Degradado Gloss con Nombre -->
+              <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70 pointer-events-none"></div>
               <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none"></div>
+              <!-- Nombre sobre la imagen -->
+              <div class="absolute bottom-4 left-0 right-0 text-center text-white">
+                <h1 class="text-2xl font-bold text-shadow">{{ userProfile.name }} {{ userProfile.surname }}</h1>
+              </div>
             </div>
             
-            <!-- Indicador de Estado Online -->
-            <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-green-500 border-4 border-white dark:border-gray-800 rounded-full"></div>
+
           </div>
           
           <!-- Información Pública del Usuario -->
           <div class="text-center space-y-4">
-            <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Juan Pérez</h1>
-              <p class="text-gray-600 dark:text-gray-400">@juanperez</p>
+            <div class="flex items-center justify-center space-x-2">
+              <p class="text-gray-600 dark:text-gray-400 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200" (click)="copyProfileUrl()">@{{ userProfile.nickname }}</p>
+              <button 
+                class="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors duration-200"
+                (click)="copyProfileUrl()"
+                title="Copiar URL del perfil">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
             </div>
             
             <div class="space-y-2">
               <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                Desarrollador Full Stack apasionado por crear experiencias digitales increíbles.
+                poner descripcion?
               </p>
             </div>
             
             <!-- Estadísticas -->
             <div class="grid grid-cols-3 gap-4 py-4 border-t border-gray-200 dark:border-gray-700">
               <div class="text-center">
-                <div class="text-xl font-bold text-gray-900 dark:text-white">127</div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">Proyectos</div>
-              </div>
-              <div class="text-center">
-                <div class="text-xl font-bold text-gray-900 dark:text-white">2.4k</div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">Seguidores</div>
-              </div>
-              <div class="text-center">
-                <div class="text-xl font-bold text-gray-900 dark:text-white">892</div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">Siguiendo</div>
+                <div class="text-xl font-bold text-gray-900 dark:text-white">
+                  {{ userEvents?.length || 0 }}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">
+                  Eventos
+                  <span *ngIf="userEvents?.length === 0" class="text-xs text-red-500 block">
+                    (No disponible)
+                  </span>
+                </div>
               </div>
             </div>
             
             <!-- Información de Contacto -->
             <div class="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <div class="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-400">
+              <a [href]="'mailto:' + userProfile.email" class="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
                   <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
                 </svg>
-                <span class="text-sm">juan@ejemplo.com</span>
-              </div>
-              
-              <div class="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-400">
+                <span class="text-sm">{{ userProfile.email }}</span>
+              </a>
+
+              <a [href]="'tel:' + userProfile.cellphone" *ngIf="userProfile.cellphone" class="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
                 </svg>
-                <span class="text-sm">Lima, Perú</span>
-              </div>
-              
-              <div class="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-400">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                </svg>
-                <span class="text-sm">Se unió en Enero 2023</span>
-              </div>
+                <span class="text-sm">{{ userProfile.cellphone }}</span>
+              </a>
+
             </div>
             
             <!-- Botones de Acción -->
             <div class="flex space-x-3 pt-4">
-              <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
-                Seguir
-              </button>
               <button class="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200">
                 Mensaje
               </button>
@@ -93,86 +106,7 @@
       <!-- Área de Contenido - Lado Derecho -->
       <div class="lg:col-span-2">
         <div class="space-y-6">
-          
-          <!-- Card de Ejemplo 1 -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 transition-colors duration-300">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Proyectos Recientes</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">E-commerce App</h3>
-                <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">Aplicación de comercio electrónico con Angular y Spring Boot</p>
-                <div class="flex space-x-2">
-                  <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">Angular</span>
-                  <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">Spring Boot</span>
-                </div>
-              </div>
-              
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Task Manager</h3>
-                <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">Gestor de tareas colaborativo con tiempo real</p>
-                <div class="flex space-x-2">
-                  <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">React</span>
-                  <span class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs rounded-full">Node.js</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Card de Ejemplo 2 -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 transition-colors duration-300">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Actividad Reciente</h2>
-            <div class="space-y-4">
-              <div class="flex items-start space-x-3">
-                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <div>
-                  <p class="text-gray-900 dark:text-white font-medium">Completó el proyecto "Sistema de Inventario"</p>
-                  <p class="text-gray-600 dark:text-gray-400 text-sm">Hace 2 horas</p>
-                </div>
-              </div>
-              
-              <div class="flex items-start space-x-3">
-                <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                  <p class="text-gray-900 dark:text-white font-medium">Publicó un nuevo artículo sobre Angular</p>
-                  <p class="text-gray-600 dark:text-gray-400 text-sm">Hace 1 día</p>
-                </div>
-              </div>
-              
-              <div class="flex items-start space-x-3">
-                <div class="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
-                <div>
-                  <p class="text-gray-900 dark:text-white font-medium">Se unió al equipo de desarrollo frontend</p>
-                  <p class="text-gray-600 dark:text-gray-400 text-sm">Hace 3 días</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Card de Ejemplo 3 -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 transition-colors duration-300">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Habilidades</h2>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-2 rounded-lg text-center text-sm font-medium">
-                Angular
-              </div>
-              <div class="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-2 rounded-lg text-center text-sm font-medium">
-                Spring Boot
-              </div>
-              <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-2 rounded-lg text-center text-sm font-medium">
-                TypeScript
-              </div>
-              <div class="bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-2 rounded-lg text-center text-sm font-medium">
-                Java
-              </div>
-              <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-3 py-2 rounded-lg text-center text-sm font-medium">
-                JavaScript
-              </div>
-              <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-3 py-2 rounded-lg text-center text-sm font-medium">
-                PostgreSQL
-              </div>
-            </div>
-          </div>
-          
+          <!-- Aquí se agregarán las tarjetas más adelante -->
         </div>
       </div>
       

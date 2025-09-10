@@ -97,4 +97,7 @@ public  class Events {
         }//atajar el pancho del error en el presenter y cear un GlobalExceptionHandler
     }
 
+    //Cuantos ganadores va a tener el sorteo
+    private int winnersCount = 0;
+
 }

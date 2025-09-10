@@ -39,6 +39,11 @@ export const routes: Routes = [
     title: 'Perfil - Raffy'
   },
   {
+    path: 'profile/:nickname',
+    loadComponent: () => import('./pages/profile/profile').then(m => m.Profile),
+    title: 'Perfil - Raffy'
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }

@@ -43,4 +43,8 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     // Buscar eventos por título (búsqueda parcial)
     @Query("SELECT e FROM Events e WHERE LOWER(e.title) LIKE LOWER(CONCAT('%', :title, '%'))")
     List<Events> findByTitleContainingIgnoreCase(@Param("title") String title);
+    
+    // Buscar eventos por participante
+    @Query("SELECT e FROM Events e JOIN e.participants p WHERE p.id = :userId")
+    List<Events> findByParticipantId(@Param("userId") Long userId);
 }
