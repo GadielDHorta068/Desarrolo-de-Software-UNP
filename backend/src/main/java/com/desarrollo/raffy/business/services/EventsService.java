@@ -13,12 +13,8 @@ import java.time.LocalDate;
 @Service
 public class EventsService {
 
-    public Events create(Events events) {
-        try {
-            return eventsRepository.save(events);
-        } catch (Exception e) {
-            return null;
-        }
+    public <T extends Events> T create(T event) {
+        return eventsRepository.save(event);
     }
 
     public Events getById(Long id) {
@@ -48,9 +44,10 @@ public class EventsService {
 
     public List<Events> getAll() {
         try {
-            return (List<Events>) eventsRepository.findAll();
+            List<Events> events = eventsRepository.findAll();
+            return events != null ? events : List.of();
         } catch (Exception e) {
-            return null;
+            return List.of();
         }       
     }
 
@@ -58,57 +55,64 @@ public class EventsService {
     
     public List<Events> getByStatusEvent(StatusEvent statusEvent) {
         try {
-            return eventsRepository.findByStatusEvent(statusEvent);
+            List<Events> events = eventsRepository.findByStatusEvent(statusEvent);
+            return events != null ? events : List.of();
         } catch (Exception e) {
-            return null;
+            return List.of();
         }
     }
     
     public List<Events> getByEventType(EventTypes eventType) {
         try {
-            return eventsRepository.findByEventType(eventType);
+            List<Events> events = eventsRepository.findByEventType(eventType);
+            return events != null ? events : List.of();
         } catch (Exception e) {
-            return null;
+            return List.of();
         }
     }
     
     public List<Events> getByCategoryId(Long categoryId) {
         try {
-            return eventsRepository.findByCategoryId(categoryId);
+            List<Events> events = eventsRepository.findByCategoryId(categoryId);
+            return events != null ? events : List.of();
         } catch (Exception e) {
-            return null;
+            return List.of();
         }
     }
     
     public List<Events> getActiveEvents() {
         try {
-            return eventsRepository.findActiveEvents();
+            List<Events> events = eventsRepository.findActiveEvents();
+            return events != null ? events : List.of();
         } catch (Exception e) {
-            return null;
+            return List.of();
         }
     }
     
     public List<Events> getByDateRange(LocalDate startDate, LocalDate endDate) {
         try {
-            return eventsRepository.findByDateRange(startDate, endDate);
+            List<Events> events = eventsRepository.findByDateRange(startDate, endDate);
+            return events != null ? events : List.of();
         } catch (Exception e) {
-            return null;
+            return List.of();
         }
     }
     
     public List<Events> getByStartDate(LocalDate startDate) {
         try {
-            return eventsRepository.findByStartDate(startDate);
+            List<Events> events = eventsRepository.findByStartDate(startDate);
+            return events != null ? events : List.of();
         } catch (Exception e) {
-            return null;
+            return List.of();
         }
     }
     
     public List<Events> getByEndDate(LocalDate endDate) {
         try {
-            return eventsRepository.findByEndDate(endDate);
+            List<Events> events = eventsRepository.findByEndDate(endDate);
+            return events != null ? events : List.of();
         } catch (Exception e) {
-            return null;
+            return List.of();
         }
     }
     
@@ -122,9 +126,19 @@ public class EventsService {
     
     public List<Events> searchByTitle(String title) {
         try {
-            return eventsRepository.findByTitleContainingIgnoreCase(title);
+            List<Events> events = eventsRepository.findByTitleContainingIgnoreCase(title);
+            return events != null ? events : List.of();
         } catch (Exception e) {
-            return null;
+            return List.of();
+        }
+    }
+    
+    public List<Events> getEventsByParticipantId(Long userId) {
+        try {
+            List<Events> events = eventsRepository.findByParticipantId(userId);
+            return events != null ? events : List.of();
+        } catch (Exception e) {
+            return List.of();
         }
     }
 

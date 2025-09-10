@@ -180,6 +180,12 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    public UserResponse getUserByNickname(String nickname) {
+        RegisteredUser user = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con nickname: " + nickname));
+        return mapToUserResponse(user);
+    }
+
     private UserResponse mapToUserResponse(RegisteredUser user) {
         return UserResponse.builder()
                 .id(user.getId())

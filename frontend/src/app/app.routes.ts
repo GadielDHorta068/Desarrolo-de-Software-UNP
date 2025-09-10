@@ -33,6 +33,24 @@ export const routes: Routes = [
     title: 'Configuración - Raffy'
   },
   {
+    path: 'profile',
+    loadComponent: () => import('./pages/profile/profile').then(m => m.Profile),
+    canActivate: [AuthGuard],
+    title: 'Perfil - Raffy'
+  },
+  {
+    path: 'profile/:nickname',
+    loadComponent: () => import('./pages/profile/profile').then(m => m.Profile),
+    title: 'Perfil - Raffy'
+  },
+  {
+    path: 'event',
+    loadComponent: () => import('./pages/event/event').then(m => m.Event),
+    canActivate: [GuestGuard],
+    title: 'Eventos - Raffy',
+    data: {animation: 'event'}
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }
