@@ -33,6 +33,12 @@ export const routes: Routes = [
     title: 'Configuración - Raffy'
   },
   {
+    path: 'profile',
+    loadComponent: () => import('./pages/profile/profile').then(m => m.Profile),
+    canActivate: [AuthGuard],
+    title: 'Perfil - Raffy'
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }

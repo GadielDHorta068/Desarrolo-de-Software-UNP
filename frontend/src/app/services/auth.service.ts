@@ -42,6 +42,24 @@ export interface RefreshTokenRequest {
   refreshToken: string;
 }
 
+export interface TwoFactorEnableRequest {
+  username: string;
+}
+
+export interface TwoFactorEnableResponse {
+  qrCode: string;
+  recoveryCodes: string[];
+}
+
+export interface TwoFactorVerifyRequest {
+  username: string;
+  code: string;
+}
+
+export interface TwoFactorVerifyResponse {
+  verified: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -266,6 +284,66 @@ export class AuthService {
    */
   changePassword(passwordData: { currentPassword: string; newPassword: string }): Observable<any> {
     return this.http.post(`${this.API_URL}/change-password`, passwordData, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Habilita 2FA para el usuario
+   */
+  enable2FA(username: string): Observable<TwoFactorEnableResponse> {
+    const request: TwoFactorEnableRequest = { username };
+    return this.http.post<TwoFactorEnableResponse>(`${environment.apiUrl}/api/2fa/enable`, request, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Verifica el código 2FA
+   */
+  verify2FA(username: string, code: string): Observable<TwoFactorVerifyResponse> {
+    const request: TwoFactorVerifyRequest = { username, code };
+    return this.http.post<TwoFactorVerifyResponse>(`${environment.apiUrl}/api/2fa/verify`, request, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Verifica código de recuperación 2FA
+   */
+  verifyRecovery2FA(username: string, recoveryCode: string): Observable<TwoFactorVerifyResponse> {
+    return this.http.post<TwoFactorVerifyResponse>(`${environment.apiUrl}/api/2fa/verify-recovery/${username}`, recoveryCode, {
+      headers: {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'text/plain'
+      }
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Rota el secreto 2FA (regenera QR y códigos)
+   */
+  rotate2FA(username: string): Observable<TwoFactorEnableResponse> {
+    return this.http.post<TwoFactorEnableResponse>(`${environment.apiUrl}/api/2fa/rotate/${username}`, {}, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Deshabilita 2FA para el usuario
+   */
+  disable2FA(username: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/api/2fa/disable/${username}`, {}, {
       headers: this.getAuthHeaders()
     }).pipe(
       catchError(this.handleError)

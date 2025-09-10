@@ -1,13 +1,13 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, TwoFactorEnableResponse } from '../../services/auth.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })
@@ -24,7 +24,18 @@ export class SettingsComponent implements OnInit {
   showCurrentPassword = false;
   showNewPassword = false;
   showConfirmPassword = false;
-  activeTab = 'profile';
+  activeTab: string = 'profile';
+  
+  // 2FA Properties
+  is2FAEnabled = false;
+  is2FALoading = false;
+  qrCodeData: string | null = null;
+  recoveryCodes: string[] = [];
+  verificationCode = '';
+  twoFASuccessMessage = '';
+  twoFAErrorMessage = '';
+  showRecoveryCodes = false;
+  manualSetupKey = '';
 
   constructor(
     private fb: FormBuilder,
@@ -37,6 +48,7 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCurrentUser();
+    this.check2FAStatus();
   }
 
   private initializeForms(): void {
@@ -231,11 +243,6 @@ export class SettingsComponent implements OnInit {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-  setActiveTab(tab: string): void {
-    this.activeTab = tab;
-    this.clearMessages();
-  }
-
   private clearMessages(): void {
     this.successMessage = '';
     this.errorMessage = '';
@@ -254,5 +261,189 @@ export class SettingsComponent implements OnInit {
       // Implementar lógica de eliminación de cuenta
       console.log('Eliminar cuenta');
     }
+  }
+
+  // 2FA Methods
+  private check2FAStatus(): void {
+    // Aquí podrías agregar una llamada al backend para verificar si 2FA está habilitado
+    // Por ahora, asumimos que está deshabilitado por defecto
+    this.is2FAEnabled = false;
+  }
+
+  enable2FA(): void {
+    if (!this.currentUser) {
+      this.twoFAErrorMessage = 'Usuario no encontrado';
+      return;
+    }
+
+    this.is2FALoading = true;
+    this.twoFAErrorMessage = '';
+    this.twoFASuccessMessage = '';
+
+    this.authService.enable2FA(this.currentUser.nickname).subscribe({
+      next: (response: TwoFactorEnableResponse) => {
+        this.is2FALoading = false;
+        this.qrCodeData = response.qrCode;
+        this.recoveryCodes = response.recoveryCodes;
+        this.extractManualSetupKey(response.qrCode);
+        this.twoFASuccessMessage = 'Código QR generado. Escanéalo con tu aplicación de autenticación.';
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.is2FALoading = false;
+        console.error('Error enabling 2FA:', error);
+        this.twoFAErrorMessage = error.error?.message || 'Error al habilitar 2FA';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  verify2FA(): void {
+    if (!this.currentUser || !this.verificationCode) {
+      this.twoFAErrorMessage = 'Por favor ingresa el código de verificación';
+      return;
+    }
+
+    if (this.verificationCode.length !== 6) {
+      this.twoFAErrorMessage = 'El código debe tener 6 dígitos';
+      return;
+    }
+
+    this.is2FALoading = true;
+    this.twoFAErrorMessage = '';
+
+    this.authService.verify2FA(this.currentUser.nickname, this.verificationCode).subscribe({
+      next: (response) => {
+        this.is2FALoading = false;
+        if (response.verified) {
+          this.is2FAEnabled = true;
+          this.showRecoveryCodes = true;
+          this.twoFASuccessMessage = '¡2FA habilitado exitosamente! Guarda tus códigos de respaldo.';
+          this.verificationCode = '';
+        } else {
+          this.twoFAErrorMessage = 'Código de verificación incorrecto';
+        }
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.is2FALoading = false;
+        console.error('Error verifying 2FA:', error);
+        this.twoFAErrorMessage = error.error?.message || 'Error al verificar el código';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  disable2FA(): void {
+    if (!this.currentUser) {
+      this.twoFAErrorMessage = 'Usuario no encontrado';
+      return;
+    }
+
+    if (!confirm('¿Estás seguro de que quieres deshabilitar la autenticación de dos factores?')) {
+      return;
+    }
+
+    this.is2FALoading = true;
+    this.twoFAErrorMessage = '';
+
+    this.authService.disable2FA(this.currentUser.nickname).subscribe({
+      next: () => {
+        this.is2FALoading = false;
+        this.is2FAEnabled = false;
+        this.qrCodeData = null;
+        this.recoveryCodes = [];
+        this.showRecoveryCodes = false;
+        this.manualSetupKey = '';
+        this.twoFASuccessMessage = '2FA deshabilitado exitosamente';
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.is2FALoading = false;
+        console.error('Error disabling 2FA:', error);
+        this.twoFAErrorMessage = error.error?.message || 'Error al deshabilitar 2FA';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  rotate2FA(): void {
+    if (!this.currentUser) {
+      this.twoFAErrorMessage = 'Usuario no encontrado';
+      return;
+    }
+
+    if (!confirm('¿Quieres regenerar tu código QR y códigos de respaldo? Los códigos actuales dejarán de funcionar.')) {
+      return;
+    }
+
+    this.is2FALoading = true;
+    this.twoFAErrorMessage = '';
+
+    this.authService.rotate2FA(this.currentUser.nickname).subscribe({
+      next: (response: TwoFactorEnableResponse) => {
+        this.is2FALoading = false;
+        this.qrCodeData = response.qrCode;
+        this.recoveryCodes = response.recoveryCodes;
+        this.extractManualSetupKey(response.qrCode);
+        this.showRecoveryCodes = true;
+        this.twoFASuccessMessage = 'Código QR y códigos de respaldo regenerados exitosamente';
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.is2FALoading = false;
+        console.error('Error rotating 2FA:', error);
+        this.twoFAErrorMessage = error.error?.message || 'Error al regenerar 2FA';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.twoFASuccessMessage = 'Copiado al portapapeles';
+      setTimeout(() => {
+        this.twoFASuccessMessage = '';
+        this.cdr.detectChanges();
+      }, 2000);
+    }).catch(() => {
+      this.twoFAErrorMessage = 'Error al copiar al portapapeles';
+    });
+  }
+
+  downloadRecoveryCodes(): void {
+    const content = this.recoveryCodes.join('\n');
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = '2fa-recovery-codes.txt';
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  private extractManualSetupKey(qrCode: string): void {
+    // Extraer la clave del código QR para configuración manual
+    try {
+      const url = new URL(qrCode.replace('data:image/png;base64,', '').replace(/.*otpauth:\/\/totp\//, 'otpauth://totp/'));
+      this.manualSetupKey = url.searchParams.get('secret') || 'No disponible';
+    } catch {
+      this.manualSetupKey = 'No disponible';
+    }
+  }
+
+  private clear2FAMessages(): void {
+    this.twoFASuccessMessage = '';
+    this.twoFAErrorMessage = '';
+  }
+
+  setActiveTab(tab: string): void {
+    this.activeTab = tab;
+    this.clearMessages();
+    this.clear2FAMessages();
+  }
+
+  isActiveTab(tab: string): boolean {
+    return this.activeTab === tab;
   }
 }
