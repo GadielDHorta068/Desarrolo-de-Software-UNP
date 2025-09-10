@@ -114,8 +114,6 @@ public class EventsController {
         }
     }
     
-    // Nuevos endpoints para mapear las consultas del repositorio
-    
     @GetMapping("/status/{statusEvent}")
     public ResponseEntity<?> getByStatusEvent(@PathVariable StatusEvent statusEvent) {
         try {
