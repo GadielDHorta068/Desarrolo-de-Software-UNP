@@ -20,5 +20,5 @@ public class UserResponse {
     private String cellphone;
     private String nickname;
     private UserType userType;
-    private String imagen;
+    private String imagen; // Base64 encoded image
 }

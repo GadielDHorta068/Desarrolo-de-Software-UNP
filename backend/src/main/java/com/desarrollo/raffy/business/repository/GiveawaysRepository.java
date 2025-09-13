@@ -22,7 +22,7 @@ public interface GiveawaysRepository extends JpaRepository<Giveaways, Long> {
     @Query("SELECT g FROM Giveaways g WHERE g.category.id = :categoryId")
     List<Giveaways> findByCategoryId(@Param("categoryId") Long categoryId);
 
-    @Query("SELECT g FROM Giveaways g WHERE g.startDate >= :startDate AND g.endDate <= : endDate")
+    @Query("SELECT g FROM Giveaways g WHERE g.startDate >= :startDate AND g.endDate <= :endDate")
     List<Giveaways> findByDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query("SELECT g FROM Giveaways g WHERE g.statusEvent IN (com.desarrollo.raffy.model.StatusEvent.OPEN, com.desarrollo.raffy.model.StatusEvent.CLOSED)")

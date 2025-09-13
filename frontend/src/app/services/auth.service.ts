@@ -411,6 +411,27 @@ export class AuthService {
       this.logout();
     }
     
-    return throwError(() => error);
+    // Extraer mensaje específico del backend
+    let errorMessage = 'Error desconocido';
+    
+    if (error.error) {
+      if (typeof error.error === 'string') {
+        // El backend devuelve el mensaje directamente como string
+        errorMessage = error.error;
+      } else if (error.error.message) {
+        // El backend devuelve un objeto con mensaje
+        errorMessage = error.error.message;
+      }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    // Crear un error personalizado con el mensaje específico
+    const customError = {
+      ...error,
+      userMessage: errorMessage
+    };
+    
+    return throwError(() => customError);
   }
 }

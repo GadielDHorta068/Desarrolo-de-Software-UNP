@@ -27,6 +27,5 @@ public class UpdateProfileRequest {
     @Size(min = 3, max = 30, message = "El nickname debe tener entre 3 y 30 caracteres")
     private String nickname;
     
-    @Size(max = 255, message = "La URL de la imagen no puede exceder 255 caracteres")
-    private String imagen;
+    private String imagen; // Base64 encoded image
 }

@@ -64,8 +64,17 @@
               (click)="toggleUserMenu()"
               class="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
             >
-              <div class="h-8 w-8 bg-emerald-600 rounded-full flex items-center justify-center">
-                <span class="text-white text-sm font-medium">
+              <div class="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center bg-emerald-600">
+                <img 
+                  [src]="profileImageSrc" 
+                  [alt]="currentUser?.name || 'Usuario'"
+                  class="w-full h-full object-cover"
+                  (error)="$event.target.src = 'assets/default-profile.jpg'"
+                >
+                <span 
+                  *ngIf="!currentUser?.imagen" 
+                  class="text-white text-sm font-medium"
+                >
                   {{ currentUser?.name?.charAt(0)?.toUpperCase() || 'U' }}
                 </span>
               </div>

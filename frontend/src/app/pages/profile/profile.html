@@ -22,10 +22,10 @@
           <div class="relative mb-6">
             <div class="aspect-[2/3] w-full max-w-xs mx-auto relative overflow-hidden rounded-2xl">
               <img 
-                [src]="userProfile.imagen?.trim() || 'assets/default-profile.jpg'" 
+                [src]="profileImageSrc" 
                 [alt]="'Foto de perfil de ' + userProfile.name + ' ' + userProfile.surname" 
                 class="w-full h-full object-cover"
-                (error)="userProfile.imagen = 'assets/default-profile.jpg'"
+                (error)="$event.target.src = 'assets/default-profile.jpg'"
               >
               <!-- Efecto Degradado Gloss con Nombre -->
               <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 pointer-events-none"></div>

@@ -23,6 +23,20 @@ export class Profile implements OnInit, OnDestroy {
   showCopiedMessage = false;
   private subscription: Subscription | null = null;
   private eventsSubscription: Subscription | null = null;
+  
+  // Getter para manejar la imagen del perfil
+  get profileImageSrc(): string {
+    if (this.userProfile?.imagen) {
+      // Si la imagen ya tiene el prefijo data:, la devolvemos tal como está
+      if (this.userProfile.imagen.startsWith('data:')) {
+        return this.userProfile.imagen;
+      }
+      // Si es solo base64, agregamos el prefijo
+      return `data:image/jpeg;base64,${this.userProfile.imagen}`;
+    }
+    // Imagen por defecto si no hay imagen
+    return 'assets/default-profile.jpg';
+  }
 
   constructor(
     private authService: AuthService,

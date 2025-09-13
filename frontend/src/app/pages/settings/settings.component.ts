@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, TwoFactorEnableResponse } from '../../services/auth.service';
+import { ImageCroppedEvent, LoadedImage, ImageCropperComponent } from 'ngx-image-cropper';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ImageCropperComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })
@@ -25,6 +26,15 @@ export class SettingsComponent implements OnInit {
   showNewPassword = false;
   showConfirmPassword = false;
   activeTab: string = 'profile';
+  selectedImage: File | null = null;
+  imagePreview: string | null = null;
+  currentImagePreview: string | null = null;
+  
+  // Image cropper properties
+  showImageCropper = false;
+  imageChangedEvent: any = '';
+  croppedImage: any = '';
+  isCropperReady = false;
   
   // 2FA Properties
   is2FAEnabled = false;
@@ -58,7 +68,7 @@ export class SettingsComponent implements OnInit {
     this.profileForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), this.onlyLettersValidator]],
       surname: ['', [Validators.required, Validators.minLength(2), this.onlyLettersValidator]],
-      email: ['', [Validators.required, Validators.email]],
+      email: [{value: '', disabled: true}],
       nickname: ['', [Validators.required, Validators.minLength(3)]],
       cellphone: ['', [this.onlyNumbersValidator]],
       imagen: ['']
@@ -115,6 +125,10 @@ export class SettingsComponent implements OnInit {
           cellphone: user.cellphone || '',
           imagen: user.imagen || ''
         });
+        // Mostrar imagen actual si existe
+        if (user.imagen) {
+          this.currentImagePreview = 'data:image/jpeg;base64,' + user.imagen;
+        }
         // Forzar detección de cambios después de cargar datos
         this.cdr.detectChanges();
       },
@@ -135,33 +149,83 @@ export class SettingsComponent implements OnInit {
 
       const profileData = this.profileForm.value;
       
-      this.authService.updateProfile(profileData).subscribe({
-        next: (response) => {
+      // Incluir el email del usuario actual ya que el campo está deshabilitado
+      if (this.currentUser && this.currentUser.email) {
+        profileData.email = this.currentUser.email;
+      }
+      
+      // Agregar imagen en base64 si existe una nueva seleccionada
+      if (this.selectedImage) {
+        this.convertImageToBase64(this.selectedImage).then(base64 => {
+          profileData.imagen = base64;
+          this.submitProfileUpdate(profileData);
+        }).catch(error => {
           this.isLoading = false;
-          this.successMessage = 'Perfil actualizado correctamente';
-          // Forzar detección de cambios
+          this.errorMessage = 'Error al procesar la imagen.';
+          console.error('Image conversion error:', error);
+        });
+      } else {
+        // Si no hay nueva imagen, mantener la actual o enviar vacío si se eliminó
+        if (!this.currentImagePreview) {
+          profileData.imagen = '';
+        }
+        this.submitProfileUpdate(profileData);
+      }
+    } else {
+      this.markFormGroupTouched(this.profileForm);
+    }
+  }
+
+  private submitProfileUpdate(profileData: any): void {
+    const imageWasUpdated = this.selectedImage !== null || (!this.currentImagePreview && profileData.imagen === '');
+    
+    this.authService.updateProfile(profileData).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.successMessage = 'Perfil actualizado correctamente';
+        // Forzar detección de cambios
+        this.cdr.detectChanges();
+        
+        // Actualizar los datos del usuario en el servicio
+        this.currentUser = { ...this.currentUser, ...response };
+        
+        // Actualizar preview de imagen
+        if (response.imagen) {
+          this.currentImagePreview = 'data:image/jpeg;base64,' + response.imagen;
+        } else {
+          this.currentImagePreview = null;
+        }
+        
+        // Limpiar imagen seleccionada
+        this.selectedImage = null;
+        this.imagePreview = null;
+        
+        // Si se actualizó la imagen, forzar actualización del AuthService y recargar página
+        if (imageWasUpdated) {
+          this.authService.initializeUserData();
+          this.successMessage = 'Perfil actualizado correctamente. Refrescando página...';
           this.cdr.detectChanges();
           
-          // Actualizar los datos del usuario en el servicio
-          this.loadCurrentUser();
-          
-          // Limpiar mensaje después de 3 segundos
+          // Recargar página después de 2 segundos para actualizar caché de imágenes
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          // Limpiar mensaje después de 3 segundos si no se actualizó imagen
           setTimeout(() => {
             this.successMessage = '';
             this.cdr.detectChanges();
           }, 3000);
-        },
-        error: (error) => {
-          this.isLoading = false;
-          console.error('Error al actualizar perfil:', error);
-          this.errorMessage = error.error || 'Error al actualizar el perfil';
-          // Forzar detección de cambios
-          this.cdr.detectChanges();
         }
-      });
-    } else {
-      this.markFormGroupTouched(this.profileForm);
-    }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.error('Error al actualizar perfil:', error);
+        this.errorMessage = error.error || 'Error al actualizar el perfil';
+        // Forzar detección de cambios
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   onPasswordSubmit(): void {
@@ -448,5 +512,142 @@ export class SettingsComponent implements OnInit {
 
   isActiveTab(tab: string): boolean {
     return this.activeTab === tab;
+  }
+
+  // Métodos para manejo de imágenes
+  onImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Validar tipo de archivo
+      if (!file.type.startsWith('image/')) {
+        this.errorMessage = 'Por favor selecciona un archivo de imagen válido.';
+        return;
+      }
+      
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.errorMessage = 'La imagen no puede ser mayor a 5MB.';
+        return;
+      }
+      
+      // Limpiar mensajes de error
+      this.errorMessage = '';
+      
+      // Mostrar el modal de recorte
+      this.imageChangedEvent = event;
+      this.showImageCropper = true;
+      this.isCropperReady = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  removeCurrentImage(): void {
+    this.currentImagePreview = null;
+    this.selectedImage = null;
+    this.imagePreview = null;
+    this.profileForm.patchValue({ imagen: '' });
+  }
+
+  removeSelectedImage(): void {
+    this.selectedImage = null;
+    this.imagePreview = null;
+    // Resetear el input file
+    const fileInput = document.getElementById('imageInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
+  private convertImageToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        // Remover el prefijo data:image/...;base64,
+        const base64Data = base64.split(',')[1];
+        resolve(base64Data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Métodos para el recorte de imagen
+  imageCropped(event: ImageCroppedEvent): void {
+    console.log('imageCropped event fired:', event);
+    // Usar blob si base64 no está disponible
+    if (event.base64) {
+      this.croppedImage = event.base64;
+    } else if (event.blob) {
+      // Convertir blob a base64
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.croppedImage = reader.result as string;
+        console.log('croppedImage updated from blob:', this.croppedImage ? 'Image data available' : 'No image data');
+        this.cdr.detectChanges();
+      };
+      reader.readAsDataURL(event.blob);
+    }
+    console.log('croppedImage updated:', this.croppedImage ? 'Image data available' : 'No image data');
+  }
+
+  imageLoaded(): void {
+    console.log('imageLoaded event fired');
+    this.isCropperReady = true;
+    console.log('isCropperReady set to:', this.isCropperReady);
+    this.cdr.detectChanges();
+  }
+
+  cropperReady(): void {
+    console.log('cropperReady event fired');
+    // El cropper está listo para usar
+  }
+
+  loadImageFailed(): void {
+    this.errorMessage = 'Error al cargar la imagen para recortar.';
+    this.showImageCropper = false;
+    this.cdr.detectChanges();
+  }
+
+  confirmCrop(): void {
+    console.log('confirmCrop called - isCropperReady:', this.isCropperReady, 'croppedImage:', this.croppedImage ? 'Available' : 'Not available');
+    if (this.croppedImage) {
+      // Convertir la imagen recortada a File
+      this.dataURLtoFile(this.croppedImage, 'cropped-image.jpg').then(file => {
+        this.selectedImage = file;
+        this.imagePreview = this.croppedImage;
+        this.showImageCropper = false;
+        this.cdr.detectChanges();
+      });
+    }
+  }
+
+  cancelCrop(): void {
+    this.showImageCropper = false;
+    this.imageChangedEvent = '';
+    this.croppedImage = '';
+    this.isCropperReady = false;
+    
+    // Resetear el input file
+    const fileInput = document.getElementById('imagen') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    
+    this.cdr.detectChanges();
+  }
+
+  private dataURLtoFile(dataurl: string, filename: string): Promise<File> {
+    return new Promise((resolve) => {
+      const arr = dataurl.split(',');
+      const mime = arr[0].match(/:(.*?);/)![1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      resolve(new File([u8arr], filename, { type: mime }));
+    });
   }
 }
