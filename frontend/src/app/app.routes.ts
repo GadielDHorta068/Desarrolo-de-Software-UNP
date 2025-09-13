@@ -33,6 +33,13 @@ export const routes: Routes = [
     title: 'Configuración - Raffy'
   },
   {
+    path: 'panel',
+    loadComponent: () => import('./pages/raffles-panel/raffles-panel').then(m => m.RafflesPanel),
+    // canActivate: [GuestGuard],
+    title: 'Panel - Raffy',
+    // data: { animation: 'register' }
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }
