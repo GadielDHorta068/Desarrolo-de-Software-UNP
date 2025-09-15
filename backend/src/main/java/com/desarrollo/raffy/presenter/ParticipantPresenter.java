@@ -2,9 +2,11 @@ package com.desarrollo.raffy.presenter;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -38,21 +40,25 @@ public class ParticipantPresenter {
 
 
     @PostMapping()
-    public ResponseEntity<Object> create(GuestUser aGuestUser, Long aEventId) {
-        if (aGuestUser.getId() != 0) {
+    public ResponseEntity<Object> create(
+        @RequestBody GuestUser aGuestUser,
+        @RequestParam Long aEventId) {
+            if (aGuestUser.getId() != 0) {
+                return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Esta intentando crear un guest user. Este no puede tener un id definido.");
+            }
+
+            User savedGuestUser = userService.save(aGuestUser);
+            Events eventToParticipate = eventService.getById(aEventId);
+            if (eventToParticipate != null) {
+                Participant participantToSave = new Participant(savedGuestUser, (Giveaways)eventToParticipate);
+                return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(participantService.save(participantToSave));
+            }
             return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body("Esta intentando crear un guest user. Este no puede tener un id definido.");
-        }
-        
-        User savedGuestUser = userService.save(aGuestUser);
-        Events eventToParticipate = eventService.getById(aEventId);
-        if (eventToParticipate != null) {
-            Participant participantToSave = new Participant(savedGuestUser, (Giveaways)eventToParticipate);
-            return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(participantService.save(participantToSave));
-        }
-        return null; // Cambiar
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("El evento con id" + aEventId + " no existe"); // Cambiar
     }
 }
