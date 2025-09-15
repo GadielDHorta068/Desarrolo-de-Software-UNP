@@ -19,6 +19,7 @@ import com.desarrollo.raffy.dto.UserResponse;
 import com.desarrollo.raffy.model.RefreshToken;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
+import com.desarrollo.raffy.util.ImageUtils;
 
 @Service
 @Transactional
@@ -59,7 +60,7 @@ public class AuthService {
                 request.getNickname(),
                 passwordEncoder.encode(request.getPassword())
         );
-        user.setImagen(request.getImagen());
+        user.setImagen(ImageUtils.base64ToBytes(request.getImagen()));
 
         RegisteredUser savedUser = userRepository.save(user);
 
@@ -155,7 +156,7 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setCellphone(request.getCellphone());
         user.setNickname(request.getNickname());
-        user.setImagen(request.getImagen());
+        user.setImagen(ImageUtils.base64ToBytes(request.getImagen()));
         
         RegisteredUser updatedUser = userRepository.save(user);
         return mapToUserResponse(updatedUser);
@@ -180,7 +181,25 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    public UserResponse getUserByNickname(String nickname) {
+        RegisteredUser user = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con nickname: " + nickname));
+        return mapToUserResponse(user);
+    }
+
     private UserResponse mapToUserResponse(RegisteredUser user) {
+        String imagenBase64 = null;
+        try {
+            // Manejar el campo LOB de manera segura
+            if (user.getImagen() != null) {
+                imagenBase64 = ImageUtils.bytesToBase64(user.getImagen());
+            }
+        } catch (Exception e) {
+            // Log del error pero continuar sin la imagen
+            System.err.println("Error al procesar imagen del usuario " + user.getId() + ": " + e.getMessage());
+            imagenBase64 = null;
+        }
+        
         return UserResponse.builder()
                 .id(user.getId())
                 .name(user.getName())
@@ -189,7 +208,7 @@ public class AuthService {
                 .cellphone(user.getCellphone())
                 .nickname(user.getNickname())
                 .userType(user.getUserType())
-                .imagen(user.getImagen())
+                .imagen(imagenBase64)
                 .build();
     }
 }

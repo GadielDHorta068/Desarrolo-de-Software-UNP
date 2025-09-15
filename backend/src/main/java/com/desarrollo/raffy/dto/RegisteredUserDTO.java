@@ -37,7 +37,7 @@ public class RegisteredUserDTO extends UserDTO {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    private String imagen;
+    private String imagen; // Base64 encoded image
 
     private UserType userType;
 

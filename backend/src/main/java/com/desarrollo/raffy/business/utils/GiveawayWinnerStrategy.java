@@ -35,6 +35,7 @@ public class GiveawayWinnerStrategy implements WinnerSelectionStrategy {
         short pos = 1;
         for(Participant p : shuffled.stream().limit(winnersCount).toList()){
             p.setPosition(pos);
+            pos++;
         }
     }
     

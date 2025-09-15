@@ -4,6 +4,7 @@ import com.desarrollo.raffy.dto.RegisteredUserDTO;
 import com.desarrollo.raffy.dto.UserDTO;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.User;
+import com.desarrollo.raffy.util.ImageUtils;
 
 public class UserMapper {
 
@@ -15,7 +16,7 @@ public class UserMapper {
             result.setSurname(registeredUser.getSurname());
             result.setEmail(registeredUser.getEmail());
             result.setCellphone(registeredUser.getCellphone());
-            result.setImagen(registeredUser.getImagen());
+            result.setImagen(ImageUtils.bytesToBase64(registeredUser.getImagen()));
 
             return result;
         }

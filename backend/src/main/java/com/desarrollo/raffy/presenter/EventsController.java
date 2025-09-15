@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.desarrollo.raffy.model.Events;
+import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.business.services.EventsService;
@@ -42,6 +43,12 @@ public class EventsController {
         } else {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/giveaways")
+    public ResponseEntity<Giveaways> createGiveaway(@RequestBody Giveaways giveaway) {
+        Giveaways giveaways = eventsService.create(giveaway);
+        return new ResponseEntity<>(giveaways, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -107,24 +114,14 @@ public class EventsController {
     @GetMapping
     public ResponseEntity<?> getAll() {
         List<Events> events = eventsService.getAll();
-        if (events != null && !events.isEmpty()) {
-            return new ResponseEntity<>(events, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("No se encontraron eventos", HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
-    
-    // Nuevos endpoints para mapear las consultas del repositorio
     
     @GetMapping("/status/{statusEvent}")
     public ResponseEntity<?> getByStatusEvent(@PathVariable StatusEvent statusEvent) {
         try {
             List<Events> events = eventsService.getByStatusEvent(statusEvent);
-            if (events != null && !events.isEmpty()) {
-                return new ResponseEntity<>(events, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("No se encontraron eventos con el estado: " + statusEvent, HttpStatus.NOT_FOUND);
-            }
+            return new ResponseEntity<>(events, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>("Estado de evento inválido: " + statusEvent, HttpStatus.BAD_REQUEST);
         }
@@ -134,11 +131,7 @@ public class EventsController {
     public ResponseEntity<?> getByEventType(@PathVariable EventTypes eventType) {
         try {
             List<Events> events = eventsService.getByEventType(eventType);
-            if (events != null && !events.isEmpty()) {
-                return new ResponseEntity<>(events, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("No se encontraron eventos del tipo: " + eventType, HttpStatus.NOT_FOUND);
-            }
+            return new ResponseEntity<>(events, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>("Tipo de evento inválido: " + eventType, HttpStatus.BAD_REQUEST);
         }
@@ -151,21 +144,13 @@ public class EventsController {
         }
         
         List<Events> events = eventsService.getByCategoryId(categoryId);
-        if (events != null && !events.isEmpty()) {
-            return new ResponseEntity<>(events, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("No se encontraron eventos para la categoría ID: " + categoryId, HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
     
     @GetMapping("/active")
     public ResponseEntity<?> getActiveEvents() {
         List<Events> events = eventsService.getActiveEvents();
-        if (events != null && !events.isEmpty()) {
-            return new ResponseEntity<>(events, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("No se encontraron eventos activos", HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
     
     @GetMapping("/date-range")
@@ -182,11 +167,7 @@ public class EventsController {
         }
         
         List<Events> events = eventsService.getByDateRange(startDate, endDate);
-        if (events != null && !events.isEmpty()) {
-            return new ResponseEntity<>(events, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("No se encontraron eventos en el rango de fechas especificado", HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
     
     @GetMapping("/start-date/{startDate}")
@@ -198,11 +179,7 @@ public class EventsController {
         }
         
         List<Events> events = eventsService.getByStartDate(startDate);
-        if (events != null && !events.isEmpty()) {
-            return new ResponseEntity<>(events, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("No se encontraron eventos que inicien en la fecha: " + startDate, HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
     
     @GetMapping("/end-date/{endDate}")
@@ -232,11 +209,7 @@ public class EventsController {
         }
         
         List<Events> events = eventsService.searchByTitle(title.trim());
-        if (events != null && !events.isEmpty()) {
-            return new ResponseEntity<>(events, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("No se encontraron eventos que contengan: " + title, HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
     
     @GetMapping("/exists/{title}")
@@ -248,4 +221,15 @@ public class EventsController {
         boolean exists = eventsService.existsByTitle(title.trim());
         return new ResponseEntity<>(exists, HttpStatus.OK);
     }
+    
+    @GetMapping("/participant/{userId}")
+    public ResponseEntity<?> getEventsByParticipantId(@PathVariable @NotNull @Positive Long userId) {
+        if (userId <= 0) {
+            return new ResponseEntity<>("El ID de usuario debe ser un número positivo", HttpStatus.BAD_REQUEST);
+        }
+        
+        List<Events> events = eventsService.getEventsByParticipantId(userId);
+        return new ResponseEntity<>(events, HttpStatus.OK);
+    }
+
 }

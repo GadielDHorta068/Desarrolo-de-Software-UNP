@@ -42,6 +42,24 @@ export interface RefreshTokenRequest {
   refreshToken: string;
 }
 
+export interface TwoFactorEnableRequest {
+  username: string;
+}
+
+export interface TwoFactorEnableResponse {
+  qrCode: string;
+  recoveryCodes: string[];
+}
+
+export interface TwoFactorVerifyRequest {
+  username: string;
+  code: string;
+}
+
+export interface TwoFactorVerifyResponse {
+  verified: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -63,12 +81,26 @@ export class AuthService {
     private router: Router,
     private ngZone: NgZone
   ) {
-    // Diferir la verificación del estado de autenticación para evitar dependencia circular
-    setTimeout(() => this.checkAuthStatus(), 0);
+    // Inicializar estado basado en token local sin hacer peticiones HTTP
+    this.initializeAuthState();
   }
 
   /**
-   * Verifica si el usuario está autenticado al inicializar el servicio
+   * Inicializa el estado de autenticación basado en tokens locales
+   */
+  private initializeAuthState(): void {
+    const token = this.getToken();
+    if (token) {
+      // Solo marcar como autenticado si hay token, sin hacer peticiones HTTP
+      this.isAuthenticatedSubject.next(true);
+    } else {
+      // Asegurar que el estado esté limpio si no hay token
+      this.clearAuthState();
+    }
+  }
+
+  /**
+   * Verifica si el usuario está autenticado haciendo una petición al servidor
    */
   private checkAuthStatus(): void {
     // No verificar si estamos en proceso de logout
@@ -78,7 +110,10 @@ export class AuthService {
     
     const token = this.getToken();
     if (token) {
-      this.getCurrentUser().subscribe({
+      // Obtener el usuario actual y actualizar el estado
+      this.http.get<UserResponse>(`${this.API_URL}/me`, {
+        headers: this.getAuthHeaders()
+      }).subscribe({
         next: (user) => {
           this.currentUserSubject.next(user);
           this.isAuthenticatedSubject.next(true);
@@ -120,11 +155,36 @@ export class AuthService {
    * Obtiene los datos del usuario actual
    */
   getCurrentUser(): Observable<UserResponse> {
+    // Si ya tenemos un usuario en el estado y es válido, lo devolvemos
+    const currentUser = this.currentUserSubject.value;
+    if (currentUser) {
+      return new Observable<UserResponse>(observer => {
+        observer.next(currentUser);
+        observer.complete();
+      });
+    }
+    
+    // Si no hay usuario en el estado o es null, hacemos la petición
     return this.http.get<UserResponse>(`${this.API_URL}/me`, {
       headers: this.getAuthHeaders()
     }).pipe(
+      tap(user => {
+        this.currentUserSubject.next(user);
+        this.isAuthenticatedSubject.next(true);
+      }),
       catchError(this.handleError)
     );
+  }
+
+  /**
+   * Inicializa los datos del usuario si están disponibles
+   * Este método debe ser llamado por componentes que necesiten datos del usuario
+   */
+  initializeUserData(): void {
+    // Solo cargar datos si hay token y no hay usuario cargado
+    if (this.getToken() && !this.currentUserSubject.value) {
+      this.checkAuthStatus();
+    }
   }
 
   /**
@@ -273,6 +333,75 @@ export class AuthService {
   }
 
   /**
+   * Habilita 2FA para el usuario
+   */
+  enable2FA(username: string): Observable<TwoFactorEnableResponse> {
+    const request: TwoFactorEnableRequest = { username };
+    return this.http.post<TwoFactorEnableResponse>(`${environment.apiUrl}/api/2fa/enable`, request, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Verifica el código 2FA
+   */
+  verify2FA(username: string, code: string): Observable<TwoFactorVerifyResponse> {
+    const request: TwoFactorVerifyRequest = { username, code };
+    return this.http.post<TwoFactorVerifyResponse>(`${environment.apiUrl}/api/2fa/verify`, request, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Verifica código de recuperación 2FA
+   */
+  verifyRecovery2FA(username: string, recoveryCode: string): Observable<TwoFactorVerifyResponse> {
+    return this.http.post<TwoFactorVerifyResponse>(`${environment.apiUrl}/api/2fa/verify-recovery/${username}`, recoveryCode, {
+      headers: {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'text/plain'
+      }
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Rota el secreto 2FA (regenera QR y códigos)
+   */
+  rotate2FA(username: string): Observable<TwoFactorEnableResponse> {
+    return this.http.post<TwoFactorEnableResponse>(`${environment.apiUrl}/api/2fa/rotate/${username}`, {}, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Deshabilita 2FA para el usuario
+   */
+  disable2FA(username: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/api/2fa/disable/${username}`, {}, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Obtiene un usuario por su nickname
+   */
+  getUserByNickname(nickname: string): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${this.API_URL}/users/${nickname}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * Maneja errores de HTTP
    */
   private handleError = (error: any): Observable<never> => {
@@ -282,6 +411,27 @@ export class AuthService {
       this.logout();
     }
     
-    return throwError(() => error);
+    // Extraer mensaje específico del backend
+    let errorMessage = 'Error desconocido';
+    
+    if (error.error) {
+      if (typeof error.error === 'string') {
+        // El backend devuelve el mensaje directamente como string
+        errorMessage = error.error;
+      } else if (error.error.message) {
+        // El backend devuelve un objeto con mensaje
+        errorMessage = error.error.message;
+      }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    // Crear un error personalizado con el mensaje específico
+    const customError = {
+      ...error,
+      userMessage: errorMessage
+    };
+    
+    return throwError(() => customError);
   }
 }

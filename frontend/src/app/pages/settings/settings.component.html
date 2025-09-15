@@ -25,7 +25,7 @@
         <nav class="flex space-x-8 px-6" aria-label="Tabs">
           <button
             (click)="setActiveTab('profile')"
-            [class]="activeTab === 'profile' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+            [class]="isActiveTab('profile') ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
             class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
           >
             <div class="flex items-center space-x-2">
@@ -38,7 +38,7 @@
           
           <button
             (click)="setActiveTab('security')"
-            [class]="activeTab === 'security' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+            [class]="isActiveTab('security') ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
             class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
           >
             <div class="flex items-center space-x-2">
@@ -51,7 +51,7 @@
           
           <button
             (click)="setActiveTab('danger')"
-            [class]="activeTab === 'danger' ? 'border-red-500 text-red-600 dark:text-red-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+            [class]="isActiveTab('danger') ? 'border-red-500 text-red-600 dark:text-red-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
             class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
           >
             <div class="flex items-center space-x-2">
@@ -67,7 +67,7 @@
       <!-- Tab Content -->
       <div class="p-6">
         <!-- Profile Tab -->
-        <div *ngIf="activeTab === 'profile'">
+        <div *ngIf="isActiveTab('profile')">
           <div class="max-w-2xl">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-6">Información Personal</h3>
             
@@ -142,9 +142,13 @@
                   id="email"
                   type="email"
                   formControlName="email"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
+                  readonly
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed"
                   [class.border-red-500]="getFieldError(profileForm, 'email')"
                 />
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  El email no puede ser modificado
+                </p>
                 <div *ngIf="getFieldError(profileForm, 'email')" class="mt-1 text-sm text-red-600 dark:text-red-400">
                   {{ getFieldError(profileForm, 'email') }}
                 </div>
@@ -178,24 +182,49 @@
                   formControlName="cellphone"
                   placeholder="Ej: +595 981 123 456"
                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
+                  [class.border-red-500]="getFieldError(profileForm, 'cellphone')"
                 />
+                <div *ngIf="getFieldError(profileForm, 'cellphone')" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {{ getFieldError(profileForm, 'cellphone') }}
+                </div>
               </div>
 
-              <!-- Image URL Field -->
+              <!-- Image Upload Field -->
               <div>
                 <label for="imagen" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  URL de Imagen de Perfil
+                  Foto de Perfil
                 </label>
-                <input
-                  id="imagen"
-                  type="url"
-                  formControlName="imagen"
-                  placeholder="https://ejemplo.com/mi-imagen.jpg"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
-                />
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Ingresa la URL de una imagen para tu foto de perfil
-                </p>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-emerald-400 dark:hover:border-emerald-500 transition-colors duration-300"
+                     [class.border-emerald-400]="selectedImage || currentImagePreview"
+                     [class.bg-emerald-50]="selectedImage || currentImagePreview"
+                     [class.dark:bg-emerald-900/20]="selectedImage || currentImagePreview">
+                  <div class="space-y-1 text-center">
+                    <div *ngIf="!selectedImage && !currentImagePreview" class="mx-auto h-12 w-12 text-gray-400">
+                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                    </div>
+                    <div *ngIf="selectedImage || currentImagePreview" class="mx-auto h-20 w-20 rounded-full overflow-hidden border-2 border-emerald-400">
+                      <img [src]="imagePreview || currentImagePreview" alt="Preview" class="h-full w-full object-cover">
+                    </div>
+                    <div class="flex text-sm text-gray-600 dark:text-gray-400">
+                      <label for="imagen" class="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-emerald-500 transition-colors">
+                        <span>{{ (selectedImage || currentImagePreview) ? 'Cambiar imagen' : 'Subir una imagen' }}</span>
+                        <input id="imagen" name="imagen" type="file" class="sr-only" accept="image/*" (change)="onImageSelected($event)">
+                      </label>
+                      <p class="pl-1">o arrastra y suelta</p>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      PNG, JPG, GIF hasta 5MB
+                    </p>
+                    <button *ngIf="selectedImage" type="button" (click)="removeSelectedImage()" class="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 transition-colors">
+                       Cancelar nueva imagen
+                     </button>
+                     <button *ngIf="!selectedImage && currentImagePreview" type="button" (click)="removeCurrentImage()" class="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 transition-colors">
+                       Eliminar imagen actual
+                     </button>
+                  </div>
+                </div>
               </div>
 
               <!-- Submit Button -->
@@ -218,8 +247,67 @@
           </div>
         </div>
 
+        <!-- Image Cropper Modal -->
+        <div *ngIf="showImageCropper" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 image-cropper-modal">
+          <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto image-cropper-content">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recortar Imagen</h3>
+              <button (click)="cancelCrop()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div class="mb-4">
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Ajusta el área de recorte para tu imagen de perfil. La imagen se recortará en formato cuadrado (1:1).
+              </p>
+              
+              <div class="flex justify-center">
+                <image-cropper
+                  [imageChangedEvent]="imageChangedEvent"
+                  [maintainAspectRatio]="true"
+                  [aspectRatio]="1"
+                  [resizeToWidth]="300"
+                  [cropperMinWidth]="100"
+                  [onlyScaleDown]="true"
+                  [roundCropper]="false"
+                  [canvasRotation]="0"
+                  [transform]="{}"
+                  [alignImage]="'center'"
+                  [style.max-height.px]="400"
+                  format="png"
+                  (imageCropped)="imageCropped($event)"
+                  (imageLoaded)="imageLoaded()"
+                  (cropperReady)="cropperReady()"
+                  (loadImageFailed)="loadImageFailed()">
+                </image-cropper>
+              </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+              <button
+                type="button"
+                (click)="cancelCrop()"
+                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                (click)="confirmCrop()"
+                [disabled]="!isCropperReady || !croppedImage"
+                class="px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Confirmar Recorte
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Security Tab -->
-        <div *ngIf="activeTab === 'security'">
+        <div *ngIf="isActiveTab('security')">
           <div class="max-w-2xl">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-6">Cambiar Contraseña</h3>
             
@@ -361,11 +449,178 @@
                 </button>
               </div>
             </form>
-          </div>
+
+            <!-- 2FA Section -->
+            <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-6">Autenticación de Dos Factores (2FA)</h3>
+              
+              <!-- 2FA Status -->
+              <div class="mb-6 p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                      <svg class="h-6 w-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="text-sm font-medium text-gray-900 dark:text-white">Estado de 2FA</h4>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">Protege tu cuenta con autenticación de dos factores</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center">
+                    <!-- Status Badge -->
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
+                       <svg class="w-2 h-2 mr-1" fill="currentColor" viewBox="0 0 8 8">
+                         <circle cx="4" cy="4" r="3" />
+                       </svg>
+                       Deshabilitado
+                     </span>
+                   </div>
+                 </div>
+               </div>
+
+               <!-- 2FA Setup Section -->
+               <div class="space-y-6">
+                 <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                   <div class="flex">
+                     <svg class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                     </svg>
+                     <div class="ml-3">
+                       <h4 class="text-sm font-medium text-blue-800 dark:text-blue-400">Configurar 2FA</h4>
+                       <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                         Para habilitar la autenticación de dos factores, escanea el código QR con tu aplicación de autenticación preferida (Google Authenticator, Authy, etc.)
+                       </p>
+                     </div>
+                   </div>
+                 </div>
+
+                 <!-- QR Code Section -->
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                   <!-- QR Code Display -->
+                   <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6 text-center">
+                     <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Código QR</h4>
+                     <div class="flex justify-center mb-4">
+                       <!-- Real QR Code or Generate Button -->
+                       <div *ngIf="!qrCodeData" class="text-center">
+                         <button 
+                           (click)="enable2FA()"
+                           [disabled]="is2FALoading"
+                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+                           <span *ngIf="is2FALoading" class="mr-2">
+                             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                             </svg>
+                           </span>
+                           {{ is2FALoading ? 'Generando...' : 'Generar Código QR' }}
+                         </button>
+                       </div>
+                       
+                       <div *ngIf="qrCodeData" class="bg-white p-4 rounded-lg border-2 border-gray-300">
+                         <img [src]="qrCodeData" alt="Código QR para 2FA" class="w-48 h-48" />
+                       </div>
+                     </div>
+                     
+                     <div *ngIf="qrCodeData" class="text-center">
+                       <button 
+                         (click)="rotate2FA()"
+                         [disabled]="is2FALoading"
+                         class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50">
+                         Regenerar Código QR
+                       </button>
+                     </div>
+                     
+                     <p *ngIf="qrCodeData" class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                       Escanea este código con tu aplicación de autenticación
+                     </p>
+                   </div>
+
+                   <!-- Manual Setup -->
+                     <div *ngIf="manualSetupKey" class="space-y-4">
+                       <div>
+                         <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Configuración Manual</h4>
+                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                           Si no puedes escanear el código QR, ingresa manualmente esta clave en tu aplicación:
+                         </p>
+                         <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 border">
+                           <div class="flex items-center justify-between">
+                             <code class="text-sm font-mono text-gray-800 dark:text-gray-200 break-all">
+                               {{ manualSetupKey }}
+                             </code>
+                             <button 
+                               (click)="copyToClipboard(manualSetupKey)"
+                               class="ml-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                               </svg>
+                             </button>
+                           </div>
+                         </div>
+                       </div>
+
+                     <!-- Verification Code Input -->
+                       <div *ngIf="qrCodeData">
+                         <label for="verificationCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                           Código de Verificación
+                         </label>
+                         <input
+                           id="verificationCode"
+                           type="text"
+                           [(ngModel)]="verificationCode"
+                           placeholder="123456"
+                           maxlength="6"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 text-center text-lg font-mono"
+                         />
+                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                           Ingresa el código de 6 dígitos de tu aplicación de autenticación
+                         </p>
+                       </div>
+
+                       <!-- Enable 2FA Button -->
+                       <div *ngIf="qrCodeData" class="pt-4">
+                         <button
+                           type="button"
+                           (click)="verify2FA()"
+                           [disabled]="is2FALoading || !verificationCode || verificationCode.length !== 6"
+                           class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition-colors"
+                         >
+                           <span *ngIf="is2FALoading" class="mr-2">
+                             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                             </svg>
+                           </span>
+                           <svg *ngIf="!is2FALoading" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                           </svg>
+                           {{ is2FALoading ? 'Verificando...' : 'Habilitar 2FA' }}
+                         </button>
+                       </div>
+                   </div>
+                 </div>
+
+                 <!-- Backup Codes Section -->
+                 <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                   <div class="flex">
+                     <svg class="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                     </svg>
+                     <div class="ml-3">
+                       <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-400">Códigos de Respaldo</h4>
+                       <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                         Una vez habilitado el 2FA, se generarán códigos de respaldo que podrás usar si pierdes acceso a tu dispositivo de autenticación. Guárdalos en un lugar seguro.
+                       </p>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+            </div>
         </div>
 
         <!-- Danger Zone Tab -->
-        <div *ngIf="activeTab === 'danger'">
+        <div *ngIf="isActiveTab('danger')">
           <div class="max-w-2xl">
             <h3 class="text-lg font-medium text-red-900 dark:text-red-400 mb-6">Zona Peligrosa</h3>
             

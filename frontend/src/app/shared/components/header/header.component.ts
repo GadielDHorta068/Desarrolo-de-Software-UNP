@@ -23,6 +23,9 @@ export class HeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Inicializar datos del usuario si están disponibles
+    this.authService.initializeUserData();
+    
     // Suscribirse al estado de autenticación
     this.authService.isAuthenticated$.subscribe(isAuth => {
       this.isAuthenticated = isAuth;
@@ -45,6 +48,19 @@ export class HeaderComponent implements OnInit {
         console.error('Error loading user:', error);
       }
     });
+  }
+
+  get profileImageSrc(): string {
+    if (this.currentUser?.imagen) {
+      // Si la imagen ya tiene el prefijo data:, la devolvemos tal como está
+      if (this.currentUser.imagen.startsWith('data:')) {
+        return this.currentUser.imagen;
+      }
+      // Si no tiene el prefijo, lo agregamos
+      return `data:image/jpeg;base64,${this.currentUser.imagen}`;
+    }
+    // Imagen por defecto si no hay imagen
+    return 'assets/default-profile.jpg';
   }
 
   toggleMenu(): void {
