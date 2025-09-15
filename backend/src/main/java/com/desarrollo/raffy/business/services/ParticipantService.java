@@ -30,7 +30,7 @@ public class ParticipantService {
         Events event = eventsRepository.findById(eventId)
         .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
-        List<Participant> participants = participantRepository.findByEventId(eventId);
+        List<Participant> participants = participantRepository.findParticipantsByEventId(eventId);
 
         if(participants.isEmpty()){
             throw new RuntimeException("No hay participantes en este sorteo");
@@ -48,6 +48,10 @@ public class ParticipantService {
         return participants.stream()
         .filter(p -> p.getPosition() > 0)
         .toList();
+    }
+
+    public List<Participant> findParticipantsByEventId(Long aEventId) {
+        return participantRepository.findParticipantsByEventId(aEventId);
     }
 
     @Transactional
