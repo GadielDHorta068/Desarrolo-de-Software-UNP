@@ -130,8 +130,8 @@ public class GiveawaysService {
             
             // Obtener la estrategia adecuada
             var strategy = winnerStrategyFactory.getStrategy(giveaway.getEventType());
-            //List<Participant> participants = participantRepository.findByGiveawayId(giveaway.getId());
-            //strategy.selectWinners(giveaway, participants);
+            List<Participant> participants = participantRepository.findParticipantsByEventId(id);
+            strategy.selectWinners(giveaway, participants);
             
             //Permitir cambios, ganadores con position > 0
             giveawaysRepository.save(giveaway);
