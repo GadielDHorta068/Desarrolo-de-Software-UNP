@@ -42,6 +42,11 @@ public  class Events {
     @Column(name = "id")
     private Long id;
 
+    @NotNull(message = "El creador del evento no debe estar vacío")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    private RegisteredUser creator;
+
     @NotBlank(message = "El titulo debe estar completo")
     @Size(min = 3, max = 50, message = "El titulo debe tener entre 3 y 50 caracteres")
     @Column(name = "title")
