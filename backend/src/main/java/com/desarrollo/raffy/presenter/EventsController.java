@@ -269,5 +269,13 @@ public class EventsController {
         return new ResponseEntity<>(giveaways, HttpStatus.OK);
     }
 
+    @GetMapping("/giveaways/search")
+    public ResponseEntity<List<Giveaways>> getGiveawayDateRange(
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
+        List<Giveaways> giveaways = giveawaysService.findByDateRangeGiveaways(startDate, endDate);
+        return new ResponseEntity<>(giveaways, HttpStatus.OK);
+    }
+
 
 }
