@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.model.User;
+import com.desarrollo.raffy.model.Events;
 
 @Repository
 
@@ -16,6 +18,8 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     @Query("SELECT p FROM Participant p WHERE p.event.id = :eventId")
     public List<Participant> findParticipantsByEventId(@Param("eventId") Long eventId);
+
+    public boolean existsByUserAndEvent(User aUser, Events aGiveaway);
 
     
 }
