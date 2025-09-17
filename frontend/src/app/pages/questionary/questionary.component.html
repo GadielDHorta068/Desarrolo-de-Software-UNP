@@ -14,6 +14,7 @@
                     type="text"
                     [(ngModel)]="guestUser.name"
                     name="name"
+                    required
                     class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-300"
                 />
             </div>
@@ -24,6 +25,7 @@
                     type="text"
                     [(ngModel)]="guestUser.surname"
                     name="surname"
+                    required
                     class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-300"
                 />
             </div>
@@ -31,9 +33,10 @@
             <div>
                 <label class="block text-sm font-medium">Email</label>
                 <input
-                    type="text"
+                    type="email"
                     [(ngModel)]="guestUser.email"
                     name="email"
+                    required
                     class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-300"
                 />
             </div>
