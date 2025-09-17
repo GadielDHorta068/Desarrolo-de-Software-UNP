@@ -3,6 +3,7 @@ package com.desarrollo.raffy.presenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -93,6 +94,16 @@ public class AuthController {
             return ResponseEntity.ok().body("Contraseña actualizada correctamente");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/users/{nickname}")
+    public ResponseEntity<UserResponse> getUserByNickname(@PathVariable String nickname) {
+        try {
+            UserResponse user = authService.getUserByNickname(nickname);
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }

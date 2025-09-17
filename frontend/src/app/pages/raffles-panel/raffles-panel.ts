@@ -18,7 +18,12 @@ export class RafflesPanel {
     { code: 'raffle', name: 'Rifa' },
     { code: 'roulette', name: 'Ruleta' },
   ];
-  // types = [];
+  // categorias de sorteo
+  categories: {code: string, name: string}[] = [
+    { code: 'sport', name: 'Deporte' },
+    { code: 'school', name: 'Escolar' },
+    { code: 'caring', name: 'Solidario/ A beneficio' }
+  ];
 
   constructor(){
     // FormGroup({
@@ -28,6 +33,10 @@ export class RafflesPanel {
     this.formPanel = new FormGroup({
       title: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
       drawType: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+      category: new FormControl({value: '', disabled: false}),
+      executionDate: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+      winners: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+      description: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
     });
   }
 

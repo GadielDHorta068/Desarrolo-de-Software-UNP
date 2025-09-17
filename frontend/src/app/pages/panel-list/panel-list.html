@@ -1,0 +1,35 @@
+<div class="container">
+    <div class="max-w-2xl">
+        <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">🎉 Lista de Sorteos</h2>
+    </div>
+
+    <!-- datos del creador -->
+    <div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mt-6">Datos del creador</h3>
+    </div>
+     <div class="flex items-center space-x-4 p-4 rounded shadow-md">
+        <!-- Imagen de perfil -->
+         <div class="w-[5%]">
+             <img src="assets/account_24.svg" class="w-[100%] invert">
+         </div>
+        <!-- Información del usuario -->
+        <div>
+            <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Username
+            </label>
+            <p class="text-sm text-gray-700">alex@email.com</p>
+        </div>
+    </div>
+
+    <!-- contenedor de los sorteos del operador -->
+    <div class="p-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            @for (event of events; track event.title) {
+                <app-draw-card [event]="event" [customBackground]="'bg-red-500'"></app-draw-card>
+            }
+            @empty {
+                <div class="col-span-3 text-center text-gray-500">No hay sorteos disponibles.</div>
+            }
+        </div>
+    </div>
+</div>

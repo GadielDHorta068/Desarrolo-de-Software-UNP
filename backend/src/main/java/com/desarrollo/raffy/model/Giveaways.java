@@ -12,7 +12,4 @@ public class Giveaways extends Events {
     public Giveaways() {
         super();
     }
-
-    //Cuantos ganadores va a tener el sorteo
-    private int winnersCount = 0;
 }

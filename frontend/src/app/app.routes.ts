@@ -36,8 +36,33 @@ export const routes: Routes = [
     path: 'panel',
     loadComponent: () => import('./pages/raffles-panel/raffles-panel').then(m => m.RafflesPanel),
     // canActivate: [GuestGuard],
-    title: 'Panel - Raffy',
+    title: 'Creación de sorteos - Raffy',
     // data: { animation: 'register' }
+  },
+  {
+    path: 'panel-list',
+    loadComponent: () => import('./pages/panel-list/panel-list').then(m => m.PanelList),
+    // canActivate: [GuestGuard],
+    title: 'Lista de sorteos - Raffy',
+    // data: { animation: 'register' }
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./pages/profile/profile').then(m => m.Profile),
+    canActivate: [AuthGuard],
+    title: 'Perfil - Raffy'
+  },
+  {
+    path: 'profile/:nickname',
+    loadComponent: () => import('./pages/profile/profile').then(m => m.Profile),
+    title: 'Perfil - Raffy'
+  },
+  {
+    path: 'event',
+    loadComponent: () => import('./pages/event/event').then(m => m.Event),
+    canActivate: [GuestGuard],
+    title: 'Eventos - Raffy',
+    data: {animation: 'event'}
   },
   {
     path: '**',
