@@ -26,6 +26,7 @@ import java.util.List;
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/events")
@@ -234,7 +235,7 @@ public class EventsController {
 
     
     @PostMapping("/giveaways")
-    public ResponseEntity<Giveaways> createGiveaway(@RequestBody Giveaways giveaway, RegisteredUser creator) {
+    public ResponseEntity<Giveaways> createGiveaway(@RequestBody Giveaways giveaway, @AuthenticationPrincipal RegisteredUser creator) {
         Giveaways giveaways = giveawaysService.create(giveaway, creator);
         return new ResponseEntity<>(giveaways, HttpStatus.CREATED);
     }
