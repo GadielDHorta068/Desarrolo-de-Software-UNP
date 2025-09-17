@@ -45,21 +45,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         
         jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt);
+        
+        // Validar que el token no esté vacío y tenga formato JWT válido
+        if (jwt.trim().isEmpty() || jwt.split("\\.").length != 3) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
+        try {
+            userEmail = jwtService.extractUsername(jwt);
+        } catch (Exception e) {
+            // Si hay error al extraer el username, continuar sin autenticar
+            filterChain.doFilter(request, response);
+            return;
+        }
         
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            try {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (Exception e) {
+                // Si hay error en la validación del token, continuar sin autenticar
+                // Esto evita que errores de JWT rompan el flujo de la aplicación
             }
         }
         filterChain.doFilter(request, response);

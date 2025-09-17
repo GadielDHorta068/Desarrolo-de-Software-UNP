@@ -11,6 +11,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Lob;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -35,7 +36,8 @@ public class RegisteredUser extends User implements UserDetails {
     @Column(name = "user_type")
     private UserType userType;
     
-    private String imagen;
+    @Column(name = "imagen", columnDefinition = "bytea")
+    private byte[] imagen;
 
     @Column(nullable = false)
     private boolean enabled = true;

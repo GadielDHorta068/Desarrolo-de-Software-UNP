@@ -95,7 +95,8 @@ export class Register implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = 'Error al registrar usuario. Por favor, intenta de nuevo.';
+          // Usar el mensaje específico del backend si está disponible
+          this.errorMessage = error.userMessage || 'Error al registrar usuario. Por favor, intenta de nuevo.';
           console.error('Register error:', error);
         }
       });

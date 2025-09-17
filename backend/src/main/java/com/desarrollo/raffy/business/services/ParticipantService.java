@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.ParticipantRepository;
@@ -29,7 +30,7 @@ public class ParticipantService {
         Events event = eventsRepository.findById(eventId)
         .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
-        List<Participant> participants = participantRepository.findByEventId(eventId);
+        List<Participant> participants = participantRepository.findParticipantsByEventId(eventId);
 
         if(participants.isEmpty()){
             throw new RuntimeException("No hay participantes en este sorteo");
@@ -49,6 +50,11 @@ public class ParticipantService {
         .toList();
     }
 
+    public List<Participant> findParticipantsByEventId(Long aEventId) {
+        return participantRepository.findParticipantsByEventId(aEventId);
+    }
+
+    @Transactional
     public Participant save(Participant aParticipant){
         return participantRepository.save(aParticipant);
     }

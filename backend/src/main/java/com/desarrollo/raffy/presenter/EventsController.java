@@ -13,9 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
+import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.business.services.EventsService;
+import com.desarrollo.raffy.business.services.GiveawaysService;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -23,12 +26,16 @@ import java.util.List;
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/events")
 public class EventsController {
     @Autowired
     private EventsService eventsService;
+
+    @Autowired
+    private GiveawaysService giveawaysService;
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody Events events) {
@@ -43,12 +50,6 @@ public class EventsController {
         } else {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
         }
-    }
-
-    @PostMapping("/giveaways")
-    public ResponseEntity<Giveaways> createGiveaway(@RequestBody Giveaways giveaway) {
-        Giveaways giveaways = eventsService.create(giveaway);
-        return new ResponseEntity<>(giveaways, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -231,5 +232,51 @@ public class EventsController {
         List<Events> events = eventsService.getEventsByParticipantId(userId);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
+
+    
+    @PostMapping("/giveaways")
+    public ResponseEntity<Giveaways> createGiveaway(@RequestBody Giveaways giveaway, @AuthenticationPrincipal RegisteredUser creator) {
+        Giveaways giveaways = giveawaysService.create(giveaway, creator);
+        return new ResponseEntity<>(giveaways, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/giveaways")
+    public ResponseEntity<Giveaways> updateGiveaway(@Valid @RequestBody Giveaways giveaways ){
+        Giveaways updatedGiveaway = giveawaysService.update(giveaways);
+        return new ResponseEntity<>(updatedGiveaway, HttpStatus.OK);
+    }
+
+    @PutMapping("/giveaways/finalize/{id}")
+    public ResponseEntity<Giveaways> finalizedGiveaway(@PathVariable Long id) {
+        giveawaysService.finalizedGiveaway(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/giveaways/category/{categoryId}")
+    public ResponseEntity<List<Giveaways>> getGivawaysCategoryId(@PathVariable Long categoryId){
+        List<Giveaways> giveaways = giveawaysService.findByGiveawaysCategoryId(categoryId);
+        return new ResponseEntity<>(giveaways, HttpStatus.OK);
+    }
+
+    @GetMapping("/giveaways/active")
+    public ResponseEntity<List<Giveaways>> getActiveGiveaways(){
+        List<Giveaways> giveaways = giveawaysService.findByActiGiveaways();
+        return new ResponseEntity<>(giveaways, HttpStatus.OK);
+    }
+
+    @GetMapping("/giveaways/status/{statusEvent}")
+    public ResponseEntity<List<Giveaways>> getGiveawayForStatus(StatusEvent statusEvent){
+        List<Giveaways> giveaways = giveawaysService.findByStatusGiveaways(statusEvent);
+        return new ResponseEntity<>(giveaways, HttpStatus.OK);
+    }
+
+    @GetMapping("/giveaways/search")
+    public ResponseEntity<List<Giveaways>> getGiveawayDateRange(
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
+        List<Giveaways> giveaways = giveawaysService.findByDateRangeGiveaways(startDate, endDate);
+        return new ResponseEntity<>(giveaways, HttpStatus.OK);
+    }
+
 
 }

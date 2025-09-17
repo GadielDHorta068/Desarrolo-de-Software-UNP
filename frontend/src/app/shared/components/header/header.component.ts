@@ -50,6 +50,19 @@ export class HeaderComponent implements OnInit {
     });
   }
 
+  get profileImageSrc(): string {
+    if (this.currentUser?.imagen) {
+      // Si la imagen ya tiene el prefijo data:, la devolvemos tal como está
+      if (this.currentUser.imagen.startsWith('data:')) {
+        return this.currentUser.imagen;
+      }
+      // Si no tiene el prefijo, lo agregamos
+      return `data:image/jpeg;base64,${this.currentUser.imagen}`;
+    }
+    // Imagen por defecto si no hay imagen
+    return 'assets/default-profile.jpg';
+  }
+
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
   }

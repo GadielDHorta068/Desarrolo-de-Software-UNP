@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.UserType;
+import com.desarrollo.raffy.util.ImageUtils;
 
 @Service
 public class RegisteredUsersService {
@@ -30,6 +31,12 @@ public class RegisteredUsersService {
                 registeredUserRepository.existsByNickname(registeredUsers.getNickname())) {
                 throw new IllegalArgumentException("El usuario con el mismo email o nickname ya existe.");
             }
+            
+            // Hashear la contraseña si no está hasheada
+            if (registeredUsers.getPassword() != null && !registeredUsers.getPassword().isEmpty()) {
+                registeredUsers.setPassword(passwordEncoder.encode(registeredUsers.getPassword()));
+            }
+            
             return registeredUserRepository.save(registeredUsers);
         } catch(Exception e){
             throw new RuntimeException("Error al crear el usuario: " + e.getMessage());

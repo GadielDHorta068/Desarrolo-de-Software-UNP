@@ -68,6 +68,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/events/participant/**").permitAll()
+                        .requestMatchers("/api/images/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

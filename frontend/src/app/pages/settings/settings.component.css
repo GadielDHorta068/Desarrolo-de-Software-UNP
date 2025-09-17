@@ -50,6 +50,47 @@
   background: linear-gradient(135deg, #fef2f2, #fee2e2);
 }
 
+/* Estilos para el modal de recorte de imagen */
+.image-cropper-modal {
+  backdrop-filter: blur(4px);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+.image-cropper-content {
+  animation: modalSlideIn 0.3s ease-out;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Estilos para el componente image-cropper */
+::ng-deep .ngx-ic-main {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+::ng-deep .ngx-ic-overlay {
+  border-radius: 8px;
+}
+
 /* Hover effects para los tabs */
 .tab-button:hover {
   transform: translateY(-1px);

@@ -1,0 +1,258 @@
+/* Estilos específicos del componente Home */
+
+/* Variables CSS para tema del sistema */
+:host {
+  --primary-color: theme('colors.primary');
+  --secondary-color: theme('colors.secondary');
+  --accent-color: theme('colors.accent');
+  --text-primary: theme('colors.gray.800');
+  --text-secondary: theme('colors.gray.600');
+  --bg-primary: theme('colors.white');
+  --bg-secondary: theme('colors.gray.50');
+  --border-color: theme('colors.gray.200');
+}
+
+/* Tema oscuro automático */
+@media (prefers-color-scheme: dark) {
+  :host {
+    --text-primary: theme('colors.white');
+    --text-secondary: theme('colors.gray.300');
+    --bg-primary: theme('colors.gray.800');
+    --bg-secondary: theme('colors.gray.900');
+    --border-color: theme('colors.gray.700');
+  }
+}
+
+/* Estilos para el gradiente de texto */
+.text-gradient {
+  @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+}
+
+/* Animaciones personalizadas */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+  }
+}
+
+/* Efectos hover mejorados */
+.card {
+  @apply bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  @apply shadow-2xl;
+  transform: translateY(-5px);
+}
+
+/* Botones con efectos mejorados */
+.btn-primary {
+  @apply bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-secondary {
+  @apply border-2 border-white text-white hover:bg-white hover:text-primary font-bold py-3 px-6 rounded-lg;
+  transition: all 0.3s ease;
+}
+
+/* Efectos de parallax suave */
+.hero-bg {
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Animación de la barra de progreso */
+.progress-bar {
+  animation: fillProgress 2s ease-in-out;
+}
+
+@keyframes fillProgress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 84.7%;
+  }
+}
+
+/* Efectos de glassmorphism */
+.glass-card {
+  @apply bg-white/10 backdrop-blur-lg border border-white/20;
+  backdrop-filter: blur(10px);
+}
+
+/* Responsividad mejorada */
+@media (max-width: 640px) {
+  .hero-title {
+    @apply text-4xl;
+  }
+  
+  .hero-subtitle {
+    @apply text-lg;
+  }
+  
+  .section-title {
+    @apply text-3xl;
+  }
+  
+  .card {
+    @apply p-4;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    @apply py-3 px-4 text-base;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-features {
+    @apply grid-cols-1 gap-6;
+  }
+  
+  .grid-hero {
+    @apply grid-cols-1 gap-8;
+  }
+  
+  .flex-buttons {
+    @apply flex-col space-y-4;
+  }
+}
+
+@media (max-width: 1024px) {
+  .grid-features {
+    @apply grid-cols-2;
+  }
+}
+
+/* Accesibilidad mejorada */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus states mejorados */
+.btn-primary:focus,
+.btn-secondary:focus {
+  @apply outline-none ring-4 ring-primary/50;
+}
+
+/* Estados de carga */
+.loading {
+  @apply opacity-50 pointer-events-none;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Efectos de scroll suave */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mejoras para dispositivos táctiles */
+@media (hover: none) and (pointer: coarse) {
+  .card:hover {
+    transform: none;
+  }
+  
+  .btn-primary:hover,
+  .btn-secondary:hover {
+    transform: none;
+  }
+}
+
+/* Estilos para modo de alto contraste */
+@media (prefers-contrast: high) {
+  .card {
+    @apply border-2 border-gray-800 dark:border-white;
+  }
+  
+  .text-gradient {
+    @apply text-primary;
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+  }
+}
+
+/* Optimizaciones de rendimiento */
+.card,
+.btn-primary,
+.btn-secondary {
+  will-change: transform;
+}
+
+/* Estilos para impresión */
+@media print {
+  .hero-section,
+  .cta-section {
+    @apply bg-white text-black;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    @apply border border-black text-black bg-transparent;
+  }
+  
+  .text-gradient {
+    @apply text-black;
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+  }
+}
