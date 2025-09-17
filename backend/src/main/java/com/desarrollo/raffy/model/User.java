@@ -27,15 +27,20 @@ public abstract class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    @NotBlank(message = "El nombre es obligatorio")
     private String name;
 
+    @Column(nullable = false)
+    @NotBlank(message = "El apellido es obligatorio")
     private String surname;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     @NotBlank(message = "El campo email es obligatorio")
     @Email(message = "El Email debe tener un formato valido")
     private String email;
 
+    @Column(nullable = true)
     private String cellphone;
     
     public User() {
