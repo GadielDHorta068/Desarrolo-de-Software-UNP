@@ -11,7 +11,9 @@ import com.desarrollo.raffy.business.repository.ParticipantRepository;
 import com.desarrollo.raffy.business.utils.WinnerSelectionStrategy;
 import com.desarrollo.raffy.business.utils.WinnerStrategyFactory;
 import com.desarrollo.raffy.model.Events;
+import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.model.User;
 
 @Service
 
@@ -55,8 +57,15 @@ public class ParticipantService {
     }
 
     @Transactional
-    public Participant save(Participant aParticipant){
-        return participantRepository.save(aParticipant);
+    public Participant registerToGiveaway(User aUser, Events aGiveaway) {
+        if (!(aGiveaway instanceof Giveaways)) {
+            throw new IllegalArgumentException("Este metodo solo para registrar usuarios a sorteos");
+        }
+        if (participantRepository.existsByUserAndEvent(aUser, aGiveaway)) {
+            throw new IllegalArgumentException("Ya estas inscripto a este sorteo");
+        }
+        Participant participantToSave = new Participant(aUser, (Giveaways) aGiveaway);
+        return participantRepository.save(participantToSave);
     }
     
 }
