@@ -19,13 +19,13 @@ import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.ParticipantService;
 import com.desarrollo.raffy.business.services.UserService;
 import com.desarrollo.raffy.model.Events;
-import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.GuestUser;
-import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.User;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("participant")
+@RequestMapping("/events")
 
 public class ParticipantPresenter {
     
@@ -39,26 +39,50 @@ public class ParticipantPresenter {
     private EventsService eventService; 
 
 
-    @PostMapping()
-    public ResponseEntity<Object> create(
-        @RequestBody GuestUser aGuestUser,
-        @RequestParam Long aEventId) {
+    @PostMapping("/{eventId}/participants")
+    public ResponseEntity<Object> registerParticipantToGiveaway(
+        @Valid @RequestBody GuestUser aGuestUser,
+        @PathVariable("eventId") Long aEventId) {
             if (aGuestUser.getId() != 0) {
                 return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body("Esta intentando crear un guest user. Este no puede tener un id definido.");
             }
 
-            User savedGuestUser = userService.save(aGuestUser);
             Events eventToParticipate = eventService.getById(aEventId);
-            if (eventToParticipate != null) {
-                Participant participantToSave = new Participant(savedGuestUser, (Giveaways)eventToParticipate);
+            if (eventToParticipate == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("El evento con id " + aEventId + " no existe");
+            }
+
+            User savedGuestUser;
+            User userFromDb = userService.findByEmail(aGuestUser.getEmail());
+            
+            // chequea si ya existe el usuario en la base de datos
+            if (userFromDb == null) {
+                // si el usuario no existe, lo guarda
+                savedGuestUser = userService.save(aGuestUser);
+            }
+            else {
+                // si el usuario existe lo actualizo
+                userFromDb.setName(aGuestUser.getName());
+                userFromDb.setSurname(aGuestUser.getSurname());
+                userFromDb.setCellphone(aGuestUser.getCellphone());
+                
+                savedGuestUser = userService.save(userFromDb);
+            }
+            try {
+                // intento guardar la participacion del usuario
+                
                 return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(participantService.save(participantToSave));
+                    .body(participantService.registerToGiveaway(savedGuestUser, eventToParticipate));    
+            } catch (Exception e) {
+                return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(e.getMessage());
             }
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body("El evento con id" + aEventId + " no existe"); // Cambiar
+            
     }
+
 }
