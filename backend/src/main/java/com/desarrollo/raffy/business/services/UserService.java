@@ -23,6 +23,10 @@ public class UserService {
         return result;
     }
 
+    public User findByEmail(String aNemail) {
+        return userRepository.findByEmail(aNemail).orElse(null);
+    }
+
     @Transactional
     public User save(User aUser) {
         return userRepository.save(aUser);
