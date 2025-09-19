@@ -19,7 +19,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     @Query("SELECT p FROM Participant p WHERE p.event.id = :eventId")
     public List<Participant> findParticipantsByEventId(@Param("eventId") Long eventId);
 
-    public boolean existsByUserAndEvent(User aUser, Events aGiveaway);
+    public boolean existsByParticipantAndEvent(User aUser, Events aGiveaway);
 
     
 }

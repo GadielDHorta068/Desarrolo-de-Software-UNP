@@ -61,7 +61,7 @@ public class ParticipantService {
         if (!(aGiveaway instanceof Giveaways)) {
             throw new IllegalArgumentException("Este metodo solo para registrar usuarios a sorteos");
         }
-        if (participantRepository.existsByUserAndEvent(aUser, aGiveaway)) {
+        if (participantRepository.existsByParticipantAndEvent(aUser, aGiveaway)) {
             throw new IllegalArgumentException("Ya estas inscripto a este sorteo");
         }
         Participant participantToSave = new Participant(aUser, (Giveaways) aGiveaway);
