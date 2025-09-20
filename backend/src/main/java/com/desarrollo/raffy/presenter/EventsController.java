@@ -51,9 +51,9 @@ public class EventsController {
     @PostMapping("/create/giveaway")
     public ResponseEntity<?> createGiveaway(
         @Valid @RequestBody Giveaways giveaways, 
-        @AuthenticationPrincipal RegisteredUser creator) {
+        Long idUser) {
         
-        Giveaways created = eventsService.create(giveaways, creator);
+        Giveaways created = eventsService.create(giveaways, idUser);
         if (created != null) {
             return new ResponseEntity<>(created, HttpStatus.CREATED);
         } else {
