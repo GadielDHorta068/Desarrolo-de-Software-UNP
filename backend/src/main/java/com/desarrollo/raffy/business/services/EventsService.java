@@ -1,33 +1,52 @@
 package com.desarrollo.raffy.business.services;
 
 import com.desarrollo.raffy.model.Events;
+import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.business.repository.EventsRepository;
+import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
+import java.util.Optional;
 import java.time.LocalDate;
 //Devolver los errores correspondientes
 
 @Service
 public class EventsService {
 
-    public <T extends Events> T create(T event) {
+    @Autowired
+    private EventsRepository eventsRepository;
+
+    @Autowired
+    private RegisteredUserRepository registeredUserRepository;
+
+    public <T extends Events> T create(T event, Long idUser) {
+        // Validar que no exista un evento con el mismo título
+        if(eventsRepository.existsByTitle(event.getTitle())){
+            throw new IllegalArgumentException("Ya existe un sorteo con el título: "+ event.getTitle());
+        }
+        Optional<RegisteredUser> creator = registeredUserRepository.findById(idUser);
+        event.setCreator(creator.get());
+        event.setStatusEvent(StatusEvent.OPEN);
+        event.setStartDate(LocalDate.now());
+
         return eventsRepository.save(event);
     }
 
-    public Events getById(Long id) {
+    public <T extends Events>T update(Long id, T event, RegisteredUser creator) {
         try {
-            return eventsRepository.findById(id).orElse(null);
+            return eventsRepository.save(event);
         } catch (Exception e) {
             return null;
         }
     }
 
-    public Events update(Events events) {
+    public Events getById(Long id) {
         try {
-            return eventsRepository.save(events);
+            return eventsRepository.findById(id).orElse(null);
         } catch (Exception e) {
             return null;
         }
@@ -142,6 +161,4 @@ public class EventsService {
         }
     }
 
-    @Autowired
-    private EventsRepository eventsRepository;
 }

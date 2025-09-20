@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
+import { environment } from '../../environments/environment';
 import { GuestUser } from '../pages/questionary/guestUser';
 
 @Injectable({
@@ -10,14 +11,16 @@ import { GuestUser } from '../pages/questionary/guestUser';
 
 export class QuestionaryService {
 
-    private questionaryUrl = 'rest/user'
+    private API_URL = `${environment.apiUrl}/events`;
 
     constructor (
         private http: HttpClient
     ) {}
 
     save(aGuestUser: GuestUser, aEventId: number): Observable<any> {
-        return this.http.post<any>(this.questionaryUrl, { aGuestUser, aEventId });
+        return this.http.post<any>(
+            `${this.API_URL}/${aEventId}/participants`,
+            aGuestUser);
     }
 
 }

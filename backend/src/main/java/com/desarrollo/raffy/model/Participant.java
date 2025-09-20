@@ -18,9 +18,11 @@ import lombok.Setter;
         @UniqueConstraint(columnNames = {"user_id", "event_id"})
     }
 )
+
 @Setter
 @Getter
 @NoArgsConstructor
+
 public class Participant {
 
     @Id
