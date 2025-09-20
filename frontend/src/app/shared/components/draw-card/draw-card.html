@@ -1,10 +1,37 @@
-<div class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition" [ngClass]="customBackground()">
-    <h2 class="text-lg font-semibold text-blue-600 mb-2">{{event?.title}}</h2>
-    <!-- <p class="text-sm text-gray-700 mb-1"><b>Premio:</b> Tablet Samsung</p> -->
-    <p class="text-sm text-gray-700 mb-1"><b>Fecha de realizacion:</b>{{event?.endDate}}</p>
-    <p class="text-sm text-gray-700 mb-3"><b>Estado:</b>{{event?.statusEvent}}</p>
-    <button class="mt-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm">Ver detalles</button>
+<div class="shadow-md rounded-lg p-4 hover:shadow-lg transition" [ngClass]="customBackground()">
+    <div class="flex gap-4">
+        <img style="width: 30px; height: 30px;" [src]="event?.eventType | handleIconTypePipe" alt="">
+        <h2 class="text-lg font-semibold text-emerald-600 mb-2 pl-1">{{event?.title}}</h2>
+    </div>
+    <div class="flex">
+        <!-- columna de datos -->
+        <div class="basis-1/2">
+            <div class="block">
+                <p class="text-sm text-gray-200"><b>Dia de realizacion</b></p>
+                <p class="text-sm text-gray-400 mb-1">{{event?.endDate}}</p>
+            </div>
+            <div class="block">
+                <p class="text-sm text-gray-200"><b>Estado</b></p>
+                <p class="text-sm text-gray-400 mb-1">{{event?.statusEvent | handleStatusPipe}}</p>
+            </div>
+        </div>
+        <!-- columna de imagen -->
+        <div class="basis-1/2">
+            <!-- <img src="" alt=""> -->
+            <img src="assets/account_24.svg" class="mx-auto min-w-[100px]">
+        </div>
+    </div>
+
+    <!-- botones de accion -->
+    <div class="flex mt-2 justify-center gap-[4%]">
+        <!-- <button class="mt-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm" (click)="modalEventInfo.open()">Ver detalles</button>
+        <button class="mt-auto bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-sm">Editar</button> -->
+        <button class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" (click)="modalEventInfo.open()">Ver detalles</button>
+        <button class="bg-blue-600 dark:bg-blue-300 hover:bg-blue-500 dark:hover:bg-blue-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" (click)="redirectEdit()">Editar</button>
+    </div>
 </div>
+
+<app-modal-draw-info [dataEvent]="event" #modalEventInfo></app-modal-draw-info>
 
 <!-- <div class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition">
     <h2 class="text-lg font-semibold text-blue-600 mb-2">Sorteo #3</h2>

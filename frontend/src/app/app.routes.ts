@@ -40,6 +40,13 @@ export const routes: Routes = [
     // data: { animation: 'register' }
   },
   {
+    path: 'event-edit',
+    loadComponent: () => import('./pages/edit-event/edit-event').then(m => m.EditEvent),
+    // canActivate: [GuestGuard],
+    title: 'Creación de sorteos - Raffy',
+    // data: { animation: 'register' }
+  },
+  {
     path: 'panel-list',
     loadComponent: () => import('./pages/panel-list/panel-list').then(m => m.PanelList),
     // canActivate: [GuestGuard],
