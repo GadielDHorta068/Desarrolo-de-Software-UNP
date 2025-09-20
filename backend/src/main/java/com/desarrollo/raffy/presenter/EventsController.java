@@ -48,16 +48,14 @@ public class EventsController {
     private ParticipantService participantService;
 
 
-    @PostMapping
-    public ResponseEntity<?> create(@Valid @RequestBody Events events) {
-        // Validar que no exista un evento con el mismo título
-        if (eventsService.existsByTitle(events.getTitle())) {
-            return new ResponseEntity<>("Ya existe un evento con este título", HttpStatus.CONFLICT);
-        }
+    @PostMapping("/create/giveaway")
+    public ResponseEntity<?> createGiveaway(
+        @Valid @RequestBody Giveaways giveaways, 
+        @AuthenticationPrincipal RegisteredUser creator) {
         
-        Events createdEvent = eventsService.create(events);
-        if (createdEvent != null) {
-            return new ResponseEntity<>(createdEvent, HttpStatus.CREATED);
+        Giveaways created = eventsService.create(giveaways, creator);
+        if (created != null) {
+            return new ResponseEntity<>(created, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
         }
@@ -76,7 +74,7 @@ public class EventsController {
             return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
         }
     }
-
+/* 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable @NotNull @Positive Long id, @Valid @RequestBody Events events) {
         if (id <= 0) {
@@ -101,7 +99,7 @@ public class EventsController {
         } else {
             return new ResponseEntity<>("Error al actualizar el evento", HttpStatus.BAD_REQUEST);
         }
-    }
+    } */
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable @NotNull @Positive Long id) {
@@ -242,13 +240,6 @@ public class EventsController {
         
         List<Events> events = eventsService.getEventsByParticipantId(userId);
         return new ResponseEntity<>(events, HttpStatus.OK);
-    }
-
-    
-    @PostMapping("/giveaways")
-    public ResponseEntity<Giveaways> createGiveaway(@RequestBody Giveaways giveaway, @AuthenticationPrincipal RegisteredUser creator) {
-        Giveaways giveaways = giveawaysService.create(giveaway, creator);
-        return new ResponseEntity<>(giveaways, HttpStatus.CREATED);
     }
 
     @PutMapping("/giveaways")

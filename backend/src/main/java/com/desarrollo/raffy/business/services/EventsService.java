@@ -1,6 +1,7 @@
 package com.desarrollo.raffy.business.services;
 
 import com.desarrollo.raffy.model.Events;
+import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.business.repository.EventsRepository;
@@ -13,21 +14,33 @@ import java.time.LocalDate;
 @Service
 public class EventsService {
 
-    public <T extends Events> T create(T event) {
+    @Autowired
+    private EventsRepository eventsRepository;
+
+    public <T extends Events> T create(T event, RegisteredUser creator) {
+        // Validar que no exista un evento con el mismo título
+        if(eventsRepository.existsByTitle(event.getTitle())){
+            throw new IllegalArgumentException("Ya existe un sorteo con el título: "+ event.getTitle());
+        }
+
+        event.setCreator(creator);
+        event.setStatusEvent(StatusEvent.OPEN);
+        event.setStartDate(LocalDate.now());
+
         return eventsRepository.save(event);
     }
 
-    public Events getById(Long id) {
+    public <T extends Events>T update(Long id, T event, RegisteredUser creator) {
         try {
-            return eventsRepository.findById(id).orElse(null);
+            return eventsRepository.save(event);
         } catch (Exception e) {
             return null;
         }
     }
 
-    public Events update(Events events) {
+    public Events getById(Long id) {
         try {
-            return eventsRepository.save(events);
+            return eventsRepository.findById(id).orElse(null);
         } catch (Exception e) {
             return null;
         }
@@ -142,6 +155,4 @@ public class EventsService {
         }
     }
 
-    @Autowired
-    private EventsRepository eventsRepository;
 }
