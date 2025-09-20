@@ -26,11 +26,11 @@ public class CategoriesService {
 
     
     public Categories findById(Long id){
-        Optional<Categories> optionalCategory = categoriesRepository.findById(id);
-        if(optionalCategory.isEmpty()){
+        Optional<Categories> categories = categoriesRepository.findById(id);
+        if(categories.isEmpty()){
             throw new RuntimeException("Categoría no encontrada");
         }
-        return optionalCategory.get();
+        return categories.get();
     }
 
     
