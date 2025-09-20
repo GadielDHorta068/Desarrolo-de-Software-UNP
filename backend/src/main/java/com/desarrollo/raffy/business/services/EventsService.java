@@ -5,9 +5,12 @@ import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.business.repository.EventsRepository;
+import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
+import java.util.Optional;
 import java.time.LocalDate;
 //Devolver los errores correspondientes
 
@@ -17,13 +20,16 @@ public class EventsService {
     @Autowired
     private EventsRepository eventsRepository;
 
-    public <T extends Events> T create(T event, RegisteredUser creator) {
+    @Autowired
+    private RegisteredUserRepository registeredUserRepository;
+
+    public <T extends Events> T create(T event, Long idUser) {
         // Validar que no exista un evento con el mismo título
         if(eventsRepository.existsByTitle(event.getTitle())){
             throw new IllegalArgumentException("Ya existe un sorteo con el título: "+ event.getTitle());
         }
-
-        event.setCreator(creator);
+        Optional<RegisteredUser> creator = registeredUserRepository.findById(idUser);
+        event.setCreator(creator.get());
         event.setStatusEvent(StatusEvent.OPEN);
         event.setStartDate(LocalDate.now());
 
