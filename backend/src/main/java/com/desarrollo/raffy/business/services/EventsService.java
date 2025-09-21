@@ -29,10 +29,11 @@ public class EventsService {
             throw new IllegalArgumentException("Ya existe un sorteo con el título: "+ event.getTitle());
         }
         Optional<RegisteredUser> creator = registeredUserRepository.findById(idUser);
+        System.out.println("CREADOR DE GIVEAWAYS: " + creator.toString());
         event.setCreator(creator.get());
         event.setStatusEvent(StatusEvent.OPEN);
         event.setStartDate(LocalDate.now());
-
+        System.out.println("EVENTO GIVEAWAYS: " + event.toString());
         return eventsRepository.save(event);
     }
 

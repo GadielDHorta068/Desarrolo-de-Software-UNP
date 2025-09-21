@@ -16,7 +16,6 @@ import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.User;
 
 @Service
-
 public class ParticipantService {
 
     @Autowired

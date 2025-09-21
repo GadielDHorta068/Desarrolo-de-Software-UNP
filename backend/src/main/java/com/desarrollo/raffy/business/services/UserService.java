@@ -11,11 +11,10 @@ import com.desarrollo.raffy.business.repository.UserRepository;
 import com.desarrollo.raffy.model.User;
 
 @Service
-
 public class UserService {
     
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
     
     public List<User> findAll() {
         List<User> result = new ArrayList<>();
