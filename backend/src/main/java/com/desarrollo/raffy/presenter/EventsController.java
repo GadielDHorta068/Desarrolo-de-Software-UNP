@@ -77,7 +77,7 @@ public class EventsController {
         }
     }
 /* 
-    @PutMapping("/{id}")
+    @PutMapping("update/{id}")
     public ResponseEntity<?> update(@PathVariable @NotNull @Positive Long id, @Valid @RequestBody Events events) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
@@ -103,7 +103,7 @@ public class EventsController {
         }
     } */
 
-    @DeleteMapping("/id/{id}")
+    @DeleteMapping("delete/id/{id}")
     public ResponseEntity<?> delete(@PathVariable @NotNull @Positive Long id) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
