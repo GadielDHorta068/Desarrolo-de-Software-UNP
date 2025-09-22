@@ -5,6 +5,7 @@ import { HandleStatusPipe } from '../../../pipes/handle-status.pipe';
 import { HandleIconTypePipe } from '../../../pipes/handle-icon-type.pipe';
 import { ModalDrawInfo } from '../modal-draw-info/modal-draw-info';
 import { Router } from '@angular/router';
+import { AdminEventService } from '../../../services/admin/adminEvent.service';
 
 @Component({
   selector: 'app-draw-card',
@@ -17,10 +18,19 @@ export class DrawCard {
   @Input() event!: Events|null;
   customBackground = input<string>('bg-white');
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private adminEventService: AdminEventService
+  ){}
 
   public redirectEdit() {
+    this.adminEventService.setSelectedEvent(this.event);
     this.router.navigate(['/event-edit']);
+  }
+
+  public onIncript(){
+    console.log("Presiona incribirse!");
+    alert("Se apreto INCRIBIRME");
   }
   
 }
