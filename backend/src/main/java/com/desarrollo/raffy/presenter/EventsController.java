@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +13,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.GuestUser;
-import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.business.services.EventsService;
-import com.desarrollo.raffy.business.services.GiveawaysService;
 import com.desarrollo.raffy.business.services.ParticipantService;
 import com.desarrollo.raffy.business.services.UserService;
 
@@ -30,7 +27,6 @@ import java.util.List;
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/events")
@@ -38,8 +34,8 @@ public class EventsController {
     @Autowired
     private EventsService eventsService;
 
-    @Autowired
-    private GiveawaysService giveawaysService;
+    /* @Autowired
+    private GiveawaysService giveawaysService; */
 
     @Autowired
     private UserService userService;
@@ -48,12 +44,12 @@ public class EventsController {
     private ParticipantService participantService;
 
 
-    @PostMapping("/create/giveaway")
+    @PostMapping("/create/giveaway/{idUser}")
     public ResponseEntity<?> createGiveaway(
-        @Valid @RequestBody Giveaways giveaways, 
-        @AuthenticationPrincipal RegisteredUser creator) {
+        @RequestBody Giveaways giveaways, 
+        @PathVariable("idUser") Long idUser) {
         
-        Giveaways created = eventsService.create(giveaways, creator);
+        Giveaways created = eventsService.create(giveaways, idUser);
         if (created != null) {
             return new ResponseEntity<>(created, HttpStatus.CREATED);
         } else {
@@ -61,7 +57,13 @@ public class EventsController {
         }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
+    }
+
+
+    @GetMapping("/id/{id}")
     public ResponseEntity<?> getById(@PathVariable @NotNull @Positive Long id) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
@@ -75,7 +77,7 @@ public class EventsController {
         }
     }
 /* 
-    @PutMapping("/{id}")
+    @PutMapping("update/{id}")
     public ResponseEntity<?> update(@PathVariable @NotNull @Positive Long id, @Valid @RequestBody Events events) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
@@ -101,7 +103,7 @@ public class EventsController {
         }
     } */
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("delete/id/{id}")
     public ResponseEntity<?> delete(@PathVariable @NotNull @Positive Long id) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
@@ -242,7 +244,7 @@ public class EventsController {
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
-    @PutMapping("/giveaways")
+   /*  @PutMapping("/giveaways")
     public ResponseEntity<Giveaways> updateGiveaway(@Valid @RequestBody Giveaways giveaways ){
         Giveaways updatedGiveaway = giveawaysService.update(giveaways);
         return new ResponseEntity<>(updatedGiveaway, HttpStatus.OK);
@@ -278,9 +280,9 @@ public class EventsController {
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
         List<Giveaways> giveaways = giveawaysService.findByDateRangeGiveaways(startDate, endDate);
         return new ResponseEntity<>(giveaways, HttpStatus.OK);
-    }
+    } */
 
-    @PostMapping("/{eventId}/participants")
+    @PostMapping("/id/{eventId}/participants")
     public ResponseEntity<Object> registerParticipantToGiveaway(
         @Valid @RequestBody GuestUser aGuestUser,
         @PathVariable("eventId") Long aEventId) {

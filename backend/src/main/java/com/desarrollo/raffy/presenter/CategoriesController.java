@@ -32,7 +32,7 @@ public class CategoriesController {
             return new ResponseEntity<>(saveCategories, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<?> findById(@PathVariable @NotNull @Positive Long id){
         if (id <= 0) {
             return new ResponseEntity<>("No se encontro la categoria", HttpStatus.BAD_REQUEST);

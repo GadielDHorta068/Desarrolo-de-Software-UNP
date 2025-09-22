@@ -58,7 +58,7 @@ public  class Events {
     private String description;
 
     @NotNull(message = "Se debe tener fecha de inicio")
-    @Future(message = "La fecha de inicio debe ser futura")
+    //@Future(message = "La fecha de inicio debe ser futura")
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
@@ -103,6 +103,7 @@ public  class Events {
     }
 
     //Cuantos ganadores va a tener el sorteo
-    private int winnersCount = 0;
+    @Column(name = "winners_count", nullable = false)
+    private int winnersCount;
 
 }
