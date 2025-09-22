@@ -13,7 +13,7 @@ export enum EventTypes {
 
 export enum Category {
     SOLIDARIO = 'Solidario',
-    DEPORTE = 'deportivo'
+    DEPORTE = 'Deportivo'
 }
 
 export interface Events {
