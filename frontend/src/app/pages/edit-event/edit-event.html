@@ -1,6 +1,6 @@
 <div class="container">
     <div class="max-w-2xl">
-        <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">Creación de eventos</h2>
+        <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">Edición de evento</h2>
     </div>
 
     <!-- datos del creador -->
@@ -20,7 +20,7 @@
     </div> -->
 
     <!-- form de datos del sorteo -->
-    <form [formGroup]="formPanel" (ngSubmit)="createDraw()">
+    <form [formGroup]="formEvent" (ngSubmit)="onSaveChanges()">
          <div>
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mt-2 mb-2">Datos del sorteo</h3>
         </div>
@@ -88,7 +88,7 @@
                         {{ type.name }}
                     </option>
                 </select>
-                <div *ngIf="formPanel.get('drawType')?.invalid && formPanel.get('drawType')?.touched">
+                <div *ngIf="formEvent.get('drawType')?.invalid && formEvent.get('drawType')?.touched">
                   <small>Debés seleccionar un tipo.</small>
                 </div>
             </div>
@@ -135,10 +135,11 @@
         </div>
 
         <div class="pt-2" style="text-align: end;">
-            <button type="submit" (click)="createDraw()"
+            <button type="submit" (click)="onSaveChanges()"
                 class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              >Crear sorteo</button>
+              >Guardar cambios</button>
         </div>
     </form>
 
 </div>
+

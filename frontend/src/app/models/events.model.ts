@@ -1,8 +1,9 @@
 export enum StatusEvent {
-    OPEN = 'OPEN',
-    CLOSED = 'CLOSED',
-    FINISHED = 'FINISHED',
-    BLOCKED = 'BLOCKED'
+    ACTIVE = 'active',
+    OPEN = 'open',
+    CLOSED = 'closed',
+    FINISHED = 'finished',
+    BLOCKED = 'blocked'
 }
 
 export enum EventTypes {

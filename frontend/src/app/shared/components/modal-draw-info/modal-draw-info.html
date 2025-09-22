@@ -1,0 +1,62 @@
+<!-- modal.component.html -->
+<div *ngIf="show" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-gray-50 dark:bg-gray-900 rounded-lg shadow-lg p-6 max-w-md w-full relative">
+    <button (click)="close()" class="absolute top-2 right-2 text-gray-500 hover:text-black">✖</button>
+
+    <div class="flex pb-1 gap-2" style="align-items: baseline;">
+      <h2 class="text-xl font-bold mb-2">{{dataEvent?.title}}</h2>
+      <!-- <span>✅</span> -->
+    </div>
+
+    <!-- fila tipo y categoria -->
+    <div class="flex gap-2 pb-2">
+      <img style="width: 30px; height: 30px;" [src]="dataEvent?.eventType | handleIconTypePipe" alt="">
+      <app-tag-category [category]="'OTRA CATEGORIA'"></app-tag-category>
+    </div>
+
+    <div>
+        <img src="assets/account_24.svg" class="mx-auto min-w-[100px] w-[100px] h-[100px]">
+    </div>
+    
+    <div>
+      <small><b>Descripción del evento</b></small>
+      <p class="mb-4">{{dataEvent?.description}}</p>
+    </div>
+
+    <!-- opcion 1: fechas e imagen -->
+    <!-- <div class="flex">
+        <div class="basis-1/2">
+          <div>
+            <small><b>Fecha de realizacion</b></small>
+            <p class="mb-4">19/09/25</p>
+          </div>
+          <div>
+            <small><b>Creado el dia</b></small>
+            <p class="mb-4">12/09/25</p>
+          </div>
+        </div>
+        <div class="basis-1/2">
+            <img src="assets/account_24.svg" class="mx-auto min-w-[100px] w-[100px] h-[100px]">
+        </div>
+    </div> -->
+
+    <!-- opcion 2: imagen arriba, fechas enfiladas -->
+    <div class="flex">
+        <div class="basis-1/2">
+          <div>
+            <small><b>Fecha de realizacion</b></small>
+            <p class="mb-4">19/09/25</p>
+          </div>
+        </div>
+        <div class="basis-1/2">
+          <div>
+            <small><b>Creado el dia</b></small>
+            <p class="mb-4">12/09/25</p>
+          </div>
+        </div>
+    </div>
+    <div class="pt-1">
+      <a href="https://ejemplo.com" target="_blank" class="text-blue-600 underline mb-4 block">Editar evento</a>
+    </div>
+  </div>
+</div>
