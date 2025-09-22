@@ -36,7 +36,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor @AllArgsConstructor
 @Entity @Table(name = "event")
 @Inheritance(strategy = InheritanceType.JOINED)
-public  class Events {
+public abstract class Events {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

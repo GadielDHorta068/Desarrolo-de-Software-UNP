@@ -6,12 +6,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
+import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
@@ -57,6 +59,19 @@ public class EventsController {
         }
     }
 
+    @PostMapping("/create/guessing-contest/{idUser}")
+    public ResponseEntity<?> createGuessingContest(
+        @RequestBody GuessingContest guessingContest, 
+        @PathVariable("idUser") Long idUser) {
+        
+        GuessingContest created = eventsService.create(guessingContest, idUser);
+        if (created != null) {
+            return new ResponseEntity<>(created, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
         return ResponseEntity.ok("pong");
@@ -76,9 +91,12 @@ public class EventsController {
             return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
         }
     }
-/* 
-    @PutMapping("update/{id}")
-    public ResponseEntity<?> update(@PathVariable @NotNull @Positive Long id, @Valid @RequestBody Events events) {
+
+    @PutMapping("update/{idEvent}/user/{idUser}")
+    public ResponseEntity<?> update(
+                    @PathVariable("idEvent") @NotNull @Positive Long id, 
+                    @RequestBody Events events, 
+                    @PathVariable("idUser") Long idUser) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
         }
@@ -95,13 +113,22 @@ public class EventsController {
         }
         
         events.setId(id);
-        Events updatedEvent = eventsService.update(events);
+        Events updatedEvent = eventsService.update(id, events, idUser);
         if (updatedEvent != null) {
             return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Error al actualizar el evento", HttpStatus.BAD_REQUEST);
         }
-    } */
+    }
+
+    @GetMapping("/creator/{idCreator}")
+    public ResponseEntity<?> getEventsByCreator(@PathVariable Long idCreator){
+        List<Events> events = eventsService.findByEventsCreator(idCreator);
+        if(events.isEmpty()){
+            return new ResponseEntity<>("No se encontraron eventos para el creador con ID: " + idCreator, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(events, HttpStatus.OK);
+    }
 
     @DeleteMapping("delete/id/{id}")
     public ResponseEntity<?> delete(@PathVariable @NotNull @Positive Long id) {

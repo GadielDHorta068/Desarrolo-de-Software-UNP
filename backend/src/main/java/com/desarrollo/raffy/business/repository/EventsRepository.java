@@ -51,4 +51,8 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     // Buscar por fecha que pase a traves del dia de hoy
     @Query("SELECT e FROM Events e WHERE e.startDate <= :today AND e.endDate >= :today")
     List<Events> findByToday(@Param("today") LocalDate today);
+
+    //Buscar eventos por creador
+    @Query("SELECT e FROM Events e WHERE e.creator.id = :creatorId")
+    List<Events> findByCreatorId(@Param("creatorId") Long creatorId);
 }
