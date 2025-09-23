@@ -6,10 +6,11 @@ import { HandleIconTypePipe } from '../../../pipes/handle-icon-type.pipe';
 import { ModalDrawInfo } from '../modal-draw-info/modal-draw-info';
 import { Router } from '@angular/router';
 import { AdminEventService } from '../../../services/admin/adminEvent.service';
+import { AppComponent } from '../../../app.component';
 
 @Component({
   selector: 'app-draw-card',
-  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, ModalDrawInfo],
+  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, ModalDrawInfo, AppComponent],
   templateUrl: './draw-card.html',
   styleUrl: './draw-card.css'
 })
