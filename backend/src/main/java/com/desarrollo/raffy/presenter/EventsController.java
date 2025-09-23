@@ -22,6 +22,7 @@ import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.ParticipantService;
 import com.desarrollo.raffy.business.services.UserService;
+import com.desarrollo.raffy.business.services.GiveawaysService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -42,8 +43,8 @@ public class EventsController {
     @Autowired
     private EventsService eventsService;
 
-    /* @Autowired
-    private GiveawaysService giveawaysService; */
+    @Autowired
+    private GiveawaysService giveawaysService;
 
     @Autowired
     private UserService userService;
@@ -326,6 +327,21 @@ public class EventsController {
                     .body(e.getMessage());
             }
             
+    }
+
+    @GetMapping("/giveaways/search")
+    public ResponseEntity<?> searchGiveawaysByDateRange(
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        if (endDate.isBefore(startDate)) {
+            return new ResponseEntity<>("La fecha de inicio no puede ser posterior a la fecha de fin", HttpStatus.BAD_REQUEST);
+        }
+        var giveaways = giveawaysService.findByDateRangeGiveaways(startDate, endDate);
+        var events = giveaways.stream()
+            .map(g -> modelMapper.map(g, EventSummaryDTO.class))
+            .toList();
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
 }
