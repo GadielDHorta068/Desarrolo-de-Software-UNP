@@ -23,6 +23,16 @@ export class DrawCard {
     private adminEventService: AdminEventService
   ){}
 
+  // PRUEBA QUESTIONARY MODAL
+    showModal = false; // el modal empieza desactivado
+    selectedEventId!: number;
+
+    openModal(aEventId: number) {
+        this.selectedEventId = aEventId;
+        this.showModal = true;
+    }
+  // PRUEBA QUESTIONARY MODAL
+
   public redirectEdit() {
     this.adminEventService.setSelectedEvent(this.event);
     this.router.navigate(['/event-edit']);
