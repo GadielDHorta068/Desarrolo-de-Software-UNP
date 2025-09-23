@@ -32,6 +32,13 @@ public class CategoriesController {
             return new ResponseEntity<>(saveCategories, HttpStatus.CREATED);
     }
 
+    // Ruta alternativa para compatibilidad: POST /categories
+    @PostMapping("")
+    public ResponseEntity<Categories> saveRoot(@Valid @RequestBody Categories categories){
+        Categories saveCategories = categoriesService.save(categories);
+        return new ResponseEntity<>(saveCategories, HttpStatus.CREATED);
+    }
+
     @GetMapping("/id/{id}")
     public ResponseEntity<?> findById(@PathVariable @NotNull @Positive Long id){
         if (id <= 0) {
@@ -42,7 +49,15 @@ public class CategoriesController {
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
-    
+    // Ruta alternativa para compatibilidad: GET /categories/{id}
+    @GetMapping("/{id}")
+    public ResponseEntity<?> findByIdAlt(@PathVariable @NotNull @Positive Long id){
+        if (id <= 0) {
+            return new ResponseEntity<>("No se encontro la categoria", HttpStatus.BAD_REQUEST);
+        }
+        Categories categories = categoriesService.findById(id);
+        return new ResponseEntity<>(categories, HttpStatus.OK);
+    }
 
     @GetMapping("/searchAll")
     public ResponseEntity<?> findAllCategories(){

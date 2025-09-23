@@ -18,6 +18,7 @@ import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
 import com.desarrollo.raffy.model.EventTypes;
+import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.ParticipantService;
 import com.desarrollo.raffy.business.services.UserService;
@@ -29,6 +30,11 @@ import java.util.List;
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import com.desarrollo.raffy.dto.EventSummaryDTO;
+import org.modelmapper.ModelMapper;
+import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/events")
@@ -45,15 +51,27 @@ public class EventsController {
     @Autowired
     private ParticipantService participantService;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
 
     @PostMapping("/create/giveaway/{idUser}")
     public ResponseEntity<?> createGiveaway(
         @RequestBody Giveaways giveaways, 
         @PathVariable("idUser") Long idUser) {
         
+        // Validaciones de fechas
+        if (giveaways.getEndDate() == null) {
+            return new ResponseEntity<>("Debe especificar la fecha de fin del evento", HttpStatus.BAD_REQUEST);
+        }
+        if (giveaways.getEndDate().isBefore(LocalDate.now())) {
+            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio", HttpStatus.BAD_REQUEST);
+        }
+        
         Giveaways created = eventsService.create(giveaways, idUser);
         if (created != null) {
-            return new ResponseEntity<>(created, HttpStatus.CREATED);
+            EventSummaryDTO dto = eventsService.getEventSummaryById(created.getId());
+            return new ResponseEntity<>(dto, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
         }
@@ -64,9 +82,18 @@ public class EventsController {
         @RequestBody GuessingContest guessingContest, 
         @PathVariable("idUser") Long idUser) {
         
+        // Validaciones de fechas
+        if (guessingContest.getEndDate() == null) {
+            return new ResponseEntity<>("Debe especificar la fecha de fin del evento", HttpStatus.BAD_REQUEST);
+        }
+        if (guessingContest.getEndDate().isBefore(LocalDate.now())) {
+            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio", HttpStatus.BAD_REQUEST);
+        }
+        
         GuessingContest created = eventsService.create(guessingContest, idUser);
         if (created != null) {
-            return new ResponseEntity<>(created, HttpStatus.CREATED);
+            EventSummaryDTO dto = eventsService.getEventSummaryById(created.getId());
+            return new ResponseEntity<>(dto, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
         }
@@ -84,7 +111,7 @@ public class EventsController {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
         }
         
-        Events event = eventsService.getById(id);
+        EventSummaryDTO event = eventsService.getEventSummaryById(id);
         if (event != null) {
             return new ResponseEntity<>(event, HttpStatus.OK);
         } else {
@@ -112,10 +139,19 @@ public class EventsController {
             return new ResponseEntity<>("Ya existe otro evento con este título", HttpStatus.CONFLICT);
         }
         
+        // Validaciones de fechas (la fecha de inicio es la del evento existente)
+        if (events.getEndDate() == null) {
+            return new ResponseEntity<>("Debe especificar la fecha de fin del evento", HttpStatus.BAD_REQUEST);
+        }
+        if (!events.getEndDate().isAfter(existingEvent.getStartDate())) {
+            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio del evento", HttpStatus.BAD_REQUEST);
+        }
+        
         events.setId(id);
         Events updatedEvent = eventsService.update(id, events, idUser);
         if (updatedEvent != null) {
-            return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
+            EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
+            return new ResponseEntity<>(dto, HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Error al actualizar el evento", HttpStatus.BAD_REQUEST);
         }
@@ -127,7 +163,10 @@ public class EventsController {
         if(events.isEmpty()){
             return new ResponseEntity<>("No se encontraron eventos para el creador con ID: " + idCreator, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(events, HttpStatus.OK);
+        List<EventSummaryDTO> response = events.stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("delete/id/{id}")
@@ -152,102 +191,66 @@ public class EventsController {
 
     @GetMapping("/all")
     public ResponseEntity<?> getAll() {
-        List<Events> events = eventsService.getAll();
+        List<EventSummaryDTO> events = eventsService.getAllEventSummaries();
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
-    
+
     @GetMapping("/status/{statusEvent}")
     public ResponseEntity<?> getByStatusEvent(@PathVariable StatusEvent statusEvent) {
-        try {
-            List<Events> events = eventsService.getByStatusEvent(statusEvent);
-            return new ResponseEntity<>(events, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("Estado de evento inválido: " + statusEvent, HttpStatus.BAD_REQUEST);
-        }
+        List<EventSummaryDTO> events = eventsService.getEventSummariesByStatus(statusEvent);
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
-    
+
     @GetMapping("/type/{eventType}")
     public ResponseEntity<?> getByEventType(@PathVariable EventTypes eventType) {
-        try {
-            List<Events> events = eventsService.getByEventType(eventType);
-            return new ResponseEntity<>(events, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("Tipo de evento inválido: " + eventType, HttpStatus.BAD_REQUEST);
-        }
+        List<EventSummaryDTO> events = eventsService.getEventSummariesByEventType(eventType);
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
-    
+
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<?> getByCategoryId(@PathVariable @NotNull @Positive Long categoryId) {
-        if (categoryId <= 0) {
-            return new ResponseEntity<>("El ID de categoría debe ser un número positivo", HttpStatus.BAD_REQUEST);
+        List<EventSummaryDTO> events = eventsService.getEventSummariesByCategoryId(categoryId);
+        if (events.isEmpty()) {
+            return new ResponseEntity<>("No se encontraron eventos para la categoría con ID: " + categoryId, HttpStatus.NOT_FOUND);
         }
-        
-        List<Events> events = eventsService.getByCategoryId(categoryId);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
-    
+
     @GetMapping("/active")
     public ResponseEntity<?> getActiveEvents() {
-        List<Events> events = eventsService.getActiveEvents();
+        List<EventSummaryDTO> events = eventsService.getActiveEventSummaries();
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
-    
+
     @GetMapping("/date-range")
     public ResponseEntity<?> getByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        
-        if (startDate == null || endDate == null) {
-            return new ResponseEntity<>("Las fechas de inicio y fin son obligatorias", HttpStatus.BAD_REQUEST);
-        }
-        
+        // Validación de rango de fechas
         if (endDate.isBefore(startDate)) {
-            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("La fecha de inicio no puede ser posterior a la fecha de fin", HttpStatus.BAD_REQUEST);
         }
-        
-        List<Events> events = eventsService.getByDateRange(startDate, endDate);
+        List<EventSummaryDTO> events = eventsService.getEventSummariesByDateRange(startDate, endDate);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
-    
+
     @GetMapping("/start-date/{startDate}")
     public ResponseEntity<?> getByStartDate(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
-        
-        if (startDate == null) {
-            return new ResponseEntity<>("La fecha de inicio es obligatoria", HttpStatus.BAD_REQUEST);
-        }
-        
-        List<Events> events = eventsService.getByStartDate(startDate);
+        List<EventSummaryDTO> events = eventsService.getEventSummariesByStartDate(startDate);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
-    
+
     @GetMapping("/end-date/{endDate}")
     public ResponseEntity<?> getByEndDate(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        
-        if (endDate == null) {
-            return new ResponseEntity<>("La fecha de fin es obligatoria", HttpStatus.BAD_REQUEST);
-        }
-        
-        List<Events> events = eventsService.getByEndDate(endDate);
-        if (events != null && !events.isEmpty()) {
-            return new ResponseEntity<>(events, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("No se encontraron eventos que terminen en la fecha: " + endDate, HttpStatus.NOT_FOUND);
-        }
+        List<EventSummaryDTO> events = eventsService.getEventSummariesByEndDate(endDate);
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
-    
+
     @GetMapping("/search")
     public ResponseEntity<?> searchByTitle(@RequestParam String title) {
-        if (title == null || title.trim().isEmpty()) {
-            return new ResponseEntity<>("El título de búsqueda es obligatorio", HttpStatus.BAD_REQUEST);
-        }
-        
-        if (title.trim().length() < 2) {
-            return new ResponseEntity<>("El título de búsqueda debe tener al menos 2 caracteres", HttpStatus.BAD_REQUEST);
-        }
-        
-        List<Events> events = eventsService.searchByTitle(title.trim());
+        List<EventSummaryDTO> events = eventsService.searchEventSummariesByTitle(title);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
     
@@ -263,60 +266,25 @@ public class EventsController {
     
     @GetMapping("/participant/{userId}")
     public ResponseEntity<?> getEventsByParticipantId(@PathVariable @NotNull @Positive Long userId) {
-        if (userId <= 0) {
-            return new ResponseEntity<>("El ID de usuario debe ser un número positivo", HttpStatus.BAD_REQUEST);
+        List<EventSummaryDTO> events = eventsService.getEventSummariesByParticipantId(userId);
+        if (events.isEmpty()) {
+            return new ResponseEntity<>("No se encontraron eventos para el participante con ID: " + userId, HttpStatus.NOT_FOUND);
         }
-        
-        List<Events> events = eventsService.getEventsByParticipantId(userId);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
-   /*  @PutMapping("/giveaways")
-    public ResponseEntity<Giveaways> updateGiveaway(@Valid @RequestBody Giveaways giveaways ){
-        Giveaways updatedGiveaway = giveawaysService.update(giveaways);
-        return new ResponseEntity<>(updatedGiveaway, HttpStatus.OK);
-    }
-
-    @PutMapping("/giveaways/finalize/{id}")
-    public ResponseEntity<Giveaways> finalizedGiveaway(@PathVariable Long id) {
-        giveawaysService.finalizedGiveaway(id);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @GetMapping("/giveaways/category/{categoryId}")
-    public ResponseEntity<List<Giveaways>> getGivawaysCategoryId(@PathVariable Long categoryId){
-        List<Giveaways> giveaways = giveawaysService.findByGiveawaysCategoryId(categoryId);
-        return new ResponseEntity<>(giveaways, HttpStatus.OK);
-    }
-
-    @GetMapping("/giveaways/active")
-    public ResponseEntity<List<Giveaways>> getActiveGiveaways(){
-        List<Giveaways> giveaways = giveawaysService.findByActiGiveaways();
-        return new ResponseEntity<>(giveaways, HttpStatus.OK);
-    }
-
-    @GetMapping("/giveaways/status/{statusEvent}")
-    public ResponseEntity<List<Giveaways>> getGiveawayForStatus(StatusEvent statusEvent){
-        List<Giveaways> giveaways = giveawaysService.findByStatusGiveaways(statusEvent);
-        return new ResponseEntity<>(giveaways, HttpStatus.OK);
-    }
-
-    @GetMapping("/giveaways/search")
-    public ResponseEntity<List<Giveaways>> getGiveawayDateRange(
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
-        List<Giveaways> giveaways = giveawaysService.findByDateRangeGiveaways(startDate, endDate);
-        return new ResponseEntity<>(giveaways, HttpStatus.OK);
-    } */
-
-    @PostMapping("/id/{eventId}/participants")
+    @PostMapping("/{eventId}/participants")
     public ResponseEntity<Object> registerParticipantToGiveaway(
         @Valid @RequestBody GuestUser aGuestUser,
         @PathVariable("eventId") Long aEventId) {
-            if (aGuestUser.getId() != 0) {
+            if (aGuestUser.getId() != null && aGuestUser.getId() != 0) {
                 return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body("Esta intentando crear un guest user. Este no puede tener un id definido.");
+            }
+            // normalizar id=0 a null para permitir persistencia con IDENTITY
+            if (aGuestUser.getId() != null && aGuestUser.getId() == 0) {
+                aGuestUser.setId(null);
             }
 
             Events eventToParticipate = eventsService.getById(aEventId);
@@ -343,10 +311,15 @@ public class EventsController {
             }
             try {
                 // intento guardar la participacion del usuario
-                
+                Participant created = participantService.registerToGiveaway(savedGuestUser, eventToParticipate);
+                Map<String, Object> response = new HashMap<>();
+                response.put("id", created.getId());
+                response.put("eventId", eventToParticipate.getId());
+                response.put("userId", savedGuestUser.getId());
+                response.put("message", "Inscripción realizada exitosamente");
                 return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(participantService.registerToGiveaway(savedGuestUser, eventToParticipate));    
+                    .body(response);
             } catch (Exception e) {
                 return ResponseEntity
                     .status(HttpStatus.CONFLICT)

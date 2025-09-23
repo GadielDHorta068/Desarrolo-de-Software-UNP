@@ -19,7 +19,7 @@ public class CategoriesService {
     @Transactional
     public Categories save(Categories categories){
         if(categoriesRepository.existsByName(categories.getName())){
-            throw new RuntimeException("La categoría con nombre '" + categories.getName() + "' ya existe.");
+            throw new IllegalArgumentException("La categoría con nombre '" + categories.getName() + "' ya existe.");
         }
         return categoriesRepository.save(categories);
     }
@@ -28,7 +28,7 @@ public class CategoriesService {
     public Categories findById(Long id){
         Optional<Categories> categories = categoriesRepository.findById(id);
         if(categories.isEmpty()){
-            throw new RuntimeException("Categoría no encontrada");
+            throw new IllegalArgumentException("Categoría no encontrada");
         }
         return categories.get();
     }

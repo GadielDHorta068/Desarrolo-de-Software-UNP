@@ -5,6 +5,13 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.modelmapper.Converter;
+
+import com.desarrollo.raffy.model.Events;
+import com.desarrollo.raffy.model.RegisteredUser;
+import com.desarrollo.raffy.dto.EventSummaryDTO;
+import com.desarrollo.raffy.dto.CreatorSummaryDTO;
+
 /**
  * Configuración de ModelMapper para el mapeo automático entre entidades y DTOs
  * 
@@ -65,20 +72,15 @@ public class ModelMapperConfig {
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper mapper = new ModelMapper();
-        
-        // Configuración de estrategia de mapeo
         mapper.getConfiguration()
-                // STRICT: Solo mapea campos con nombres exactamente iguales (más seguro)
                 .setMatchingStrategy(MatchingStrategies.STRICT)
-                // Permite mapear por nombres de campos además de getters/setters
                 .setFieldMatchingEnabled(true)
-                // Permite acceder a campos privados directamente (compatible con Lombok)
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
-        
+
         // NOTA: Para mapeos personalizados complejos, agregar configuraciones aquí:
         // mapper.createTypeMap(SourceClass.class, DestinationClass.class)
         //       .addMapping(src -> src.getField(), DestinationClass::setMappedField);
-        
+
         // Configuración específica para RegisteredUserDTO -> RegisteredUser
         mapper.createTypeMap(com.desarrollo.raffy.dto.RegisteredUserDTO.class, com.desarrollo.raffy.model.RegisteredUser.class)
                 .setProvider(request -> {
@@ -92,7 +94,28 @@ public class ModelMapperConfig {
                             dto.getPassword()
                     );
                 });
-        
+
+        // RegisteredUser -> CreatorSummaryDTO
+        mapper.createTypeMap(RegisteredUser.class, CreatorSummaryDTO.class);
+
+        // Converters para aplanar category en EventSummaryDTO
+        Converter<Events, Long> categoryIdConverter = ctx -> {
+            Events src = ctx.getSource();
+            return (src != null && src.getCategory() != null) ? src.getCategory().getId() : null;
+        };
+        Converter<Events, String> categoryNameConverter = ctx -> {
+            Events src = ctx.getSource();
+            return (src != null && src.getCategory() != null) ? src.getCategory().getName() : null;
+        };
+
+        // Events -> EventSummaryDTO (incluye mapeo de creator usando el typeMap anterior y category aplanado)
+        mapper.createTypeMap(Events.class, EventSummaryDTO.class)
+              .addMappings(m -> {
+                  m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
+                  m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
+                  // creator se mapea automáticamente usando el typeMap RegisteredUser -> CreatorSummaryDTO
+              });
+
         return mapper;
     }
     

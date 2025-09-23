@@ -4,6 +4,7 @@ import java.time.LocalDate;
 //Devolver los errores correspondientes
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
+import org.modelmapper.ModelMapper;
+import com.desarrollo.raffy.dto.EventSummaryDTO;
 
 @Service
 public class EventsService {
@@ -25,6 +28,9 @@ public class EventsService {
 
     @Autowired
     private RegisteredUserRepository registeredUserRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Transactional
     public <T extends Events> T create(T event, Long idUser) {
@@ -80,12 +86,76 @@ public class EventsService {
         return eventsRepository.findByCreatorId(IdCreator);
     }
 
-    public Events getById(Long id) {
-        try {
-            return eventsRepository.findById(id).orElse(null);
-        } catch (Exception e) {
-            return null;
-        }
+    public List<EventSummaryDTO> getEventSummariesByCreator(Long creatorId){
+        return eventsRepository.findByCreatorId(creatorId).stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    public List<EventSummaryDTO> getAllEventSummaries(){
+        return eventsRepository.findAllWithDetails().stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    public List<EventSummaryDTO> getEventSummariesByStatus(StatusEvent statusEvent){
+        return eventsRepository.findByStatusEvent(statusEvent).stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    public List<EventSummaryDTO> getEventSummariesByEventType(EventTypes eventType){
+        return eventsRepository.findByEventType(eventType).stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    public List<EventSummaryDTO> getEventSummariesByCategoryId(Long categoryId){
+        return eventsRepository.findByCategoryId(categoryId).stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    public List<EventSummaryDTO> getActiveEventSummaries(){
+        return eventsRepository.findActiveEvents().stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    public List<EventSummaryDTO> getEventSummariesByDateRange(LocalDate startDate, LocalDate endDate){
+        return eventsRepository.findByDateRange(startDate, endDate).stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    public List<EventSummaryDTO> getEventSummariesByStartDate(LocalDate startDate){
+        return eventsRepository.findByStartDate(startDate).stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    public List<EventSummaryDTO> getEventSummariesByEndDate(LocalDate endDate){
+        return eventsRepository.findByEndDate(endDate).stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    public List<EventSummaryDTO> searchEventSummariesByTitle(String title){
+        return eventsRepository.findByTitleContainingIgnoreCase(title).stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    public List<EventSummaryDTO> getEventSummariesByParticipantId(Long userId){
+        return eventsRepository.findByParticipantId(userId).stream()
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    public EventSummaryDTO getEventSummaryById(Long id){
+        return eventsRepository.findByIdWithDetails(id)
+            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .orElse(null);
     }
 
     public boolean delete(Long id) {
@@ -197,4 +267,11 @@ public class EventsService {
         }
     }
 
+    public Events getById(Long id) {
+        try {
+            return eventsRepository.findById(id).orElse(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
