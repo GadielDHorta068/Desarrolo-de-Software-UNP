@@ -53,6 +53,6 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     List<Events> findByToday(@Param("today") LocalDate today);
 
     //Buscar eventos por creador
-    @Query("SELECT e FROM Events e WHERE e.creator.id = :creatorId")
+    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.creator.id = :creatorId")
     List<Events> findByCreatorId(@Param("creatorId") Long creatorId);
 }

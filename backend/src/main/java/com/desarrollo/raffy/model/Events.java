@@ -32,6 +32,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Setter @Getter
 @NoArgsConstructor @AllArgsConstructor
 @Entity @Table(name = "event")
@@ -83,6 +85,7 @@ public abstract class Events {
         joinColumns = @JoinColumn(name = "event_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @JsonIgnore
     private List<User> participants;
 
     @NotNull(message = "Debe especificar el tipo de evento")
