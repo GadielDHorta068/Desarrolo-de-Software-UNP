@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { QuestionaryService } from '../../services/questionary.service';
 import { GuestUser } from './guestUser';
@@ -8,44 +9,33 @@ import { GuestUser } from './guestUser';
 @Component({
   selector: 'app-questionary',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './questionary.component.html',
   styleUrl: './questionary.component.css'
 })
 
 export class QuestionaryComponent {
 
-    eventId!: number;
+    @Input() eventId!: number;
+    @Output() close = new EventEmitter<void>();
+
     guestUser!: GuestUser;
-    isOpen = false;
 
     constructor(
         private questionaryService: QuestionaryService
     ) {}
 
-    openModal(aEventId: number): void {
-        this.eventId = aEventId;
-        this.guestUser = {
-            id: 0,
-            name: '',
-            surname: '',
-            email: '',
-            cellphone: ''
-        }; // resetea el form por las dudas
-        this.isOpen = true;
-    }
-
     closeModal(): void {
-        this.isOpen = false;
+        this.close.emit();
     }
 
-    save(): void {
+    onSubmit(): void {
         this.questionaryService.save(
             this.guestUser,
             this.eventId //despues podria tener un objeto y usar un dto o algo asi
         ).subscribe({
             next: (responseMessage) => {
-                console.log('Guardado en backend:', responseMessage);
+                console.log('Guardado en backend:', responseMessage); // borrar
                 this.closeModal();
                 alert('Usuario guardado con éxito');
             },
