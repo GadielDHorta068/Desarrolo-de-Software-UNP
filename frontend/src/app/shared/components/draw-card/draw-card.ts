@@ -6,11 +6,11 @@ import { HandleIconTypePipe } from '../../../pipes/handle-icon-type.pipe';
 import { ModalDrawInfo } from '../modal-draw-info/modal-draw-info';
 import { Router } from '@angular/router';
 import { AdminEventService } from '../../../services/admin/adminEvent.service';
-import { AppComponent } from '../../../app.component';
+import { QuestionaryComponent } from '../../../pages/questionary/questionary.component';
 
 @Component({
   selector: 'app-draw-card',
-  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, ModalDrawInfo, AppComponent],
+  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, ModalDrawInfo, QuestionaryComponent],
   templateUrl: './draw-card.html',
   styleUrl: './draw-card.css'
 })
@@ -28,7 +28,11 @@ export class DrawCard {
     showModal = false; // el modal empieza desactivado
     selectedEventId!: number;
 
-    openModal(aEventId: number) {
+    openModal(aEventId?: number) {
+        if (!aEventId) {
+        console.warn("eventId inválido:", aEventId); //borrar
+        return;
+        }
         this.selectedEventId = aEventId;
         this.showModal = true;
     }
