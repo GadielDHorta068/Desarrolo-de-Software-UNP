@@ -11,6 +11,7 @@ import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
 import com.desarrollo.raffy.dto.CreatorSummaryDTO;
+import com.desarrollo.raffy.model.Giveaways;
 
 /**
  * Configuración de ModelMapper para el mapeo automático entre entidades y DTOs
@@ -114,6 +115,13 @@ public class ModelMapperConfig {
                   m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
                   m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
                   // creator se mapea automáticamente usando el typeMap RegisteredUser -> CreatorSummaryDTO
+              });
+
+        // Giveaways -> EventSummaryDTO (asegura que los sorteos también mapeen categoryId/categoryName)
+        mapper.createTypeMap(Giveaways.class, EventSummaryDTO.class)
+              .addMappings(m -> {
+                  m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
+                  m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
               });
 
         return mapper;
