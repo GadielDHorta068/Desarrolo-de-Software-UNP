@@ -28,19 +28,6 @@
             <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Nombre (*)
             </label>
-            <!-- <input
-                type="text"
-                id="titulo"
-                formControlName="title"
-                name="titulo"
-                (focus)="onEmailFocus()"
-                (blur)="onEmailBlur()"
-                class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
-                [class.border-red-500]="getFieldError('email')"
-                [class.ring-4]="emailFocused"
-                [class.ring-indigo-200]="emailFocused"
-                placeholder="Ej. Ruleta de Primavera"
-            /> -->
             <input
                 type="text"
                 id="titulo"
@@ -83,7 +70,7 @@
                 <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo (*)</label>
                 
                 <select formControlName="drawType" id="draw" class="bg-gray-800 text-white rounded-md px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">-- Seleccioná el tipo --</option>
+                    <option value="">Seleccioná el tipo</option>
                     <option *ngFor="let type of types" [value]="type.code">
                         {{ type.name }}
                     </option>
@@ -96,8 +83,11 @@
                 <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
                 
                 <select formControlName="category" id="category" class="bg-gray-800 text-white rounded-md px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">-- Seleccioná una categoria --</option>
-                    <option *ngFor="let category of categories" [value]="category.code">
+                    <option value="">Seleccioná una categoria</option>
+                    <!-- <option *ngFor="let category of categories" [value]="category.code">
+                        {{ category.name }}
+                    </option> -->
+                    <option *ngFor="let category of categories" [value]="category.id">
                         {{ category.name }}
                     </option>
                 </select>
@@ -113,8 +103,8 @@
                 <input
                     type="number"
                     id="winners"
-                    max=1
-                    min=10
+                    max=10
+                    min=1
                     formControlName="winners"
                     name="Cantidad de ganadores"
                     class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
@@ -135,7 +125,8 @@
         </div>
 
         <div class="pt-2" style="text-align: end;">
-            <button type="submit" (click)="createDraw()"
+            <button type="submit" [title]="formPanel.valid ? '': 'Existen campos obligatorios vacios o no válidos'"
+                [ngStyle]="formPanel.valid ? {'opacity': '1'} : {'opacity': '0.6'}"
                 class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >Crear sorteo</button>
         </div>

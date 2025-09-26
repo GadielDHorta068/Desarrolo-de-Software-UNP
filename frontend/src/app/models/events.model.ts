@@ -47,14 +47,20 @@ export interface EventsTemp {
     description: string;
     startDate: number[];
     endDate: number[];
-    category: {
-        id: number;
-        name: string;
-    };
     statusEvent: StatusEvent;
     eventType: EventTypes;
     winnersCount: number;
     categoryId: number,
     categoryName: Category,
     creator: Creator
+}
+export interface EventsCreate {
+    title: string;
+    description: string;
+    endDate: number[];
+    category: {
+        id: number;
+    };
+    eventType: EventTypes;
+    winnersCount: number;
 }

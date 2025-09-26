@@ -40,7 +40,7 @@ export class EditEvent {
     this.formEvent = new FormGroup({
       title: new FormControl({value: this.event?.title, disabled: false}, {validators:[ Validators.required ]}),
       drawType: new FormControl({value: this.event?.eventType, disabled: false}, {validators:[ Validators.required ]}),
-      category: new FormControl({value: this.event?.category, disabled: false}),
+      category: new FormControl({value: this.event?.categoryName, disabled: false}),
       executionDate: new FormControl({value: this.event?.endDate, disabled: false}, {validators:[ Validators.required ]}),
       winners: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
       description: new FormControl({value: this.event?.description, disabled: false}, {validators:[ Validators.required ]}),
@@ -63,7 +63,7 @@ export class EditEvent {
   private updateForm(){
     this.formEvent.get('title')?.setValue(this.event?.title);
     this.formEvent.get('drawType')?.setValue(this.event?.eventType);
-    this.formEvent.get('category')?.setValue(this.event?.category);
+    this.formEvent.get('category')?.setValue(this.event?.categoryName);
     this.formEvent.get('executionDate')?.setValue(this.event?.endDate);
     this.formEvent.get('winners')?.setValue(this.event?.winnersCount);
     this.formEvent.get('description')?.setValue(this.event?.description);

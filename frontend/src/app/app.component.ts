@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, ChildrenOutletContexts } from '@angular/router';
 import { HeaderComponent } from './shared/components/header/header.component';
 import { slideInAnimation } from './animations/route-animations';
+import { configService } from './services/config.service';
 
 @Component({
   selector: 'app-root',
@@ -93,7 +94,12 @@ export class AppComponent {
   // Componente principal de la aplicación
   // Utiliza OnPush para mejor rendimiento
   
-  constructor(private contexts: ChildrenOutletContexts) {}
+  constructor(
+    private contexts: ChildrenOutletContexts,
+    private configService: configService
+  ) {
+    this.configService.initData();
+  }
   
   getRouteAnimationData() {
     return this.contexts.getContext('primary')?.route?.snapshot?.data?.['animation'];
