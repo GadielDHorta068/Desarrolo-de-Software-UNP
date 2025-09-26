@@ -8,19 +8,19 @@ export class HandleStatusPipe implements PipeTransform {
   transform( code: string|undefined ): string {
     let newStatus: string = "Desconocido";
     switch(code as string){
-      case 'open':
+      case 'OPEN':
         newStatus = 'ABIERTO';
         break;
-      case 'active':
+      case 'ACTIVE':
         newStatus = 'ACTIVO';
         break;
-      case 'closed':
+      case 'CLOSED':
         newStatus = 'CERRADO';
         break;
-      case 'blocked' :
+      case 'BLOCKED' :
         newStatus = 'BLOQUEADO';
         break;
-      case 'finished' :
+      case 'FINISHED' :
         newStatus = 'FINALIZADO';
     }
 

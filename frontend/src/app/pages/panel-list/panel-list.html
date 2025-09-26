@@ -8,22 +8,22 @@
 
         <div class="flex items-center space-x-3">
             <label class="inline-flex items-center">
-            <input type="radio" name="opcion" value="active" class="form-radio cursor-pointer text-blue-600 focus:ring-blue-500" (click)="aplyFilter('active')">
+            <input type="radio" name="opcion" value="OPEN" class="form-radio cursor-pointer text-blue-600 focus:ring-blue-500" (click)="aplyFilter('active')">
             <span class="ml-2 text-gray-300">Activo</span>
             </label>
 
             <label class="inline-flex items-center">
-            <input type="radio" name="opcion" value="blocked" class="form-radio cursor-pointer text-blue-600 focus:ring-blue-500" (click)="aplyFilter('blocked')">
+            <input type="radio" name="opcion" value="BLOCKED" class="form-radio cursor-pointer text-blue-600 focus:ring-blue-500" (click)="aplyFilter('blocked')">
             <span class="ml-2 text-gray-300">Bloqueado</span>
             </label>
 
             <label class="inline-flex items-center">
-            <input type="radio" name="opcion" value="finished" class="form-radio cursor-pointer text-blue-600 focus:ring-blue-500" (click)="aplyFilter('finished')">
+            <input type="radio" name="opcion" value="FINISHED" class="form-radio cursor-pointer text-blue-600 focus:ring-blue-500" (click)="aplyFilter('finished')">
             <span class="ml-2 text-gray-300">Finalizado</span>
             </label>
 
             <label class="inline-flex items-center">
-            <input type="radio" name="opcion" value="finished" class="form-radio cursor-pointer text-blue-600 focus:ring-blue-500" (click)="aplyFilter(null)">
+            <input type="radio" name="opcion" value=null class="form-radio cursor-pointer text-blue-600 focus:ring-blue-500" (click)="aplyFilter(null)">
             <span class="ml-2 text-gray-300">Todos</span>
             </label>
         </div>

@@ -8,7 +8,7 @@
         <div class="basis-1/2">
             <div class="block">
                 <p class="text-sm text-gray-200"><b>Dia de realizacion</b></p>
-                <p class="text-sm text-gray-400 mb-1">{{event?.endDate}}</p>
+                <p class="text-sm text-gray-400 mb-1">{{event?.endDate | handleDatePipe}}</p>
             </div>
             <div class="block">
                 <p class="text-sm text-gray-200"><b>Estado</b></p>

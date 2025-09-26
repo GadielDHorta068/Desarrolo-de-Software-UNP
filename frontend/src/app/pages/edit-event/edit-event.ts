@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Events } from '../../models/events.model';
+import { Events, EventsTemp } from '../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 
@@ -13,7 +13,8 @@ import { AdminEventService } from '../../services/admin/adminEvent.service';
 export class EditEvent {
 
   // evento en contexto (debe ser seteado desde donde se quiere interactuar con el dato, por ej el boton de EDITAR)
-  event!: Events|null;
+  // event!: Events|null;
+  event!: EventsTemp|null;
 
   formEvent: FormGroup;
   
