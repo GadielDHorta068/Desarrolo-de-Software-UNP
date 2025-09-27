@@ -25,6 +25,10 @@ export class QuestionaryComponent {
         private questionaryService: QuestionaryService
     ) {}
 
+    ngOnInit() {
+        this.guestUser = <GuestUser> {};
+    }
+
     closeModal(): void {
         this.close.emit();
     }
@@ -37,7 +41,7 @@ export class QuestionaryComponent {
             next: (responseMessage) => {
                 console.log('Guardado en backend:', responseMessage); // borrar
                 this.closeModal();
-                alert('Usuario guardado con éxito');
+                alert('Usuario participante registrado al sorteo exitosamente');
             },
             error: (errorMessage) => {
                 console.error('Error:', errorMessage);
