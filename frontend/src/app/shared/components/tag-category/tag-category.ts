@@ -7,5 +7,5 @@ import { Component, Input } from '@angular/core';
   styleUrl: './tag-category.css'
 })
 export class TagCategory {
-  @Input() category: string = "";
+  @Input() category: string|undefined = "";
 }

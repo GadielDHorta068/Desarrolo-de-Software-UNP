@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.StatusEvent;
-import com.desarrollo.raffy.business.services.GiveawaysService;
+import com.desarrollo.raffy.business.services.EventsService;
 
 @Service
 public class Cron {
@@ -18,7 +18,7 @@ public class Cron {
     private EventsRepository eventsRepository;
 
     @Autowired
-    private GiveawaysService giveawaysService;
+    private EventsService eventsService;
 
     /*
      * En esta funcion se actualiza el estado de los eventos
@@ -29,11 +29,10 @@ public class Cron {
     public void runEvents() {
         List<Events> events = eventsRepository.findByToday(LocalDate.now());
         for (Events event : events) {
-            if(event.getEndDate().isEqual(LocalDate.now())){
-                this.giveawaysService.closedGiveaway(event.getId());
-            }
-            if(event.getEndDate().isBefore(LocalDate.now()) && event.getStatusEvent() != StatusEvent.CLOSED){
-                this.giveawaysService.closedGiveaway(event.getId());
+            if((event.getEndDate().isEqual(LocalDate.now()) || event.getEndDate().isBefore(LocalDate.now())) 
+                && event.getStatusEvent() != StatusEvent.CLOSED){
+
+                this.eventsService.closeEvent(event.getId());
             }
         }
     }

@@ -86,6 +86,25 @@ public class EventsService {
         return eventsRepository.findByCreatorId(IdCreator);
     }
 
+    public boolean closeEvent(Long idEvent){
+        try {
+            Events event = eventsRepository.findById(idEvent)
+                .orElseThrow(() -> new RuntimeException("Sorteo no econtrado"));
+            
+            // Solo cerrar si no está ya cerrado o finalizado
+            if (event.getStatusEvent() == StatusEvent.CLOSED || event.getStatusEvent() == StatusEvent.FINALIZED) {
+                return false;
+            }
+            
+            event.setStatusEvent(StatusEvent.CLOSED);
+            eventsRepository.save(event);
+            
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al finalizar el sorteo " + e.getStackTrace());
+        }
+    }
+
     public List<EventSummaryDTO> getEventSummariesByCreator(Long creatorId){
         return eventsRepository.findByCreatorId(creatorId).stream()
             .map(e -> modelMapper.map(e, EventSummaryDTO.class))

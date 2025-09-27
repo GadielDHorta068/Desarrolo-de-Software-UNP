@@ -11,7 +11,10 @@
     <!-- fila tipo y categoria -->
     <div class="flex gap-2 pb-2">
       <img style="width: 30px; height: 30px;" [src]="dataEvent?.eventType | handleIconTypePipe" alt="">
-      <app-tag-category [category]="'OTRA CATEGORIA'"></app-tag-category>
+      <!-- @if (dataEvent?.category?.name) { -->
+        <!-- <app-tag-category [category]="dataEvent?.category?.name"></app-tag-category> -->
+        <app-tag-category [category]="dataEvent?.categoryName"></app-tag-category>
+      <!-- } -->
     </div>
 
     <div>
@@ -45,13 +48,13 @@
         <div class="basis-1/2">
           <div>
             <small><b>Fecha de realizacion</b></small>
-            <p class="mb-4">19/09/25</p>
+            <p class="mb-4">{{dataEvent?.endDate | handleDatePipe}}</p>
           </div>
         </div>
         <div class="basis-1/2">
           <div>
             <small><b>Creado el dia</b></small>
-            <p class="mb-4">12/09/25</p>
+            <p class="mb-4">{{dataEvent?.startDate | handleDatePipe}}</p>
           </div>
         </div>
     </div>

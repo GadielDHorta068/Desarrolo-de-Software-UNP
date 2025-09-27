@@ -72,6 +72,26 @@ export const routes: Routes = [
     data: {animation: 'event'}
   },
   {
+    path: 'draws',
+    children: [
+      {
+        path: 'all',
+        loadComponent: () => import('./pages/panel-list/panel-list').then(m => m.PanelList),
+        // canActivate: [GuestGuard],
+        title: 'Mis sorteos - Raffy'
+      },
+      { path: 'edit',
+        loadComponent: () => import('./pages/edit-event/edit-event').then(m => m.EditEvent),
+        // canActivate: [GuestGuard],
+        title: 'Editar sorteo - Raffy'
+      },
+      {
+        path: '**',
+        redirectTo: '/all'
+      }
+    ]
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }

@@ -112,4 +112,9 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/register']);
     this.closeMenus();
   }
+
+  public navigateToAllDraws(): void {
+    this.router.navigate(['/draws/all']);
+    this.closeMenus();
+  }
 }
