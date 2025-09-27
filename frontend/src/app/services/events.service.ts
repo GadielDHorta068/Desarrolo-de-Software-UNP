@@ -33,6 +33,15 @@ export class EventsService {
   }
 
   // recupera todos los eventos creados (usado para test rapido)
+  getAllByCreator(id: string): Observable<EventsTemp[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.get<EventsTemp[]>(`${this.apiUrl}/creator/`+id, { headers });
+  }
+
+  // recupera todos los eventos creados (usado para test rapido)
   getAllEvents(): Observable<EventsTemp[]> {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.authService.getToken()}`,

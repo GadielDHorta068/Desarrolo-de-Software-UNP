@@ -7,10 +7,10 @@ export enum StatusEvent {
 }
 
 export enum EventTypes {
-    GIVEAWAY = 'GIVEAWAY',
+    GIVEAWAY = 'GIVEAWAYS',     // sorteo
     CONTEST = 'CONTEST',
     TOURNAMENT = 'TOURNAMENT',
-    RAFFLES = 'RAFFLES'
+    RAFFLES = 'RAFFLES'         // rifa
 }
 
 export enum Category {

@@ -1,28 +1,32 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EventsCreate, EventsTemp, EventTypes } from '../../models/events.model';
 import { Category } from '../../services/category.service';
 import { configService } from '../../services/config.service';
 import { EventsService } from '../../services/events.service';
 import { AuthService, UserResponse } from '../../services/auth.service';
+import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
 
 @Component({
   selector: 'app-raffles-panel',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ModalInfo],
   templateUrl: './raffles-panel.html',
   styleUrl: './raffles-panel.css',
   standalone: true
 })
 export class RafflesPanel {
 
+  @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
+
   formPanel: FormGroup;
   userCurrent: UserResponse|null = null;
+  dataModal: InfoModal = {title: "Creación de eventos", message: ""};
 
   // tipos de sorteo
   types: {code: string, name: string}[] = [
     { code: EventTypes.RAFFLES, name: 'Rifa' },
-    { code: EventTypes.GIVEAWAY, name: 'Ruleta' },
+    { code: EventTypes.GIVEAWAY, name: 'Sorteo' },
   ];
 
   categories: Category[] = [];
@@ -52,16 +56,19 @@ export class RafflesPanel {
     return; */
     // console.log("[crearSorteo] => datos del sorteo: ", this.formPanel.value);
     const dataNewEvent = this.getNewEvent(this.formPanel.value);
-    console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
+    // console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
     this.eventService.createEvent(""+this.userCurrent?.id, dataNewEvent).subscribe({
       next: (response) => {
-        console.log('[initConfig] => nuevo evento creado: ', response);
-        // this.categories = response;
+          // console.log('[initConfig] => nuevo evento creado: ', response);
+        this.dataModal.message = "Evento creado correctamente";
+        this.modalInfoRef.open();
       },
       error: (error) => {
-        // Usar el mensaje específico del backend si está disponible
-        // this.errorMessage = error.userMessage || 'Error al registrar usuario. Por favor, intenta de nuevo.';
-        console.warn('[Eventos]: error al crear el evento: ', error);
+          console.warn('[Eventos]: error al crear el evento: ', error);
+          this.dataModal.message = "Error al crear el evento. ", error.error;
+          // NOTA: cuando la fecha esta errada no es un json la respuesta, corregir
+          this.modalInfoRef.open();
+        // });
       }
     });
   }
@@ -90,5 +97,8 @@ export class RafflesPanel {
       winnersCount: dataEvent.winners
     } as EventsCreate;
   }
+
+  // TODO: falta el reste del form luego de crear un soreo con exito
+  // TODO: se podria cambiar el color de fondo del modal o del titulo segun el tipo de response
 
 }
