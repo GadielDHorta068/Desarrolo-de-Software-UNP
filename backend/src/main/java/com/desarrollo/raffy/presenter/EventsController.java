@@ -170,6 +170,12 @@ public class EventsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/event-types")
+    public ResponseEntity<?> getAllEventTypes() {
+        EventTypes[] eventTypes = eventsService.getAllEventTypes();
+        return new ResponseEntity<>(eventTypes, HttpStatus.OK);
+    }
+
     @DeleteMapping("delete/id/{id}")
     public ResponseEntity<?> delete(@PathVariable @NotNull @Positive Long id) {
         if (id <= 0) {
