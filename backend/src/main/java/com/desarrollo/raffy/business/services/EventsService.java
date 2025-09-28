@@ -15,8 +15,11 @@ import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
+import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
+import com.desarrollo.raffy.util.ImageUtils;
+
 import org.modelmapper.ModelMapper;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
 
@@ -42,6 +45,7 @@ public class EventsService {
         event.setCreator(creator.get());
         event.setStatusEvent(StatusEvent.OPEN);
         event.setStartDate(LocalDate.now());
+        event.setImagen(ImageUtils.base64ToBytes(event.getImageBase64()));
         return eventsRepository.save(event);
     }
 
@@ -73,9 +77,12 @@ public class EventsService {
         existing.setCategory(event.getCategory());
         existing.setEndDate(event.getEndDate());
         existing.setWinnersCount(event.getWinnersCount());
+        existing.setImagen(ImageUtils.base64ToBytes(event.getImageBase64()));
 
         if(existing instanceof Giveaways && event instanceof Giveaways){
             // No hay campos específicos para actualizar en Giveaways por ahora
+        } else if(existing instanceof GuessingContest && event instanceof GuessingContest) {
+
         }
 
         return (T) eventsRepository.save(existing);
@@ -97,12 +104,17 @@ public class EventsService {
             }
             
             event.setStatusEvent(StatusEvent.CLOSED);
+            event.setImageBase64(ImageUtils.bytesToBase64(event.getImagen()));
             eventsRepository.save(event);
             
             return true;
         } catch (Exception e) {
             throw new RuntimeException("Error al finalizar el sorteo " + e.getStackTrace());
         }
+    }
+
+    public EventTypes[] getAllEventTypes() {
+        return EventTypes.values();
     }
 
     public List<EventSummaryDTO> getEventSummariesByCreator(Long creatorId){

@@ -33,6 +33,7 @@ import lombok.Setter;
 import lombok.AllArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 
 @Setter @Getter
 @NoArgsConstructor @AllArgsConstructor
@@ -93,6 +94,10 @@ public abstract class Events {
     @Column(name = "event_type", nullable = false)
     private EventTypes eventType;
 
+    @Column(name = "image")
+    private byte[] imagen;
+
+    private String imageBase64;
     /*
      * En esta funcion se valida que la fecha de inicio no sea posterior a la fecha fin
      * @throws IllegalArgumentException si la fecha de finalización es anterior a la fecha de inicio
