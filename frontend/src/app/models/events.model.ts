@@ -68,4 +68,5 @@ export interface EventsCreate {
     };
     eventType: EventTypes;
     winnersCount: number;
+    image: string;
 }

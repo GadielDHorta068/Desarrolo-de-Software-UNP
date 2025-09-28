@@ -59,8 +59,8 @@ export class RafflesPanel {
     if(this.imageEvent){
       this.formPanel.get('image')?.setValue(await this.getB64Image(this.imageEvent));
     }
-    console.log("[create] => datos del form: ", this.formPanel);
-    return;
+    // console.log("[create] => datos del form: ", this.formPanel);
+    // return;
     
     // console.log("[crearSorteo] => datos del sorteo: ", this.formPanel.value);
     const dataNewEvent = this.getNewEvent(this.formPanel.value);
@@ -114,7 +114,8 @@ export class RafflesPanel {
         id: Number(dataEvent.category)
       },
       endDate: dataEvent.executionDate,
-      winnersCount: dataEvent.winners
+      winnersCount: dataEvent.winners,
+      image: dataEvent.image
     } as EventsCreate;
   }
 
