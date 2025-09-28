@@ -75,7 +75,7 @@ public class EventsService {
         RegisteredUser creator = registeredUserRepository.findById(idUser)
             .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        if (!existing.getCreator().equals(creator)) {
+        if (!existing.getCreator().getId().equals(creator.getId())) {
                throw new IllegalArgumentException("No tienes permiso para actualizar este evento");
         }
             
