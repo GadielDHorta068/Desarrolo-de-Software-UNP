@@ -26,4 +26,5 @@ public class EventSummaryDTO {
     private Long categoryId;
     private String categoryName;
     private CreatorSummaryDTO creator;
+    private String imageUrl;
 }
