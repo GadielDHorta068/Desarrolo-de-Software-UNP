@@ -49,4 +49,13 @@ export class EventsService {
     });
     return this.http.get<EventsTemp[]>(`${this.apiUrl}/all`, { headers });
   }
+
+  // recupera todos los tipos de eventos permitidos
+  getTypesEvent(): Observable<string[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.get<string[]>(`${this.apiUrl}/event-types`, { headers });
+  }
 }

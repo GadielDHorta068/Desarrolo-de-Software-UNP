@@ -18,6 +18,11 @@ export enum Category {
     DEPORTE = 'DEPORTE'
 }
 
+export interface EventType {
+    code: string;
+    name: string;
+}
+
 export interface Events {
     id: number;
     title: string;

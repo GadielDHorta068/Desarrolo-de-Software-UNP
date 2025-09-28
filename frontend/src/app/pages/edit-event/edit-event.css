@@ -16,3 +16,24 @@
     grid-template-columns: 3fr 1fr;
     gap: 1rem;
 }
+/* un grilla con 2 columnas donde una tiene 2 filas y la otra ocupa el lugar de esas 2 filas */
+.grid-name-description-image{
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Dos columnas: izquierda más angosta */
+    grid-template-rows: auto auto; /* Dos filas */
+    gap: 10px; /* Espacio entre elementos */
+}
+.item-name {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.item-description {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.item-image {
+  grid-column: 2;
+  grid-row: 1 / span 2; /* Ocupa ambas filas */
+}

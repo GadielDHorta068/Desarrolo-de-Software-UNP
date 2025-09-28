@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EventsCreate, EventsTemp, EventTypes } from '../../models/events.model';
+import { EventsCreate, EventsTemp, EventType, EventTypes } from '../../models/events.model';
 import { Category } from '../../services/category.service';
 import { configService } from '../../services/config.service';
 import { EventsService } from '../../services/events.service';
 import { AuthService, UserResponse } from '../../services/auth.service';
 import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { LoaderImage } from '../../shared/components/loader-image/loader-image';
+import { ParseFileService } from '../../services/utils/parseFile.service';
 
 @Component({
   selector: 'app-raffles-panel',
@@ -24,22 +25,20 @@ export class RafflesPanel {
   userCurrent: UserResponse|null = null;
   dataModal: InfoModal = {title: "Creación de eventos", message: ""};
 
-  // tipos de sorteo
-  types: {code: string, name: string}[] = [
-    { code: EventTypes.RAFFLES, name: 'Rifa' },
-    { code: EventTypes.GIVEAWAY, name: 'Sorteo' },
-  ];
-
   categories: Category[] = [];
+  types: EventType[] = [];
+  imageEvent: File|null = null;
 
   constructor(
     private configService: configService,
     private eventService: EventsService,
-    private authService: AuthService
+    private authService: AuthService,
+    private parseFileService: ParseFileService
   ){
     this.userCurrent = this.authService.getCurrentUserValue();
     // console.log("[createEvent] => usuario actual: ", this.userCurrent);
-    this.categories = this.configService.getAllCategories();
+    this.categories = this.configService.getCategories();
+    this.types = this.configService.getEventTypes();
 
     // inicializacion del form de creacion de eventos
     this.formPanel = new FormGroup({
@@ -49,12 +48,20 @@ export class RafflesPanel {
       executionDate: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
       winners: new FormControl({value: 1, disabled: false}, {validators:[ Validators.required ]}),
       description: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+      image: new FormControl({value: null, disabled: false}),
     });
   }
 
-  public createDraw(){
+  public async createDraw(){
+    // aca deberiamos de recuperar la imagen seleccionada si la hay
     /* this.checkStatusControl();
     return; */
+    if(this.imageEvent){
+      this.formPanel.get('image')?.setValue(await this.getB64Image(this.imageEvent));
+    }
+    console.log("[create] => datos del form: ", this.formPanel);
+    return;
+    
     // console.log("[crearSorteo] => datos del sorteo: ", this.formPanel.value);
     const dataNewEvent = this.getNewEvent(this.formPanel.value);
     // console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
@@ -86,6 +93,18 @@ export class RafflesPanel {
   //   console.log("[validForm] => winners erros: ", this.formPanel.get('winners')?.errors);
   // }
 
+  
+  public onChangeSelectedImge(image: File|null){
+    // console.log("[imagen] => archivo seleccionado desde el componente de carga: ", image);
+    this.imageEvent = image;
+  }
+
+  private async getB64Image(image: File){
+    const respConvertImage = await this.parseFileService.convertImageToBase64(image);
+    // aca deberiamos ver cuando da error para enviar null
+    return respConvertImage;
+  }
+  
   private getNewEvent(dataEvent: any){
     return {
       title: dataEvent.title,
