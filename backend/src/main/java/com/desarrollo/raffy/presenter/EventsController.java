@@ -17,6 +17,7 @@ import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
+import com.desarrollo.raffy.util.ImageUtils;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.business.services.EventsService;
@@ -165,8 +166,8 @@ public class EventsController {
             return new ResponseEntity<>("No se encontraron eventos para el creador con ID: " + idCreator, HttpStatus.NOT_FOUND);
         }
         List<EventSummaryDTO> response = events.stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
-            .collect(Collectors.toList());
+            .map(eventsService::toEventSummaryDTO).collect(Collectors.toList());
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
