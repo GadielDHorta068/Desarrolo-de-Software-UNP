@@ -45,7 +45,14 @@ public class EventsService {
         event.setCreator(creator.get());
         event.setStatusEvent(StatusEvent.OPEN);
         event.setStartDate(LocalDate.now());
-        event.setImagen(ImageUtils.base64ToBytes(event.getImageBase64()));
+        
+        // Solo procesar la imagen si imageBase64 no es null
+        if (event.getImageBase64() != null && !event.getImageBase64().trim().isEmpty()) {
+            event.setImagen(ImageUtils.base64ToBytes(event.getImageBase64()));
+        } else {
+            event.setImagen(null);
+        }
+        
         return eventsRepository.save(event);
     }
 
