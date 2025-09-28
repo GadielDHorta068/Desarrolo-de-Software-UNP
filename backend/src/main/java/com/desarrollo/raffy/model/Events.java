@@ -34,6 +34,7 @@ import lombok.Setter;
 import lombok.AllArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Setter @Getter
 @NoArgsConstructor @AllArgsConstructor
@@ -98,6 +99,7 @@ public abstract class Events {
     private byte[] imagen;
 
     @Transient
+    @JsonProperty("image")
     private String imageBase64;
     /*
      * En esta funcion se valida que la fecha de inicio no sea posterior a la fecha fin
