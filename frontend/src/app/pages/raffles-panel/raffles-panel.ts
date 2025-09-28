@@ -7,10 +7,11 @@ import { configService } from '../../services/config.service';
 import { EventsService } from '../../services/events.service';
 import { AuthService, UserResponse } from '../../services/auth.service';
 import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
+import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 
 @Component({
   selector: 'app-raffles-panel',
-  imports: [CommonModule, ReactiveFormsModule, ModalInfo],
+  imports: [CommonModule, ReactiveFormsModule, ModalInfo, LoaderImage],
   templateUrl: './raffles-panel.html',
   styleUrl: './raffles-panel.css',
   standalone: true

@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EventsService } from '../../services/events.service';
 import { AuthService, UserResponse } from '../../services/auth.service';
+import { Router } from '@angular/router';
 // import { CommonModule } from '@angular/common';
 
 @Component({
@@ -21,6 +22,7 @@ export class PanelList {
 
   constructor(
     private eventService: EventsService,
+    private router: Router,
     private cdr: ChangeDetectorRef,
     private authService: AuthService
   ){}
@@ -37,6 +39,10 @@ export class PanelList {
     // console.log("[radioButton] => filtro seleccionado: ", filter);
     // this.events = filter ? this.totalEvents.filter((evt: Events) => evt.statusEvent == filter) : this.totalEvents;
     this.events = filter ? this.totalEvents.filter((evt) => evt.statusEvent == filter) : this.totalEvents;
+  }
+
+  public onRedirectToCreate(){
+    this.router.navigate(['/panel']);
   }
 
   private getDraws(){
