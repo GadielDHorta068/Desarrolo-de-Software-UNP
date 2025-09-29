@@ -5,7 +5,7 @@
 
     <!-- form de datos del sorteo -->
     <form [formGroup]="formEvent" (ngSubmit)="onSaveChanges()">
-        <div class="pt-2">
+        <!-- <div class="pt-2">
             <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Nombre (*)
             </label>
@@ -18,9 +18,8 @@
                 [ngClass]="formEvent.get('title')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' "
                 placeholder="Ej. Ruleta de Primavera"
             />
-        </div>
-
-         <div class="grid-description pt-2">
+        </div> -->
+         <!-- <div class="grid-description pt-2">
              <div class="pt-2">
                  <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                      Descripción (*)
@@ -42,9 +41,9 @@
                      <small>Aca iria el mismo loader de imagen que creo Gadiel XD </small>
                  </div>
              </div>
-        </div>
+        </div> -->
 
-        <!-- <div class="grid-name-description-image">
+        <div class="grid-name-description-image">
             <div class="pt-2 item-name">
                 <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Nombre (*)
@@ -71,10 +70,13 @@
                     class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02] resize-none"
                 ></textarea>
             </div>
-            <div>
+            <div class="pt-2 item-image">
+                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Imagen de tu evento
+                </label>
                 <app-loader-image></app-loader-image>
             </div>
-        </div> -->
+        </div>
 
         <div class="grid-custom-2 pt-2">
             <!-- careacteristicas del sorteo, tipo y categoria -->
