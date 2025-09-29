@@ -1,4 +1,4 @@
-import { Component, input, Input } from '@angular/core';
+import { Component, input, Input, OnInit, OnDestroy } from '@angular/core';
 import { Events, EventsTemp } from '../../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { HandleStatusPipe } from '../../../pipes/handle-status.pipe';
@@ -8,6 +8,8 @@ import { Router } from '@angular/router';
 import { AdminEventService } from '../../../services/admin/adminEvent.service';
 import { QuestionaryComponent } from '../../../pages/questionary/questionary.component';
 import { HandleDatePipe } from '../../../pipes/handle-date.pipe';
+import { AuthService, UserResponse } from '../../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-draw-card',
@@ -15,16 +17,84 @@ import { HandleDatePipe } from '../../../pipes/handle-date.pipe';
   templateUrl: './draw-card.html',
   styleUrl: './draw-card.css'
 })
-export class DrawCard {
+export class DrawCard implements OnInit, OnDestroy {
 
   // @Input() event!: Events|null;
   @Input() event!: EventsTemp|null;
   customBackground = input<string>('bg-white');
 
+  // Estado del usuario
+  currentUser: UserResponse | null = null;
+  isAuthenticated = false;
+  private authSubscription?: Subscription;
+
   constructor(
     private router: Router,
-    private adminEventService: AdminEventService
+    private adminEventService: AdminEventService,
+    private authService: AuthService
   ){}
+
+  ngOnInit() {
+    // Suscribirse al estado de autenticación
+    this.authSubscription = this.authService.isAuthenticated$.subscribe(
+      isAuth => {
+        this.isAuthenticated = isAuth;
+        if (isAuth) {
+          this.authService.getCurrentUser().subscribe({
+            next: (user) => {
+              this.currentUser = user;
+            },
+            error: (error) => {
+              console.error('Error obteniendo usuario actual:', error);
+              this.currentUser = null;
+            }
+          });
+        } else {
+          this.currentUser = null;
+        }
+      }
+    );
+  }
+
+  ngOnDestroy() {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
+  }
+
+  // Métodos para determinar qué botones mostrar
+  get isUserCreator(): boolean {
+    return this.currentUser?.id === this.event?.creator?.id;
+  }
+
+  get canUserRegister(): boolean {
+    // El usuario puede registrarse si:
+    // 1. Está autenticado
+    // 2. No es el creador del evento
+    // 3. No está ya registrado
+    return this.isAuthenticated && 
+           !this.isUserCreator && 
+           !this.event?.isUserRegistered;
+  }
+
+  get isUserRegistered(): boolean {
+    return this.event?.isUserRegistered === true;
+  }
+
+  get showEditButton(): boolean {
+    // Solo el creador puede ver el botón de editar
+    return this.isUserCreator;
+  }
+
+  get showRegisterButton(): boolean {
+    // Mostrar botón de registro si el usuario puede registrarse
+    return this.canUserRegister;
+  }
+
+  get showRegisteredStatus(): boolean {
+    // Mostrar estado "Inscrito" si el usuario está registrado
+    return this.isUserRegistered;
+  }
 
   // PRUEBA QUESTIONARY MODAL
     showModal = false; // el modal empieza desactivado

@@ -76,9 +76,8 @@ export const routes: Routes = [
     children: [
       {
         path: 'all',
-        loadComponent: () => import('./pages/panel-list/panel-list').then(m => m.PanelList),
-        // canActivate: [GuestGuard],
-        title: 'Mis sorteos - Raffy'
+        loadComponent: () => import('./pages/public-events/public-events').then(m => m.PublicEvents),
+        title: 'Sorteos públicos - Raffy'
       },
       { path: 'edit',
         loadComponent: () => import('./pages/edit-event/edit-event').then(m => m.EditEvent),

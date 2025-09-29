@@ -1,0 +1,19 @@
+<div class="container mx-auto px-4 py-6">
+  <h2 class="text-2xl font-bold text-emerald-600 mb-4">Sorteos públicos</h2>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-gray-500">Cargando eventos...</div>
+
+  <!-- Error -->
+  <div *ngIf="!loading && error" class="text-red-500">{{ error }}</div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && !error && events.length === 0" class="text-gray-400">
+    No hay eventos disponibles por ahora.
+  </div>
+
+  <!-- Events list -->
+  <div *ngIf="!loading && !error && events.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <app-draw-card *ngFor="let evt of events" [event]="evt" [customBackground]="'bg-zinc-800'"></app-draw-card>
+  </div>
+</div>

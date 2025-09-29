@@ -7,11 +7,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
+import com.desarrollo.raffy.business.repository.ParticipantRepository;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
@@ -34,6 +37,9 @@ public class EventsService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private ParticipantRepository participantRepository;
 
     @Transactional
     public <T extends Events> T create(T event, Long idUser) {
@@ -152,6 +158,15 @@ public class EventsService {
             dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
         }
 
+        // Verificar si el usuario actual está inscrito en el evento
+        RegisteredUser currentUser = getCurrentUser();
+        if (currentUser != null) {
+            boolean isRegistered = participantRepository.existsByParticipantAndEvent(currentUser, event);
+            dto.setIsUserRegistered(isRegistered);
+        } else {
+            dto.setIsUserRegistered(false);
+        }
+
         return dto;
     }
 
@@ -160,7 +175,33 @@ public class EventsService {
         if (event.getImagen() != null) {
             dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
         }
+        
+        // Verificar si el usuario actual está inscrito en el evento
+        RegisteredUser currentUser = getCurrentUser();
+        if (currentUser != null) {
+            boolean isRegistered = participantRepository.existsByParticipantAndEvent(currentUser, event);
+            dto.setIsUserRegistered(isRegistered);
+        } else {
+            dto.setIsUserRegistered(false);
+        }
+        
         return dto;
+    }
+
+    /**
+     * Obtiene el usuario actual del contexto de seguridad
+     * @return RegisteredUser o null si no hay usuario autenticado
+     */
+    private RegisteredUser getCurrentUser() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.getPrincipal() instanceof RegisteredUser) {
+                return (RegisteredUser) authentication.getPrincipal();
+            }
+        } catch (Exception e) {
+            // Si hay algún error, simplemente retornamos null
+        }
+        return null;
     }
 
 

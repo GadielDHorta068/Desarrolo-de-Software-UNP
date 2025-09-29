@@ -46,7 +46,14 @@ export class PanelList {
   }
 
   private getDraws(){
-    this.eventService.getAllByCreator(""+this.userCurrent?.id).subscribe({
+    // Verificar que hay un usuario autenticado antes de hacer la llamada
+    if (!this.userCurrent || !this.userCurrent.id) {
+      console.warn('[Eventos]: No hay usuario autenticado para cargar eventos');
+      this.router.navigate(['/login']); // Redirigir al login si no hay usuario
+      return;
+    }
+
+    this.eventService.getAllByCreator(this.userCurrent.id.toString()).subscribe({
         next: (response) => {
           // this.router.navigate(['/home']);
           console.log('[Eventos]: eventos recuperados: ', response);

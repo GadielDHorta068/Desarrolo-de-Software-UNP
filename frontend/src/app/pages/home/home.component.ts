@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { HeaderComponent } from '../../shared/components/header/header.component';
+import { AuthService, UserResponse } from '../../services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -9,13 +12,56 @@ import { HeaderComponent } from '../../shared/components/header/header.component
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit, OnDestroy {
   // Componente de página de inicio con landing page completa para RAFFIFY
+  
+  currentUser: UserResponse | null = null;
+  isAuthenticated = false;
+  authSubscription: Subscription = new Subscription();
+  showLoginModal = false;
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.authSubscription = this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      this.isAuthenticated = !!user;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.authSubscription.unsubscribe();
+  }
   
   // Método para manejar el click en "Crear Sorteo Gratis"
   onCreateRaffle(): void {
-    // TODO: Implementar navegación a la página de creación de sorteos
-    console.log('Navegando a crear sorteo...');
+    if (this.isAuthenticated) {
+      // Usuario autenticado, navegar a crear sorteo
+      this.router.navigate(['/raffles-panel']);
+    } else {
+      // Usuario no autenticado, mostrar modal de registro
+      this.showLoginModal = true;
+    }
+  }
+
+  // Método para cerrar el modal de login
+  closeLoginModal(): void {
+    this.showLoginModal = false;
+  }
+
+  // Método para navegar al registro
+  navigateToRegister(): void {
+    this.showLoginModal = false;
+    this.router.navigate(['/register']);
+  }
+
+  // Método para navegar al login
+  navigateToLogin(): void {
+    this.showLoginModal = false;
+    this.router.navigate(['/login']);
   }
   
   // Método para manejar el click en "Ver Demo"

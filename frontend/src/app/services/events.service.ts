@@ -43,11 +43,8 @@ export class EventsService {
 
   // recupera todos los eventos creados (usado para test rapido)
   getAllEvents(): Observable<EventsTemp[]> {
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${this.authService.getToken()}`,
-      'Content-Type': 'application/json'
-    });
-    return this.http.get<EventsTemp[]>(`${this.apiUrl}/all`, { headers });
+    // Endpoint público: no requiere encabezados de autorización
+    return this.http.get<EventsTemp[]>(`${this.apiUrl}/all`);
   }
 
   // recupera todos los tipos de eventos permitidos

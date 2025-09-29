@@ -27,4 +27,5 @@ public class EventSummaryDTO {
     private String categoryName;
     private CreatorSummaryDTO creator;
     private String imageUrl;
+    private Boolean isUserRegistered; // Indica si el usuario actual está inscrito en el evento
 }

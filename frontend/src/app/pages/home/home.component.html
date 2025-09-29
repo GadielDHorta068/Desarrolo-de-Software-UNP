@@ -229,3 +229,39 @@
     </div>
   </div>
 </section>
+
+<!-- Modal de Registro -->
+<div *ngIf="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" (click)="closeLoginModal()">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all" (click)="$event.stopPropagation()">
+    <div class="text-center">
+      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mb-4">
+        <svg class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        ¡Únete a RAFFIFY!
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        Para crear sorteos necesitas tener una cuenta. Es gratis y solo toma unos minutos.
+      </p>
+      <div class="flex flex-col gap-3">
+        <button 
+          (click)="navigateToRegister()"
+          class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+          Crear cuenta gratis
+        </button>
+        <button 
+          (click)="navigateToLogin()"
+          class="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-3 px-4 rounded-lg transition-colors">
+          Ya tengo cuenta
+        </button>
+      </div>
+      <button 
+        (click)="closeLoginModal()"
+        class="mt-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
