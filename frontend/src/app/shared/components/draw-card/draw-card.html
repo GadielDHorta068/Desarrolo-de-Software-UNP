@@ -17,8 +17,12 @@
         </div>
         <!-- columna de imagen -->
         <div class="basis-1/2">
-            <!-- <img src="" alt=""> -->
-            <img src="assets/account_24.svg" class="mx-auto min-w-[100px]">
+            <img 
+                [src]="event?.imageUrl ? 'data:image/jpeg;base64,' + event?.imageUrl : 'assets/account_24.svg'" 
+                [alt]="event?.title || 'Imagen del evento'"
+                class="mx-auto min-w-[100px] max-h-[100px] object-cover rounded-lg"
+                [class.border]="event?.imageUrl"
+                [class.border-gray-300]="event?.imageUrl">
         </div>
     </div>
 

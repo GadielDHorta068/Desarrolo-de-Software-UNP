@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { QuestionaryService } from '../../services/questionary.service';
 import { GuestUser } from './guestUser';
+import { NotificationService } from '../../services/notification.service';
 
 
 @Component({
@@ -22,8 +23,22 @@ export class QuestionaryComponent {
     guestUser!: GuestUser;
 
     constructor(
-        private questionaryService: QuestionaryService
+        private questionaryService: QuestionaryService,
+        private notificationService: NotificationService
     ) {}
+
+    ngOnInit() {
+        this.guestUser = <GuestUser> {};
+    }
+
+    validatePhoneInput(event: KeyboardEvent) {
+        const allowedChars = /[0-9+]/;
+        const inputChar = event.key;
+
+        if (!allowedChars.test(inputChar)) {
+            event.preventDefault();
+        }
+    }
 
     closeModal(): void {
         this.close.emit();
@@ -36,12 +51,14 @@ export class QuestionaryComponent {
         ).subscribe({
             next: (responseMessage) => {
                 console.log('Guardado en backend:', responseMessage); // borrar
+                this.notificationService.notifySuccess('Registo al sorteo exitoso');
                 this.closeModal();
-                alert('Usuario guardado con éxito');
+                // alert('Usuario participante registrado al sorteo exitosamente');
             },
             error: (errorMessage) => {
                 console.error('Error:', errorMessage);
-                alert('Error al guardar, intentá de nuevo')
+                this.notificationService.notifyError('Error al guardar, intentá de nuevo');
+                // alert('Error al guardar, intentá de nuevo')
             }
         });
     }

@@ -182,7 +182,7 @@ public class AuthService {
     }
 
     public UserResponse getUserByNickname(String nickname) {
-        RegisteredUser user = userRepository.findByNickname(nickname)
+        RegisteredUser user = userRepository.findByNicknameIgnoreCase(nickname)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con nickname: " + nickname));
         return mapToUserResponse(user);
     }

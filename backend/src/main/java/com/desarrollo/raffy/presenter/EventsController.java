@@ -159,6 +159,18 @@ public class EventsController {
         }
     }
 
+    @PutMapping("update/giveaway/{idEvent}/user/{idUser}")
+    public ResponseEntity<?> updateGiveaway(
+            @PathVariable Long idEvent,
+            @PathVariable Long idUser,
+            @RequestBody Giveaways event) {
+
+        Giveaways updatedEvent = eventsService.update(idEvent, event, idUser);
+        EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
+        return ResponseEntity.ok(dto);
+    }
+
+
     @GetMapping("/creator/{idCreator}")
     public ResponseEntity<?> getEventsByCreator(@PathVariable Long idCreator){
         List<Events> events = eventsService.findByEventsCreator(idCreator);
