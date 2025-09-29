@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, input, Input, OnInit, OnDestroy } from '@angular/core';
-import { Events, EventsTemp } from '../../../models/events.model';
+import { Events, EventsTemp, StatusEvent } from '../../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { HandleStatusPipe } from '../../../pipes/handle-status.pipe';
 import { HandleIconTypePipe } from '../../../pipes/handle-icon-type.pipe';
@@ -10,6 +10,8 @@ import { QuestionaryComponent } from '../../../pages/questionary/questionary.com
 import { HandleDatePipe } from '../../../pipes/handle-date.pipe';
 import { AuthService, UserResponse } from '../../../services/auth.service';
 import { Subscription } from 'rxjs';
+import { EventsService } from '../../../services/events.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-draw-card',
@@ -29,12 +31,15 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   isAuthenticated = false;
   private authSubscription?: Subscription;
   isCreator: boolean = false;
+  public StatusEvent = StatusEvent;
 
   constructor(
     private router: Router,
     private adminEventService: AdminEventService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private eventsService: EventsService,
+    private notificationService: NotificationService
   ){
     this.userCurrent = this.authService.getCurrentUserValue();
     console.log("[card-event] => usuario actual: ", this.userCurrent);
@@ -80,7 +85,8 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     // 3. No está ya registrado
     return this.isAuthenticated && 
            !this.isUserCreator && 
-           !this.event?.isUserRegistered;
+           !this.event?.isUserRegistered &&
+           this.event?.statusEvent === StatusEvent.OPEN;
   }
 
   get isUserRegistered(): boolean {
@@ -128,6 +134,44 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   public onIncript(){
     console.log("Presiona incribirse!");
     alert("Se apreto INCRIBIRME");
+  }
+
+  // Cerrar inscripciones (solo creador)
+  public closeRegistrations(): void {
+    if (!this.isUserCreator || !this.event?.id) return;
+    if (!this.userCurrent?.id) return;
+    this.eventsService.updateEventStatus(this.event.id, this.userCurrent.id, StatusEvent.CLOSED).subscribe({
+      next: (updated) => {
+        if (this.event) {
+          this.event.statusEvent = StatusEvent.CLOSED;
+        }
+        this.notificationService.notifySuccess('Inscripciones cerradas');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al cerrar inscripciones:', err);
+        this.notificationService.notifyError('No se pudo cerrar inscripciones');
+      }
+    });
+  }
+
+  // Finalizar evento (solo creador)
+  public finalizeEvent(): void {
+    if (!this.isUserCreator || !this.event?.id) return;
+    if (!this.userCurrent?.id) return;
+    this.eventsService.updateEventStatus(this.event.id, this.userCurrent.id, StatusEvent.FINISHED).subscribe({
+      next: (updated) => {
+        if (this.event) {
+          this.event.statusEvent = StatusEvent.FINISHED;
+        }
+        this.notificationService.notifySuccess('Evento finalizado. Ganador elegido.');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al finalizar evento:', err);
+        this.notificationService.notifyError('No se pudo finalizar el evento');
+      }
+    });
   }
 
   private reviewCreator(){

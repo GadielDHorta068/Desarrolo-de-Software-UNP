@@ -1,20 +1,25 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { EventsService } from '../../services/events.service';
-import { EventsTemp } from '../../models/events.model';
+import { EventsTemp, StatusEvent } from '../../models/events.model';
 import { DrawCard } from '../../shared/components/draw-card/draw-card';
 
 @Component({
   selector: 'app-public-events',
   standalone: true,
-  imports: [CommonModule, DrawCard],
+  imports: [CommonModule, FormsModule, RouterModule, DrawCard],
   templateUrl: './public-events.html',
   styleUrl: './public-events.css'
 })
 export class PublicEvents implements OnInit {
   events: EventsTemp[] = [];
+  filteredEvents: EventsTemp[] = [];
   loading = true;
   error = '';
+  public StatusEvent = StatusEvent;
+  selectedStatus: 'ALL' | StatusEvent = 'ALL';
 
   constructor(
     private eventsService: EventsService,
@@ -29,6 +34,7 @@ export class PublicEvents implements OnInit {
     this.eventsService.getAllEvents().subscribe({
       next: (response) => {
         this.events = response || [];
+        this.applyFilter(this.selectedStatus);
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -39,5 +45,14 @@ export class PublicEvents implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  public applyFilter(status: 'ALL' | StatusEvent): void {
+    this.selectedStatus = status;
+    if (status === 'ALL') {
+      this.filteredEvents = this.events;
+    } else {
+      this.filteredEvents = this.events.filter(evt => evt.statusEvent === status);
+    }
   }
 }

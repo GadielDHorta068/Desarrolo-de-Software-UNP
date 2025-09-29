@@ -363,4 +363,65 @@ public class EventsController {
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
+    @PutMapping("/{idEvent}/status/user/{idUser}")
+    public ResponseEntity<?> updateStatusEvent(
+            @PathVariable("idEvent") Long idEvent,
+            @PathVariable("idUser") Long idUser,
+            @RequestBody Map<String, String> payload) {
+
+        // Validar existencia del evento
+        Events existingEvent = eventsService.getById(idEvent);
+        if (existingEvent == null) {
+            return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
+        }
+
+        // Validar que el usuario sea el creador del evento
+        if (existingEvent.getCreator() == null || !existingEvent.getCreator().getId().equals(idUser)) {
+            return new ResponseEntity<>("No autorizado: solo el creador puede cambiar el estado", HttpStatus.FORBIDDEN);
+        }
+
+        // Validar cuerpo de la petición
+        String statusStr = payload.get("statusEvent");
+        if (statusStr == null || statusStr.trim().isEmpty()) {
+            return new ResponseEntity<>("Debe especificar el estado del evento (statusEvent)", HttpStatus.BAD_REQUEST);
+        }
+
+        // Normalizar alias del estado desde el frontend
+        // FINISHED (frontend) -> FINALIZED (backend)
+        if ("FINISHED".equalsIgnoreCase(statusStr)) {
+            statusStr = "FINALIZED";
+        }
+
+        StatusEvent requestedStatus;
+        try {
+            requestedStatus = StatusEvent.valueOf(statusStr.trim());
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity<>("Estado inválido: " + statusStr, HttpStatus.BAD_REQUEST);
+        }
+
+        // Si ya está en el estado solicitado, devolver el resumen actual
+        if (existingEvent.getStatusEvent() == requestedStatus) {
+            EventSummaryDTO dto = eventsService.getEventSummaryById(idEvent);
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        }
+
+        // Transiciones soportadas: OPEN -> CLOSED, CLOSED -> FINALIZED
+        try {
+            if (requestedStatus == StatusEvent.CLOSED) {
+                // Cerrar inscripciones del evento
+                eventsService.closeEvent(idEvent);
+            } else if (requestedStatus == StatusEvent.FINALIZED) {
+                // Finalizar sorteo (seleccionar ganadores si aplica)
+                giveawaysService.finalizedGiveaway(idEvent);
+            } else {
+                return new ResponseEntity<>("Transición de estado no soportada", HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("No se pudo actualizar el estado: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        EventSummaryDTO dto = eventsService.getEventSummaryById(idEvent);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
 }
