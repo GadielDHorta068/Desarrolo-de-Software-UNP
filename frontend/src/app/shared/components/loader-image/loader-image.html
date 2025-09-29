@@ -1,9 +1,7 @@
-<p>loader-image works!</p>
-
-<!-- <div>
-    <label for="imagen" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        Foto de Perfil
-    </label>
+<div>
+    <!-- <label for="imagen" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Imagen del evento
+    </label> -->
     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-emerald-400 dark:hover:border-emerald-500 transition-colors duration-300"
         [class.border-emerald-400]="selectedImage || currentImagePreview"
         [class.bg-emerald-50]="selectedImage || currentImagePreview"
@@ -42,4 +40,62 @@
         </div>
     </div>
 </div>
- -->
+
+<!-- Image Cropper Modal -->
+<div *ngIf="showImageCropper" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 image-cropper-modal">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto image-cropper-content">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recortar Imagen</h3>
+        <button (click)="cancelCrop()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        </button>
+    </div>
+    
+    <div class="mb-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        Ajusta el área de recorte para tu imagen de perfil. La imagen se recortará en formato cuadrado (1:1).
+        </p>
+        
+        <div class="flex justify-center">
+        <image-cropper
+            [imageChangedEvent]="imageChangedEvent"
+            [maintainAspectRatio]="true"
+            [aspectRatio]="1"
+            [resizeToWidth]="300"
+            [cropperMinWidth]="100"
+            [onlyScaleDown]="true"
+            [roundCropper]="false"
+            [canvasRotation]="0"
+            [transform]="{}"
+            [alignImage]="'center'"
+            [style.max-height.px]="400"
+            format="png"
+            (imageCropped)="imageCropped($event)"
+            (imageLoaded)="imageLoaded()"
+            (cropperReady)="cropperReady()"
+            (loadImageFailed)="loadImageFailed()">
+        </image-cropper>
+        </div>
+    </div>
+    
+    <div class="flex justify-end space-x-3">
+        <button
+        type="button"
+        (click)="cancelCrop()"
+        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        >
+        Cancelar
+        </button>
+        <button
+        type="button"
+        (click)="confirmCrop()"
+        [disabled]="!isCropperReady || !croppedImage"
+        class="px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+        Confirmar Recorte
+        </button>
+    </div>
+    </div>
+</div>

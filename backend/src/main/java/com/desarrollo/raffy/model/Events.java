@@ -22,6 +22,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,6 +34,7 @@ import lombok.Setter;
 import lombok.AllArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Setter @Getter
 @NoArgsConstructor @AllArgsConstructor
@@ -93,6 +95,12 @@ public abstract class Events {
     @Column(name = "event_type", nullable = false)
     private EventTypes eventType;
 
+    @Column(name = "image")
+    private byte[] imagen;
+
+    @Transient
+    @JsonProperty("image")
+    private String imageBase64;
     /*
      * En esta funcion se valida que la fecha de inicio no sea posterior a la fecha fin
      * @throws IllegalArgumentException si la fecha de finalización es anterior a la fecha de inicio

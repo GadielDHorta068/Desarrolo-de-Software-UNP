@@ -7,11 +7,12 @@ import { Subscription } from 'rxjs';
 import { Events, EventsTemp } from '../../models/events.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClipboardModule } from '@angular/cdk/clipboard';
+import { DrawCard } from '../../shared/components/draw-card/draw-card';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, ClipboardModule],
+  imports: [CommonModule, HttpClientModule, ClipboardModule, DrawCard],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })
@@ -62,8 +63,7 @@ export class Profile implements OnInit, OnDestroy {
         if (currentUser) {
           this.userProfile = currentUser;
           this.loading = false;
-          // this.loadUserEvents(currentUser.id);
-          this.loadUserEventsTemp();
+          this.loadUserEventsByCreator(currentUser.id);
         } else {
           this.loadUserProfile();
         }
@@ -82,8 +82,7 @@ export class Profile implements OnInit, OnDestroy {
             user.imagen = user.imagen.trim();
           }
           this.userProfile = user;
-          // this.loadUserEvents(user.id);
-          this.loadUserEventsTemp();
+          this.loadUserEventsByCreator(user.id);
           this.cdr.detectChanges();
         }
         this.loading = false;
@@ -125,8 +124,7 @@ export class Profile implements OnInit, OnDestroy {
         if (user) {
           this.userProfile = user;
           this.loading = false;
-          // this.loadUserEvents(user.id);
-          this.loadUserEventsTemp();
+          this.loadUserEventsByCreator(user.id);
         } else {
           this.error = 'No se pudo cargar el perfil del usuario';
           this.loading = false;
@@ -140,28 +138,17 @@ export class Profile implements OnInit, OnDestroy {
     });
   }
 
-  // private loadUserEvents(userId: number) {
-  //   this.eventsService.getEventsByParticipantId(userId).subscribe({
-  //     next: (events) => {
-  //       this.userEvents = events;
-  //       this.cdr.detectChanges();
-  //     },
-  //     error: (err: Error) => {
-  //       console.error('Error loading user events:', err);
-  //       // Inicializar eventos como array vacío para evitar errores en la vista
-  //       this.userEvents = [];
-  //       this.cdr.detectChanges();
-  //     }
-  //   });
-  // }
-  private loadUserEventsTemp() {
-    this.eventsService.getAllEvents().subscribe({
+  private loadUserEventsByCreator(userId: number) {
+    if (this.eventsSubscription) {
+      this.eventsSubscription.unsubscribe();
+    }
+    this.eventsSubscription = this.eventsService.getAllByCreator(userId.toString()).subscribe({
       next: (events) => {
         this.userEvents = events;
         this.cdr.detectChanges();
       },
       error: (err: Error) => {
-        console.error('Error loading user events:', err);
+        console.error('Error loading creator events:', err);
         // Inicializar eventos como array vacío para evitar errores en la vista
         this.userEvents = [];
         this.cdr.detectChanges();

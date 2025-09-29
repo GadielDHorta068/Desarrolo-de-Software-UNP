@@ -1,59 +1,26 @@
 <div class="container">
     <div class="max-w-2xl">
-        <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">Edición de evento</h2>
+        <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">Edita tu evento</h2>
     </div>
-
-    <!-- datos del creador -->
-    <!-- <div>
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mt-6">Datos del creador</h3>
-    </div>
-     <div class="flex items-center space-x-4 p-4 rounded shadow-md">
-         <div class="w-[5%]">
-             <img src="assets/account_24.svg" class="w-[100%] invert">
-         </div>
-        <div>
-            <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Username
-            </label>
-            <p class="text-sm text-gray-700">alex@email.com</p>
-        </div>
-    </div> -->
 
     <!-- form de datos del sorteo -->
     <form [formGroup]="formEvent" (ngSubmit)="onSaveChanges()">
-         <div>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mt-2 mb-2">Datos del sorteo</h3>
-        </div>
         <div class="pt-2">
             <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Nombre (*)
             </label>
-            <!-- <input
-                type="text"
-                id="titulo"
-                formControlName="title"
-                name="titulo"
-                (focus)="onEmailFocus()"
-                (blur)="onEmailBlur()"
-                class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
-                [class.border-red-500]="getFieldError('email')"
-                [class.ring-4]="emailFocused"
-                [class.ring-indigo-200]="emailFocused"
-                placeholder="Ej. Ruleta de Primavera"
-            /> -->
             <input
                 type="text"
                 id="titulo"
                 formControlName="title"
                 name="titulo"
-                class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
+                class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                [ngClass]="formEvent.get('title')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' "
                 placeholder="Ej. Ruleta de Primavera"
             />
         </div>
 
-        <!-- descripcion del sorteo -->
          <div class="grid-description pt-2">
-            <!-- texto descriptivo -->
              <div class="pt-2">
                  <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                      Descripción (*)
@@ -66,7 +33,7 @@
                      class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02] resize-none"
                  ></textarea>
              </div>
-             <!-- imagen -->
+             
              <div>
                  <label for="imageDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                      Imagen ilustrativa de tu sorteo
@@ -75,7 +42,39 @@
                      <small>Aca iria el mismo loader de imagen que creo Gadiel XD </small>
                  </div>
              </div>
-         </div>
+        </div>
+
+        <!-- <div class="grid-name-description-image">
+            <div class="pt-2 item-name">
+                <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Nombre (*)
+                </label>
+                <input
+                    type="text"
+                    id="titulo"
+                    formControlName="title"
+                    name="titulo"
+                    class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    [ngClass]="formEvent.get('title')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' "
+                    placeholder="Ej. Ruleta de Primavera"
+                />
+            </div>
+            <div class="pt-2 item-description">
+                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Descripción (*)
+                </label>
+                <textarea
+                    id="description"
+                    formControlName="description"
+                    name="Descripción de tu sorteo"
+                    rows="3"
+                    class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02] resize-none"
+                ></textarea>
+            </div>
+            <div>
+                <app-loader-image></app-loader-image>
+            </div>
+        </div> -->
 
         <div class="grid-custom-2 pt-2">
             <!-- careacteristicas del sorteo, tipo y categoria -->
@@ -97,14 +96,14 @@
                 
                 <select formControlName="category" id="category" class="bg-gray-800 text-white rounded-md px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">-- Seleccioná una categoria --</option>
-                    <option *ngFor="let category of categories" [value]="category.code">
+                    <option *ngFor="let category of categories" [value]="category.id">
                         {{ category.name }}
                     </option>
                 </select>
             </div>
         </div>
 
-        <div class="grid-custom-2 pt-2">
+        <div class="grid-custom-2 pt-4">
             <!-- fecha de realizacion -->
             <div>
                 <label for="winners" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

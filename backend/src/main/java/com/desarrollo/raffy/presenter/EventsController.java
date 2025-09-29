@@ -17,6 +17,7 @@ import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
+import com.desarrollo.raffy.util.ImageUtils;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.business.services.EventsService;
@@ -158,6 +159,18 @@ public class EventsController {
         }
     }
 
+    @PutMapping("update/giveaway/{idEvent}/user/{idUser}")
+    public ResponseEntity<?> updateGiveaway(
+            @PathVariable Long idEvent,
+            @PathVariable Long idUser,
+            @RequestBody Giveaways event) {
+
+        Giveaways updatedEvent = eventsService.update(idEvent, event, idUser);
+        EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
+        return ResponseEntity.ok(dto);
+    }
+
+
     @GetMapping("/creator/{idCreator}")
     public ResponseEntity<?> getEventsByCreator(@PathVariable Long idCreator){
         List<Events> events = eventsService.findByEventsCreator(idCreator);
@@ -165,9 +178,15 @@ public class EventsController {
             return new ResponseEntity<>("No se encontraron eventos para el creador con ID: " + idCreator, HttpStatus.NOT_FOUND);
         }
         List<EventSummaryDTO> response = events.stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
-            .collect(Collectors.toList());
+            .map(eventsService::toEventSummaryDTO).collect(Collectors.toList());
+
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/event-types")
+    public ResponseEntity<?> getAllEventTypes() {
+        EventTypes[] eventTypes = eventsService.getAllEventTypes();
+        return new ResponseEntity<>(eventTypes, HttpStatus.OK);
     }
 
     @DeleteMapping("delete/id/{id}")

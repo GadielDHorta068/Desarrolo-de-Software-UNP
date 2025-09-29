@@ -4,6 +4,8 @@ import { DrawCard } from '../../shared/components/draw-card/draw-card';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EventsService } from '../../services/events.service';
+import { AuthService, UserResponse } from '../../services/auth.service';
+import { Router } from '@angular/router';
 // import { CommonModule } from '@angular/common';
 
 @Component({
@@ -14,76 +16,19 @@ import { EventsService } from '../../services/events.service';
 })
 export class PanelList {
 
-  // totalEvents: Events[] = [
-  //   {
-  //     id: 123,
-  //     title: 'Sorteo de Tablet Samsung',
-  //     endDate: '2025-09-20',
-  //     description: "Aca iria una descripcion algo larga del evento que posiblemente abarque todo el ancho",
-  //     startDate: "fecha de incio",
-  //     category: {id: 1, name: "deporte"},
-  //     statusEvent: StatusEvent.ACTIVE,
-  //     eventType: EventTypes.CONTEST,
-  //     winnersCount: 1
-  //   },
-  //   {
-  //     id: 12,
-  //     title: 'Sorteo de Auriculares JBL',
-  //     endDate: '2025-09-25',
-  //     description: "la descripcion 2",
-  //     startDate: "fecha de incio",
-  //     category: {id: 1, name: "deporte"},
-  //     statusEvent: StatusEvent.BLOCKED,
-  //     eventType: EventTypes.GIVEAWAY,
-  //     winnersCount: 1
-  //   },
-  //   {
-  //     id: 11,
-  //     title: 'Sorteo Gift Card $1000',
-  //     endDate: '2025-09-30',
-  //     description: "la descripcion 3",
-  //     startDate: "fecha de incio",
-  //     category: {id: 1, name: "escolar"},
-  //     statusEvent: StatusEvent.FINISHED,
-  //     eventType: EventTypes.GIVEAWAY,
-  //     winnersCount: 1
-  //   },
-  //   {
-  //     id: 983,
-  //     title: 'Sorteo de Bicicleta Eléctrica',
-  //     endDate: '2025-10-05',
-  //     description: "la descripcion 4",
-  //     startDate: "fecha de incio",
-  //     category: {id: 1, name: "deporte"},
-  //     statusEvent: StatusEvent.BLOCKED,
-  //     eventType: EventTypes.GIVEAWAY,
-  //     winnersCount: 1
-  //   },
-  //   {
-  //     id: 762,
-  //     title: 'Sorteo de Smartwatch',
-  //     endDate: '2025-10-10',
-  //     description: "la descripcion 5",
-  //     startDate: "fecha de incio",
-  //     category: {id: 1, name: "deporte"},
-  //     statusEvent: StatusEvent.CLOSED,
-  //     eventType: EventTypes.TOURNAMENT,
-  //     winnersCount: 1
-  //   }
-  // ];
-
-  // events: Events[] = [];
-
+  userCurrent: UserResponse|null = null;
   totalEvents: EventsTemp[] = [];
   events: EventsTemp[] = [];
 
   constructor(
     private eventService: EventsService,
-    private cdr: ChangeDetectorRef
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
   ){}
 
   ngOnInit(): void {
-    // this.events = this.totalEvents;
+    this.userCurrent = this.authService.getCurrentUserValue();
     this.getDraws();
   } 
 
@@ -96,8 +41,12 @@ export class PanelList {
     this.events = filter ? this.totalEvents.filter((evt) => evt.statusEvent == filter) : this.totalEvents;
   }
 
+  public onRedirectToCreate(){
+    this.router.navigate(['/panel']);
+  }
+
   private getDraws(){
-    this.eventService.getAllEvents().subscribe({
+    this.eventService.getAllByCreator(""+this.userCurrent?.id).subscribe({
         next: (response) => {
           // this.router.navigate(['/home']);
           console.log('[Eventos]: eventos recuperados: ', response);

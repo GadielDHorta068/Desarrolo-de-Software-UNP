@@ -15,8 +15,11 @@ import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
+import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
+import com.desarrollo.raffy.util.ImageUtils;
+
 import org.modelmapper.ModelMapper;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
 
@@ -42,6 +45,14 @@ public class EventsService {
         event.setCreator(creator.get());
         event.setStatusEvent(StatusEvent.OPEN);
         event.setStartDate(LocalDate.now());
+        
+        // Solo procesar la imagen si imageBase64 no es null
+        if (event.getImageBase64() != null && !event.getImageBase64().trim().isEmpty()) {
+            event.setImagen(ImageUtils.base64ToBytes(event.getImageBase64()));
+        } else {
+            event.setImagen(null);
+        }
+        
         return eventsRepository.save(event);
     }
 
@@ -64,7 +75,7 @@ public class EventsService {
         RegisteredUser creator = registeredUserRepository.findById(idUser)
             .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        if (!existing.getCreator().equals(creator)) {
+        if (!existing.getCreator().getId().equals(creator.getId())) {
                throw new IllegalArgumentException("No tienes permiso para actualizar este evento");
         }
             
@@ -74,8 +85,22 @@ public class EventsService {
         existing.setEndDate(event.getEndDate());
         existing.setWinnersCount(event.getWinnersCount());
 
+        if(event.getImageBase64() != null && !event.getImageBase64().isEmpty()){
+        existing.setImagen(ImageUtils.base64ToBytes(event.getImageBase64()));
+        } else{
+            existing.setImagen(existing.getImagen());
+        }
+
         if(existing instanceof Giveaways && event instanceof Giveaways){
             // No hay campos específicos para actualizar en Giveaways por ahora
+        } else if(existing instanceof GuessingContest && event instanceof GuessingContest) {
+            GuessingContest existingContest = (GuessingContest) existing;
+            GuessingContest newContest = (GuessingContest) event;
+
+            existingContest.setMinValue(newContest.getMinValue());
+            existingContest.setMaxValue(newContest.getMaxValue());
+            existingContest.setTargetNumber(newContest.getTargetNumber());
+            existingContest.setMaxAttempts(newContest.getMaxAttempts());
         }
 
         return (T) eventsRepository.save(existing);
@@ -83,6 +108,7 @@ public class EventsService {
 
     ///Método para traer todos los eventos(Giveaways, Raffles, etc) dado el id del creador
     public List<Events> findByEventsCreator(Long IdCreator){
+
         return eventsRepository.findByCreatorId(IdCreator);
     }
 
@@ -105,11 +131,38 @@ public class EventsService {
         }
     }
 
+    public EventTypes[] getAllEventTypes() {
+        return EventTypes.values();
+    }
+
     public List<EventSummaryDTO> getEventSummariesByCreator(Long creatorId){
         return eventsRepository.findByCreatorId(creatorId).stream()
             .map(e -> modelMapper.map(e, EventSummaryDTO.class))
             .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public EventSummaryDTO getEventSummaryById(Long id){
+        Events event = eventsRepository.findByIdWithDetails(id)
+            .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+
+        EventSummaryDTO dto = modelMapper.map(event, EventSummaryDTO.class);
+
+        if(event.getImagen() != null){
+            dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
+        }
+
+        return dto;
+    }
+
+    public EventSummaryDTO toEventSummaryDTO(Events event) {
+        EventSummaryDTO dto = modelMapper.map(event, EventSummaryDTO.class);
+        if (event.getImagen() != null) {
+            dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
+        }
+        return dto;
+    }
+
 
     public List<EventSummaryDTO> getAllEventSummaries(){
         return eventsRepository.findAllWithDetails().stream()
@@ -169,12 +222,6 @@ public class EventsService {
         return eventsRepository.findByParticipantId(userId).stream()
             .map(e -> modelMapper.map(e, EventSummaryDTO.class))
             .collect(Collectors.toList());
-    }
-
-    public EventSummaryDTO getEventSummaryById(Long id){
-        return eventsRepository.findByIdWithDetails(id)
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
-            .orElse(null);
     }
 
     public boolean delete(Long id) {

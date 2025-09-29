@@ -7,15 +7,20 @@ export enum StatusEvent {
 }
 
 export enum EventTypes {
-    GIVEAWAY = 'GIVEAWAY',
+    GIVEAWAY = 'GIVEAWAYS',     // sorteo
     CONTEST = 'CONTEST',
     TOURNAMENT = 'TOURNAMENT',
-    RAFFLES = 'RAFFLES'
+    RAFFLES = 'RAFFLES'         // rifa
 }
 
 export enum Category {
     SOLIDARIO = 'SOLIDARIO',
     DEPORTE = 'DEPORTE'
+}
+
+export interface EventType {
+    code: string;
+    name: string;
 }
 
 export interface Events {
@@ -63,4 +68,5 @@ export interface EventsCreate {
     };
     eventType: EventTypes;
     winnersCount: number;
+    image: string;
 }
