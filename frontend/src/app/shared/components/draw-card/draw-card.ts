@@ -1,4 +1,4 @@
-import { Component, input, Input, OnInit, OnDestroy } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, input, Input, OnInit, OnDestroy } from '@angular/core';
 import { Events, EventsTemp } from '../../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { HandleStatusPipe } from '../../../pipes/handle-status.pipe';
@@ -17,8 +17,9 @@ import { Subscription } from 'rxjs';
   templateUrl: './draw-card.html',
   styleUrl: './draw-card.css'
 })
-export class DrawCard implements OnInit, OnDestroy {
+export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
 
+  userCurrent: UserResponse|null = null;
   // @Input() event!: Events|null;
   @Input() event!: EventsTemp|null;
   customBackground = input<string>('bg-white');
@@ -27,12 +28,17 @@ export class DrawCard implements OnInit, OnDestroy {
   currentUser: UserResponse | null = null;
   isAuthenticated = false;
   private authSubscription?: Subscription;
+  isCreator: boolean = false;
 
   constructor(
     private router: Router,
     private adminEventService: AdminEventService,
-    private authService: AuthService
-  ){}
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
+  ){
+    this.userCurrent = this.authService.getCurrentUserValue();
+    console.log("[card-event] => usuario actual: ", this.userCurrent);
+  }
 
   ngOnInit() {
     // Suscribirse al estado de autenticación
@@ -110,6 +116,10 @@ export class DrawCard implements OnInit, OnDestroy {
     }
   // PRUEBA QUESTIONARY MODAL
 
+  ngAfterViewInit(){
+    this.reviewCreator();
+  }
+
   public redirectEdit() {
     this.adminEventService.setSelectedEvent(this.event);
     this.router.navigate(['/event-edit']);
@@ -118,6 +128,20 @@ export class DrawCard implements OnInit, OnDestroy {
   public onIncript(){
     console.log("Presiona incribirse!");
     alert("Se apreto INCRIBIRME");
+  }
+
+  private reviewCreator(){
+    // console.log("[card-event] => datos del usuario: ", this.userCurrent);
+    // console.log("[card-event] => datos del evento: ", this.event);
+    // console.log("[card-event] => es el creador: ", (this.userCurrent?.id == this.event?.creator.id));
+    
+    if( this.userCurrent?.id && this.event?.creator.id && (this.userCurrent?.id == this.event?.creator.id)){
+      this.isCreator = true;
+    }
+    else{
+      this.isCreator = false;
+    }
+    this.cdr.detectChanges();
   }
   
 }
