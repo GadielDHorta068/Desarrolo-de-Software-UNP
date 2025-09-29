@@ -57,7 +57,8 @@ export interface EventsTemp {
     winnersCount: number;
     categoryId: number,
     categoryName: Category,
-    creator: Creator
+    creator: Creator,
+    imageUrl?: string; // Campo opcional para la imagen en base64
 }
 export interface EventsCreate {
     title: string;
