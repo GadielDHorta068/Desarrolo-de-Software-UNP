@@ -33,6 +33,8 @@ import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
+import com.desarrollo.raffy.exception.AlreadyRegisteredToGiveawayExeption;
+
 import org.modelmapper.ModelMapper;
 import java.util.stream.Collectors;
 import java.util.Map;
@@ -340,6 +342,10 @@ public class EventsController {
                 return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(response);
+            } catch (AlreadyRegisteredToGiveawayExeption e) {
+                return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(e.getMessage());
             } catch (Exception e) {
                 return ResponseEntity
                     .status(HttpStatus.CONFLICT)
