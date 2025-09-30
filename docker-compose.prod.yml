@@ -1,0 +1,77 @@
+services:
+  db:
+    image: postgres:16
+    container_name: raffy-db-prod
+    env_file:
+      - docker/db.env
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U raffy_user -d raffy_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - raffy-network
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: raffy-pgadmin-prod
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@raffy.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data_prod:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - raffy-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: raffy-backend-prod
+    env_file:
+      - docker/backend.env
+      - docker/db.env
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    volumes: []
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - raffy-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: raffy-frontend-prod
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - raffy-network
+  
+volumes:
+  postgres_data_prod:
+  db_data_prod:
+  pgadmin_data_prod:
+      
+networks:
+  raffy-network:
+    driver: bridge
