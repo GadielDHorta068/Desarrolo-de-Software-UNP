@@ -81,14 +81,35 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @Value("${CORS_ALLOWED_ORIGINS:*}")
+    private String corsAllowedOrigins;
+
+    @Value("${CORS_ALLOWED_METHODS:GET,POST,PUT,DELETE,OPTIONS}")
+    private String corsAllowedMethods;
+
+    @Value("${CORS_ALLOWED_HEADERS:*}")
+    private String corsAllowedHeaders;
+
+    @Value("${CORS_ALLOW_CREDENTIALS:true}")
+    private boolean corsAllowCredentials;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-        
+        // Orígenes permitidos
+        if ("*".equals(corsAllowedOrigins)) {
+            configuration.setAllowedOriginPatterns(List.of("*"));
+        } else {
+            configuration.setAllowedOrigins(List.of(corsAllowedOrigins.split(",")));
+        }
+
+        // Métodos permitidos
+        configuration.setAllowedMethods(List.of(corsAllowedMethods.split(",")));
+        // Headers permitidos
+        configuration.setAllowedHeaders(List.of(corsAllowedHeaders.split(",")));
+        // Cookies/autenticación cruzada
+        configuration.setAllowCredentials(corsAllowCredentials);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
