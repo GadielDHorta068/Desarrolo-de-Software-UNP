@@ -84,10 +84,19 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Configuración de CORS para permitir acceso desde múltiples orígenes
+        configuration.setAllowedOriginPatterns(List.of(
+            "*", // Permite todos los orígenes para desarrollo
+            "https://raffyfy.argcloud.com.ar", // URL de producción
+            "https://raffyfy.argcloud.com.ar/*", // Subdominios y rutas
+            "http://localhost:4200", // Desarrollo local
+            "http://localhost:3000" // Desarrollo alternativo
+        ));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
+        // Configuración adicional para headers específicos
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

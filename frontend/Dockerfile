@@ -25,5 +25,11 @@ ENV CHOKIDAR_INTERVAL=1000
 ENV WATCHPACK_POLLING=true
 ENV NODE_ENV=development
 
-# Comando por defecto
-CMD ["npm", "start"]
+# Variable de entorno para la URL de la API (se puede sobrescribir desde docker-compose)
+ENV API_URL=localhost:8080
+
+# Copiar script de configuración de entorno
+COPY scripts/set-env.js ./scripts/set-env.js
+
+# Comando por defecto que configura el entorno y luego inicia Angular
+CMD ["sh", "-c", "node scripts/set-env.js && npm start"]
