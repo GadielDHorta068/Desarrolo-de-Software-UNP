@@ -32,4 +32,5 @@ ENV API_URL=localhost:8080
 COPY scripts/set-env.js ./scripts/set-env.js
 
 # Comando por defecto que configura el entorno y luego inicia Angular
-CMD ["sh", "-c", "node scripts/set-env.js && npm start"]
+# En desarrollo usa proxy, en producción usa URL relativa
+CMD ["sh", "-c", "node scripts/set-env.js && if [ \"$NODE_ENV\" = \"production\" ]; then npm run start:prod; else npm start; fi"]
