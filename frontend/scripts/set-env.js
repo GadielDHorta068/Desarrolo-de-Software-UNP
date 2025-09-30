@@ -23,7 +23,28 @@ function buildApiUrl(url) {
   return `https://${url}`;
 }
 
-const finalApiUrl = buildApiUrl(apiUrl);
+// Función para detectar si estamos en producción basado en el hostname
+function isProductionEnvironment() {
+  // Verifica si estamos ejecutándose en el dominio de producción
+  const hostname = process.env.HOSTNAME || '';
+  return hostname.includes('raffyfy') || hostname.includes('argcloud');
+}
+
+// Determina la URL final basada en el entorno
+let finalApiUrl;
+
+// Verifica si se debe usar la URL de producción
+const useProductionUrl = process.env.USE_PRODUCTION_URL === 'true' || 
+                        process.env.NODE_ENV === 'production' ||
+                        isProductionEnvironment();
+
+if (useProductionUrl) {
+  // En producción, usa la URL de producción
+  finalApiUrl = 'https://raffyfy.argcloud.com.ar:8080';
+} else {
+  // En desarrollo, usa la URL configurada
+  finalApiUrl = buildApiUrl(apiUrl);
+}
 
 // Genera el contenido del archivo environment.ts
 const environmentContent = `// Configuración del entorno generada automáticamente
