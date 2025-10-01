@@ -6,6 +6,10 @@ function getApiBaseUrlProd(): string {
     if (typeof window !== 'undefined' && window.location) {
       const protocol = window.location.protocol || 'http:';
       const host = window.location.hostname || 'localhost';
+      // En producción detrás de HTTPS (Cloudflare/Proxy), usa mismo origen sin puerto
+      if (protocol === 'https:') {
+        return `${protocol}//${host}`;
+      }
       return `${protocol}//${host}:8080`;
     }
   } catch {
