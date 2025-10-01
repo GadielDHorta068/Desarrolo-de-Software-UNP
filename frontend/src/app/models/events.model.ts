@@ -57,7 +57,9 @@ export interface EventsTemp {
     winnersCount: number;
     categoryId: number,
     categoryName: Category,
-    creator: Creator
+    creator: Creator,
+    imageUrl?: string; // Campo opcional para la imagen en base64
+    isUserRegistered?: boolean; // Indica si el usuario actual está inscrito en el evento
 }
 export interface EventsCreate {
     title: string;

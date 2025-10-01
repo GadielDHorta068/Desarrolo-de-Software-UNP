@@ -33,12 +33,25 @@ export class RafflesPanel {
     private configService: configService,
     private eventService: EventsService,
     private authService: AuthService,
-    private parseFileService: ParseFileService
+    private parseFileService: ParseFileService,
+    private cdr: ChangeDetectorRef
   ){
     this.userCurrent = this.authService.getCurrentUserValue();
     // console.log("[createEvent] => usuario actual: ", this.userCurrent);
-    this.categories = this.configService.getCategories();
-    this.types = this.configService.getEventTypes();
+    
+    // Inicializar datos de configuración (categorías y tipos de eventos)
+    this.configService.initData();
+    
+    // Suscribirse a los observables para obtener los datos cuando estén disponibles
+    this.configService.categories$.subscribe(categories => {
+      this.categories = categories || [];
+      this.cdr.detectChanges();
+    });
+    
+    this.configService.typeEvents$.subscribe(types => {
+      this.types = types || [];
+      this.cdr.detectChanges();
+    });
 
     // inicializacion del form de creacion de eventos
     this.formPanel = new FormGroup({

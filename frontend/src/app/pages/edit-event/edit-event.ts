@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectorRef } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Events, EventsTemp, EventType, EventTypes } from '../../models/events.model';
 import { CommonModule } from '@angular/common';
@@ -36,8 +36,23 @@ export class EditEvent {
   constructor(
     private adminEventService: AdminEventService,
     private configService: configService,
-    private datePipe: HandleDatePipe
+    private datePipe: HandleDatePipe,
+    private cdr: ChangeDetectorRef
   ){
+    // Inicializar datos de configuración (categorías y tipos de eventos)
+    this.configService.initData();
+    
+    // Suscribirse a los observables para obtener los datos cuando estén disponibles
+    this.configService.categories$.subscribe(categories => {
+      this.categories = categories || [];
+      this.cdr.detectChanges();
+    });
+    
+    this.configService.typeEvents$.subscribe(types => {
+      this.types = types || [];
+      this.cdr.detectChanges();
+    });
+    
     // FormGroup({
     //   valueCivilId: new FormControl({ value: civilIdFormatted, disabled: false}, {
     //             validators:[ Validators.required ]
@@ -45,7 +60,7 @@ export class EditEvent {
     this.formEvent = new FormGroup({
       title: new FormControl({value: this.event?.title, disabled: true}, {validators:[ Validators.required ]}),
       drawType: new FormControl({value: this.event?.eventType, disabled: true}, {validators:[ Validators.required ]}),
-      category: new FormControl({value: this.event?.categoryName, disabled: false}),
+      category: new FormControl({value: this.event?.categoryId, disabled: false}),
       executionDate: new FormControl({value: this.event?.endDate, disabled: false}, {validators:[ Validators.required ]}),
       winners: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
       description: new FormControl({value: this.event?.description, disabled: false}, {validators:[ Validators.required ]}),
@@ -58,9 +73,6 @@ export class EditEvent {
         this.updateForm();
       }
     )
-
-    this.categories = this.configService.getCategories();
-    this.types = this.configService.getEventTypes();
   }
 
   public onSaveChanges(){

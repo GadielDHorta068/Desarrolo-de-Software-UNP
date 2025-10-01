@@ -7,11 +7,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
+import com.desarrollo.raffy.business.repository.ParticipantRepository;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
@@ -34,6 +37,9 @@ public class EventsService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private ParticipantRepository participantRepository;
 
     @Transactional
     public <T extends Events> T create(T event, Long idUser) {
@@ -137,7 +143,7 @@ public class EventsService {
 
     public List<EventSummaryDTO> getEventSummariesByCreator(Long creatorId){
         return eventsRepository.findByCreatorId(creatorId).stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }
 
@@ -152,6 +158,15 @@ public class EventsService {
             dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
         }
 
+        // Verificar si el usuario actual está inscrito en el evento
+        RegisteredUser currentUser = getCurrentUser();
+        if (currentUser != null) {
+            boolean isRegistered = participantRepository.existsByParticipantAndEvent(currentUser, event);
+            dto.setIsUserRegistered(isRegistered);
+        } else {
+            dto.setIsUserRegistered(false);
+        }
+
         return dto;
     }
 
@@ -160,67 +175,93 @@ public class EventsService {
         if (event.getImagen() != null) {
             dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
         }
+        
+        // Verificar si el usuario actual está inscrito en el evento
+        RegisteredUser currentUser = getCurrentUser();
+        if (currentUser != null) {
+            boolean isRegistered = participantRepository.existsByParticipantAndEvent(currentUser, event);
+            dto.setIsUserRegistered(isRegistered);
+        } else {
+            dto.setIsUserRegistered(false);
+        }
+        
         return dto;
+    }
+
+    /**
+     * Obtiene el usuario actual del contexto de seguridad
+     * @return RegisteredUser o null si no hay usuario autenticado
+     */
+    private RegisteredUser getCurrentUser() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.getPrincipal() instanceof RegisteredUser) {
+                return (RegisteredUser) authentication.getPrincipal();
+            }
+        } catch (Exception e) {
+            // Si hay algún error, simplemente retornamos null
+        }
+        return null;
     }
 
 
     public List<EventSummaryDTO> getAllEventSummaries(){
         return eventsRepository.findAllWithDetails().stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }
 
     public List<EventSummaryDTO> getEventSummariesByStatus(StatusEvent statusEvent){
         return eventsRepository.findByStatusEvent(statusEvent).stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }
 
     public List<EventSummaryDTO> getEventSummariesByEventType(EventTypes eventType){
         return eventsRepository.findByEventType(eventType).stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }
 
     public List<EventSummaryDTO> getEventSummariesByCategoryId(Long categoryId){
         return eventsRepository.findByCategoryId(categoryId).stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }
 
     public List<EventSummaryDTO> getActiveEventSummaries(){
         return eventsRepository.findActiveEvents().stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }
 
     public List<EventSummaryDTO> getEventSummariesByDateRange(LocalDate startDate, LocalDate endDate){
         return eventsRepository.findByDateRange(startDate, endDate).stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }
 
     public List<EventSummaryDTO> getEventSummariesByStartDate(LocalDate startDate){
         return eventsRepository.findByStartDate(startDate).stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }
 
     public List<EventSummaryDTO> getEventSummariesByEndDate(LocalDate endDate){
         return eventsRepository.findByEndDate(endDate).stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }
 
     public List<EventSummaryDTO> searchEventSummariesByTitle(String title){
         return eventsRepository.findByTitleContainingIgnoreCase(title).stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }
 
     public List<EventSummaryDTO> getEventSummariesByParticipantId(Long userId){
         return eventsRepository.findByParticipantId(userId).stream()
-            .map(e -> modelMapper.map(e, EventSummaryDTO.class))
+            .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }
 

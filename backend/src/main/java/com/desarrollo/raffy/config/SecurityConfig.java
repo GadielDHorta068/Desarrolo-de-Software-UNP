@@ -67,7 +67,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/users/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/events/participant/**").permitAll()
+                        .requestMatchers("/events/**").permitAll()
+                        .requestMatchers("/categories/**").permitAll()
                         .requestMatchers("/api/images/**").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -83,10 +84,18 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // Orígenes permitidos en desarrollo y detrás de Cloudflare
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost",
+                "http://localhost:8080",
+                "http://localhost:4200",
+                "https://raffyfy.argcloud.com.ar",
+                "https://raffyfy.argcloud.com.ar:8080"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

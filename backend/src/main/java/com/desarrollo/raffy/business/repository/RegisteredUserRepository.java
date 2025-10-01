@@ -22,10 +22,6 @@ public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, 
     Optional<RegisteredUser> findByEmail(String email);
     
     Optional<RegisteredUser> findByNickname(String nickname);
-    
-    // Método case-insensitive para buscar por nickname
-    @Query("SELECT r FROM RegisteredUser r WHERE LOWER(r.nickname) = LOWER(:nickname)")
-    Optional<RegisteredUser> findByNicknameIgnoreCase(@Param("nickname") String nickname);
 
     // Métodos para update: verifica existencia excluyendo un id dado
     @Query("SELECT COUNT(r) > 0 FROM RegisteredUser r WHERE r.email = :email AND r.id != :id")

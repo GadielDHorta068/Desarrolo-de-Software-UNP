@@ -23,6 +23,16 @@
           Inicio
         </button>
         
+        <!-- Enlace visible para invitados al Hub/Explorar -->
+        <ng-container *ngIf="!isAuthenticated">
+          <button 
+            (click)="navigateToAllDraws()"
+            class="text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+          >
+            Explorar
+          </button>
+        </ng-container>
+        
         <ng-container *ngIf="isAuthenticated">
           <button class="text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
             Explorar
@@ -163,7 +173,7 @@
           Explorar
         </button>
         <button class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md text-base font-medium transition-colors">
-          Mis Sorteos
+          Hub Sorteos
         </button>
         
         <hr class="my-2">
@@ -191,6 +201,12 @@
       </ng-container>
       
       <ng-container *ngIf="!isAuthenticated">
+        <button 
+          (click)="navigateToAllDraws()"
+          class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md text-base font-medium transition-colors"
+        >
+          Explorar
+        </button>
         <button 
           (click)="navigateToLogin()"
           class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md text-base font-medium transition-colors"
