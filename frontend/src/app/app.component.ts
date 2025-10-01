@@ -95,10 +95,9 @@ export class AppComponent {
   // Utiliza OnPush para mejor rendimiento
   
   constructor(
-    private contexts: ChildrenOutletContexts,
-    private configService: configService
+    private contexts: ChildrenOutletContexts
   ) {
-    this.configService.initData();
+    // Removido initData() - ahora se llama solo en las páginas que lo necesitan
   }
   
   getRouteAnimationData() {
