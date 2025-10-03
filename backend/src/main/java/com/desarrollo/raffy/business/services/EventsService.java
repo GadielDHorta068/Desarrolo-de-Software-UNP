@@ -184,7 +184,9 @@ public class EventsService {
         } else {
             dto.setIsUserRegistered(false);
         }
-        
+        /* System.out.println("Evento: " + event.getTitle() + " - Categoria: " + 
+            (event.getCategory() != null ? event.getCategory().getName() : "NULL")); */
+
         return dto;
     }
 

@@ -135,6 +135,17 @@ public class ModelMapperConfig {
                     if(src instanceof GuessingContest) return new GuessingContestDTO();
                     return new EventSummaryDTO();
                 });
+        mapper.createTypeMap(Giveaways.class, GiveawaysDTO.class)
+            .addMappings(m -> {
+                m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
+                m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
+            });
+        mapper.createTypeMap(GuessingContest.class, GuessingContestDTO.class)
+            .addMappings(m -> {
+                m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
+                m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
+            });
+
 
         return mapper;
     }
