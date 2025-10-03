@@ -65,8 +65,10 @@ public class AuthService {
         user.setImagen(ImageUtils.base64ToBytes(request.getImagen()));
 
         RegisteredUser savedUser = userRepository.save(user);
-        emailService.sendEmail(savedUser.getEmail(), "Creación de cuenta - Rafify",
-    "Hola, gracias por registrarte en Rafify.");
+        
+        // Enviar correo de bienvenida con plantilla profesional
+        String userName = savedUser.getName() + " " + savedUser.getSurname();
+        emailService.sendWelcomeEmailWithTemplate(savedUser.getEmail(), userName, null);
 
         // Generar tokens
         String accessToken = jwtService.generateToken(savedUser);
