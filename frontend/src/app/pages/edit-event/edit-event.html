@@ -5,44 +5,6 @@
 
     <!-- form de datos del sorteo -->
     <form [formGroup]="formEvent" (ngSubmit)="onSaveChanges()">
-        <!-- <div class="pt-2">
-            <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Nombre (*)
-            </label>
-            <input
-                type="text"
-                id="titulo"
-                formControlName="title"
-                name="titulo"
-                class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                [ngClass]="formEvent.get('title')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' "
-                placeholder="Ej. Ruleta de Primavera"
-            />
-        </div> -->
-         <!-- <div class="grid-description pt-2">
-             <div class="pt-2">
-                 <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                     Descripción (*)
-                 </label>
-                 <textarea
-                     id="description"
-                     formControlName="description"
-                     name="Descripción de tu sorteo"
-                     rows="3"
-                     class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02] resize-none"
-                 ></textarea>
-             </div>
-             
-             <div>
-                 <label for="imageDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                     Imagen ilustrativa de tu sorteo
-                 </label>
-                 <div style="border: solid gray 1px;">
-                     <small>Aca iria el mismo loader de imagen que creo Gadiel XD </small>
-                 </div>
-             </div>
-        </div> -->
-
         <div class="grid-name-description-image">
             <div class="pt-2 item-name">
                 <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -74,7 +36,7 @@
                 <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Imagen de tu evento
                 </label>
-                <app-loader-image></app-loader-image>
+                <app-loader-image [srcImage]="event?.imageUrl" (changeSelectedImage)="onChangeSelectedImge($event)"></app-loader-image>
             </div>
         </div>
 
@@ -83,7 +45,8 @@
             <div>
                 <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo (*)</label>
                 
-                <select formControlName="drawType" id="draw" class="bg-gray-800 text-white rounded-md px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select formControlName="drawType" id="draw" class="bg-gray-800 text-white rounded-md px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  [ngClass]="formEvent.get('drawType')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' ">
                     <option value="">-- Seleccioná el tipo --</option>
                     <option *ngFor="let type of types" [value]="type.code">
                         {{ type.name }}
@@ -96,7 +59,7 @@
             <div>
                 <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
                 
-                <select formControlName="category" id="category" class="bg-gray-800 text-white rounded-md px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select formControlName="category" id="category" class="bg-gray-800 text-white rounded-md px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]">
                     <option value="">-- Seleccioná una categoria --</option>
                     <option *ngFor="let category of categories" [value]="category.id">
                         {{ category.name }}
@@ -118,7 +81,8 @@
                     min=10
                     formControlName="winners"
                     name="Cantidad de ganadores"
-                    class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
+                    class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    [ngClass]="formEvent.get('winners')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' "
                 />
             </div>
             <div>
@@ -135,12 +99,17 @@
             </div>
         </div>
 
-        <div class="pt-2" style="text-align: end;">
-            <button type="submit" (click)="onSaveChanges()"
+        <div class="p-[1%] flex gap-[5px] justify-end">
+            <button *ngIf="formEvent.dirty" type="button" (click)="onDiscardChanges()"
+                class="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >Descartar cambios</button>
+            <button type="submit"
                 class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >Guardar cambios</button>
         </div>
     </form>
 
 </div>
+
+<app-modal-info [dataModal]="dataModal" #modalInfo></app-modal-info>
 

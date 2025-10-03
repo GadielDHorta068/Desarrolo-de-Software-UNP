@@ -55,4 +55,13 @@ export class EventsService {
     });
     return this.http.get<string[]>(`${this.apiUrl}/event-types`, { headers });
   }
+
+  // actualiza los datos del evento
+  updateGiveaways(dataEvent: EventsCreate, eventId: string, userId: string): Observable<EventsTemp[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.put<EventsTemp[]>(`${this.apiUrl}/update/giveaway/${eventId}/user/${userId}`, dataEvent, { headers });
+  }
 }

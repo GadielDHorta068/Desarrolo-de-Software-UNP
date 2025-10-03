@@ -1,5 +1,5 @@
-import { AfterViewInit, ChangeDetectorRef, Component, input, Input, OnInit, OnDestroy } from '@angular/core';
-import { Events, EventsTemp } from '../../../models/events.model';
+import { AfterViewInit, ChangeDetectorRef, Component, input, Input, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Events, EventsTemp, EventTypes, StatusEvent } from '../../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { HandleStatusPipe } from '../../../pipes/handle-status.pipe';
 import { HandleIconTypePipe } from '../../../pipes/handle-icon-type.pipe';
@@ -10,14 +10,18 @@ import { QuestionaryComponent } from '../../../pages/questionary/questionary.com
 import { HandleDatePipe } from '../../../pipes/handle-date.pipe';
 import { AuthService, UserResponse } from '../../../services/auth.service';
 import { Subscription } from 'rxjs';
+import { InfoModal, ModalInfo } from '../modal-info/modal-info';
 
 @Component({
   selector: 'app-draw-card',
-  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, HandleDatePipe, ModalDrawInfo, QuestionaryComponent],
+  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, HandleDatePipe, ModalDrawInfo, QuestionaryComponent, ModalInfo],
   templateUrl: './draw-card.html',
   styleUrl: './draw-card.css'
 })
 export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
+
+  @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
+  dataModal: InfoModal = {title: "Administración del evento", message: ""};
 
   userCurrent: UserResponse|null = null;
   // @Input() event!: Events|null;
@@ -37,7 +41,7 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     private cdr: ChangeDetectorRef
   ){
     this.userCurrent = this.authService.getCurrentUserValue();
-    console.log("[card-event] => usuario actual: ", this.userCurrent);
+    // console.log("[card-event] => usuario actual: ", this.userCurrent);
   }
 
   ngOnInit() {
@@ -121,6 +125,19 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   }
 
   public redirectEdit() {
+    // console.log("[edit] => datos del evento: ", this.event);
+    // controlamos q solo los de estado ABIERTO se puedan editar
+    if(this.event?.statusEvent != StatusEvent.OPEN){
+      this.dataModal.message = "No es posible editar el evento seleccionado. Solo se pueden editar los eventos en estaado ABIERTO";
+      this.modalInfoRef.open();
+      return;
+    }
+    // TODO: este control meterlo en el boton de edicion del card!!
+    if(this.event?.eventType !== EventTypes.GIVEAWAY){
+      this.dataModal.message = "Por el momento no es posible editar los datos de este tipo de eventos.";
+      this.modalInfoRef.open();
+      return;
+    }
     this.adminEventService.setSelectedEvent(this.event);
     this.router.navigate(['/event-edit']);
   }
