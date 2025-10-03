@@ -96,10 +96,11 @@ public class EmailService {
 
         try {
             emailSender.send(message);
-            System.out.println("Correo enviado a: " + to);
+            System.out.println("Correo enviado a: " + to + " con el asunto: " + subject + " y el texto: " + text);
         } catch (Exception e) {
             throw new RuntimeException("Error al enviar correo: " + e.getMessage());
         }
     }
+
 
 } 

@@ -40,6 +40,9 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private EmailService emailService;
+
     public AuthResponse register(RegisteredUserDTO request) {
         // Verificar si el email ya existe
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -58,11 +61,12 @@ public class AuthService {
                 request.getEmail(),
                 request.getCellphone(),
                 request.getNickname(),
-                passwordEncoder.encode(request.getPassword())
-        );
+                passwordEncoder.encode(request.getPassword()));
         user.setImagen(ImageUtils.base64ToBytes(request.getImagen()));
 
         RegisteredUser savedUser = userRepository.save(user);
+        emailService.sendEmail(savedUser.getEmail(), "Creación de cuenta - Rafify",
+    "Hola, gracias por registrarte en Rafify.");
 
         // Generar tokens
         String accessToken = jwtService.generateToken(savedUser);
@@ -81,9 +85,7 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getPassword()
-                )
-        );
+                        request.getPassword()));
 
         RegisteredUser user = (RegisteredUser) authentication.getPrincipal();
 
@@ -134,22 +136,22 @@ public class AuthService {
     public UserResponse updateProfile(UpdateProfileRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        
+
         RegisteredUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
+
         // Verificar si el nuevo email ya existe (si es diferente al actual)
-        if (!user.getEmail().equals(request.getEmail()) && 
-            userRepository.existsByEmail(request.getEmail())) {
+        if (!user.getEmail().equals(request.getEmail()) &&
+                userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
         }
-        
+
         // Verificar si el nuevo nickname ya existe (si es diferente al actual)
-        if (!user.getNickname().equals(request.getNickname()) && 
-            userRepository.existsByNickname(request.getNickname())) {
+        if (!user.getNickname().equals(request.getNickname()) &&
+                userRepository.existsByNickname(request.getNickname())) {
             throw new RuntimeException("El nickname ya está en uso");
         }
-        
+
         // Actualizar los campos
         user.setName(request.getName());
         user.setSurname(request.getSurname());
@@ -157,27 +159,27 @@ public class AuthService {
         user.setCellphone(request.getCellphone());
         user.setNickname(request.getNickname());
         user.setImagen(ImageUtils.base64ToBytes(request.getImagen()));
-        
+
         RegisteredUser updatedUser = userRepository.save(user);
         return mapToUserResponse(updatedUser);
     }
-    
+
     public void changePassword(ChangePasswordRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        
+
         RegisteredUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
+
         // Verificar que la contraseña actual sea correcta
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new RuntimeException("La contraseña actual es incorrecta");
         }
-        
+
         // Hashear y guardar la nueva contraseña
         String hashedNewPassword = passwordEncoder.encode(request.getNewPassword());
         user.setPassword(hashedNewPassword);
-        
+
         userRepository.save(user);
     }
 
@@ -199,7 +201,7 @@ public class AuthService {
             System.err.println("Error al procesar imagen del usuario " + user.getId() + ": " + e.getMessage());
             imagenBase64 = null;
         }
-        
+
         return UserResponse.builder()
                 .id(user.getId())
                 .name(user.getName())

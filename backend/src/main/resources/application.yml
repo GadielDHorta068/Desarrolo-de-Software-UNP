@@ -1,5 +1,5 @@
 spring:
-  application: 
+  application:
     name: raffy
   datasource:
     url: jdbc:postgresql://db:5432/${POSTGRES_DB}
@@ -49,18 +49,30 @@ spring:
       port: 35729
   # Configuración del Correo Electrónico
   mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    host: smtp.gmail.com
+    port: 587 # Puerto para TLS (recomendado)
+    username: ${MAIL_USERNAME:rafifyteam@gmail.com}
+    password: ${MAIL_PASSWORD:srjxaijwhjcvsxoi} # ¡SIN ESPACIOS!
     properties:
       mail:
+        debug: true
         smtp:
-          auth: ${MAIL_SMTP_AUTH}
+          auth: true
           starttls:
-            enable: ${MAIL_SMTP_STARTTLS_ENABLE}
+            enable: true # Debe ser TRUE para el puerto 587
+            required: true # Recomendado para seguridad
+          ssl:
+            trust: smtp.gmail.com
+            enable: false # Debe ser FALSE para el puerto 587
   server:
     port: ${APP_PORT:-8080}
+
+  # Propiedades de la app usadas por EmailService
+app:
+  from:
+    email: ${APP_FROM_EMAIL:${MAIL_USERNAME:rafifyteam@gmail.com}}
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:4200}
 
   management:
     endpoints:
@@ -84,7 +96,7 @@ spring:
 
 # Configuración de BCrypt para hashing seguro de contraseñas
 bcrypt:
-  strength: ${BCRYPT_STRENGTH:12}  # Factor de trabajo (10-31, por defecto 12)
+  strength: ${BCRYPT_STRENGTH:12} # Factor de trabajo (10-31, por defecto 12)
   # Nota: strength 12 es un buen balance entre seguridad y rendimiento
   # - 10: Más rápido, menos seguro (desarrollo)
   # - 12: Balanceado (producción recomendado)
@@ -93,8 +105,8 @@ bcrypt:
 # Configuración de JWT para autenticación y autorización
 jwt:
   secret: ${JWT_SECRET:raffyjwtsecretkey2025supersecurefordevelopment}
-  expiration: ${JWT_EXPIRATION:86400000}  # 24 horas en milisegundos
-  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7 días en milisegundos
+  expiration: ${JWT_EXPIRATION:86400000} # 24 horas en milisegundos
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 días en milisegundos
   issuer: ${JWT_ISSUER:raffy-backend}
   audience: ${JWT_AUDIENCE:raffy-frontend}
   # Nota: En producción, JWT_SECRET debe ser una clave de al menos 256 bits (32 caracteres)
@@ -108,5 +120,3 @@ logging:
     com.zaxxer.hikari: DEBUG
     org.springframework.security: DEBUG
     com.desarrollo.raffy: DEBUG
-
- 
