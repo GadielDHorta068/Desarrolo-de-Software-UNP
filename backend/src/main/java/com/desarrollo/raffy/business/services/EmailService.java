@@ -64,7 +64,7 @@ public class EmailService {
     }
 
     /**
-     * Envía un correo de verificación usando plantilla HTML profesional.
+     * Envía un correo de verificación usando plantilla HTML.
      *
      * @param to la dirección de correo electrónico del destinatario.
      * @param userName nombre del usuario.
@@ -112,7 +112,7 @@ public class EmailService {
     }
 
     /**
-     * Envía un correo de restablecimiento de contraseña usando plantilla HTML profesional.
+     * Envía un correo de restablecimiento de contraseña usando plantilla HTML.
      *
      * @param to la dirección de correo electrónico del destinatario.
      * @param userName nombre del usuario.
@@ -132,7 +132,7 @@ public class EmailService {
     }
 
     /**
-     * Envía un correo de bienvenida usando plantilla HTML profesional.
+     * Envía un correo de bienvenida usando plantilla HTML.
      *
      * @param to la dirección de correo electrónico del destinatario.
      * @param userName nombre del usuario.
@@ -150,7 +150,7 @@ public class EmailService {
     }
 
     /**
-     * Envía una notificación de evento usando plantilla HTML profesional.
+     * Envía una notificación de evento usando plantilla HTML.
      *
      * @param to la dirección de correo electrónico del destinatario.
      * @param userName nombre del usuario.
@@ -304,7 +304,7 @@ public class EmailService {
     }
 
     /**
-     * Envío avanzado y profesional: soporta múltiples destinatarios, CC/BCC, reply-to,
+     * Envío avanzado: soporta múltiples destinatarios, CC/BCC, reply-to,
      * prioridad, adjuntos múltiples y recursos inline.
      */
     public void sendAdvancedEmail(EmailMessage email) {
