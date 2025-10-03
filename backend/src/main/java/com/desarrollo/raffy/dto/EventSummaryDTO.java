@@ -6,14 +6,14 @@ import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.StatusEvent;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class EventSummaryDTO {
     private Long id;
     private String title;

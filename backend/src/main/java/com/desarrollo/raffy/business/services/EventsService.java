@@ -25,6 +25,8 @@ import com.desarrollo.raffy.util.ImageUtils;
 
 import org.modelmapper.ModelMapper;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
+import com.desarrollo.raffy.dto.GiveawaysDTO;
+import com.desarrollo.raffy.dto.GuessingContestDTO;
 
 @Service
 public class EventsService {
@@ -105,7 +107,6 @@ public class EventsService {
 
             existingContest.setMinValue(newContest.getMinValue());
             existingContest.setMaxValue(newContest.getMaxValue());
-            existingContest.setTargetNumber(newContest.getTargetNumber());
             existingContest.setMaxAttempts(newContest.getMaxAttempts());
         }
 
@@ -118,6 +119,12 @@ public class EventsService {
         return eventsRepository.findByCreatorId(IdCreator);
     }
 
+    /**
+     * Cierra un evento cambiando su estado a CLOSED.
+     * @param idEvent
+     * @return true si el evento se cerró correctamente, false si ya estaba cerrado o finalizado.
+     * @throws RuntimeException si el evento no se encuentra o hay un error al guardar.
+     */
     public boolean closeEvent(Long idEvent){
         try {
             Events event = eventsRepository.findById(idEvent)
@@ -152,26 +159,19 @@ public class EventsService {
         Events event = eventsRepository.findByIdWithDetails(id)
             .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
-        EventSummaryDTO dto = modelMapper.map(event, EventSummaryDTO.class);
-
-        if(event.getImagen() != null){
-            dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
-        }
-
-        // Verificar si el usuario actual está inscrito en el evento
-        RegisteredUser currentUser = getCurrentUser();
-        if (currentUser != null) {
-            boolean isRegistered = participantRepository.existsByParticipantAndEvent(currentUser, event);
-            dto.setIsUserRegistered(isRegistered);
-        } else {
-            dto.setIsUserRegistered(false);
-        }
-
-        return dto;
+        return toEventSummaryDTO(event);
     }
 
     public EventSummaryDTO toEventSummaryDTO(Events event) {
-        EventSummaryDTO dto = modelMapper.map(event, EventSummaryDTO.class);
+        EventSummaryDTO dto;
+        if(event instanceof Giveaways){
+            dto = modelMapper.map(event, GiveawaysDTO.class);
+        } else if(event instanceof GuessingContest){
+            dto = modelMapper.map(event, GuessingContestDTO.class);
+        } else {
+            dto = modelMapper.map(event, EventSummaryDTO.class);
+        }
+
         if (event.getImagen() != null) {
             dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
         }

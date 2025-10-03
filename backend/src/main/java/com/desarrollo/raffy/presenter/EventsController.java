@@ -170,6 +170,17 @@ public class EventsController {
         return ResponseEntity.ok(dto);
     }
 
+    @PutMapping("update/guessing-contest/{idEvent}/user/{idUser}")
+    public ResponseEntity<?> updateGuessingConstest(
+            @PathVariable Long idEvent,
+            @PathVariable Long idUser,
+            @RequestBody GuessingContest event) {
+
+        GuessingContest updatedEvent = eventsService.update(idEvent, event, idUser);
+        EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
+        return ResponseEntity.ok(dto);
+    }
+
 
     @GetMapping("/creator/{idCreator}")
     public ResponseEntity<?> getEventsByCreator(@PathVariable Long idCreator){
