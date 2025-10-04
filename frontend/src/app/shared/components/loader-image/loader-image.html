@@ -7,20 +7,20 @@
         [class.bg-emerald-50]="selectedImage || currentImagePreview"
         [class.dark:bg-emerald-900/20]="selectedImage || currentImagePreview">
         <div class="space-y-1 text-center">
-            <div *ngIf="!selectedImage && !currentImagePreview" class="mx-auto h-12 w-12 text-gray-400">
+            <div *ngIf="!selectedImage && !currentImagePreview && !srcImage" class="mx-auto h-12 w-12 text-gray-400">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
             </div>
-            <div *ngIf="selectedImage || currentImagePreview"
+            <div *ngIf="selectedImage || currentImagePreview || srcImage"
                 class="mx-auto h-20 w-20 rounded-full overflow-hidden border-2 border-emerald-400">
-                <img [src]="imagePreview || currentImagePreview" alt="Preview" class="h-full w-full object-cover">
+                <img [src]="imagePreview || currentImagePreview || srcImage" alt="Preview" class="h-full w-full object-cover">
             </div>
             <div class="flex text-sm text-gray-600 dark:text-gray-400">
                 <label for="imagen"
                     class="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-emerald-500 transition-colors">
-                    <span>{{ (selectedImage || currentImagePreview) ? 'Cambiar imagen' : 'Subir una imagen' }}</span>
+                    <span>{{ (selectedImage || currentImagePreview || srcImage) ? 'Cambiar imagen' : 'Subir una imagen' }}</span>
                     <input id="imagen" name="imagen" type="file" class="sr-only" accept="image/*"
                         (change)="onImageSelected($event)">
                 </label>

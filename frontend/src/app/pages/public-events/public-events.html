@@ -7,8 +7,8 @@
 
   <!-- Filtro por estado -->
   <div class="mb-6 flex items-center gap-3">
-    <label class="text-gray-700">Filtrar por estado:</label>
-    <select [(ngModel)]="selectedStatus" (change)="applyFilter(selectedStatus)" class="border rounded px-3 py-2 bg-white">
+    <label class="text-gray-400">Filtrar por estado:</label>
+    <select [(ngModel)]="selectedStatus" (change)="applyFilter(selectedStatus)" class="border rounded px-2 py-1 bg-gray-900">
       <option value="ALL">Todos</option>
       <option [ngValue]="StatusEvent.OPEN">Abiertos</option>
       <option [ngValue]="StatusEvent.CLOSED">Cerrados</option>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { ParseFileService } from '../../../services/utils/parseFile.service';
 
@@ -24,12 +24,28 @@ export class LoaderImage {
 
   errorMessage: string = "";
 
+  @Input() srcImage!: string|undefined;
   @Output() changeSelectedImage = new EventEmitter<File|null>();
 
   constructor(
     private cdr: ChangeDetectorRef,
     private parseFileService: ParseFileService
-  ){}
+  ){
+    if(this.srcImage){
+      this.srcImage = "data:image/png;base64,"+this.srcImage;
+      // console.log("[loaderImg] => imagen en b64: ", this.srcImage);
+    }
+  }
+
+  // detectamos el cambio del input q puede null inicialmente
+  ngOnChanges(changes: SimpleChanges) {
+    // console.log('[loaderImg] => Hubo cambios en el loader de la img!!');
+    if (changes['srcImage'] && changes['srcImage'].currentValue) {
+      this.srcImage = "data:image/png;base64,"+changes['srcImage'].currentValue;
+      // console.log('[loaderImg] => src de la img generada:', this.srcImage);
+      this.cdr.detectChanges();
+    }
+  }
 
   // Métodos para manejo de imágenes
   onImageSelected(event: any): void {
