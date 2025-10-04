@@ -19,6 +19,9 @@ public class RegisteredUsersService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private EmailService emailService;
+
     @Transactional
     public RegisteredUser create(RegisteredUser registeredUsers){
         try{
@@ -36,6 +39,12 @@ public class RegisteredUsersService {
             if (registeredUsers.getPassword() != null && !registeredUsers.getPassword().isEmpty()) {
                 registeredUsers.setPassword(passwordEncoder.encode(registeredUsers.getPassword()));
             }
+            
+            // Enviar correo de verificación
+            emailService.sendEmail(registeredUsers.getEmail(),
+            "Creacion de cuenta - Rafify",
+             "Hola, gracias por registrarte en Rafify. Mail de prueba de verificacion");
+             System.out.println("Correo enviado a: " + registeredUsers.getEmail());
             
             return registeredUserRepository.save(registeredUsers);
         } catch(Exception e){

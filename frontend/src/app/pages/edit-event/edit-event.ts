@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Events, EventsCreate, EventsTemp, EventType, EventTypes } from '../../models/events.model';
 import { CommonModule } from '@angular/common';
@@ -60,9 +60,6 @@ export class EditEvent {
         // this.updateForm();
       }
     )
-
-    this.categories = this.configService.getCategories();
-    this.types = this.configService.getEventTypes();
   }
 
   public async onSaveChanges(){
@@ -74,7 +71,7 @@ export class EditEvent {
     // TODO: aca falta recuperar la imagen si se subio
     const dataNewEvent = this.getNewEvent(this.formEvent.getRawValue());
     // console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
-    this.eventService.updateGiveaways(dataNewEvent, ""+this.event?.id, ""+this.event?.creator.id, ).subscribe({
+    this.eventService.updateGiveaways(dataNewEvent, ""+this.event?.id, this.event?.creator?.id, ).subscribe({
       next: (response) => {
           // console.log('[initConfig] => nuevo evento creado: ', response);
         this.dataModal.message = "Evento editado correctamente: ", response;

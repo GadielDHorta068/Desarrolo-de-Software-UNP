@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Events, EventsCreate, EventsTemp } from '../models/events.model';
+import { Observable, throwError } from 'rxjs';
+import { Events, EventsCreate, EventsTemp, StatusEvent } from '../models/events.model';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -57,11 +57,25 @@ export class EventsService {
   }
 
   // actualiza los datos del evento
-  updateGiveaways(dataEvent: EventsCreate, eventId: string, userId: string): Observable<EventsTemp[]> {
+  updateGiveaways(dataEvent: EventsCreate, eventId: string, userId: number|undefined): Observable<EventsTemp[]> {
+    if(!userId){
+      console.warn("Error al actualizar el evento. Se espera el id de un usuario.");
+      return throwError(() => new Error("Se espera el id de un usuario."));
+    }
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.authService.getToken()}`,
       'Content-Type': 'application/json'
     });
     return this.http.put<EventsTemp[]>(`${this.apiUrl}/update/giveaway/${eventId}/user/${userId}`, dataEvent, { headers });
+  }
+
+// Actualiza el estado de un evento (ABIERTO/CERRADO/FINALIZADO/BLOQUEADO)
+  updateEventStatus(eventId: number, userId: number, status: StatusEvent): Observable<EventsTemp> {
+    const payload = { statusEvent: status };
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.put<EventsTemp>(`${this.apiUrl}/${eventId}/status/user/${userId}`, payload, { headers });
   }
 }

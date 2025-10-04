@@ -25,4 +25,5 @@ export class ModalDrawInfo {
   close() {
     this.show = false;
   }
+  
 }

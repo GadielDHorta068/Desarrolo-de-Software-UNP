@@ -1,5 +1,22 @@
 <div class="container mx-auto px-4 py-6">
-  <h2 class="text-2xl font-bold text-emerald-600 mb-4">Sorteos públicos</h2>
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-2xl font-bold text-emerald-600">Sorteos públicos</h2>
+    <!-- Botón Nuevo evento -->
+    <a routerLink="/panel" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">Nuevo evento</a>
+  </div>
+
+  <!-- Filtro por estado -->
+  <div class="mb-6 flex items-center gap-3">
+    <label class="text-gray-400">Filtrar por estado:</label>
+    <select [(ngModel)]="selectedStatus" (change)="applyFilter(selectedStatus)" class="border rounded px-2 py-1 bg-gray-900">
+      <option value="ALL">Todos</option>
+      <option [ngValue]="StatusEvent.OPEN">Abiertos</option>
+      <option [ngValue]="StatusEvent.CLOSED">Cerrados</option>
+      <option [ngValue]="StatusEvent.FINISHED">Finalizados</option>
+      <option [ngValue]="StatusEvent.ACTIVE">Activos</option>
+      <option [ngValue]="StatusEvent.BLOCKED">Bloqueados</option>
+    </select>
+  </div>
 
   <!-- Loading -->
   <div *ngIf="loading" class="text-gray-500">Cargando eventos...</div>
@@ -8,12 +25,12 @@
   <div *ngIf="!loading && error" class="text-red-500">{{ error }}</div>
 
   <!-- Empty state -->
-  <div *ngIf="!loading && !error && events.length === 0" class="text-gray-400">
+  <div *ngIf="!loading && !error && filteredEvents.length === 0" class="text-gray-400">
     No hay eventos disponibles por ahora.
   </div>
 
   <!-- Events list -->
-  <div *ngIf="!loading && !error && events.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-    <app-draw-card *ngFor="let evt of events" [event]="evt" [customBackground]="'bg-zinc-800'"></app-draw-card>
+  <div *ngIf="!loading && !error && filteredEvents.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <app-draw-card *ngFor="let evt of filteredEvents" [event]="evt" [customBackground]="'bg-zinc-800'"></app-draw-card>
   </div>
 </div>
