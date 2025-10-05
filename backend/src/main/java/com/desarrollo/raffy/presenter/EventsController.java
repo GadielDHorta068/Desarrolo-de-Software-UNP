@@ -20,6 +20,7 @@ import com.desarrollo.raffy.model.User;
 import com.desarrollo.raffy.util.ImageUtils;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.Response;
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.ParticipantService;
 import com.desarrollo.raffy.business.services.UserService;
@@ -33,12 +34,10 @@ import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
-import com.desarrollo.raffy.exception.AlreadyRegisteredToGiveawayExeption;
 
 import org.modelmapper.ModelMapper;
 import java.util.stream.Collectors;
 import java.util.Map;
-import java.util.HashMap;
 
 @RestController
 @RequestMapping("/events")
@@ -331,28 +330,15 @@ public class EventsController {
                 
                 savedGuestUser = userService.save(userFromDb);
             }
-            try {
-                // intento guardar la participacion del usuario
-                Participant created = participantService.registerToGiveaway(savedGuestUser, eventToParticipate);
-                Map<String, Object> response = new HashMap<>();
-                response.put("id", created.getId());
-                response.put("eventId", eventToParticipate.getId());
-                response.put("userId", savedGuestUser.getId());
-                response.put("message", "Inscripción realizada exitosamente");
-                return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(response);
-            } catch (AlreadyRegisteredToGiveawayExeption e) {
-                return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(e.getMessage());
-            } catch (Exception e) {
-                return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(e.getMessage());
-            }
+            // intento guardar la participacion del usuario
+            @SuppressWarnings("unused")
+            Participant created = participantService.registerToGiveaway(savedGuestUser, eventToParticipate);
             
-    }
+            return Response.ok(null,"Inscripción exitosa");
+            // cambiar el null por un dto o manejar la referencia circular q hay entre giveaway y
+            //su organizador en caso de querer retornar el objeto Participant 
+
+        }
 
     @GetMapping("/giveaways/search")
     public ResponseEntity<?> searchGiveawaysByDateRange(
