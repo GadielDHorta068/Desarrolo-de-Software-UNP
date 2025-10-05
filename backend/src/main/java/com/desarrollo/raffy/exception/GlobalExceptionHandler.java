@@ -45,12 +45,28 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(AlreadyRegisteredToGiveawayExeption.class)
+    public ResponseEntity<ErrorResponse> handleDobleRegisterToGiveAwayException(
+        AlreadyRegisteredToGiveawayExeption ex, WebRequest request) {
+
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error("Conflict: Doble inscirpcion a un sorteo")
+                .message(ex.getMessage())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
     /**
      * Maneja excepciones generales no controladas
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(
             Exception ex, WebRequest request) {
+
+         ex.printStackTrace();
         
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
