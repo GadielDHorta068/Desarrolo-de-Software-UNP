@@ -50,13 +50,14 @@ export class QuestionaryComponent {
             this.eventId //despues podria tener un objeto y usar un dto o algo asi
         ).subscribe({
             next: (response) => {
-                console.log('Guardado en backend:', response.message ); // borrar
-                this.notificationService.notifySuccess('Registo al sorteo exitoso');
+                console.log('Guardado en backend:', JSON.stringify(response)); // borrar
+                this.notificationService.notifySuccess(response.message);
                 this.closeModal();
             },
-            error: (errorMessage) => {
-                console.error('Error:', errorMessage);
-                this.notificationService.notifyError('Error al guardar, intentá de nuevo');
+            error: (errorResponse) => {
+                console.log('LOG ERROR:', JSON.stringify(errorResponse)); // borrar
+                console.error('Error:', errorResponse);
+                this.notificationService.notifyError(errorResponse.error.message);
             }
         });
     }
