@@ -34,6 +34,7 @@ import lombok.Setter;
 import lombok.AllArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Setter @Getter
@@ -49,6 +50,7 @@ public abstract class Events {
     @NotNull(message = "El creador del evento no debe estar vacío")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // ver
     private RegisteredUser creator;
 
     @NotBlank(message = "El titulo debe estar completo")
@@ -74,6 +76,7 @@ public abstract class Events {
     @NotNull(message = "Debe tener categoría")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // ver
     private Categories category;
 
     @NotNull(message = "El estado del evento no debe estar vacío")
