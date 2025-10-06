@@ -122,7 +122,7 @@ public class EventsController {
         }
     }
 
-    @PutMapping("update/{idEvent}/user/{idUser}")
+    @PutMapping("/update/{idEvent}/user/{idUser}")
     public ResponseEntity<?> update(
                     @PathVariable("idEvent") @NotNull @Positive Long id, 
                     @RequestBody Events events, 
@@ -160,7 +160,7 @@ public class EventsController {
         }
     }
 
-    @PutMapping("update/giveaway/{idEvent}/user/{idUser}")
+    @PutMapping("/update/giveaway/{idEvent}/user/{idUser}")
     public ResponseEntity<?> updateGiveaway(
             @PathVariable Long idEvent,
             @PathVariable Long idUser,
@@ -171,7 +171,7 @@ public class EventsController {
         return ResponseEntity.ok(dto);
     }
 
-    @PutMapping("update/guessing-contest/{idEvent}/user/{idUser}")
+    @PutMapping("/update/guessing-contest/{idEvent}/user/{idUser}")
     public ResponseEntity<?> updateGuessingConstest(
             @PathVariable Long idEvent,
             @PathVariable Long idUser,
@@ -234,7 +234,7 @@ public class EventsController {
         return new ResponseEntity<>(eventTypes, HttpStatus.OK);
     }
 
-    @DeleteMapping("delete/id/{id}")
+    @DeleteMapping("/delete/id/{id}")
     public ResponseEntity<?> delete(@PathVariable @NotNull @Positive Long id) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
