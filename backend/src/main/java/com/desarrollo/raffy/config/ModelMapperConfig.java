@@ -10,8 +10,11 @@ import org.modelmapper.Converter;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
+import com.desarrollo.raffy.dto.GiveawaysDTO;
+import com.desarrollo.raffy.dto.GuessingContestDTO;
 import com.desarrollo.raffy.dto.CreatorSummaryDTO;
 import com.desarrollo.raffy.model.Giveaways;
+import com.desarrollo.raffy.model.GuessingContest;
 
 /**
  * Configuración de ModelMapper para el mapeo automático entre entidades y DTOs
@@ -123,6 +126,26 @@ public class ModelMapperConfig {
                   m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
                   m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
               });
+
+        // Mapeo polimórfico para Events -> EventSummaryDTO según la subclase
+        mapper.typeMap(Events.class, EventSummaryDTO.class)
+              .setProvider(request -> {
+                    Events src = (Events) request.getSource();
+                    if(src instanceof Giveaways) return new GiveawaysDTO();
+                    if(src instanceof GuessingContest) return new GuessingContestDTO();
+                    return new EventSummaryDTO();
+                });
+        mapper.createTypeMap(Giveaways.class, GiveawaysDTO.class)
+            .addMappings(m -> {
+                m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
+                m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
+            });
+        mapper.createTypeMap(GuessingContest.class, GuessingContestDTO.class)
+            .addMappings(m -> {
+                m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
+                m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
+            });
+
 
         return mapper;
     }

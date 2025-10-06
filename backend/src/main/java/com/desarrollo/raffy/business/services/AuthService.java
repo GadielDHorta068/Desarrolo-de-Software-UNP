@@ -16,6 +16,7 @@ import com.desarrollo.raffy.dto.RefreshTokenRequest;
 import com.desarrollo.raffy.dto.RegisteredUserDTO;
 import com.desarrollo.raffy.dto.UpdateProfileRequest;
 import com.desarrollo.raffy.dto.UserResponse;
+import com.desarrollo.raffy.exception.UserAlreadyExistsException;
 import com.desarrollo.raffy.model.RefreshToken;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
@@ -40,40 +41,65 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private EmailService emailService;
+
     public AuthResponse register(RegisteredUserDTO request) {
-        // Verificar si el email ya existe
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("El email ya está registrado");
+        try {
+            // Verificar si el email ya existe
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new UserAlreadyExistsException("El email ya está registrado");
+            }
+
+            // Verificar si el nickname ya existe
+            if (userRepository.existsByNickname(request.getNickname())) {
+                throw new UserAlreadyExistsException("El nickname ya está en uso");
+            }
+
+            // Crear nuevo usuario
+            RegisteredUser user = new RegisteredUser(
+                    request.getName(),
+                    request.getSurname(),
+                    request.getEmail(),
+                    request.getCellphone(),
+                    request.getNickname(),
+                    passwordEncoder.encode(request.getPassword()));
+            user.setImagen(ImageUtils.base64ToBytes(request.getImagen()));
+
+            RegisteredUser savedUser = userRepository.save(user);
+            
+            // Enviar correo de bienvenida con plantilla profesional
+            String userName = savedUser.getName() + " " + savedUser.getSurname();
+            emailService.sendWelcomeEmailWithTemplate(savedUser.getEmail(), userName, null);
+
+            // Generar tokens
+            String accessToken = jwtService.generateToken(savedUser);
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(savedUser);
+
+            return AuthResponse.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken.getToken())
+                    .expiresIn(jwtService.getJwtExpiration())
+                    .user(mapToUserResponse(savedUser))
+                    .build();
+                    
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Manejar errores de integridad de base de datos como fallback
+            if (e.getMessage().contains("email") || e.getMessage().contains("UKoshmjvr6wht0bg9oivn75aajr")) {
+                throw new UserAlreadyExistsException("El email ya está registrado");
+            } else if (e.getMessage().contains("nickname")) {
+                throw new UserAlreadyExistsException("El nickname ya está en uso");
+            } else {
+                
+                throw new RuntimeException("Error al registrar usuario: " + e.getMessage());
+            }
+        } catch (UserAlreadyExistsException e) {
+            // Re-lanzar excepciones de usuario ya existente
+            throw e;
+        } catch (Exception e) {
+            // Manejar cualquier otro error
+            throw new RuntimeException("Error al registrar usuario: " + e.getMessage());
         }
-
-        // Verificar si el nickname ya existe
-        if (userRepository.existsByNickname(request.getNickname())) {
-            throw new RuntimeException("El nickname ya está en uso");
-        }
-
-        // Crear nuevo usuario
-        RegisteredUser user = new RegisteredUser(
-                request.getName(),
-                request.getSurname(),
-                request.getEmail(),
-                request.getCellphone(),
-                request.getNickname(),
-                passwordEncoder.encode(request.getPassword())
-        );
-        user.setImagen(ImageUtils.base64ToBytes(request.getImagen()));
-
-        RegisteredUser savedUser = userRepository.save(user);
-
-        // Generar tokens
-        String accessToken = jwtService.generateToken(savedUser);
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(savedUser);
-
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken.getToken())
-                .expiresIn(jwtService.getJwtExpiration())
-                .user(mapToUserResponse(savedUser))
-                .build();
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -81,9 +107,7 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getPassword()
-                )
-        );
+                        request.getPassword()));
 
         RegisteredUser user = (RegisteredUser) authentication.getPrincipal();
 
@@ -134,22 +158,22 @@ public class AuthService {
     public UserResponse updateProfile(UpdateProfileRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        
+
         RegisteredUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
+
         // Verificar si el nuevo email ya existe (si es diferente al actual)
-        if (!user.getEmail().equals(request.getEmail()) && 
-            userRepository.existsByEmail(request.getEmail())) {
+        if (!user.getEmail().equals(request.getEmail()) &&
+                userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
         }
-        
+
         // Verificar si el nuevo nickname ya existe (si es diferente al actual)
-        if (!user.getNickname().equals(request.getNickname()) && 
-            userRepository.existsByNickname(request.getNickname())) {
+        if (!user.getNickname().equals(request.getNickname()) &&
+                userRepository.existsByNickname(request.getNickname())) {
             throw new RuntimeException("El nickname ya está en uso");
         }
-        
+
         // Actualizar los campos
         user.setName(request.getName());
         user.setSurname(request.getSurname());
@@ -157,27 +181,27 @@ public class AuthService {
         user.setCellphone(request.getCellphone());
         user.setNickname(request.getNickname());
         user.setImagen(ImageUtils.base64ToBytes(request.getImagen()));
-        
+
         RegisteredUser updatedUser = userRepository.save(user);
         return mapToUserResponse(updatedUser);
     }
-    
+
     public void changePassword(ChangePasswordRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        
+
         RegisteredUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
+
         // Verificar que la contraseña actual sea correcta
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new RuntimeException("La contraseña actual es incorrecta");
         }
-        
+
         // Hashear y guardar la nueva contraseña
         String hashedNewPassword = passwordEncoder.encode(request.getNewPassword());
         user.setPassword(hashedNewPassword);
-        
+
         userRepository.save(user);
     }
 
@@ -199,7 +223,7 @@ public class AuthService {
             System.err.println("Error al procesar imagen del usuario " + user.getId() + ": " + e.getMessage());
             imagenBase64 = null;
         }
-        
+
         return UserResponse.builder()
                 .id(user.getId())
                 .name(user.getName())

@@ -17,7 +17,6 @@ import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
-import com.desarrollo.raffy.util.ImageUtils;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.business.services.EventsService;
@@ -33,7 +32,7 @@ import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
-import com.desarrollo.raffy.exception.AlreadyRegisteredToGiveawayExeption;
+import com.desarrollo.raffy.dto.WinnerDTO;
 
 import org.modelmapper.ModelMapper;
 import java.util.stream.Collectors;
@@ -123,7 +122,7 @@ public class EventsController {
         }
     }
 
-    @PutMapping("update/{idEvent}/user/{idUser}")
+    @PutMapping("/update/{idEvent}/user/{idUser}")
     public ResponseEntity<?> update(
                     @PathVariable("idEvent") @NotNull @Positive Long id, 
                     @RequestBody Events events, 
@@ -161,13 +160,24 @@ public class EventsController {
         }
     }
 
-    @PutMapping("update/giveaway/{idEvent}/user/{idUser}")
+    @PutMapping("/update/giveaway/{idEvent}/user/{idUser}")
     public ResponseEntity<?> updateGiveaway(
             @PathVariable Long idEvent,
             @PathVariable Long idUser,
             @RequestBody Giveaways event) {
 
         Giveaways updatedEvent = eventsService.update(idEvent, event, idUser);
+        EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
+        return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/update/guessing-contest/{idEvent}/user/{idUser}")
+    public ResponseEntity<?> updateGuessingConstest(
+            @PathVariable Long idEvent,
+            @PathVariable Long idUser,
+            @RequestBody GuessingContest event) {
+
+        GuessingContest updatedEvent = eventsService.update(idEvent, event, idUser);
         EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
         return ResponseEntity.ok(dto);
     }
@@ -185,13 +195,46 @@ public class EventsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/winners/event/{eventId}")
+    public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable Long eventId){
+        try {
+            List<Participant> winners = eventsService.finalizedEvent(eventId);
+        if(winners.isEmpty()){
+            return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
+        }
+        List<WinnerDTO> response = winners.stream()
+            .map(this::toWinnerDTO)
+            .toList();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>("Error al finalizar el evento", HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>("Error al obtener los ganadores: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        
+    }
+
+    private WinnerDTO toWinnerDTO(Participant participant) {
+        WinnerDTO dto = new WinnerDTO();
+        dto.setParticipantId(participant.getParticipant().getId());
+        dto.setName(participant.getParticipant().getName());
+        dto.setSurname(participant.getParticipant().getSurname());
+        dto.setPosition(participant.getPosition());
+        dto.setEmail(participant.getParticipant().getEmail());
+        dto.setPhone(participant.getParticipant().getCellphone());
+        dto.setEventId(participant.getEvent().getId());
+        dto.setEventTitle(participant.getEvent().getTitle());
+        return dto;
+    }
+
     @GetMapping("/event-types")
     public ResponseEntity<?> getAllEventTypes() {
         EventTypes[] eventTypes = eventsService.getAllEventTypes();
         return new ResponseEntity<>(eventTypes, HttpStatus.OK);
     }
 
-    @DeleteMapping("delete/id/{id}")
+    @DeleteMapping("/delete/id/{id}")
     public ResponseEntity<?> delete(@PathVariable @NotNull @Positive Long id) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);

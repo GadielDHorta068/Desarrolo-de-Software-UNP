@@ -6,7 +6,14 @@
     <div class="flex">
         <!-- columna de datos -->
         <div class="basis-1/2">
-            <div class="block">
+            <div *ngIf="showRegisteredStatus"
+                class="bg-green-600 dark:bg-green-500 text-white px-4 py-1 rounded-lg text-sm font-medium flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                ESTAS INSCRITO
+            </div>
+            <div class="block" style="padding-top: 8px;">
                 <p class="text-sm text-gray-200"><b>Dia de realizacion</b></p>
                 <p class="text-sm text-gray-400 mb-1">{{event?.endDate | handleDatePipe}}</p>
             </div>
@@ -16,9 +23,9 @@
             </div>
         </div>
         <!-- columna de imagen -->
-        <div class="basis-1/2">
+        <div class="basis-1/2 flex items-center">
             <img 
-                [src]="event?.imageUrl ? 'data:image/jpeg;base64,' + event?.imageUrl : 'assets/account_24.svg'" 
+                [src]="event?.imageUrl ? 'data:image/jpeg;base64,' + event?.imageUrl : 'assets/no-image.jpg'" 
                 [alt]="event?.title || 'Imagen del evento'"
                 class="mx-auto min-w-[100px] max-h-[100px] object-cover rounded-lg"
                 [class.border]="event?.imageUrl"
@@ -27,7 +34,7 @@
     </div>
 
     <!-- botones de accion -->
-    <div class="flex mt-2 justify-center gap-[4%]">
+    <div class="flex mt-2 justify-center gap-[4%] pt-1">
         <!-- Botón Ver detalles - siempre visible -->
         <button class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" (click)="modalEventInfo.open()">Ver detalles</button>
         
@@ -65,14 +72,14 @@
         </button>
         
         <!-- Estado Inscrito - visible si el usuario ya está registrado -->
-        <div 
+        <!-- <div 
             *ngIf="showRegisteredStatus"
             class="bg-green-600 dark:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
             </svg>
             Inscrito
-        </div>
+        </div> -->
         
         <!-- Botón Inscribirme para invitados (sin autenticación) -->
         <button 
@@ -103,3 +110,5 @@
     <p class="text-sm text-gray-700 mb-3">Participantes: 200</p>
     <button class="mt-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm">Ver detalles</button>
 </div> -->
+
+<app-modal-info [dataModal]="dataModal" #modalInfo></app-modal-info>

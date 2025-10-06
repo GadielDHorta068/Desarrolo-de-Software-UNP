@@ -14,17 +14,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
+import com.desarrollo.raffy.business.utils.GiveawayWinnerStrategy;
+import com.desarrollo.raffy.business.utils.GuessingContestWinnerStrategy;
+import com.desarrollo.raffy.business.utils.WinnerStrategyFactory;
 import com.desarrollo.raffy.business.repository.ParticipantRepository;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.GuessingContest;
+import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.util.ImageUtils;
 
 import org.modelmapper.ModelMapper;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
+import com.desarrollo.raffy.dto.GiveawaysDTO;
+import com.desarrollo.raffy.dto.GuessingContestDTO;
 
 @Service
 public class EventsService {
@@ -40,6 +46,18 @@ public class EventsService {
 
     @Autowired
     private ParticipantRepository participantRepository;
+
+    @Autowired
+    private ParticipantService participantService;
+
+    @Autowired
+    private GiveawayWinnerStrategy giveawayWinnerStrategy;
+
+    @Autowired
+    private GuessingContestWinnerStrategy guessingContestWinnerStrategy;
+
+    @Autowired
+    private WinnerStrategyFactory winnerStrategyFactory;
 
     @Transactional
     public <T extends Events> T create(T event, Long idUser) {
@@ -105,7 +123,6 @@ public class EventsService {
 
             existingContest.setMinValue(newContest.getMinValue());
             existingContest.setMaxValue(newContest.getMaxValue());
-            existingContest.setTargetNumber(newContest.getTargetNumber());
             existingContest.setMaxAttempts(newContest.getMaxAttempts());
         }
 
@@ -118,6 +135,12 @@ public class EventsService {
         return eventsRepository.findByCreatorId(IdCreator);
     }
 
+    /**
+     * Cierra un evento cambiando su estado a CLOSED.
+     * @param idEvent
+     * @return true si el evento se cerró correctamente, false si ya estaba cerrado o finalizado.
+     * @throws RuntimeException si el evento no se encuentra o hay un error al guardar.
+     */
     public boolean closeEvent(Long idEvent){
         try {
             Events event = eventsRepository.findById(idEvent)
@@ -152,26 +175,19 @@ public class EventsService {
         Events event = eventsRepository.findByIdWithDetails(id)
             .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
-        EventSummaryDTO dto = modelMapper.map(event, EventSummaryDTO.class);
-
-        if(event.getImagen() != null){
-            dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
-        }
-
-        // Verificar si el usuario actual está inscrito en el evento
-        RegisteredUser currentUser = getCurrentUser();
-        if (currentUser != null) {
-            boolean isRegistered = participantRepository.existsByParticipantAndEvent(currentUser, event);
-            dto.setIsUserRegistered(isRegistered);
-        } else {
-            dto.setIsUserRegistered(false);
-        }
-
-        return dto;
+        return toEventSummaryDTO(event);
     }
 
     public EventSummaryDTO toEventSummaryDTO(Events event) {
-        EventSummaryDTO dto = modelMapper.map(event, EventSummaryDTO.class);
+        EventSummaryDTO dto;
+        if(event instanceof Giveaways){
+            dto = modelMapper.map(event, GiveawaysDTO.class);
+        } else if(event instanceof GuessingContest){
+            dto = modelMapper.map(event, GuessingContestDTO.class);
+        } else {
+            dto = modelMapper.map(event, EventSummaryDTO.class);
+        }
+
         if (event.getImagen() != null) {
             dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
         }
@@ -184,9 +200,91 @@ public class EventsService {
         } else {
             dto.setIsUserRegistered(false);
         }
-        
+        /* System.out.println("Evento: " + event.getTitle() + " - Categoria: " + 
+            (event.getCategory() != null ? event.getCategory().getName() : "NULL")); */
+
         return dto;
     }
+
+
+
+   /*  @Transactional
+    public boolean finalizedEvents(Long eventID){
+        try{
+            Events event = eventsRepository.findById(eventID)
+            .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+
+            if(event.getStatusEvent() == StatusEvent.CLOSED){
+                event.setStatusEvent(StatusEvent.FINALIZED);
+                if(event instanceof Giveaways){
+                    selectWinnersGiveaways(eventID);
+                    eventsRepository.save(event);
+                } else if(event instanceof GuessingContest){
+                    selectWinnersGuessingContest(eventID);
+                    eventsRepository.save(event);
+                }
+                return true;
+            }
+            return false;
+        } catch(Exception e){
+            throw new RuntimeException("Error al finalizar el evento " + e.getStackTrace());
+        }
+    } */
+
+    @Transactional
+    public List<Participant> finalizedEvent(Long eventId){
+        Events event = eventsRepository.findById(eventId)
+            .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+        
+        if (event.getStatusEvent() != StatusEvent.CLOSED) {
+            throw new IllegalStateException("El evento debe estar cerrado para poder finalizarse");
+        }
+        // Cambia el estado del evento a FINALIZED
+        event.setStatusEvent(StatusEvent.FINALIZED);
+
+        //Delega la selección de ganadores a ParticipantService
+        List<Participant> winners = participantService.runEvent(eventId);
+
+        eventsRepository.save(event);
+        return winners;
+    }
+
+
+    /**
+     * Selecciona los ganadores de Sorteo
+     * @param id
+     */
+    /* private void selectWinnersGiveaways(Long id){
+        try {
+            Giveaways giveaways = (Giveaways) eventsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sorteo no encontrado"));
+            
+            var strategy = winnerStrategyFactory.getStrategy(giveaways.getEventType());
+            List<Participant> participants = participantRepository.findParticipantsByEventId(id);
+            strategy.selectWinners(giveaways, participants);
+            eventsRepository.save(giveaways);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al seleccionar los ganadores del sorteo " + e.getStackTrace());
+        }
+    } */
+
+    /**
+     * Selecciona los ganadores de un concurso de adivinanzas
+     * @param id
+     */
+    /* private void selectWinnersGuessingContest(Long id){
+        try {
+            GuessingContest guessingContest = (GuessingContest) eventsRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Sorteo no encontrado"));
+
+            var strategy = winnerStrategyFactory.getStrategy(guessingContest.getEventType());
+            List<Participant> participants = participantRepository.findParticipantsByEventId(id);
+            strategy.selectWinners(guessingContest, participants);
+            eventsRepository.save(guessingContest);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al seleccionar los ganadores del sorteo " + e.getStackTrace());
+        }
+    } */
 
     /**
      * Obtiene el usuario actual del contexto de seguridad

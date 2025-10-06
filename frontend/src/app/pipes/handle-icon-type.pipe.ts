@@ -1,4 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { EventTypes } from '../models/events.model';
 
 @Pipe({
   name: 'handleIconTypePipe'
@@ -6,17 +7,20 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class HandleIconTypePipe implements PipeTransform {
 
   transform( code: string|undefined ): string {
-    let srcImage: string = "assets/raffle_icon.png";
-    // switch(code as string){
-    //   case 'GIVEAWAY':
-    //     srcImage = 'assets/sorteo_2.png';
-    //     break;
-    //   case 'CONTEST':
-    //     srcImage = 'assets/sorteo_3.png';
-    //     break;
-    //   case 'TOURNAMENT' :
-    //     srcImage = 'assets/sorteo_4.png';
-    // }
+    let srcImage: string = "";
+    switch(code as string){
+      case EventTypes.GIVEAWAY:
+        srcImage = 'assets/roulette_icon.png';
+        break;
+      case EventTypes.RAFFLES:
+        srcImage = 'assets/raffle_icon.png';
+        break;
+      // case EventTypes.CONTEST :
+      //   srcImage = 'assets/raffle_icon.png';
+      default:
+        srcImage = 'assets/raffle_icon.png';
+        break;
+    }
 
     return srcImage;
   }

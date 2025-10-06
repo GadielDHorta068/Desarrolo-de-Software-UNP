@@ -18,7 +18,12 @@
     </div>
 
     <div>
-        <img src="assets/account_24.svg" class="mx-auto min-w-[100px] w-[100px] h-[100px]">
+        <img 
+          [src]="dataEvent?.imageUrl ? 'data:image/jpeg;base64,' + dataEvent?.imageUrl : 'assets/no-image.jpg'" 
+          [alt]="dataEvent?.title || 'Imagen del evento'"
+          class="mx-auto min-w-[100px] max-h-[100px] object-cover rounded-lg"
+          [class.border]="dataEvent?.imageUrl"
+          [class.border-gray-300]="dataEvent?.imageUrl">
     </div>
     
     <div>
@@ -58,8 +63,8 @@
           </div>
         </div>
     </div>
-    <div class="pt-1">
-      <a href="https://ejemplo.com" target="_blank" class="text-blue-600 underline mb-4 block">Editar evento</a>
-    </div>
+    <!-- <div class="pt-1">
+      <small class="text-green-500  underline mb-4 block" (click)="onRedirectEdit()">Editar evento</small>
+    </div> -->
   </div>
 </div>
