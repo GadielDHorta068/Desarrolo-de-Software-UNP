@@ -17,7 +17,6 @@ import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
-import com.desarrollo.raffy.util.ImageUtils;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.business.services.EventsService;
@@ -33,6 +32,8 @@ import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
+import com.desarrollo.raffy.dto.WinnerDTO;
+
 import org.modelmapper.ModelMapper;
 import java.util.stream.Collectors;
 import java.util.Map;
@@ -192,6 +193,39 @@ public class EventsController {
             .map(eventsService::toEventSummaryDTO).collect(Collectors.toList());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/winners/event/{eventId}")
+    public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable Long eventId){
+        try {
+            List<Participant> winners = eventsService.finalizedEvent(eventId);
+        if(winners.isEmpty()){
+            return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
+        }
+        List<WinnerDTO> response = winners.stream()
+            .map(this::toWinnerDTO)
+            .toList();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>("Error al finalizar el evento", HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>("Error al obtener los ganadores: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        
+    }
+
+    private WinnerDTO toWinnerDTO(Participant participant) {
+        WinnerDTO dto = new WinnerDTO();
+        dto.setParticipantId(participant.getParticipant().getId());
+        dto.setName(participant.getParticipant().getName());
+        dto.setSurname(participant.getParticipant().getSurname());
+        dto.setPosition(participant.getPosition());
+        dto.setEmail(participant.getParticipant().getEmail());
+        dto.setPhone(participant.getParticipant().getCellphone());
+        dto.setEventId(participant.getEvent().getId());
+        dto.setEventTitle(participant.getEvent().getTitle());
+        return dto;
     }
 
     @GetMapping("/event-types")

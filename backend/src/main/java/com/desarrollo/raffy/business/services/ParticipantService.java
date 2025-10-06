@@ -13,6 +13,7 @@ import com.desarrollo.raffy.business.utils.WinnerStrategyFactory;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
 
 @Service
@@ -31,6 +32,10 @@ public class ParticipantService {
         Events event = eventsRepository.findById(eventId)
         .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
+        if (event.getStatusEvent() != StatusEvent.CLOSED) {
+            throw new IllegalStateException("El evento debe estar cerrado para poder ejecutarse");
+        }
+
         List<Participant> participants = participantRepository.findParticipantsByEventId(eventId);
 
         if(participants.isEmpty()){
@@ -39,6 +44,9 @@ public class ParticipantService {
 
         // Obtener la estrategia adecuada
         WinnerSelectionStrategy strategy = strategyFactory.getStrategy(event.getEventType());
+        if (strategy == null) {
+            throw new UnsupportedOperationException("No hay estrategia definida para este tipo de evento: " + event.getEventType());
+        }
 
         strategy.selectWinners(event, participants);
 

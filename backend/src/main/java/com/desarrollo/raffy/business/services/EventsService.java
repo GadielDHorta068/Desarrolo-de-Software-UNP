@@ -14,11 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
+import com.desarrollo.raffy.business.utils.GiveawayWinnerStrategy;
+import com.desarrollo.raffy.business.utils.GuessingContestWinnerStrategy;
+import com.desarrollo.raffy.business.utils.WinnerStrategyFactory;
 import com.desarrollo.raffy.business.repository.ParticipantRepository;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.GuessingContest;
+import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.util.ImageUtils;
@@ -42,6 +46,18 @@ public class EventsService {
 
     @Autowired
     private ParticipantRepository participantRepository;
+
+    @Autowired
+    private ParticipantService participantService;
+
+    @Autowired
+    private GiveawayWinnerStrategy giveawayWinnerStrategy;
+
+    @Autowired
+    private GuessingContestWinnerStrategy guessingContestWinnerStrategy;
+
+    @Autowired
+    private WinnerStrategyFactory winnerStrategyFactory;
 
     @Transactional
     public <T extends Events> T create(T event, Long idUser) {
@@ -189,6 +205,86 @@ public class EventsService {
 
         return dto;
     }
+
+
+
+   /*  @Transactional
+    public boolean finalizedEvents(Long eventID){
+        try{
+            Events event = eventsRepository.findById(eventID)
+            .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+
+            if(event.getStatusEvent() == StatusEvent.CLOSED){
+                event.setStatusEvent(StatusEvent.FINALIZED);
+                if(event instanceof Giveaways){
+                    selectWinnersGiveaways(eventID);
+                    eventsRepository.save(event);
+                } else if(event instanceof GuessingContest){
+                    selectWinnersGuessingContest(eventID);
+                    eventsRepository.save(event);
+                }
+                return true;
+            }
+            return false;
+        } catch(Exception e){
+            throw new RuntimeException("Error al finalizar el evento " + e.getStackTrace());
+        }
+    } */
+
+    @Transactional
+    public List<Participant> finalizedEvent(Long eventId){
+        Events event = eventsRepository.findById(eventId)
+            .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+        
+        if (event.getStatusEvent() != StatusEvent.CLOSED) {
+            throw new IllegalStateException("El evento debe estar cerrado para poder finalizarse");
+        }
+        // Cambia el estado del evento a FINALIZED
+        event.setStatusEvent(StatusEvent.FINALIZED);
+
+        //Delega la selección de ganadores a ParticipantService
+        List<Participant> winners = participantService.runEvent(eventId);
+
+        eventsRepository.save(event);
+        return winners;
+    }
+
+
+    /**
+     * Selecciona los ganadores de Sorteo
+     * @param id
+     */
+    /* private void selectWinnersGiveaways(Long id){
+        try {
+            Giveaways giveaways = (Giveaways) eventsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sorteo no encontrado"));
+            
+            var strategy = winnerStrategyFactory.getStrategy(giveaways.getEventType());
+            List<Participant> participants = participantRepository.findParticipantsByEventId(id);
+            strategy.selectWinners(giveaways, participants);
+            eventsRepository.save(giveaways);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al seleccionar los ganadores del sorteo " + e.getStackTrace());
+        }
+    } */
+
+    /**
+     * Selecciona los ganadores de un concurso de adivinanzas
+     * @param id
+     */
+    /* private void selectWinnersGuessingContest(Long id){
+        try {
+            GuessingContest guessingContest = (GuessingContest) eventsRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Sorteo no encontrado"));
+
+            var strategy = winnerStrategyFactory.getStrategy(guessingContest.getEventType());
+            List<Participant> participants = participantRepository.findParticipantsByEventId(id);
+            strategy.selectWinners(guessingContest, participants);
+            eventsRepository.save(guessingContest);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al seleccionar los ganadores del sorteo " + e.getStackTrace());
+        }
+    } */
 
     /**
      * Obtiene el usuario actual del contexto de seguridad

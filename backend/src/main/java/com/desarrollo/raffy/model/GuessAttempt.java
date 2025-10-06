@@ -11,9 +11,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 @Entity
 @Table(name = "guess_attempt")
+@Data
 public class GuessAttempt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
