@@ -1,0 +1,110 @@
+<div class="flex flex-col h-screen gap-4 p-4 bg-gray-100 dark:bg-gray-900">
+
+  <!-- Card: encabezado con título y tabs -->
+  <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow flex flex-col gap-4">
+    <!-- Título -->
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ rifa.titulo }}</h1>
+    <hr class="border-gray-300 dark:border-gray-700" />
+
+    <!-- Tabs y botón -->
+    <div class="flex justify-between items-center border-b border-gray-300 dark:border-gray-700 pb-1">
+      <div class="flex space-x-6">
+
+        <!-- Tab: Información -->
+        <span
+          class="pb-2 cursor-pointer font-semibold"
+          [ngClass]="{
+            'text-blue-600 border-b-2 border-blue-600': tab === 'info',
+            'text-gray-600 dark:text-gray-300': tab !== 'info'
+          }"
+          (click)="tab = 'info'"
+        >
+          Información
+        </span>
+
+        <!-- Tab: Números -->
+        <span
+          class="pb-2 cursor-pointer font-semibold"
+          [ngClass]="{
+            'text-blue-600 border-b-2 border-blue-600': tab === 'numeros',
+            'text-gray-600 dark:text-gray-300': tab !== 'numeros'
+          }"
+          (click)="tab = 'numeros'"
+        >
+          Números
+        </span>
+
+        <!-- Tab: Registrados -->
+        <span
+          class="pb-2 cursor-pointer font-semibold"
+          [ngClass]="{
+            'text-blue-600 border-b-2 border-blue-600': tab === 'registrados',
+            'text-gray-600 dark:text-gray-300': tab !== 'registrados'
+          }"
+          (click)="tab = 'registrados'"
+        >
+            Registrados
+        </span>
+      </div>
+
+        <!-- Botón (solo visible en info o números) -->
+        <button
+            *ngIf="tab === 'numeros'"
+            (click)="addToCart()"
+            class="h-10 px-5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow flex items-center justify-center"
+        >
+            Agregar al carrito
+        </button>
+    </div>
+  </div>
+
+  <!-- Card: Contenido dinámico según tab -->
+  <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow flex-1 overflow-auto">
+
+    <!-- TAB: Información -->
+    <div *ngIf="tab === 'info'" class="flex flex-col gap-4">
+      <p class="text-gray-600 dark:text-gray-300">{{ rifa.descripcion }}</p>
+
+      <div class="flex gap-4 items-center">
+        <span class="font-semibold text-lg text-gray-900 dark:text-white">Precio por número:</span>
+        <span class="text-lg text-red-600">${{ rifa.precio }}</span>
+      </div>
+
+      <div class="flex gap-2 mt-2">
+        <span 
+          *ngFor="let tag of rifa.etiquetas"
+          class="px-2 py-1 bg-blue-200 text-blue-800 rounded-full text-sm"
+        >
+          {{ tag }}
+        </span>
+      </div>
+    </div>
+
+    <!-- TAB: Números -->
+    <div *ngIf="tab === 'numeros'" class="flex flex-col gap-4">
+      <div class="grid grid-cols-10 gap-2">
+        <button
+          *ngFor="let num of numeros"
+          (click)="selectNumber(num)"
+          [disabled]="num.buyStatus"
+          class="w-16 h-16 flex items-center justify-center border rounded-lg shadow transition"
+          [ngClass]="{
+            'bg-red-500 bg-opacity-70 text-white cursor-not-allowed': num.buyStatus,
+            'bg-blue-600 text-white': num.selectStatus && !num.buyStatus,
+            'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-blue-100 dark:hover:bg-blue-600': !num.selectStatus && !num.buyStatus
+          }"
+        >
+          {{ num.ticketNumber }}
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB: Registrados -->
+    <div *ngIf="tab === 'registrados'" class="p-4">
+      <p class="text-gray-700 dark:text-gray-300 text-center italic">
+        (Próximamente: lista de usuarios registrados con sus números)
+      </p>
+    </div>
+
+  </div>
+</div>
