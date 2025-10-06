@@ -175,20 +175,8 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   // Finalizar evento (solo creador)
   public finalizeEvent(): void {
     if (!this.isUserCreator || !this.event?.id) return;
-    if (!this.userCurrent?.id) return;
-    this.eventsService.updateEventStatus(this.event.id, this.userCurrent.id, StatusEvent.FINISHED).subscribe({
-      next: (updated) => {
-        if (this.event) {
-          this.event.statusEvent = StatusEvent.FINISHED;
-        }
-        this.notificationService.notifySuccess('Evento finalizado. Ganador elegido.');
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error al finalizar evento:', err);
-        this.notificationService.notifyError('No se pudo finalizar el evento');
-      }
-    });
+    // Navegar a la pantalla de ruleta de ganadores; el backend finalizará el evento.
+    this.router.navigate(['/winners', this.event.id]);
   }
 
   private reviewCreator(){

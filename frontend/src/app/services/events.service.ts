@@ -78,4 +78,13 @@ export class EventsService {
     });
     return this.http.put<EventsTemp>(`${this.apiUrl}/${eventId}/status/user/${userId}`, payload, { headers });
   }
+
+  // Obtiene ganadores del evento y finaliza en backend si corresponde
+  getWinnersByEventId(eventId: number): Observable<any[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.get<any[]>(`${this.apiUrl}/winners/event/${eventId}`, { headers });
+  }
 }

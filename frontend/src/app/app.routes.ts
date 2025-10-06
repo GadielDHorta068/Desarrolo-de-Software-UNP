@@ -91,6 +91,11 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'winners/:eventId',
+    loadComponent: () => import('./pages/winners/winners-wheel').then(m => m.WinnersWheel),
+    title: 'Ganadores - Raffy'
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }

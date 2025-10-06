@@ -1,0 +1,33 @@
+<div class="min-h-[60vh] flex flex-col items-center justify-center gap-6 p-6">
+  <h1 class="text-2xl font-semibold text-emerald-600">Ruleta de Ganadores</h1>
+
+  <!-- Ruleta -->
+  <div class="wheel-container">
+    <div class="wheel" [class.spinning]="spinning">
+      <img src="assets/roulette_icon.png" alt="Ruleta" />
+    </div>
+  </div>
+
+  <!-- Estado de carga / error -->
+  <div *ngIf="loading" class="text-gray-500">Obteniendo ganadores...</div>
+  <div *ngIf="errorMessage" class="text-red-600">{{ errorMessage }}</div>
+
+  <!-- Ganadores -->
+  <div *ngIf="!loading && winners.length" class="w-full max-w-md">
+    <h2 class="text-xl font-medium mb-2">Ganadores</h2>
+    <ul class="space-y-2">
+      <li *ngFor="let w of winners; let i = index"
+          class="p-3 rounded-lg border flex items-center justify-between"
+          [class.winner-highlight]="i === highlightIndex">
+        <span class="font-medium">{{ w?.participant?.nickname || w?.nickname || 'Participante' }}</span>
+        <span class="text-sm text-gray-500">Posición: {{ w?.position || (i+1) }}</span>
+      </li>
+    </ul>
+
+    <div class="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+      <p class="text-emerald-700">
+        ¡Felicitaciones <strong>{{ winners[0]?.participant?.nickname || winners[0]?.nickname }}</strong>!
+      </p>
+    </div>
+  </div>
+</div>
