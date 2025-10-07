@@ -17,12 +17,7 @@ import { configService } from './services/config.service';
       
       <!-- Demo de tarjeta compartible -->
       <div class="p-4">
-        <app-event-share-card
-          [shortcode]="demoShortcode"
-          [qrBase64]="demoQr"
-          [title]="demoTitle"
-          description="Comparte este enlace corto y su código"
-        ></app-event-share-card>
+        <app-event-share-card></app-event-share-card>
       </div>
 
       <section class="flex-1 bg-gray-50 dark:bg-gray-900 overflow-hidden" [@routeAnimations]="getRouteAnimationData()">
