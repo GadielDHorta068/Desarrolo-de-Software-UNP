@@ -7,7 +7,6 @@ import com.desarrollo.raffy.business.repository.EventsRepository;
 import java.time.LocalDate;
 import java.util.List;
 import com.desarrollo.raffy.model.Events;
-import com.desarrollo.raffy.model.StatusEvent;
 
 import lombok.extern.slf4j.Slf4j;
 
