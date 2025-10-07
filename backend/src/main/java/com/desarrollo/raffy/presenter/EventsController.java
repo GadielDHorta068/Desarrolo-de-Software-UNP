@@ -22,11 +22,12 @@ import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.ParticipantService;
 import com.desarrollo.raffy.business.services.UserService;
-import com.desarrollo.raffy.business.services.GiveawaysService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
@@ -39,14 +40,12 @@ import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
 
+@Slf4j
 @RestController
 @RequestMapping("/events")
 public class EventsController {
     @Autowired
     private EventsService eventsService;
-
-    @Autowired
-    private GiveawaysService giveawaysService;
 
     @Autowired
     private UserService userService;
@@ -196,9 +195,10 @@ public class EventsController {
     }
 
     @GetMapping("/winners/event/{eventId}")
-    public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable Long eventId){
+    public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable("eventId") Long eventId){
         try {
             List<Participant> winners = eventsService.finalizedEvent(eventId);
+            log.info("Número de ganadores obtenidos: " + winners.size());
         if(winners.isEmpty()){
             return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
         }
@@ -401,7 +401,7 @@ public class EventsController {
         if (endDate.isBefore(startDate)) {
             return new ResponseEntity<>("La fecha de inicio no puede ser posterior a la fecha de fin", HttpStatus.BAD_REQUEST);
         }
-        var giveaways = giveawaysService.findByDateRangeGiveaways(startDate, endDate);
+        var giveaways = eventsService.getByDateRange(startDate, endDate);
         var events = giveaways.stream()
             .map(g -> modelMapper.map(g, EventSummaryDTO.class))
             .toList();
@@ -431,38 +431,21 @@ public class EventsController {
             return new ResponseEntity<>("Debe especificar el estado del evento (statusEvent)", HttpStatus.BAD_REQUEST);
         }
 
-        // Normalizar alias del estado desde el frontend
-        // FINISHED (frontend) -> FINALIZED (backend)
-        if ("FINISHED".equalsIgnoreCase(statusStr)) {
-            statusStr = "FINALIZED";
-        }
-
         StatusEvent requestedStatus;
         try {
-            requestedStatus = StatusEvent.valueOf(statusStr.trim());
+            requestedStatus = StatusEvent.valueOf(statusStr.trim().toUpperCase());
         } catch (IllegalArgumentException ex) {
             return new ResponseEntity<>("Estado inválido: " + statusStr, HttpStatus.BAD_REQUEST);
         }
 
-        // Si ya está en el estado solicitado, devolver el resumen actual
-        if (existingEvent.getStatusEvent() == requestedStatus) {
-            EventSummaryDTO dto = eventsService.getEventSummaryById(idEvent);
-            return new ResponseEntity<>(dto, HttpStatus.OK);
+        if(existingEvent.getStatusEvent() != StatusEvent.CLOSED){
+            return new ResponseEntity<>("Solo se pueden cerrar eventos que estén en estado OPEN", HttpStatus.BAD_REQUEST);
         }
 
-        // Transiciones soportadas: OPEN -> CLOSED, CLOSED -> FINALIZED
         try {
-            if (requestedStatus == StatusEvent.CLOSED) {
-                // Cerrar inscripciones del evento
                 eventsService.closeEvent(idEvent);
-            } else if (requestedStatus == StatusEvent.FINALIZED) {
-                // Finalizar sorteo (seleccionar ganadores si aplica)
-                giveawaysService.finalizedGiveaway(idEvent);
-            } else {
-                return new ResponseEntity<>("Transición de estado no soportada", HttpStatus.BAD_REQUEST);
-            }
         } catch (Exception e) {
-            return new ResponseEntity<>("No se pudo actualizar el estado: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("No se pudo cerrar el evento: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         EventSummaryDTO dto = eventsService.getEventSummaryById(idEvent);
