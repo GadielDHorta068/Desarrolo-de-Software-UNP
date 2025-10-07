@@ -8,6 +8,7 @@ import { HandleDatePipe } from '../../pipes/handle-date.pipe';
 import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { InfoEvent } from '../../shared/components/info-event/info-event';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-management-event',
@@ -35,6 +36,7 @@ export class ManagementEvent {
   constructor(
     private adminEventService: AdminEventService,
     private handleDatePipe: HandleDatePipe,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ){
     this.adminEventService.selectedEvent$.subscribe(
@@ -72,5 +74,7 @@ export class ManagementEvent {
     return `${anio}-${mesFormateado}-${diaFormateado}`;
   }
 
-
+  redirectEdit(){
+    this.router.navigate(['/event-edit']);
+  }
 }
