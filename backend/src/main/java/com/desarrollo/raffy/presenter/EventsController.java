@@ -431,38 +431,21 @@ public class EventsController {
             return new ResponseEntity<>("Debe especificar el estado del evento (statusEvent)", HttpStatus.BAD_REQUEST);
         }
 
-        // Normalizar alias del estado desde el frontend
-        // FINISHED (frontend) -> FINALIZED (backend)
-        if ("FINISHED".equalsIgnoreCase(statusStr)) {
-            statusStr = "FINALIZED";
-        }
-
         StatusEvent requestedStatus;
         try {
-            requestedStatus = StatusEvent.valueOf(statusStr.trim());
+            requestedStatus = StatusEvent.valueOf(statusStr.trim().toUpperCase());
         } catch (IllegalArgumentException ex) {
             return new ResponseEntity<>("Estado inválido: " + statusStr, HttpStatus.BAD_REQUEST);
         }
 
-        // Si ya está en el estado solicitado, devolver el resumen actual
-        if (existingEvent.getStatusEvent() == requestedStatus) {
-            EventSummaryDTO dto = eventsService.getEventSummaryById(idEvent);
-            return new ResponseEntity<>(dto, HttpStatus.OK);
+        if(existingEvent.getStatusEvent() != StatusEvent.CLOSED){
+            return new ResponseEntity<>("Solo se pueden cerrar eventos que estén en estado OPEN", HttpStatus.BAD_REQUEST);
         }
 
-        // Transiciones soportadas: OPEN -> CLOSED, CLOSED -> FINALIZED
         try {
-            if (requestedStatus == StatusEvent.CLOSED) {
-                // Cerrar inscripciones del evento
                 eventsService.closeEvent(idEvent);
-            } else if (requestedStatus == StatusEvent.FINALIZED) {
-                // Finalizar sorteo (seleccionar ganadores si aplica)
-                eventsService.finalizedEvent(idEvent);
-            } else {
-                return new ResponseEntity<>("Transición de estado no soportada", HttpStatus.BAD_REQUEST);
-            }
         } catch (Exception e) {
-            return new ResponseEntity<>("No se pudo actualizar el estado: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("No se pudo cerrar el evento: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         EventSummaryDTO dto = eventsService.getEventSummaryById(idEvent);
