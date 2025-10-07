@@ -34,6 +34,20 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(AlreadyRegisteredToGiveawayExeption.class)
+    public ResponseEntity<ErrorResponse> handleDobleRegisterToGiveAwayException(
+        AlreadyRegisteredToGiveawayExeption ex, WebRequest request) {
+
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error("Conflict: Doble inscirpcion a un sorteo")
+                .message(ex.getMessage())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
     /**
      * Maneja excepciones generales de runtime.
      */
@@ -58,6 +72,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(
             Exception ex, WebRequest request) {
+
+         ex.printStackTrace();
         
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());

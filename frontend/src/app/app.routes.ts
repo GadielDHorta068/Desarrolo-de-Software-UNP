@@ -91,6 +91,11 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'raffle/id', // cambiar id por :id 
+    loadComponent: () => import('./pages/rifa-front.component/rifa-front.component').then(m => m.RifaFrontComponent),
+    title: 'raffle-detail'
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }
