@@ -16,6 +16,9 @@ import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class ParticipantService {
 
@@ -37,19 +40,20 @@ public class ParticipantService {
         }
 
         List<Participant> participants = participantRepository.findParticipantsByEventId(eventId);
-
+        log.info("Participantes: " + participants);
         if(participants.isEmpty()){
             throw new RuntimeException("No hay participantes en este sorteo");
         }
 
         // Obtener la estrategia adecuada
         WinnerSelectionStrategy strategy = strategyFactory.getStrategy(event.getEventType());
+        log.info("Estrategia seleccionada: " + (strategy != null ? strategy.getClass().getSimpleName() : "Ninguna"));
         if (strategy == null) {
             throw new UnsupportedOperationException("No hay estrategia definida para este tipo de evento: " + event.getEventType());
         }
 
         strategy.selectWinners(event, participants);
-
+        log.info("Participantes después de seleccionar ganadores: " + participants);
         // Persistir cambios (posiciones actualizadas)
         participantRepository.saveAll(participants);
 

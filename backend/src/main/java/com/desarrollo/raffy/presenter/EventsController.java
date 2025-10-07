@@ -27,6 +27,9 @@ import com.desarrollo.raffy.business.services.GiveawaysService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
 
+@Slf4j
 @RestController
 @RequestMapping("/events")
 public class EventsController {
@@ -196,9 +200,10 @@ public class EventsController {
     }
 
     @GetMapping("/winners/event/{eventId}")
-    public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable Long eventId){
+    public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable("eventId") Long eventId){
         try {
             List<Participant> winners = eventsService.finalizedEvent(eventId);
+            log.info("Número de ganadores obtenidos: " + winners.size());
         if(winners.isEmpty()){
             return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
         }

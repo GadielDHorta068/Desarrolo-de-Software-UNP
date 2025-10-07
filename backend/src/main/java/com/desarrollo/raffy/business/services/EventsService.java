@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
@@ -26,6 +27,9 @@ import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.util.ImageUtils;
+import com.desarrollo.raffy.util.OnCreate;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.modelmapper.ModelMapper;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
@@ -33,6 +37,7 @@ import com.desarrollo.raffy.dto.GiveawaysDTO;
 import com.desarrollo.raffy.dto.GuessingContestDTO;
 
 @Service
+@Slf4j
 public class EventsService {
 
     @Autowired
@@ -60,6 +65,7 @@ public class EventsService {
     private WinnerStrategyFactory winnerStrategyFactory;
 
     @Transactional
+    @Validated(OnCreate.class)
     public <T extends Events> T create(T event, Long idUser) {
         // Validar que no exista un evento con el mismo título
         if(eventsRepository.existsByTitle(event.getTitle())){
@@ -156,7 +162,7 @@ public class EventsService {
             
             return true;
         } catch (Exception e) {
-            throw new RuntimeException("Error al finalizar el sorteo " + e.getStackTrace());
+            throw new RuntimeException("Error al finalizar el sorteo " + e.getMessage(), e);
         }
     }
 
@@ -235,7 +241,7 @@ public class EventsService {
     public List<Participant> finalizedEvent(Long eventId){
         Events event = eventsRepository.findById(eventId)
             .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
-        
+        log.info("Finalizando evento: " + event.getTitle() + " con estado: " + event.getStatusEvent());
         if (event.getStatusEvent() != StatusEvent.CLOSED) {
             throw new IllegalStateException("El evento debe estar cerrado para poder finalizarse");
         }
@@ -244,7 +250,7 @@ public class EventsService {
 
         //Delega la selección de ganadores a ParticipantService
         List<Participant> winners = participantService.runEvent(eventId);
-
+        log.info("Ganadores seleccionados: " + winners.size());
         eventsRepository.save(event);
         return winners;
     }

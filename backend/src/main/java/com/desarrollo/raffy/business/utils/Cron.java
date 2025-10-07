@@ -8,8 +8,12 @@ import java.time.LocalDate;
 import java.util.List;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.StatusEvent;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.desarrollo.raffy.business.services.EventsService;
 
+@Slf4j
 @Service
 public class Cron {
     public static final String CRON_EXPRESSION_EVERY_DAY = "0 0 0 * * *";
@@ -27,14 +31,18 @@ public class Cron {
      */
     @Scheduled(cron = CRON_EXPRESSION_EVERY_DAY)
     public void runEvents() {
-        List<Events> events = eventsRepository.findByToday(LocalDate.now());
+        List<Events> events = eventsRepository.findOpenEventsToClose(LocalDate.now());
+        log.info("Eventos OPEN con fecha vencida o igual a hoy: {}", events.size());
+        
         for (Events event : events) {
-            if((event.getEndDate().isEqual(LocalDate.now()) || event.getEndDate().isBefore(LocalDate.now())) 
-                && event.getStatusEvent() != StatusEvent.CLOSED){
-
-                this.eventsService.closeEvent(event.getId());
+            log.info("Cerrando evento: {} - {}", event.getId(), event.getTitle());
+            try {
+                eventsService.closeEvent(event.getId());
+            } catch (Exception e) {
+                log.error("Error al cerrar evento {}", event.getId(), e);
             }
         }
     }
+
     
 }
