@@ -20,6 +20,7 @@ import com.desarrollo.raffy.model.User;
 import com.desarrollo.raffy.util.ImageUtils;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.Response;
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.ParticipantService;
@@ -100,6 +101,24 @@ public class EventsController {
         } else {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/create/raffle/{idUser}")
+    public ResponseEntity<?> createRaffle(
+        @RequestBody Raffle aRaffle,
+        @PathVariable("idUser") Long idUser
+    ) {
+        
+        // Validaciones de fechas
+        if (aRaffle.getEndDate() == null) {
+            return new ResponseEntity<>("Debe especificar la fecha de fin del evento", HttpStatus.BAD_REQUEST);
+        }
+        if (aRaffle.getEndDate().isBefore(LocalDate.now())) {
+            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio", HttpStatus.BAD_REQUEST);
+        }
+        
+        Raffle newRaffle = 
+        return null; // CAMBIAR!
     }
 
     @GetMapping("/ping")
