@@ -34,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
 import com.desarrollo.raffy.dto.WinnerDTO;
+import com.desarrollo.raffy.dto.ParticipantDTO;
 
 import org.modelmapper.ModelMapper;
 import java.util.stream.Collectors;
@@ -215,6 +216,27 @@ public class EventsController {
         
     }
 
+    @GetMapping("/participants/event/{eventId}")
+    public ResponseEntity<?> getParticipantsByEventId(@PathVariable("eventId") Long eventId){
+        try {
+            List<Participant> participants = participantService.findParticipantsByEventId(eventId);
+            log.info("Número de participantes obtenidos: " + participants.size());
+            if(participants.isEmpty()){
+                return new ResponseEntity<>("No se encontraron participantes para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
+            }
+            
+            // Crear DTOs para participantes (sin información sensible)
+            List<ParticipantDTO> response = participants.stream()
+                .map(this::toParticipantDTO)
+                .toList();
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error al obtener participantes: " + e.getMessage(), e);
+            return new ResponseEntity<>("Error al obtener los participantes: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     private WinnerDTO toWinnerDTO(Participant participant) {
         WinnerDTO dto = new WinnerDTO();
         dto.setParticipantId(participant.getParticipant().getId());
@@ -223,6 +245,17 @@ public class EventsController {
         dto.setPosition(participant.getPosition());
         dto.setEmail(participant.getParticipant().getEmail());
         dto.setPhone(participant.getParticipant().getCellphone());
+        dto.setEventId(participant.getEvent().getId());
+        dto.setEventTitle(participant.getEvent().getTitle());
+        return dto;
+    }
+
+    private ParticipantDTO toParticipantDTO(Participant participant) {
+        ParticipantDTO dto = new ParticipantDTO();
+        dto.setParticipantId(participant.getParticipant().getId());
+        dto.setName(participant.getParticipant().getName());
+        dto.setSurname(participant.getParticipant().getSurname());
+        dto.setPosition(participant.getPosition());
         dto.setEventId(participant.getEvent().getId());
         dto.setEventTitle(participant.getEvent().getTitle());
         return dto;
@@ -438,7 +471,7 @@ public class EventsController {
             return new ResponseEntity<>("Estado inválido: " + statusStr, HttpStatus.BAD_REQUEST);
         }
 
-        if(existingEvent.getStatusEvent() != StatusEvent.CLOSED){
+        if(existingEvent.getStatusEvent() != StatusEvent.OPEN){
             return new ResponseEntity<>("Solo se pueden cerrar eventos que estén en estado OPEN", HttpStatus.BAD_REQUEST);
         }
 

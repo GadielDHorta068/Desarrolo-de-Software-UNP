@@ -87,4 +87,13 @@ export class EventsService {
     });
     return this.http.get<any[]>(`${this.apiUrl}/winners/event/${eventId}`, { headers });
   }
+
+  // Obtiene todos los participantes del evento (para suspense)
+  getParticipantsByEventId(eventId: number): Observable<any[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.get<any[]>(`${this.apiUrl}/participants/event/${eventId}`, { headers });
+  }
 }
