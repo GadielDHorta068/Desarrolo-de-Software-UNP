@@ -148,6 +148,11 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     this.router.navigate(['/event-edit']);
   }
 
+  public redirectAdmin(){
+    this.adminEventService.setSelectedEvent(this.event);
+    this.router.navigate(['/event-admin']);
+  }
+
   public onIncript(){
     console.log("Presiona incribirse!");
     alert("Se apreto INCRIBIRME");

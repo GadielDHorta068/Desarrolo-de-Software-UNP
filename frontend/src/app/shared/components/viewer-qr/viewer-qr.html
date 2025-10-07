@@ -1,0 +1,4 @@
+<div style="text-align: center;">
+    <qrcode *ngIf="data" [qrdata]="data" [width]="size ? size : DEFAULT_SIZE" [errorCorrectionLevel]="errorCorrectLevel ? errorCorrectLevel : DEFAULT_CORRECTION_LEVEL" [allowEmptyString]="true"></qrcode>
+    <!-- <qrcode *ngIf="data" [qrdata]="data" [width]="size ? size : DEFAULT_SIZE" errorCorrectionLevel="M" [allowEmptyString]="true"></qrcode> -->
+</div>

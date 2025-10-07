@@ -87,13 +87,13 @@ export class configService {
   private getObjcType(codeType: string){
     let name: string = "";
     if(codeType == "GIVEAWAYS"){
-      name = "RIFA";
+      name = "SORTEO";
     }
     if(codeType == "GUESSING_CONTEST"){
       name = "ADIVINANZAS";
     }
     if(codeType == "RAFFLES"){
-      name = "SORTEO";
+      name = "RIFA";
     }
     return {code: codeType, name: name};
   }
