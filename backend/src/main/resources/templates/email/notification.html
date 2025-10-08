@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8fafc;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+      padding: 20px;
+      text-align: center;
+    }
+    .logo-section { display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .logo { width: 50px; height: 50px; object-fit: contain; border-radius: 8px; }
+    .brand-name { color: white; font-size: 24px; font-weight: bold; margin: 0; }
+    .content { padding: 30px; }
+    .notification-title { color: #1F2937; font-size: 24px; font-weight: 600; margin-bottom: 20px; text-align: center; }
+    .message { margin-bottom: 30px; }
+    .message p { font-size: 16px; line-height: 1.6; color: #4B5563; }
+    .action-section { text-align: center; margin: 30px 0; }
+    .action-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+      color: white;
+      padding: 12px 30px;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: transform 0.2s ease;
+    }
+    .action-button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+    .footer { background-color: #F9FAFB; padding: 20px 30px; border-top: 1px solid #E5E7EB; }
+    .footer-message { color: #6B7280; font-size: 14px; margin-bottom: 15px; text-align: center; }
+    .footer-links { text-align: center; }
+    .footer-links p { color: #9CA3AF; font-size: 12px; margin: 5px 0; }
+    @media (max-width: 600px) {
+      .email-container { margin: 0; border-radius: 0; }
+      .content { padding: 20px; }
+      .notification-title { font-size: 20px; }
+      .action-button { padding: 10px 25px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <div class="logo-section">
+        <img src="{{logoDataUri}}" alt="Rafify" class="logo">
+        <h1 class="brand-name">Rafify</h1>
+      </div>
+    </div>
+    <div class="content">
+      <h2 class="notification-title">{{title}}</h2>
+      <div class="message">{{message}}</div>
+      {{actionSection}}
+    </div>
+    <div class="footer">
+      <p class="footer-message">{{footerMessage}}</p>
+      <div class="footer-links">
+        <p>© 2025 Rafify. Todos los derechos reservados.</p>
+        <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+
