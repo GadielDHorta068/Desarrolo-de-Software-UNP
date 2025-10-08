@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Servicio para generar plantillas de correo electrónico profesionales.
@@ -32,68 +34,19 @@ public class EmailTemplateService {
      * @param footerMessage Mensaje del footer (opcional)
      * @return HTML de la plantilla
      */
-    public String generateNotificationTemplate(String title, 
-                                               String message, 
-                                               String actionText, 
-                                               String actionUrl, 
+    public String generateNotificationTemplate(String title,
+                                               String message,
+                                               String actionText,
+                                               String actionUrl,
                                                String footerMessage) {
-        StringBuilder html = new StringBuilder();
-        
-        html.append("<!DOCTYPE html>");
-        html.append("<html lang=\"es\">");
-        html.append("<head>");
-        html.append("<meta charset=\"UTF-8\">");
-        html.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-        html.append("<title>").append(escapeHtml(title)).append("</title>");
-        html.append("<style>");
-        html.append(getEmailStyles());
-        html.append("</style>");
-        html.append("</head>");
-        html.append("<body>");
-        
-        // Header con logo
-        html.append("<div class=\"email-container\">");
-        html.append("<div class=\"header\">");
-        html.append("<div class=\"logo-section\">");
-        html.append("<img src=\"").append(getLogoBase64()).append("\" alt=\"Rafify\" class=\"logo\">");
-        html.append("<h1 class=\"brand-name\">Rafify</h1>");
-        html.append("</div>");
-        html.append("</div>");
-        
-        // Contenido principal
-        html.append("<div class=\"content\">");
-        html.append("<h2 class=\"notification-title\">").append(escapeHtml(title)).append("</h2>");
-        html.append("<div class=\"message\">");
-        html.append("<p>").append(escapeHtml(message)).append("</p>");
-        html.append("</div>");
-        
-        // Botón de acción si se proporciona
-        if (actionText != null && actionUrl != null && !actionText.trim().isEmpty() && !actionUrl.trim().isEmpty()) {
-            html.append("<div class=\"action-section\">");
-            html.append("<a href=\"").append(escapeHtml(actionUrl)).append("\" class=\"action-button\">");
-            html.append(escapeHtml(actionText));
-            html.append("</a>");
-            html.append("</div>");
-        }
-        
-        html.append("</div>");
-        
-        // Footer
-        html.append("<div class=\"footer\">");
-        if (footerMessage != null && !footerMessage.trim().isEmpty()) {
-            html.append("<p class=\"footer-message\">").append(escapeHtml(footerMessage)).append("</p>");
-        }
-        html.append("<div class=\"footer-links\">");
-        html.append("<p>© 2025 Rafify. Todos los derechos reservados.</p>");
-        html.append("<p>Este es un correo automático, por favor no respondas a este mensaje.</p>");
-        html.append("</div>");
-        html.append("</div>");
-        
-        html.append("</div>");
-        html.append("</body>");
-        html.append("</html>");
-        
-        return html.toString();
+        String template = loadTemplate("notification.html");
+        Map<String, String> variables = new HashMap<>();
+        variables.put("title", escapeHtml(title));
+        variables.put("message", "<p>" + escapeHtml(message) + "</p>");
+        variables.put("footerMessage", footerMessage == null ? "" : escapeHtml(footerMessage));
+        variables.put("logoDataUri", getLogoBase64());
+        variables.put("actionSection", buildActionSection(actionText, actionUrl));
+        return replaceVariables(template, variables);
     }
 
     /**
@@ -171,17 +124,20 @@ public class EmailTemplateService {
                                                    String eventType, 
                                                    String eventUrl, 
                                                    String message) {
-        String title = "Nueva notificación de " + eventType;
-        String fullMessage = "Hola " + userName + "," +
-                            message + "" +
-                            "<strong>Evento:</strong> " + eventName + "" +
-                            "<strong>Tipo:</strong> " + eventType;
-        
-        String actionText = "Ver " + eventType;
+        String title = "Nueva notificación de " + escapeHtml(eventType);
+        StringBuilder msg = new StringBuilder();
+        msg.append("<p>")
+           .append("Hola ").append(escapeHtml(userName)).append(", ")
+           .append(escapeHtml(message))
+           .append("</p>");
+        msg.append("<p><strong>Evento:</strong> ").append(escapeHtml(eventName)).append("</p>");
+        msg.append("<p><strong>Tipo:</strong> ").append(escapeHtml(eventType)).append("</p>");
+
+        String actionText = "Ver " + escapeHtml(eventType);
         String actionUrl = eventUrl;
         String footerMessage = "Mantente al día con las últimas novedades de tus eventos favoritos.";
-        
-        return generateNotificationTemplate(title, fullMessage, actionText, actionUrl, footerMessage);
+
+        return renderNotificationFromTemplate(title, msg.toString(), actionText, actionUrl, footerMessage);
     }
 
     /**
@@ -207,7 +163,6 @@ public class EmailTemplateService {
      */
     private String getLogoBase64() {
         try {
-            // Intentar cargar logo personalizado
             String logoBase64 = loadCustomLogo();
             if (logoBase64 != null) {
                 return "data:image/png;base64," + logoBase64;
@@ -215,8 +170,6 @@ public class EmailTemplateService {
         } catch (Exception e) {
             System.err.println("No se pudo cargar logo personalizado: " + e.getMessage());
         }
-        
-        // Fallback al logo generado programáticamente
         String logoBase64 = createSimpleLogoBase64();
         return "data:image/svg+xml;base64," + logoBase64;
     }
@@ -227,8 +180,10 @@ public class EmailTemplateService {
     private String loadCustomLogo() throws IOException {
         Resource logoResource = new ClassPathResource("assets/images/logo.png");
         if (logoResource.exists()) {
-            byte[] logoBytes = Files.readAllBytes(logoResource.getFile().toPath());
-            return java.util.Base64.getEncoder().encodeToString(logoBytes);
+            try (InputStream is = logoResource.getInputStream()) {
+                byte[] logoBytes = StreamUtils.copyToByteArray(is);
+                return java.util.Base64.getEncoder().encodeToString(logoBytes);
+            }
         }
         return null;
     }
@@ -255,147 +210,53 @@ public class EmailTemplateService {
 
 
 
-    /**
-     * Obtiene los estilos CSS para las plantillas de email.
-     */
-    private String getEmailStyles() {
-        return """
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-            
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                line-height: 1.6;
-                color: #333;
-                background-color: #f8fafc;
-            }
-            
-            .email-container {
-                max-width: 600px;
-                margin: 0 auto;
-                background-color: #ffffff;
-                border-radius: 8px;
-                overflow: hidden;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
-            
-            .header {
-                background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-                padding: 20px;
-                text-align: center;
-            }
-            
-            .logo-section {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 12px;
-            }
-            
-            .logo {
-                width: 50px;
-                height: 50px;
-                object-fit: contain;
-                border-radius: 8px;
-            }
-            
-            .brand-name {
-                color: white;
-                font-size: 24px;
-                font-weight: bold;
-                margin: 0;
-            }
-            
-            .content {
-                padding: 30px;
-            }
-            
-            .notification-title {
-                color: #1F2937;
-                font-size: 24px;
-                font-weight: 600;
-                margin-bottom: 20px;
-                text-align: center;
-            }
-            
-            .message {
-                margin-bottom: 30px;
-            }
-            
-            .message p {
-                font-size: 16px;
-                line-height: 1.6;
-                color: #4B5563;
-            }
-            
-            .action-section {
-                text-align: center;
-                margin: 30px 0;
-            }
-            
-            .action-button {
-                display: inline-block;
-                background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-                color: white;
-                padding: 12px 30px;
-                text-decoration: none;
-                border-radius: 6px;
-                font-weight: 600;
-                font-size: 16px;
-                transition: transform 0.2s ease;
-            }
-            
-            .action-button:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-            }
-            
-            .footer {
-                background-color: #F9FAFB;
-                padding: 20px 30px;
-                border-top: 1px solid #E5E7EB;
-            }
-            
-            .footer-message {
-                color: #6B7280;
-                font-size: 14px;
-                margin-bottom: 15px;
-                text-align: center;
-            }
-            
-            .footer-links {
-                text-align: center;
-            }
-            
-            .footer-links p {
-                color: #9CA3AF;
-                font-size: 12px;
-                margin: 5px 0;
-            }
-            
-            @media (max-width: 600px) {
-                .email-container {
-                    margin: 0;
-                    border-radius: 0;
-                }
-                
-                .content {
-                    padding: 20px;
-                }
-                
-                .notification-title {
-                    font-size: 20px;
-                }
-                
-                .action-button {
-                    padding: 10px 25px;
-                    font-size: 14px;
-                }
-            }
-            """;
+    // Carga un archivo de plantilla desde classpath: resources/templates/email/{templateName}
+    private String loadTemplate(String templateName) {
+        Resource resource = new ClassPathResource("templates/email/" + templateName);
+        if (!resource.exists()) {
+            throw new IllegalStateException("No se encontró la plantilla: " + templateName);
+        }
+        try (InputStream is = resource.getInputStream()) {
+            return StreamUtils.copyToString(is, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("No se pudo leer la plantilla: " + templateName, e);
+        }
+    }
+
+    // Construye el bloque del botón de acción o vacío si faltan datos
+    private String buildActionSection(String actionText, String actionUrl) {
+        if (actionText == null || actionUrl == null) return "";
+        if (actionText.trim().isEmpty() || actionUrl.trim().isEmpty()) return "";
+        return "<div class=\"action-section\">" +
+               "<a href=\"" + escapeHtml(actionUrl) + "\" class=\"action-button\">" +
+               escapeHtml(actionText) +
+               "</a></div>";
+    }
+
+    // Renderiza la notificación inyectando messageHtml ya construido/escapado en la plantilla
+    private String renderNotificationFromTemplate(String title,
+                                                  String messageHtml,
+                                                  String actionText,
+                                                  String actionUrl,
+                                                  String footerMessage) {
+        String template = loadTemplate("notification.html");
+        Map<String, String> variables = new HashMap<>();
+        variables.put("title", escapeHtml(title));
+        variables.put("message", messageHtml == null ? "" : messageHtml);
+        variables.put("footerMessage", footerMessage == null ? "" : escapeHtml(footerMessage));
+        variables.put("logoDataUri", getLogoBase64());
+        variables.put("actionSection", buildActionSection(actionText, actionUrl));
+        return replaceVariables(template, variables);
+    }
+
+    // Reemplaza placeholders {{key}} por sus valores
+    private String replaceVariables(String template, Map<String, String> variables) {
+        String rendered = template;
+        for (Map.Entry<String, String> entry : variables.entrySet()) {
+            String value = entry.getValue() == null ? "" : entry.getValue();
+            rendered = rendered.replace("{{" + entry.getKey() + "}}", value);
+        }
+        return rendered;
     }
 
     /**

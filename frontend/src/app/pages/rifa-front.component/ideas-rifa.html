@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es" class="dark"> <!-- quitar "dark" si querés solo automático -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class' // o "media" si querés según sistema
+      }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen flex flex-col items-center p-6">
+    <div class="flex flex-col h-screen gap-4 p-4 bg-gray-100 dark:bg-gray-900">
+
+    <!-- Panel 1: Datos de la rifa -->
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow flex flex-col gap-2">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Rifa de Camisetas Deportivas</h1>
+        <p class="text-gray-600 dark:text-gray-300">Participá por increíbles camisetas deportivas de tu equipo favorito</p>
+        <div class="flex gap-4 items-center">
+            <span class="font-semibold text-lg text-gray-900 dark:text-white">Precio por número:</span>
+            <span class="text-lg text-red-600">$1000</span>
+        </div>
+        <div class="flex gap-2 mt-2">
+          <span class="px-2 py-1 bg-blue-200 text-blue-800 rounded-full text-sm">Ropa</span>
+          <span class="px-2 py-1 bg-green-200 text-green-800 rounded-full text-sm">Deporte</span>
+        </div>
+    </div>
+
+    <!-- Panel 2: Grilla de números -->
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow flex-1 overflow-auto">
+        <!-- Grilla -->
+        <div id="grid" class="grid grid-cols-10 gap-2"></div>
+
+        <script>
+          const grid = document.getElementById("grid");
+          const total = 100;
+        
+          for (let i = 1; i <= total; i++) {
+            const btn = document.createElement("button");
+            btn.innerText = i;
+            btn.className = "w-20 h-20 flex items-center justify-center \
+              bg-white dark:bg-gray-700 \
+              text-gray-900 dark:text-gray-100 \
+              border border-gray-300 dark:border-gray-600 \
+              rounded-lg shadow \
+              hover:bg-blue-100 dark:hover:bg-blue-600 \
+              transition";
+        
+            // click -> seleccionado (azul)
+            btn.addEventListener("click", () => {
+              if (!btn.classList.contains("bg-red-500")) { // si no está comprado
+                btn.classList.toggle("bg-blue-500");
+                btn.classList.toggle("text-white");
+              }
+            });
+        
+            grid.appendChild(btn);
+          }
+      
+          // Ejemplo: marcar algunos como comprados
+          [3, 15, 27].forEach(n => {
+            const btn = grid.children[n-1];
+            btn.classList.add("bg-red-500", "bg-opacity-70", "text-white");
+            btn.disabled = true;
+          });
+        </script>
+    </div>
+
+    <!-- Panel 3: Botón agregar al carrito -->
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow flex justify-end">
+        <button 
+          id="add-to-cart"
+          class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow"
+        >
+          Agregar al carrito
+        </button>
+    </div>
+</div>  
+</body>
+</html>

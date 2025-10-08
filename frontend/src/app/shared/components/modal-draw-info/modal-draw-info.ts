@@ -25,5 +25,10 @@ export class ModalDrawInfo {
   close() {
     this.show = false;
   }
+
+  // aca llamamos al servie de creacion de enlace para compartir del sorteo
+  onCreateLinkShare(){
+    // TODO: llamamos al service de creaion de link
+  }
   
 }

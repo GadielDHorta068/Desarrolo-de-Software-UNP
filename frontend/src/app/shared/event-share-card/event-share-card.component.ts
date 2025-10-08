@@ -9,7 +9,7 @@ import { UrlService } from '../../services/url.service';
   template: `
     <div class="share-card">
       <div class="share-card__header">
-        <div class="share-card__title">{{ title || 'Invitación al evento' }}</div>
+        <!-- <div class="share-card__title">{{ title || 'Invitación al evento' }}</div> -->
         <div class="share-card__subtitle" *ngIf="description">{{ description }}</div>
       </div>
       <div class="share-card__content">
@@ -107,7 +107,8 @@ export class EventShareCardComponent implements OnInit {
   qrBase64?: string;
   title: string = 'Invitación al evento';
   description?: string = 'Comparte el enlace corto y su código QR';
-  originalUrl?: string;
+  // originalUrl?: string;
+  originalUrl?: string = "www.google.com";
 
   constructor(private urlService: UrlService, private cdr: ChangeDetectorRef) {}
 
@@ -192,6 +193,7 @@ export class EventShareCardComponent implements OnInit {
       ? window.location.href
       : '';
 
+    // console.log("[link-url] => url generada: ", href);
     if (!href) {
       // Si no se puede obtener la URL (SSR/edge), no hacemos nada
       return;

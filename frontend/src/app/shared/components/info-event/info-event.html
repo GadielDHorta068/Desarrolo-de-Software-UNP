@@ -1,0 +1,39 @@
+<div class="grid-main">
+    <div>
+        <div class="grid-row">
+            <div class="text-base font-bold pt-2">Nombre</div>
+            <div class="p-2">{{event?.title}}</div>
+        </div>
+        <div class="grid-row">
+            <div class="text-base font-bold pt-2">Descripción</div>
+            <div class="p-2"><p>{{event?.description}}</p></div>
+        </div>
+        <div class="grid-row">
+            <div class="text-base font-bold pt-2">Tipo</div>
+            <div class="flex gap-2 p-2">
+                <p>{{event?.eventType | handleTypePipe}}</p>
+                <img style="width: 1.2rem;" [src]="event?.eventType | handleIconTypePipe" alt="">
+            </div>
+        </div>
+        <div class="grid-row">
+            <div class="text-base font-bold pt-2">Categoría</div>
+            <div class="p-2"><app-tag-category [category]="event?.categoryName"></app-tag-category></div>
+        </div>
+        <div class="grid-row">
+            <div class="text-base font-bold pt-2">Número de ganadores</div>
+            <div class="p-2">{{event?.winnersCount}}</div>
+        </div>
+        <div class="grid-row">
+            <div class="text-base font-bold pt-2">Fecha de realización</div>
+            <div class="p-2">{{event?.endDate | handleDatePipe}}</div>
+        </div>
+    </div>
+    <div *ngIf="event?.imageUrl">
+        <div class="grid-row" style="align-items: start;">
+            <div class="text-base font-bold pt-2">Imagen del evento</div>
+            <div class="p-2" style="border: solid 2px lightslategray; border-radius: 5px;">
+                <img style="width: 20vw;" [src]="event?.imageUrl ? 'data:image/jpeg;base64,' + event?.imageUrl : 'assets/no-image.jpg'" >
+            </div>
+        </div>
+    </div>
+</div>

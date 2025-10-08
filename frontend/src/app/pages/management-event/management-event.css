@@ -1,0 +1,73 @@
+.container{
+    padding: 1% 3%;
+}
+.grid-custom-3{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+.grid-custom-2{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+.grid-description{
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 1rem;
+}
+/* un grilla con 2 columnas donde una tiene 2 filas y la otra ocupa el lugar de esas 2 filas */
+.grid-name-description-image{
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Dos columnas: izquierda más angosta */
+    grid-template-rows: auto auto; /* Dos filas */
+    gap: 10px; /* Espacio entre elementos */
+}
+.item-name {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.item-description {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.item-image {
+  grid-column: 2;
+  grid-row: 1 / span 2; /* Ocupa ambas filas */
+}
+.container-columns{
+  display: flex;
+  gap: 4px;
+  padding-top: 2%;
+}
+.column{
+  flex: 1;
+}
+.grid-test {
+  display: grid;
+  align-items: baseline;
+  grid-template-columns: 1fr 2fr;
+  gap: 2px; /* espacio entre elementos */
+}
+/* En pantallas pequeñas, cambia a 1 columna y 2 filas */
+@media (max-width: 768px) {
+  .grid-test {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(2, auto);
+  }
+}
+
+.grid-test-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* gap: 2px; espacio entre elementos */
+}
+/* En pantallas pequeñas, cambia a 1 columna y 2 filas */
+@media (max-width: 768px) {
+  .grid-test-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(2, auto);
+  }
+}
