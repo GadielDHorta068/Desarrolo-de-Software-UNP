@@ -43,6 +43,7 @@ public class RaffleNumber {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @NotNull(message = "Todo numero de una rifa debe estar asociado a un usuario")
     private User numberOwner;
     
     // position: 0 = no ganador, >0 = lugar en el ranking
