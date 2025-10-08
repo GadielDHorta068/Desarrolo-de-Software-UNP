@@ -9,11 +9,10 @@ import { AuthService, UserResponse } from '../../services/auth.service';
 import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 import { ParseFileService } from '../../services/utils/parseFile.service';
-import { ViewerQr } from '../../shared/components/viewer-qr/viewer-qr';
 
 @Component({
   selector: 'app-raffles-panel',
-  imports: [CommonModule, ReactiveFormsModule, ModalInfo, LoaderImage, ViewerQr],
+  imports: [CommonModule, ReactiveFormsModule, ModalInfo, LoaderImage],
   templateUrl: './raffles-panel.html',
   styleUrl: './raffles-panel.css',
   standalone: true

@@ -37,6 +37,10 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   isCreator: boolean = false;
   public StatusEvent = StatusEvent;
 
+  // modal de inscripcion a sorteo
+  showFormGiveaway = false; // el modal empieza desactivado
+  selectedEventId!: number;
+
   constructor(
     private router: Router,
     private adminEventService: AdminEventService,
@@ -112,19 +116,26 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     return this.isUserRegistered;
   }
 
-  // PRUEBA QUESTIONARY MODAL
-    showModal = false; // el modal empieza desactivado
-    selectedEventId!: number;
-
-    openModal(aEventId?: number) {
-        if (!aEventId) {
-        console.warn("eventId inválido:", aEventId); //borrar
-        return;
-        }
-        this.selectedEventId = aEventId;
-        this.showModal = true;
+  onInscript(){
+    if(this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY){
+      // mostramos el form de inscripcion al sorteo
+      this.selectedEventId = this.event.id;
+      this.showFormGiveaway = true;
     }
-  // PRUEBA QUESTIONARY MODAL
+    if(this.event?.id && this.event?.eventType == EventTypes.RAFFLES){
+      alert("Aca iria el componente de seleccion de nros de rifa")
+    }
+  }
+
+  // modal de inscripcion a sorteos
+  // openInscriptionGiveayas(aEventId?: number) {
+  //   if (!aEventId) {
+  //     console.warn("eventId inválido:", aEventId); //borrar
+  //   return;
+  //   }
+  //   this.selectedEventId = aEventId;
+  //   this.showFormGiveaway = true;
+  // }
 
   ngAfterViewInit(){
     this.reviewCreator();

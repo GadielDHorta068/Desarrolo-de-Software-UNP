@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EventsTemp, EventType, StatusEvent } from '../../models/events.model';
+import { EventsTemp, EventType, EventTypes, StatusEvent } from '../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 import { Category } from '../../services/category.service';
@@ -8,14 +8,15 @@ import { HandleDatePipe } from '../../pipes/handle-date.pipe';
 import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { InfoEvent } from '../../shared/components/info-event/info-event';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { EventShareCardComponent } from '../../shared/event-share-card/event-share-card.component';
 import { AuthService } from '../../services/auth.service';
 import { ModalShareEvent } from '../../shared/components/modal-share-event/modal-share-event';
+import { QuestionaryComponent } from '../questionary/questionary.component';
 
 @Component({
   selector: 'app-management-event',
-  imports: [CommonModule, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent, HandleDatePipe, EventShareCardComponent, ModalShareEvent],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent, HandleDatePipe, EventShareCardComponent, ModalShareEvent, QuestionaryComponent],
   templateUrl: './management-event.html',
   styleUrl: './management-event.css',
   providers: [HandleDatePipe]
@@ -36,6 +37,10 @@ export class ManagementEvent {
   types: EventType[] = [];
   // categorias de sorteo
   categories: Category[] = [];
+
+  // PRUEBA QUESTIONARY MODAL
+  showModalIncript = false;
+  selectedEventId!: number;
 
   constructor(
     private adminEventService: AdminEventService,
@@ -79,10 +84,6 @@ export class ManagementEvent {
     return `${anio}-${mesFormateado}-${diaFormateado}`;
   }
 
-  redirectEdit(){
-    this.router.navigate(['/event-edit']);
-  }
-
   // Métodos para determinar qué botones mostrar
   get canEdit(): boolean {
     return this.authService.isAuthenticated() && this.isUserCreator;
@@ -103,4 +104,16 @@ export class ManagementEvent {
             !this.event?.isUserRegistered &&
             this.event?.statusEvent === StatusEvent.OPEN;
   }
+
+  onInscript(){
+    if(this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY){
+      // mostramos el form de inscripcion al sorteo
+      this.selectedEventId = this.event.id;
+      this.showModalIncript = true;
+    }
+    if(this.event?.id && this.event?.eventType == EventTypes.RAFFLES){
+      alert("Aca iria el componente de seleccion de nros de rifa")
+    }
+  }
+
 }
