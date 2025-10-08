@@ -15,11 +15,11 @@ import com.desarrollo.raffy.model.RaffleNumber;
 
 public interface RaffleNumberRepository extends JpaRepository<RaffleNumber, Long> {
 
-    @Query("SELECT rn FROM RaffleNumber rn WHERE rn.event.id = :aEventId")
+    @Query("SELECT rn FROM RaffleNumber rn WHERE rn.raffle.id = :aEventId")
     public List<RaffleNumber> findNumbersById(@Param("aEventId") Long aEventId);
 
-    @Query("SELECT rn FROM RaffleNumber rn WHERE rn.event.id = :aEventId")
-    public List<RaffleNumber> findParticipantsByEventId(@Param("aEventId") Long aEventId);
+    @Query("SELECT DISTINCT rn.numberOwner FROM RaffleNumber rn WHERE rn.raffle.id = :aEventId")
+    public List<User> findParticipantsByEventId(@Param("aEventId") Long aEventId);
 
     @Query("SELECT CASE WHEN COUNT(rn) > 0 THEN TRUE ELSE FALSE END "
         + "FROM RaffleNumber rn "

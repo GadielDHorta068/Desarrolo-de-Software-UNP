@@ -22,12 +22,9 @@ public class RaffleNumberService {
     @Autowired
     private RaffleNumberRepository raffleNumRepository;
 
-    @Autowired
-    private EventsRepository eventsRepository;
-
     public List<RaffleNumber> findRaffleNumbersById(Raffle aRaffle) {
         if (!(aRaffle instanceof Raffle)) {
-            throw new IllegalArgumentException("Este metodo es solo para asignar numeros de rifa a usuarios");
+            throw new IllegalArgumentException("Este metodo es solo eventos de tipo rifa");
         }
         List<RaffleNumber> result = raffleNumRepository.findNumbersById(aRaffle.getId());
 
