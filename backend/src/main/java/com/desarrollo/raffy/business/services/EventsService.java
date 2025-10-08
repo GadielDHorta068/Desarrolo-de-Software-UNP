@@ -20,6 +20,7 @@ import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.util.ImageUtils;
@@ -31,6 +32,7 @@ import org.modelmapper.ModelMapper;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
 import com.desarrollo.raffy.dto.GiveawaysDTO;
 import com.desarrollo.raffy.dto.GuessingContestDTO;
+import com.desarrollo.raffy.dto.RaffleDTO;
 
 @Service
 @Slf4j
@@ -177,6 +179,8 @@ public class EventsService {
             dto = modelMapper.map(event, GiveawaysDTO.class);
         } else if(event instanceof GuessingContest){
             dto = modelMapper.map(event, GuessingContestDTO.class);
+        } else if(event instanceof Raffle) {
+            dto = modelMapper.map(event, RaffleDTO.class);
         } else {
             dto = modelMapper.map(event, EventSummaryDTO.class);
         }

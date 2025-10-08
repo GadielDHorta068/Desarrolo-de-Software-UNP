@@ -25,9 +25,6 @@ public class Raffle extends Events {
 
     @NotNull(message = "El precio de la rifa es obligatorio")
     @Column(name = "price_of_number")
-    private int priceOfNumber;
-
-
-    
+    private double priceOfNumber;
 
 }
