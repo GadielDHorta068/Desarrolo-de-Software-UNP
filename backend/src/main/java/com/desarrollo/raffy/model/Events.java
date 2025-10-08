@@ -33,6 +33,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
 
+import com.desarrollo.raffy.util.OnCreate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -69,7 +70,7 @@ public abstract class Events {
     private LocalDate startDate;
 
     @NotNull(message = "Se debe tener una fecha de finalización")
-    @Future(message = "La fecha de finalización debe ser futura")
+    @Future(groups = OnCreate.class, message = "La fecha de finalización debe ser futura")
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 

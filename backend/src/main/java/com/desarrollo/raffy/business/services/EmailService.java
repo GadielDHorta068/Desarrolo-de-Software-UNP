@@ -206,17 +206,18 @@ public class EmailService {
      */
     public void sendHtmlEmail(String to, String subject, String html) {
         try {
+            // Para correos HTML sin adjuntos, usar modo no-multipart evita encabezados y límites innecesarios
             MimeMessage mimeMessage = emailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, StandardCharsets.UTF_8.name());
             helper.setFrom(fromEmail);
             helper.setTo(to);
             helper.setSubject(subject);
+            // Indicar explícitamente que el cuerpo es HTML
             helper.setText(html, true);
-            
-            // Configurar headers para asegurar renderizado HTML
-            mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
-            mimeMessage.setHeader("MIME-Version", "1.0");
-            
+
+            // No establecer manualmente Content-Type/MIME-Version.
+            // JavaMail los genera correctamente según la estructura del mensaje.
+
             emailSender.send(mimeMessage);
             System.out.println("✅ Correo HTML enviado correctamente a: " + to);
         } catch (MessagingException e) {
@@ -440,4 +441,4 @@ public class EmailService {
         }
     }
 
-} 
+}

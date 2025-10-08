@@ -8,6 +8,11 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'invite/:shortcode',
+    loadComponent: () => import('./pages/invite/invite.component').then(m => m.InviteRedirectComponent),
+    title: 'Invitación - Raffy'
+  },
+  {
     path: 'home',
     loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent),
     title: 'Inicio - Raffy'
@@ -94,6 +99,11 @@ export const routes: Routes = [
     path: 'raffle/id', // cambiar id por :id 
     loadComponent: () => import('./pages/rifa-front.component/rifa-front.component').then(m => m.RifaFrontComponent),
     title: 'raffle-detail'
+  },
+  {
+    path: 'winners/:eventId',
+    loadComponent: () => import('./pages/winners/winners-wheel').then(m => m.WinnersWheel),
+    title: 'Ganadores - Raffy'
   },
   {
     path: '**',

@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { HeaderComponent } from '../../shared/components/header/header.component';
+import { EventShareCardComponent } from '../../shared/event-share-card/event-share-card.component';
 import { AuthService, UserResponse } from '../../services/auth.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, HeaderComponent],
+  imports: [CommonModule, HeaderComponent, EventShareCardComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -19,6 +20,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   authSubscription: Subscription = new Subscription();
   showLoginModal = false;
+
+  // Datos de demostración para tarjeta compartible
+  demoShortcode = 'FKILLoxC';
+  demoTitle = 'Invitación al evento';
+  demoDescription = 'Comparte el link corto y su código';
+  demoQr?: string = undefined; // Provee base64 válido para ver el QR
+  demoOriginalUrl?: string = undefined;
 
   constructor(
     private authService: AuthService,
