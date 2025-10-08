@@ -52,7 +52,7 @@ export class RafflesPanel {
       this.types = types || [];
       this.cdr.detectChanges();
     });
-
+    
     // inicializacion del form de creacion de eventos
     this.formPanel = new FormGroup({
       title: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
@@ -62,6 +62,8 @@ export class RafflesPanel {
       winners: new FormControl({value: 1, disabled: false}, {validators:[ Validators.required ]}),
       description: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
       image: new FormControl({value: null, disabled: false}),
+      priceRaffle: new FormControl({value: '', disabled: false}),
+      quantityNumbersRaffle: new FormControl({value: '', disabled: false})
     });
   }
 
