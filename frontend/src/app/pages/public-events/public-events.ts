@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { EventsService } from '../../services/events.service';
 import { EventsTemp, StatusEvent } from '../../models/events.model';
 import { DrawCard } from '../../shared/components/draw-card/draw-card';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-public-events',
@@ -20,14 +21,17 @@ export class PublicEvents implements OnInit {
   error = '';
   public StatusEvent = StatusEvent;
   selectedStatus: 'ALL' | StatusEvent = 'ALL';
+  userLogged: boolean = false;
 
   constructor(
     private eventsService: EventsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
   ){}
 
   ngOnInit(): void {
     this.loadPublicEvents();
+    this.userLogged = this.authService.isAuthenticated();
   }
 
   private loadPublicEvents(): void {
