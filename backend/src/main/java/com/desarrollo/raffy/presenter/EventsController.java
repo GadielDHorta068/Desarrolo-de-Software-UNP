@@ -24,7 +24,6 @@ import com.desarrollo.raffy.Response;
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.ParticipantService;
 import com.desarrollo.raffy.business.services.UserService;
-import com.desarrollo.raffy.business.services.GiveawaysService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -36,6 +35,7 @@ import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
+import com.desarrollo.raffy.dto.ParticipantDTO;
 import com.desarrollo.raffy.dto.WinnerDTO;
 
 
@@ -104,23 +104,23 @@ public class EventsController {
         }
     }
 
-    @PostMapping("/create/raffle/{idUser}")
-    public ResponseEntity<?> createRaffle(
-        @RequestBody Raffle aRaffle,
-        @PathVariable("idUser") Long idUser
-    ) {
+    // @PostMapping("/create/raffle/{idUser}")
+    // public ResponseEntity<?> createRaffle(
+    //     @RequestBody Raffle aRaffle,
+    //     @PathVariable("idUser") Long idUser
+    // ) {
         
-        // Validaciones de fechas
-        if (aRaffle.getEndDate() == null) {
-            return new ResponseEntity<>("Debe especificar la fecha de fin del evento", HttpStatus.BAD_REQUEST);
-        }
-        if (aRaffle.getEndDate().isBefore(LocalDate.now())) {
-            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio", HttpStatus.BAD_REQUEST);
-        }
+    //     // Validaciones de fechas
+    //     if (aRaffle.getEndDate() == null) {
+    //         return new ResponseEntity<>("Debe especificar la fecha de fin del evento", HttpStatus.BAD_REQUEST);
+    //     }
+    //     if (aRaffle.getEndDate().isBefore(LocalDate.now())) {
+    //         return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio", HttpStatus.BAD_REQUEST);
+    //     }
         
-        Raffle newRaffle = 
-        return null; // CAMBIAR!
-    }
+    //     Raffle newRaffle = 
+    //     return null; // CAMBIAR!
+    // }
 
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
