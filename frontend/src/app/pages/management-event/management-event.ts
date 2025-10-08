@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EventsTemp, EventType } from '../../models/events.model';
+import { EventsTemp, EventType, StatusEvent } from '../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 import { Category } from '../../services/category.service';
@@ -9,15 +9,19 @@ import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { InfoEvent } from '../../shared/components/info-event/info-event';
 import { Router } from '@angular/router';
+import { EventShareCardComponent } from '../../shared/event-share-card/event-share-card.component';
+import { AuthService } from '../../services/auth.service';
+import { ModalShareEvent } from '../../shared/components/modal-share-event/modal-share-event';
 
 @Component({
   selector: 'app-management-event',
-  imports: [CommonModule, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent, HandleDatePipe],
+  imports: [CommonModule, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent, HandleDatePipe, EventShareCardComponent, ModalShareEvent],
   templateUrl: './management-event.html',
   styleUrl: './management-event.css',
   providers: [HandleDatePipe]
 })
 export class ManagementEvent {
+  @ViewChild('modalShareEvent') modalShareEvent!: ModalShareEvent;
   @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
   dataModal: InfoModal = {title: "Actualización de datos", message: ""};
 
@@ -37,6 +41,7 @@ export class ManagementEvent {
     private adminEventService: AdminEventService,
     private handleDatePipe: HandleDatePipe,
     private router: Router,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef
   ){
     this.adminEventService.selectedEvent$.subscribe(
@@ -76,5 +81,26 @@ export class ManagementEvent {
 
   redirectEdit(){
     this.router.navigate(['/event-edit']);
+  }
+
+  // Métodos para determinar qué botones mostrar
+  get canEdit(): boolean {
+    return this.authService.isAuthenticated() && this.isUserCreator;
+  }
+
+  // Métodos para determinar qué botones mostrar
+  get isUserCreator(): boolean {
+    return this.authService.getCurrentUserValue()?.id === this.event?.creator?.id;
+  }
+
+  get canUserInscript(): boolean {
+    // El usuario puede inscribirse si:
+    // 1. Está autenticado
+    // 2. No es el creador del evento
+    // 3. No está ya registrado
+    return this.authService.isAuthenticated() && 
+            !this.isUserCreator && 
+            !this.event?.isUserRegistered &&
+            this.event?.statusEvent === StatusEvent.OPEN;
   }
 }

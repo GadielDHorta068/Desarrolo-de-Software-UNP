@@ -11,6 +11,9 @@ import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.Participant;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class GiveawayWinnerStrategy implements WinnerSelectionStrategy {
 
@@ -22,8 +25,9 @@ public class GiveawayWinnerStrategy implements WinnerSelectionStrategy {
     @Override
     public void selectWinners(Events event, List<Participant> participants) {
         Giveaways giveaway = (Giveaways) event;
+        log.info("Número de participantes antes de seleccionar ganadores: " + participants.size());
+        log.info("Detalles del sorteo: " + giveaway);
         int winnersCount = giveaway.getWinnersCount();
-
         // Resetea la posición previa
         participants.forEach(p -> p.setPosition((short)0));
 

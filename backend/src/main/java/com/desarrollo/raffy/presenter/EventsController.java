@@ -17,35 +17,36 @@ import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
-import com.desarrollo.raffy.util.ImageUtils;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.ParticipantService;
 import com.desarrollo.raffy.business.services.UserService;
-import com.desarrollo.raffy.business.services.GiveawaysService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
+import com.desarrollo.raffy.dto.WinnerDTO;
+import com.desarrollo.raffy.dto.ParticipantDTO;
+
 import org.modelmapper.ModelMapper;
 import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
 
+@Slf4j
 @RestController
 @RequestMapping("/events")
 public class EventsController {
     @Autowired
     private EventsService eventsService;
-
-    @Autowired
-    private GiveawaysService giveawaysService;
 
     @Autowired
     private UserService userService;
@@ -121,7 +122,7 @@ public class EventsController {
         }
     }
 
-    @PutMapping("update/{idEvent}/user/{idUser}")
+    @PutMapping("/update/{idEvent}/user/{idUser}")
     public ResponseEntity<?> update(
                     @PathVariable("idEvent") @NotNull @Positive Long id, 
                     @RequestBody Events events, 
@@ -159,13 +160,24 @@ public class EventsController {
         }
     }
 
-    @PutMapping("update/giveaway/{idEvent}/user/{idUser}")
+    @PutMapping("/update/giveaway/{idEvent}/user/{idUser}")
     public ResponseEntity<?> updateGiveaway(
             @PathVariable Long idEvent,
             @PathVariable Long idUser,
             @RequestBody Giveaways event) {
 
         Giveaways updatedEvent = eventsService.update(idEvent, event, idUser);
+        EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
+        return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/update/guessing-contest/{idEvent}/user/{idUser}")
+    public ResponseEntity<?> updateGuessingConstest(
+            @PathVariable Long idEvent,
+            @PathVariable Long idUser,
+            @RequestBody GuessingContest event) {
+
+        GuessingContest updatedEvent = eventsService.update(idEvent, event, idUser);
         EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
         return ResponseEntity.ok(dto);
     }
@@ -183,13 +195,79 @@ public class EventsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/winners/event/{eventId}")
+    public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable("eventId") Long eventId){
+        try {
+            List<Participant> winners = eventsService.finalizedEvent(eventId);
+            log.info("Número de ganadores obtenidos: " + winners.size());
+        if(winners.isEmpty()){
+            return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
+        }
+        List<WinnerDTO> response = winners.stream()
+            .map(this::toWinnerDTO)
+            .toList();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>("Error al finalizar el evento", HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>("Error al obtener los ganadores: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        
+    }
+
+    @GetMapping("/participants/event/{eventId}")
+    public ResponseEntity<?> getParticipantsByEventId(@PathVariable("eventId") Long eventId){
+        try {
+            List<Participant> participants = participantService.findParticipantsByEventId(eventId);
+            log.info("Número de participantes obtenidos: " + participants.size());
+            if(participants.isEmpty()){
+                return new ResponseEntity<>("No se encontraron participantes para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
+            }
+            
+            // Crear DTOs para participantes (sin información sensible)
+            List<ParticipantDTO> response = participants.stream()
+                .map(this::toParticipantDTO)
+                .toList();
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error al obtener participantes: " + e.getMessage(), e);
+            return new ResponseEntity<>("Error al obtener los participantes: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private WinnerDTO toWinnerDTO(Participant participant) {
+        WinnerDTO dto = new WinnerDTO();
+        dto.setParticipantId(participant.getParticipant().getId());
+        dto.setName(participant.getParticipant().getName());
+        dto.setSurname(participant.getParticipant().getSurname());
+        dto.setPosition(participant.getPosition());
+        dto.setEmail(participant.getParticipant().getEmail());
+        dto.setPhone(participant.getParticipant().getCellphone());
+        dto.setEventId(participant.getEvent().getId());
+        dto.setEventTitle(participant.getEvent().getTitle());
+        return dto;
+    }
+
+    private ParticipantDTO toParticipantDTO(Participant participant) {
+        ParticipantDTO dto = new ParticipantDTO();
+        dto.setParticipantId(participant.getParticipant().getId());
+        dto.setName(participant.getParticipant().getName());
+        dto.setSurname(participant.getParticipant().getSurname());
+        dto.setPosition(participant.getPosition());
+        dto.setEventId(participant.getEvent().getId());
+        dto.setEventTitle(participant.getEvent().getTitle());
+        return dto;
+    }
+
     @GetMapping("/event-types")
     public ResponseEntity<?> getAllEventTypes() {
         EventTypes[] eventTypes = eventsService.getAllEventTypes();
         return new ResponseEntity<>(eventTypes, HttpStatus.OK);
     }
 
-    @DeleteMapping("delete/id/{id}")
+    @DeleteMapping("/delete/id/{id}")
     public ResponseEntity<?> delete(@PathVariable @NotNull @Positive Long id) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
@@ -356,7 +434,7 @@ public class EventsController {
         if (endDate.isBefore(startDate)) {
             return new ResponseEntity<>("La fecha de inicio no puede ser posterior a la fecha de fin", HttpStatus.BAD_REQUEST);
         }
-        var giveaways = giveawaysService.findByDateRangeGiveaways(startDate, endDate);
+        var giveaways = eventsService.getByDateRange(startDate, endDate);
         var events = giveaways.stream()
             .map(g -> modelMapper.map(g, EventSummaryDTO.class))
             .toList();
@@ -386,38 +464,21 @@ public class EventsController {
             return new ResponseEntity<>("Debe especificar el estado del evento (statusEvent)", HttpStatus.BAD_REQUEST);
         }
 
-        // Normalizar alias del estado desde el frontend
-        // FINISHED (frontend) -> FINALIZED (backend)
-        if ("FINISHED".equalsIgnoreCase(statusStr)) {
-            statusStr = "FINALIZED";
-        }
-
         StatusEvent requestedStatus;
         try {
-            requestedStatus = StatusEvent.valueOf(statusStr.trim());
+            requestedStatus = StatusEvent.valueOf(statusStr.trim().toUpperCase());
         } catch (IllegalArgumentException ex) {
             return new ResponseEntity<>("Estado inválido: " + statusStr, HttpStatus.BAD_REQUEST);
         }
 
-        // Si ya está en el estado solicitado, devolver el resumen actual
-        if (existingEvent.getStatusEvent() == requestedStatus) {
-            EventSummaryDTO dto = eventsService.getEventSummaryById(idEvent);
-            return new ResponseEntity<>(dto, HttpStatus.OK);
+        if(existingEvent.getStatusEvent() != StatusEvent.OPEN){
+            return new ResponseEntity<>("Solo se pueden cerrar eventos que estén en estado OPEN", HttpStatus.BAD_REQUEST);
         }
 
-        // Transiciones soportadas: OPEN -> CLOSED, CLOSED -> FINALIZED
         try {
-            if (requestedStatus == StatusEvent.CLOSED) {
-                // Cerrar inscripciones del evento
                 eventsService.closeEvent(idEvent);
-            } else if (requestedStatus == StatusEvent.FINALIZED) {
-                // Finalizar sorteo (seleccionar ganadores si aplica)
-                giveawaysService.finalizedGiveaway(idEvent);
-            } else {
-                return new ResponseEntity<>("Transición de estado no soportada", HttpStatus.BAD_REQUEST);
-            }
         } catch (Exception e) {
-            return new ResponseEntity<>("No se pudo actualizar el estado: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("No se pudo cerrar el evento: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         EventSummaryDTO dto = eventsService.getEventSummaryById(idEvent);

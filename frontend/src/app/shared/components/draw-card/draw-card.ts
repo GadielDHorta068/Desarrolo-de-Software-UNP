@@ -130,23 +130,23 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     this.reviewCreator();
   }
 
-  public redirectEdit() {
-    // console.log("[edit] => datos del evento: ", this.event);
-    // controlamos q solo los de estado ABIERTO se puedan editar
-    if(this.event?.statusEvent != StatusEvent.OPEN){
-      this.dataModal.message = "No es posible editar el evento seleccionado. Solo se pueden editar los eventos en estaado ABIERTO";
-      this.modalInfoRef.open();
-      return;
-    }
-    // TODO: este control meterlo en el boton de edicion del card!!
-    if(this.event?.eventType !== EventTypes.GIVEAWAY){
-      this.dataModal.message = "Por el momento no es posible editar los datos de este tipo de eventos.";
-      this.modalInfoRef.open();
-      return;
-    }
-    this.adminEventService.setSelectedEvent(this.event);
-    this.router.navigate(['/event-edit']);
-  }
+  // public redirectEdit() {
+  //   // console.log("[edit] => datos del evento: ", this.event);
+  //   // controlamos q solo los de estado ABIERTO se puedan editar
+  //   if(this.event?.statusEvent != StatusEvent.OPEN){
+  //     this.dataModal.message = "No es posible editar el evento seleccionado. Solo se pueden editar los eventos en estaado ABIERTO";
+  //     this.modalInfoRef.open();
+  //     return;
+  //   }
+  //   // TODO: este control meterlo en el boton de edicion del card!!
+  //   if(this.event?.eventType !== EventTypes.GIVEAWAY){
+  //     this.dataModal.message = "Por el momento no es posible editar los datos de este tipo de eventos.";
+  //     this.modalInfoRef.open();
+  //     return;
+  //   }
+  //   this.adminEventService.setSelectedEvent(this.event);
+  //   this.router.navigate(['/event-edit']);
+  // }
 
   public redirectAdmin(){
     this.adminEventService.setSelectedEvent(this.event);
@@ -180,20 +180,8 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   // Finalizar evento (solo creador)
   public finalizeEvent(): void {
     if (!this.isUserCreator || !this.event?.id) return;
-    if (!this.userCurrent?.id) return;
-    this.eventsService.updateEventStatus(this.event.id, this.userCurrent.id, StatusEvent.FINISHED).subscribe({
-      next: (updated) => {
-        if (this.event) {
-          this.event.statusEvent = StatusEvent.FINISHED;
-        }
-        this.notificationService.notifySuccess('Evento finalizado. Ganador elegido.');
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error al finalizar evento:', err);
-        this.notificationService.notifyError('No se pudo finalizar el evento');
-      }
-    });
+    // Navegar a la pantalla de ruleta de ganadores; el backend finalizará el evento.
+    this.router.navigate(['/winners', this.event.id]);
   }
 
   private reviewCreator(){

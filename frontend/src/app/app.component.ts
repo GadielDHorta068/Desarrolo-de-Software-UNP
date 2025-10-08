@@ -13,7 +13,7 @@ import { configService } from './services/config.service';
       <header class="bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 text-white shadow-lg">
         <app-header></app-header>
       </header>
-      
+
       <section class="flex-1 bg-gray-50 dark:bg-gray-900 overflow-hidden" [@routeAnimations]="getRouteAnimationData()">
         <router-outlet />
       </section>

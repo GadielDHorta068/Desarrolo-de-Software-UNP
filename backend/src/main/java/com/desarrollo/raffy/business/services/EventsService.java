@@ -1,7 +1,6 @@
 package com.desarrollo.raffy.business.services;
 
 import java.time.LocalDate;
-//Devolver los errores correspondientes
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
@@ -19,14 +19,21 @@ import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.GuessingContest;
+import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.util.ImageUtils;
+import com.desarrollo.raffy.util.OnCreate;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.modelmapper.ModelMapper;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
+import com.desarrollo.raffy.dto.GiveawaysDTO;
+import com.desarrollo.raffy.dto.GuessingContestDTO;
 
 @Service
+@Slf4j
 public class EventsService {
 
     @Autowired
@@ -41,7 +48,11 @@ public class EventsService {
     @Autowired
     private ParticipantRepository participantRepository;
 
+    @Autowired
+    private ParticipantService participantService;
+
     @Transactional
+    @Validated(OnCreate.class)
     public <T extends Events> T create(T event, Long idUser) {
         // Validar que no exista un evento con el mismo título
         if(eventsRepository.existsByTitle(event.getTitle())){
@@ -105,7 +116,6 @@ public class EventsService {
 
             existingContest.setMinValue(newContest.getMinValue());
             existingContest.setMaxValue(newContest.getMaxValue());
-            existingContest.setTargetNumber(newContest.getTargetNumber());
             existingContest.setMaxAttempts(newContest.getMaxAttempts());
         }
 
@@ -118,6 +128,12 @@ public class EventsService {
         return eventsRepository.findByCreatorId(IdCreator);
     }
 
+    /**
+     * Cierra un evento cambiando su estado a CLOSED.
+     * @param idEvent
+     * @return true si el evento se cerró correctamente, false si ya estaba cerrado o finalizado.
+     * @throws RuntimeException si el evento no se encuentra o hay un error al guardar.
+     */
     public boolean closeEvent(Long idEvent){
         try {
             Events event = eventsRepository.findById(idEvent)
@@ -133,7 +149,7 @@ public class EventsService {
             
             return true;
         } catch (Exception e) {
-            throw new RuntimeException("Error al finalizar el sorteo " + e.getStackTrace());
+            throw new RuntimeException("Error al finalizar el sorteo " + e.getMessage(), e);
         }
     }
 
@@ -152,26 +168,19 @@ public class EventsService {
         Events event = eventsRepository.findByIdWithDetails(id)
             .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
-        EventSummaryDTO dto = modelMapper.map(event, EventSummaryDTO.class);
-
-        if(event.getImagen() != null){
-            dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
-        }
-
-        // Verificar si el usuario actual está inscrito en el evento
-        RegisteredUser currentUser = getCurrentUser();
-        if (currentUser != null) {
-            boolean isRegistered = participantRepository.existsByParticipantAndEvent(currentUser, event);
-            dto.setIsUserRegistered(isRegistered);
-        } else {
-            dto.setIsUserRegistered(false);
-        }
-
-        return dto;
+        return toEventSummaryDTO(event);
     }
 
     public EventSummaryDTO toEventSummaryDTO(Events event) {
-        EventSummaryDTO dto = modelMapper.map(event, EventSummaryDTO.class);
+        EventSummaryDTO dto;
+        if(event instanceof Giveaways){
+            dto = modelMapper.map(event, GiveawaysDTO.class);
+        } else if(event instanceof GuessingContest){
+            dto = modelMapper.map(event, GuessingContestDTO.class);
+        } else {
+            dto = modelMapper.map(event, EventSummaryDTO.class);
+        }
+
         if (event.getImagen() != null) {
             dto.setImageUrl(ImageUtils.bytesToBase64(event.getImagen()));
         }
@@ -184,8 +193,28 @@ public class EventsService {
         } else {
             dto.setIsUserRegistered(false);
         }
-        
+        /* System.out.println("Evento: " + event.getTitle() + " - Categoria: " + 
+            (event.getCategory() != null ? event.getCategory().getName() : "NULL")); */
+
         return dto;
+    }
+
+    @Transactional
+    public List<Participant> finalizedEvent(Long eventId){
+        Events event = eventsRepository.findById(eventId)
+            .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+        log.info("Finalizando evento: " + event.getTitle() + " con estado: " + event.getStatusEvent());
+        if (event.getStatusEvent() != StatusEvent.CLOSED) {
+            throw new IllegalStateException("El evento debe estar cerrado para poder finalizarse");
+        }
+        // Cambia el estado del evento a FINALIZED
+        event.setStatusEvent(StatusEvent.FINALIZED);
+
+        //Delega la selección de ganadores a ParticipantService
+        List<Participant> winners = participantService.runEvent(event);
+        log.info("Ganadores seleccionados: " + winners.size());
+        eventsRepository.save(event);
+        return winners;
     }
 
     /**

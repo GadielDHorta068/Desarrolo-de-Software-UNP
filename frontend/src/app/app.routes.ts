@@ -8,6 +8,11 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'invite/:shortcode',
+    loadComponent: () => import('./pages/invite/invite.component').then(m => m.InviteRedirectComponent),
+    title: 'Invitación - Raffy'
+  },
+  {
     path: 'home',
     loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent),
     title: 'Inicio - Raffy'
@@ -96,6 +101,11 @@ export const routes: Routes = [
         redirectTo: '/all'
       }
     ]
+  },
+  {
+    path: 'winners/:eventId',
+    loadComponent: () => import('./pages/winners/winners-wheel').then(m => m.WinnersWheel),
+    title: 'Ganadores - Raffy'
   },
   {
     path: '**',
