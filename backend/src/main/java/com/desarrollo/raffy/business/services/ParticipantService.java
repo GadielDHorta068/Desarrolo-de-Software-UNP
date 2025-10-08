@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.desarrollo.raffy.business.repository.ParticipantRepository;
 import com.desarrollo.raffy.business.utils.WinnerSelectionStrategy;
 import com.desarrollo.raffy.business.utils.WinnerStrategyFactory;
+import com.desarrollo.raffy.exception.AlreadyRegisteredToGiveawayExeption;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.Participant;
@@ -66,10 +67,10 @@ public class ParticipantService {
     @Transactional
     public Participant registerToGiveaway(User aUser, Events aGiveaway) {
         if (!(aGiveaway instanceof Giveaways)) {
-            throw new IllegalArgumentException("Este metodo solo para registrar usuarios a sorteos");
+            throw new IllegalArgumentException("Este metodo es solo para registrar usuarios a sorteos");
         }
         if (participantRepository.existsByParticipantAndEvent(aUser, aGiveaway)) {
-            throw new IllegalArgumentException("Ya estas inscripto a este sorteo");
+            throw new AlreadyRegisteredToGiveawayExeption("Ya estás inscripto a este sorteo");
         }
         Participant participantToSave = new Participant(aUser, (Giveaways) aGiveaway);
         return participantRepository.save(participantToSave);
