@@ -50,6 +50,45 @@ public class EmailTemplateService {
     }
 
     /**
+     * Genera una plantilla para confirmar un pago exitoso de múltiples boletos/tickets.
+     * Pensada para cuando un participante compra más de una rifa en una sola operación.
+     * No incluye método de pago ni números de comprobante.
+     *
+     * @param userName Nombre del usuario
+     * @param eventName Nombre del evento
+     * @param ticketsCount Cantidad de boletos/tickets adquiridos
+     * @param eventUrl URL para ver el evento o los detalles
+     * @return HTML de la plantilla
+     */
+    public String generateMultiTicketPaymentConfirmationTemplate(String userName,
+                                                                 String eventName,
+                                                                 int ticketsCount,
+                                                                 String eventUrl) {
+        String title = "Pago confirmado";
+
+        StringBuilder msg = new StringBuilder();
+        msg.append("<p>")
+           .append("Hola ").append(escapeHtml(userName)).append(", ")
+           .append("tu pago fue procesado correctamente.")
+           .append("</p>");
+
+        msg.append("<p>")
+           .append("Has adquirido <strong>").append(ticketsCount).append(" boletos</strong> para el evento ")
+           .append("<strong>").append(escapeHtml(eventName)).append("</strong>.")
+           .append("</p>");
+
+
+        String actionText = "Ver detalles del evento";
+        String footerMessage = "Gracias por confiar en Rafify.";
+
+        return renderNotificationFromTemplate(title,
+                                              msg.toString(),
+                                              actionText,
+                                              eventUrl,
+                                              footerMessage);
+    }
+
+    /**
      * Genera una plantilla de bienvenida profesional para nuevos usuarios.
      * 
      * @param userName Nombre del usuario

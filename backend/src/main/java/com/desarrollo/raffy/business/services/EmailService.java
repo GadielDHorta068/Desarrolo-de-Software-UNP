@@ -459,6 +459,52 @@ public class EmailService {
     }
 
     /**
+     * Notifica un pago correcto de múltiples boletos/tickets en un solo envío.
+     * Reutiliza la plantilla HTML y soporta adjuntos opcionales para los comprobantes.
+     * No incluye método de pago ni números de comprobante.
+     *
+     * @param to Correo del destinatario
+     * @param userName Nombre del usuario
+     * @param eventName Nombre del evento
+     * @param ticketsCount Cantidad de boletos/tickets adquiridos
+     * @param eventUrl URL para ver detalles del evento
+     * @param attachments Adjuntos opcionales (por ejemplo, comprobantes en PDF)
+     */
+    public void sendMultiTicketPaymentConfirmation(String to,
+                                                   String userName,
+                                                   String eventName,
+                                                   int ticketsCount,
+                                                   String eventUrl,
+                                                   Collection<Attachment> attachments) {
+        String htmlContent = emailTemplateService.generateMultiTicketPaymentConfirmationTemplate(
+                userName, eventName, ticketsCount, eventUrl);
+
+        String textBody = "Hola " + userName + ",\n\n" +
+                "Tu pago fue procesado correctamente.\n" +
+                "Has adquirido " + ticketsCount + " boletos para el evento " + eventName + ".\n" +
+                "Adjuntamos los comprobantes correspondientes.\n\n" +
+                "Puedes ver los detalles aquí: " + eventUrl + "\n\n" +
+                "Gracias por confiar en Rafify.";
+
+        EmailMessage email = new EmailMessage(
+                List.of(to),
+                null,
+                null,
+                null,
+                "Pago confirmado - Rafify",
+                textBody,
+                htmlContent,
+                null,
+                attachments,
+                emailTemplateService.getDefaultInlineResources() != null
+                        ? emailTemplateService.getDefaultInlineResources().values()
+                        : null
+        );
+
+        sendAdvancedEmail(email);
+    }
+
+    /**
      * Recurso inline para referenciar via CID en HTML.
      */
     public static class InlineResource {
