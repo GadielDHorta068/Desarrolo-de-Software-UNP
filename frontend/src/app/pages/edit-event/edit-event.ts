@@ -42,6 +42,8 @@ export class EditEvent {
     private parseFileService: ParseFileService,
     private cdr: ChangeDetectorRef
   ){
+    this.configService.initData();
+    this.initDataLoadEvent();
     // this.formEvent = new FormGroup({
     //   title: new FormControl({value: this.event?.title, disabled: true}, {validators:[ Validators.required ]}),
     //   drawType: new FormControl({value: this.event?.eventType, disabled: true}, {validators:[ Validators.required ]}),
@@ -131,6 +133,19 @@ export class EditEvent {
       winners: new FormControl({value: this.event?.winnersCount, disabled: true}, {validators:[ Validators.required ]}),
       description: new FormControl({value: this.event?.description, disabled: false}, {validators:[ Validators.required ]}),
       image: new FormControl({value: null, disabled: false}),
+    });
+  }
+
+  private initDataLoadEvent(){
+    // Suscribirse a los observables para obtener los datos cuando estén disponibles
+    this.configService.categories$.subscribe( categories => {
+      this.categories = categories || [];
+      this.cdr.detectChanges();
+    });
+    
+    this.configService.typeEvents$.subscribe(types => {
+      this.types = types || [];
+      this.cdr.detectChanges();
     });
   }
 

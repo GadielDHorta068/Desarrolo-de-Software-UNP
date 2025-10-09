@@ -52,6 +52,13 @@ export const routes: Routes = [
     // data: { animation: 'register' }
   },
   {
+    path: 'event-admin',
+    loadComponent: () => import('./pages/management-event/management-event').then(m => m.ManagementEvent),
+    // canActivate: [GuestGuard],
+    title: 'Gestiona tu evento - Raffy',
+    // data: { animation: 'register' }
+  },
+  {
     path: 'panel-list',
     loadComponent: () => import('./pages/panel-list/panel-list').then(m => m.PanelList),
     // canActivate: [GuestGuard],
@@ -94,6 +101,11 @@ export const routes: Routes = [
         redirectTo: '/all'
       }
     ]
+  },
+  {
+    path: 'raffle/id', // cambiar id por :id 
+    loadComponent: () => import('./pages/rifa-front.component/rifa-front.component').then(m => m.RifaFrontComponent),
+    title: 'raffle-detail'
   },
   {
     path: 'winners/:eventId',

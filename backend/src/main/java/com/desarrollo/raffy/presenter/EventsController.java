@@ -20,8 +20,12 @@ import com.desarrollo.raffy.model.User;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.business.services.EmailService;
+import com.desarrollo.raffy.model.Raffle;
+import com.desarrollo.raffy.model.RaffleNumber;
+import com.desarrollo.raffy.Response;
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.ParticipantService;
+import com.desarrollo.raffy.business.services.RaffleNumberService;
 import com.desarrollo.raffy.business.services.UserService;
 
 import jakarta.validation.Valid;
@@ -33,14 +37,16 @@ import java.util.List;
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import com.desarrollo.raffy.dto.BuyRaffleNumberRequestDTO;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
-import com.desarrollo.raffy.dto.WinnerDTO;
 import com.desarrollo.raffy.dto.ParticipantDTO;
+import com.desarrollo.raffy.dto.WinnerDTO;
+
 
 import org.modelmapper.ModelMapper;
 import java.util.stream.Collectors;
 import java.util.Map;
-import java.util.HashMap;
 
 @Slf4j
 @RestController
@@ -54,6 +60,9 @@ public class EventsController {
 
     @Autowired
     private ParticipantService participantService;
+
+    @Autowired
+    private RaffleNumberService raffleNumberService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -100,6 +109,29 @@ public class EventsController {
         GuessingContest created = eventsService.create(guessingContest, idUser);
         if (created != null) {
             EventSummaryDTO dto = eventsService.getEventSummaryById(created.getId());
+            return new ResponseEntity<>(dto, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/create/raffle/{idUser}")
+    public ResponseEntity<?> createRaffle(
+        @RequestBody Raffle aRaffle,
+        @PathVariable("idUser") Long idUser
+    ) {
+        
+        // Validaciones de fechas
+        if (aRaffle.getEndDate() == null) {
+            return new ResponseEntity<>("Debe especificar la fecha de fin del evento", HttpStatus.BAD_REQUEST);
+        }
+        if (aRaffle.getEndDate().isBefore(LocalDate.now())) {
+            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio", HttpStatus.BAD_REQUEST);
+        }
+        
+        Raffle newRaffle = eventsService.create(aRaffle, idUser);
+        if (newRaffle != null) {
+            EventSummaryDTO dto = eventsService.getEventSummaryById(newRaffle.getId());
             return new ResponseEntity<>(dto, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
@@ -436,24 +468,59 @@ public class EventsController {
                 
                 savedGuestUser = userService.save(userFromDb);
             }
-            try {
-                // intento guardar la participacion del usuario
-                Participant created = participantService.registerToGiveaway(savedGuestUser, eventToParticipate);
-                Map<String, Object> response = new HashMap<>();
-                response.put("id", created.getId());
-                response.put("eventId", eventToParticipate.getId());
-                response.put("userId", savedGuestUser.getId());
-                response.put("message", "Inscripción realizada exitosamente");
-                return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(response);
-            } catch (Exception e) {
-                return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(e.getMessage());
-            }
+            // intento guardar la participacion del usuario
+            @SuppressWarnings("unused")
+            Participant created = participantService.registerToGiveaway(savedGuestUser, eventToParticipate);
             
+            return Response.ok(null,"Inscripción exitosa");
+            // cambiar el null por un dto o manejar la referencia circular q hay entre giveaway y
+            //su organizador en caso de querer retornar el objeto Participant 
+
     }
+
+    @PostMapping("/{eventId}/buy-raffle-number")
+    public ResponseEntity<Object> buyRaffleNumber(
+        @Valid @RequestBody BuyRaffleNumberRequestDTO aBuyRequest,
+        @PathVariable("eventId") Long aEventId) {
+            GuestUser aGuestUser = aBuyRequest.getAGuestUser();
+            if (aGuestUser.getId() != null && aGuestUser.getId() != 0) {
+                return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Esta intentando crear un guest user. Este no puede tener un id definido.");
+            }
+            // normalizar id=0 a null para permitir persistencia con IDENTITY
+            if (aGuestUser.getId() != null && aGuestUser.getId() == 0) {
+                aGuestUser.setId(null);
+            }
+
+            Raffle eventToParticipate = (Raffle) eventsService.getById(aEventId);
+            if (eventToParticipate == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("El evento con id " + aEventId + " no existe");
+            }
+
+            User savedGuestUser;
+            User userFromDb = userService.findByEmail(aGuestUser.getEmail());
+            
+            // chequea si ya existe el usuario en la base de datos
+            if (userFromDb == null) {
+                // si el usuario no existe, lo guarda
+                savedGuestUser = userService.save(aGuestUser);
+            }
+            else {
+                // si el usuario existe lo actualizo
+                userFromDb.setName(aGuestUser.getName());
+                userFromDb.setSurname(aGuestUser.getSurname());
+                userFromDb.setCellphone(aGuestUser.getCellphone());
+                
+                savedGuestUser = userService.save(userFromDb);
+            }
+
+            @SuppressWarnings("unused")
+            List<RaffleNumber> someBoughtRaffleNumbers = raffleNumberService.createRaffleNumbers(eventToParticipate, savedGuestUser, aBuyRequest.getSomeNumbersToBuy());
+
+            return Response.ok(null, "Numeros adquiridos exitosamente"); // CAMBIAR!
+    } 
 
     @GetMapping("/giveaways/search")
     public ResponseEntity<?> searchGiveawaysByDateRange(

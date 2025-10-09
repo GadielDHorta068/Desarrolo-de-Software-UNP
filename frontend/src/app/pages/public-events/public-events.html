@@ -2,7 +2,7 @@
   <div class="flex items-center justify-between mb-4">
     <h2 class="text-2xl font-bold text-emerald-600">Sorteos públicos</h2>
     <!-- Botón Nuevo evento -->
-    <a routerLink="/panel" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">Nuevo evento</a>
+    <a *ngIf="userLogged" routerLink="/panel" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">Nuevo evento</a>
   </div>
 
   <!-- Filtro por estado -->
