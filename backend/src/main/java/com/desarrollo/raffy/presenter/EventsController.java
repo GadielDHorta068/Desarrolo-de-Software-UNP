@@ -19,6 +19,7 @@ import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.business.services.EmailService;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
 import com.desarrollo.raffy.Response;
@@ -65,6 +66,9 @@ public class EventsController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private EmailService emailService;
 
 
     @PostMapping("/create/giveaway/{idUser}")
@@ -230,16 +234,41 @@ public class EventsController {
     @GetMapping("/winners/event/{eventId}")
     public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable("eventId") Long eventId){
         try {
+            // Obtener los ganadores del evento
             List<Participant> winners = eventsService.finalizedEvent(eventId);
             log.info("Número de ganadores obtenidos: " + winners.size());
-        if(winners.isEmpty()){
-            return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
-        }
-        List<WinnerDTO> response = winners.stream()
-            .map(this::toWinnerDTO)
-            .toList();
+            
+            if(winners.isEmpty()){
+                return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
+            }
+            
+            // Convertir la lista de participantes a WinnerDTO
+            List<WinnerDTO> response = winners.stream()
+                .map(this::toWinnerDTO)
+                .toList();
+            log.info("WinnerDTO generados: " + response.size());
+            
+            // Obtener la información del evento para enviar en los correos
+            log.info("Obteniendo información del evento con ID: " + eventId);
+            EventSummaryDTO event = eventsService.getEventSummaryById(eventId);
+            if (event == null) {
+                log.warn("No se pudo obtener la información del evento con ID: " + eventId);
+                return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
+            }
+            log.info("Evento obtenido: " + event.getTitle() + " - Tipo: " + event.getEventType());
+            
+            // Enviar correos a los ganadores con la plantilla personalizada
+            String eventTypeStr = event.getEventType() != null ? event.getEventType().toString() : "GIVEAWAY";
+            log.info("Iniciando envío de correos a los ganadores...");
+            try {
+                emailService.sendWinnerEmails(response, event.getId(), event.getTitle(), eventTypeStr);
+                log.info("✅ Correos electrónicos enviados a los ganadores del evento: " + event.getTitle());
+            } catch (Exception e) {
+                log.error("❌ Error al enviar correos a los ganadores: " + e.getMessage(), e);
+                // Continuar aunque falle el envío de correos
+            }
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (IllegalStateException e) {
             return new ResponseEntity<>("Error al finalizar el evento", HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
@@ -464,7 +493,7 @@ public class EventsController {
                 aGuestUser.setId(null);
             }
 
-            Events eventToParticipate = eventsService.getById(aEventId);
+            Raffle eventToParticipate = (Raffle) eventsService.getById(aEventId);
             if (eventToParticipate == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("El evento con id " + aEventId + " no existe");
