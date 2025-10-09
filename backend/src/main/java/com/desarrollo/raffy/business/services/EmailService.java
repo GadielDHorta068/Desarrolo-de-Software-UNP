@@ -1,5 +1,6 @@
 package com.desarrollo.raffy.business.services;
 
+import com.desarrollo.raffy.dto.WinnerDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.core.io.ByteArrayResource;
@@ -61,6 +62,75 @@ public class EmailService {
         message.setText(messageText);
         
         emailSender.send(message);
+    }
+
+    /**
+     * Envía correos de notificación a todos los ganadores de un evento.
+     * Utiliza la plantilla HTML profesional con el logo y branding de Rafify.
+     * 
+     * @param winners Colección de ganadores con su información (nombre, email, posición)
+     * @param eventId ID del evento
+     * @param eventTitle Título del evento
+     * @param eventType Tipo de evento (GIVEAWAY o GUESSING_CONTEST)
+     */
+    public void sendWinnerEmails(Collection<WinnerDTO> winners, Long eventId, String eventTitle, String eventType) {
+        // Validar que hay ganadores
+        if (winners == null || winners.isEmpty()) {
+            System.out.println("No hay ganadores a los que enviar correos");
+            return;
+        }
+        
+        System.out.println("Enviando correos a " + winners.size() + " ganadores del evento: " + eventTitle);
+        
+        // Construir la URL del evento en el frontend
+        String eventUrl = frontendUrl + "/event/" + eventId;
+        
+        // Enviar correo a cada ganador
+        winners.forEach(winner -> {
+            try {
+                // Validar que el ganador tiene email
+                if (winner.getEmail() == null || winner.getEmail().trim().isEmpty()) {
+                    System.err.println("⚠️ El ganador " + winner.getName() + " " + winner.getSurname() + 
+                                     " no tiene email registrado. No se puede enviar notificación.");
+                    return;
+                }
+                
+                // Construir el nombre completo del ganador
+                String winnerFullName = winner.getName() + " " + winner.getSurname();
+                
+                // Generar la plantilla HTML
+                String htmlContent = emailTemplateService.generateWinnerNotificationTemplate(
+                    winnerFullName,
+                    winner.getPosition(),
+                    eventTitle,
+                    eventType,
+                    eventUrl
+                );
+                
+                // Determinar el asunto del correo según el tipo de evento
+                String eventTypeText = eventType != null && eventType.equals("GUESSING_CONTEST") ? "sorteo" : "rifa";
+                String subject = "🎉 ¡Felicidades! Has ganado en el " + eventTypeText + " - Rafify";
+                
+                // Enviar el correo con recursos inline (logo)
+                sendEmailWithInlineResources(
+                    winner.getEmail(),
+                    subject,
+                    htmlContent,
+                    emailTemplateService.getDefaultInlineResources()
+                );
+                
+                System.out.println("✅ Correo de ganador enviado exitosamente a: " + winner.getEmail() + 
+                                 " (Posición: " + winner.getPosition() + ")");
+                
+            } catch (Exception e) {
+                System.err.println("❌ Error al enviar correo al ganador " + winner.getName() + " " + 
+                                 winner.getSurname() + ": " + e.getMessage());
+                e.printStackTrace();
+                // Continuar con los demás ganadores aunque falle uno
+            }
+        });
+        
+        System.out.println("✅ Proceso de envío de correos a ganadores completado");
     }
 
     /**

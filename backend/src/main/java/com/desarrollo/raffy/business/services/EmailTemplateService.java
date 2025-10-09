@@ -185,6 +185,57 @@ public class EmailTemplateService {
     }
 
     /**
+     * Genera una plantilla de notificación para ganadores de sorteo/rifa.
+     * Se envía cuando un participante ha ganado en un evento.
+     * 
+     * @param winnerName Nombre completo del ganador
+     * @param position Posición del ganador (1 = primero, 2 = segundo, etc.)
+     * @param eventTitle Título del evento
+     * @param eventType Tipo de evento (GIVEAWAY o GUESSING_CONTEST)
+     * @param eventUrl URL para ver el evento
+     * @return HTML de la plantilla
+     */
+    public String generateWinnerNotificationTemplate(String winnerName,
+                                                     int position,
+                                                     String eventTitle,
+                                                     String eventType,
+                                                     String eventUrl) {
+        // Determinar el texto según el tipo de evento
+        String eventTypeText = eventType != null && eventType.equals("GUESSING_CONTEST") ? "sorteo" : "rifa";
+        
+        // Determinar el título según la posición
+        String title;
+        String positionText;
+        if (position == 1) {
+            title = "🎉 ¡Felicidades! ¡Has ganado!";
+            positionText = "primer lugar";
+        } else if (position == 2) {
+            title = "🎉 ¡Felicidades! ¡Has ganado!";
+            positionText = "segundo lugar";
+        } else if (position == 3) {
+            title = "🎉 ¡Felicidades! ¡Has ganado!";
+            positionText = "tercer lugar";
+        } else {
+            title = "🎉 ¡Felicidades! ¡Has ganado!";
+            positionText = position + "° lugar";
+        }
+        
+        // Construir el mensaje principal con formato HTML
+        String message = "Hola " + winnerName + ",\n\n" +
+                        "¡Tenemos excelentes noticias! Has resultado ganador en el " + eventTypeText + ":\n\n" +
+                        "📌 <strong>Evento:</strong> " + eventTitle + "\n" +
+                        "🏆 <strong>Posición:</strong> " + positionText + "\n\n" +
+                        "Estamos muy contentos de que hayas participado y te hayas llevado este reconocimiento. " +
+                        "Haz clic en el botón de abajo para ver los detalles completos del evento y obtener más información.";
+        
+        String actionText = "Ver detalles del " + eventTypeText;
+        String actionUrl = eventUrl;
+        String footerMessage = "¡Gracias por participar en Rafify! Esperamos verte pronto en más eventos.";
+        
+        return generateNotificationTemplate(title, message, actionText, actionUrl, footerMessage);
+    }
+
+    /**
      * Obtiene los recursos inline necesarios para las plantillas (logo, etc.).
      * 
      * @return Mapa de recursos inline
