@@ -464,7 +464,7 @@ public class EventsController {
                 aGuestUser.setId(null);
             }
 
-            Events eventToParticipate = eventsService.getById(aEventId);
+            Raffle eventToParticipate = (Raffle) eventsService.getById(aEventId);
             if (eventToParticipate == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("El evento con id " + aEventId + " no existe");
