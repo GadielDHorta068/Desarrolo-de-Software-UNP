@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RaffleNumber } from './RaffleNumber';
 import { CommonModule } from '@angular/common';
+import { RaffleEvent } from '../../models/events.model';
 
 @Component({
   selector: 'app-rifa-front.component',
@@ -16,6 +17,9 @@ export class RifaFrontComponent {
 
     tab: 'info' | 'numeros' | 'registrados' = 'info';
 
+    private raffle!: RaffleEvent;
+
+    
     // MOCK RIFA
     rifa = {
         titulo: 'Rifa de Camisetas Deportivas',
