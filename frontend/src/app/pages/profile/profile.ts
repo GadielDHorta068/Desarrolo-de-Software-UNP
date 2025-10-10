@@ -5,14 +5,14 @@ import { EventsService } from '../../services/events.service';
 import { HttpClientModule } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { Events, EventsTemp } from '../../models/events.model';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { DrawCard } from '../../shared/components/draw-card/draw-card';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, ClipboardModule, DrawCard],
+  imports: [CommonModule, HttpClientModule, ClipboardModule, DrawCard, RouterModule],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })
