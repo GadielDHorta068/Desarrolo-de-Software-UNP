@@ -19,6 +19,9 @@ public interface RaffleNumberRepository extends JpaRepository<RaffleNumber, Long
     @Query("SELECT rn FROM RaffleNumber rn WHERE rn.raffle.id = :aEventId")
     public List<RaffleNumber> findNumbersById(@Param("aEventId") Long aEventId);
 
+    @Query("SELECT rn.number FROM RaffleNumber rn WHERE rn.raffle.id = :aEventId")
+    public List<Integer> findsoldNumbersById(@Param("aEventId") Long aEventId);
+
     @Query("SELECT DISTINCT rn.numberOwner FROM RaffleNumber rn WHERE rn.raffle.id = :aEventId")
     public List<User> findParticipantsByEventId(@Param("aEventId") Long aEventId);
 

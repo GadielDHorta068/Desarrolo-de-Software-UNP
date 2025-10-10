@@ -478,6 +478,13 @@ public class EventsController {
 
     }
 
+    @GetMapping("/raffle/{eventId}/sold-numbers")
+    public ResponseEntity<Object> getSoldNumbersById(Long aRaffleId) {
+        List<Integer> someSoldNumbers = raffleNumberService.findSoldNumbersById(aRaffleId);
+        
+        return new ResponseEntity<Object>(someSoldNumbers, HttpStatus.OK); // 
+    }
+
     @PostMapping("/{eventId}/buy-raffle-number")
     public ResponseEntity<Object> buyRaffleNumber(
         @Valid @RequestBody BuyRaffleNumberRequestDTO aBuyRequest,

@@ -22,12 +22,26 @@ public class RaffleNumberService {
     @Autowired
     private RaffleNumberRepository raffleNumRepository;
 
-    public List<RaffleNumber> findRaffleNumbersById(Raffle aRaffle) {
-        if (!(aRaffle instanceof Raffle)) {
+    @Autowired
+    private EventsService eventsService;
+
+    public List<RaffleNumber> findRaffleNumbersById(Long aRaffleId) {
+        Events selectedRaffle = eventsService.getById(aRaffleId);
+        if (!(selectedRaffle instanceof Raffle)) {
             throw new IllegalArgumentException("Este metodo es solo eventos de tipo rifa");
         }
         List<RaffleNumber> result = raffleNumRepository.findNumbersById(aRaffle.getId());
 
+        return result;
+    }
+
+    public List<Integer> findSoldNumbersById(Long aRaffleId) {
+        Events selectedRaffle = eventsService.getById(aRaffleId);
+        if (!(selectedRaffle instanceof Raffle)) {
+            throw new IllegalArgumentException("Este metodo es solo eventos de tipo rifa");            
+        }
+        List<Integer> result = raffleNumRepository.findsoldNumbersById(aRaffleId);
+        
         return result;
     }
 
