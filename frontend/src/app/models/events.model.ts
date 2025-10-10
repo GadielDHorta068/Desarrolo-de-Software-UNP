@@ -60,7 +60,10 @@ export interface EventsTemp {
     creator: Creator,
     imageUrl?: string; // Campo opcional para la imagen en base64
     isUserRegistered?: boolean; // Indica si el usuario actual está inscrito en el evento
+    quantityOfNumbers: number;
+    priceOfNumber: number;
 }
+// de momento no usamos extensiones sino un solo modelo de eventos con todos los atr (A.T)
 export interface RaffleEvent extends EventsTemp {
     quantityOfNumbers: number;
     priceOfNumber: number;
@@ -75,7 +78,10 @@ export interface EventsCreate {
     eventType: EventTypes;
     winnersCount: number;
     image: string;
+    quantityOfNumbers: number;
+    priceOfNumber: number;
 }
+// de momento no usamos extensiones sino un solo modelo de eventos con todos los atr (A.T)
 export interface RaffleCreate extends EventsCreate {
     quantityOfNumbers: number;
     priceOfNumber: number;

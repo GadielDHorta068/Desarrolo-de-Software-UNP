@@ -25,6 +25,7 @@ export class LoaderImage {
   errorMessage: string = "";
 
   @Input() srcImage!: string|undefined;
+  @Input() enabled!: boolean;
   @Output() changeSelectedImage = new EventEmitter<File|null>();
 
   constructor(
@@ -106,12 +107,12 @@ export class LoaderImage {
         const reader = new FileReader();
         reader.onload = () => {
           this.croppedImage = reader.result as string;
-          console.log('croppedImage updated from blob:', this.croppedImage ? 'Image data available' : 'No image data');
+          // console.log('croppedImage updated from blob:', this.croppedImage ? 'Image data available' : 'No image data');
           this.cdr.detectChanges();
         };
         reader.readAsDataURL(event.blob);
       }
-      console.log('croppedImage updated:', this.croppedImage ? 'Image data available' : 'No image data');
+      // console.log('croppedImage updated:', this.croppedImage ? 'Image data available' : 'No image data');
     }
 
   cancelCrop(): void {

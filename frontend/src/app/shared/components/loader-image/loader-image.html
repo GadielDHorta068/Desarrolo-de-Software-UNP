@@ -1,4 +1,4 @@
-<div>
+<div [ngStyle]="enabled ? {'opacity': '1'}: {'opacity': '0.5'}">
     <!-- <label for="imagen" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         Imagen del evento
     </label> -->
@@ -21,7 +21,7 @@
                 <label for="imagen"
                     class="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-emerald-500 transition-colors">
                     <span>{{ (selectedImage || currentImagePreview || srcImage) ? 'Cambiar imagen' : 'Subir una imagen' }}</span>
-                    <input id="imagen" name="imagen" type="file" class="sr-only" accept="image/*"
+                    <input [disabled]="!enabled" id="imagen" name="imagen" type="file" class="sr-only" accept="image/*"
                         (change)="onImageSelected($event)">
                 </label>
                 <p class="pl-1">o arrastra y suelta</p>

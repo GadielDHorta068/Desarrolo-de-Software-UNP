@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EventsCreate, EventsTemp, EventType, EventTypes } from '../../models/events.model';
+import { EventsCreate, EventsTemp, EventType, EventTypes, RaffleCreate } from '../../models/events.model';
 import { Category } from '../../services/category.service';
 import { configService } from '../../services/config.service';
 import { EventsService } from '../../services/events.service';
@@ -28,6 +28,11 @@ export class RafflesPanel {
   categories: Category[] = [];
   types: EventType[] = [];
   imageEvent: File|null = null;
+  minDate?: string;
+
+  eventTypes = EventTypes;
+  // indica si ya se ha creado un evento
+  eventCreated: boolean = false;
 
   constructor(
     private configService: configService,
@@ -36,6 +41,7 @@ export class RafflesPanel {
     private parseFileService: ParseFileService,
     private cdr: ChangeDetectorRef
   ){
+    this.initDateMin();
     this.userCurrent = this.authService.getCurrentUserValue();
     // console.log("[createEvent] => usuario actual: ", this.userCurrent);
     
@@ -54,35 +60,50 @@ export class RafflesPanel {
     });
     
     // inicializacion del form de creacion de eventos
-    this.formPanel = new FormGroup({
-      title: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-      drawType: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-      category: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-      executionDate: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-      winners: new FormControl({value: 1, disabled: false}, {validators:[ Validators.required ]}),
-      description: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-      image: new FormControl({value: null, disabled: false}),
-      priceRaffle: new FormControl({value: '', disabled: false}),
-      quantityNumbersRaffle: new FormControl({value: '', disabled: false})
+    // this.formPanel = new FormGroup({
+    //   title: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+    //   drawType: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+    //   category: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+    //   executionDate: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+    //   winners: new FormControl({value: 1, disabled: false}, {validators:[ Validators.required ]}),
+    //   description: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+    //   image: new FormControl({value: null, disabled: false}),
+    //   priceRaffle: new FormControl({value: '', disabled: false}),
+    //   quantityNumbersRaffle: new FormControl({value: '', disabled: false})
+    // });
+    this.formPanel = this.initForm();
+
+    this.formPanel.get('drawType')?.valueChanges.subscribe(valor => {
+      // console.log('Nuevo tipo de evento:', valor);
+      this.updateAvailabilityControls(valor);
     });
   }
 
+  private initDateMin(){
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    this.minDate = tomorrow.toISOString().split('T')[0]; // formato yyyy-MM-dd
+  }
+
   public async createDraw(){
-    // aca deberiamos de recuperar la imagen seleccionada si la hay
-    /* this.checkStatusControl();
-    return; */
+    if(!this.formPanel.valid){
+      // console.log("[create] => No esta habilitado el boton!");
+      return;
+    }
+    // aca deberiamos recuperar la imagen seleccionada si la hay
+    // this.checkStatusControl();
     if(this.imageEvent){
       this.formPanel.get('image')?.setValue(await this.getB64Image(this.imageEvent));
-    }
-    // console.log("[create] => datos del form: ", this.formPanel);
-    // return;
-    
+    }    
     // console.log("[crearSorteo] => datos del sorteo: ", this.formPanel.value);
     const dataNewEvent = this.getNewEvent(this.formPanel.value);
+
     // console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
-    this.eventService.createEvent(""+this.userCurrent?.id, dataNewEvent).subscribe({
+    this.eventService.createEvent(""+this.userCurrent?.id, dataNewEvent, this.getEventTypeForCreate()).subscribe({
       next: (response) => {
-          // console.log('[initConfig] => nuevo evento creado: ', response);
+        // console.log('[initConfig] => nuevo evento creado: ', response);
+        this.formPanel.disable();
+        this.eventCreated = true;
         this.dataModal.message = "Evento creado correctamente";
         this.modalInfoRef.open();
       },
@@ -94,6 +115,18 @@ export class RafflesPanel {
         // });
       }
     });
+  }
+
+  private getEventTypeForCreate(){
+    let type = this.formPanel.get('drawType')?.value;
+    if(type == EventTypes.GIVEAWAY){
+      return "giveaway";
+    }
+    if(type == EventTypes.RAFFLES){
+      return "raffle";
+    }
+    // por default toma el sorteo
+    return "giveaway";
   }
 
   // para test interno
@@ -108,20 +141,37 @@ export class RafflesPanel {
   //   console.log("[validForm] => winners erros: ", this.formPanel.get('winners')?.errors);
   // }
 
-  
+  initForm(){
+    return new FormGroup({
+      title: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+      drawType: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+      category: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+      executionDate: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+      winners: new FormControl({value: 1, disabled: false}, {validators:[ Validators.required ]}),
+      description: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+      image: new FormControl({value: null, disabled: false}),
+      priceRaffle: new FormControl({value: '', disabled: false}),
+      quantityNumbersRaffle: new FormControl({value: '', disabled: false})
+    });
+  }
+
   public onChangeSelectedImge(image: File|null){
     // console.log("[imagen] => archivo seleccionado desde el componente de carga: ", image);
     this.imageEvent = image;
   }
 
-  private async getB64Image(image: File){
+  private async getB64Image(image: File|null){
+    if(!image){
+      return;
+    }
     const respConvertImage = await this.parseFileService.convertImageToBase64(image);
     // aca deberiamos ver cuando da error para enviar null
     return respConvertImage;
   }
   
   private getNewEvent(dataEvent: any){
-    return {
+    let isRaffle = (dataEvent.drawType == EventTypes.RAFFLES);
+    let event: any = {
       title: dataEvent.title,
       description: dataEvent.description,
       eventType: dataEvent.drawType,
@@ -131,10 +181,44 @@ export class RafflesPanel {
       endDate: dataEvent.executionDate,
       winnersCount: dataEvent.winners,
       image: dataEvent.image
-    } as EventsCreate;
+    }
+    if (isRaffle){
+      event.quantityOfNumbers = dataEvent.quantityNumbersRaffle,
+      event.priceOfNumber = dataEvent.priceRaffle
+    }
+    // return isRaffle ? event as RaffleCreate: event as EventsCreate;
+    return event as EventsCreate;
   }
 
-  // TODO: falta el reste del form luego de crear un soreo con exito
-  // TODO: se podria cambiar el color de fondo del modal o del titulo segun el tipo de response
+  // aca actualizamos la visualizacion de nuevos campos en el caso de una rifa por ej
+  private updateAvailabilityControls(eventType: string){
+    if(eventType == EventTypes.RAFFLES){
+      this.formPanel.get('priceRaffle')?.setValidators(Validators.required);
+      this.formPanel.get('quantityNumbersRaffle')?.setValidators([Validators.required, Validators.min(50), Validators.max(500)]);
+      this.formPanel.get('priceRaffle')?.updateValueAndValidity();
+      this.formPanel.get('quantityNumbersRaffle')?.updateValueAndValidity();
+    }
+    else{
+      this.formPanel.get('priceRaffle')?.clearValidators();
+      this.formPanel.get('quantityNumbersRaffle')?.clearValidators();
+      this.formPanel.get('priceRaffle')?.updateValueAndValidity();
+      this.formPanel.get('quantityNumbersRaffle')?.updateValueAndValidity();
+    }
+    this.cdr.detectChanges();
+  }
+  
+  resetForm(){
+    this.eventCreated = false;
+    this.formPanel.enable();
+    this.formPanel.reset({
+      winners: 1
+    });
+    // this.formPanel.reset();
+    this.cdr.detectChanges();
+  }
+
+  get eventTypeSelected(){
+    return this.formPanel.get('drawType')?.value;
+  }
 
 }

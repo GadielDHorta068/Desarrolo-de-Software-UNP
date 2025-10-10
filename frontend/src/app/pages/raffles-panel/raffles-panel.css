@@ -37,3 +37,29 @@
   grid-column: 2;
   grid-row: 1 / span 2; /* Ocupa ambas filas */
 }
+
+.grid-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* gap: 2px; espacio entre elementos */
+}
+/* En pantallas pequeñas, cambia a 1 columna y 2 filas */
+@media (max-width: 768px) {
+  .grid-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(2, auto);
+  }
+}
+.grid-row {
+  display: grid;
+  align-items: baseline;
+  grid-template-columns: 1fr 2fr;
+  gap: 2px; /* espacio entre elementos */
+}
+/* En pantallas pequeñas, cambia a 1 columna y 2 filas */
+@media (max-width: 768px) {
+  .grid-row {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(2, auto);
+  }
+}
