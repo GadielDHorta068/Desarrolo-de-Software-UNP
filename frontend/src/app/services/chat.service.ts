@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, map } from 'rxjs';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { Message } from '../models/message.model';
@@ -18,6 +18,26 @@ export class ChatService {
   private messageIds = new Set<number>();
 
   constructor(private http: HttpClient, private authService: AuthService) {}
+
+  // Convierte formatos de fecha (ISO, epoch, arreglo [y,m,d,h,mm,ss]) a ISO string
+  private toIsoString(dateLike: any): string | undefined {
+    if (!dateLike) return undefined;
+    try {
+      if (Array.isArray(dateLike)) {
+        const [y, m, d, hh = 0, mm = 0, ss = 0] = dateLike as number[];
+        return new Date(y, (m ?? 1) - 1, d, hh, mm, ss).toISOString();
+      }
+      if (typeof dateLike === 'string') {
+        return new Date(dateLike).toISOString();
+      }
+      if (typeof dateLike === 'number') {
+        return new Date(dateLike).toISOString();
+      }
+      return new Date(dateLike).toISOString();
+    } catch {
+      return undefined;
+    }
+  }
 
   connect(): void {
     if (this.client && this.client.connected) {
@@ -58,7 +78,13 @@ export class ChatService {
 
   loadHistory(destinatarioId: number): Observable<Message[]> {
     // Endpoint REST está bajo /api/chat en el backend
-    return this.http.get<Message[]>(`${environment.apiUrl}/api/chat/history/${destinatarioId}`);
+    return this.http.get<Message[]>(`${environment.apiUrl}/api/chat/history/${destinatarioId}`).pipe(
+      // Normalizar a ISO string para que el date pipe funcione y respete el tipo
+      map(list => list.map(m => ({
+        ...m,
+        fechaEnvio: this.toIsoString((m as any).fechaEnvio),
+      })))
+    );
   }
 
   sendMessage(message: Message): void {
@@ -70,7 +96,11 @@ export class ChatService {
       body: JSON.stringify(message),
     });
     // Optimista: agregar el mensaje localmente (remitente actual)
-    this.appendMessage({ ...message });
+    this.appendMessage({
+      ...message,
+      // Si no viene fecha, usar ahora como ISO para que el pipe de fecha funcione
+      fechaEnvio: message.fechaEnvio ? this.toIsoString((message as any).fechaEnvio) : new Date().toISOString(),
+    });
   }
 
   clearMessages(): void {
@@ -79,24 +109,33 @@ export class ChatService {
   }
 
   private appendMessage(message: Message): void {
-    if (message.id != null) {
-      if (this.messageIds.has(message.id)) return;
-      this.messageIds.add(message.id);
+    const normalized: Message = {
+      ...message,
+      fechaEnvio: this.toIsoString((message as any).fechaEnvio) ?? message.fechaEnvio,
+    };
+    if (normalized.id != null) {
+      if (this.messageIds.has(normalized.id)) return;
+      this.messageIds.add(normalized.id);
     }
     const current = this.messagesSubject.value;
-    this.messagesSubject.next([...current, message]);
+    this.messagesSubject.next([...current, normalized]);
   }
 
   // Carga el historial en un solo lote para evitar múltiples re-renderizados
   appendMessages(messages: Message[]): void {
     if (!messages || messages.length === 0) return;
     const current = this.messagesSubject.value;
-    const filtered = messages.filter(m => {
-      if (m.id == null) return true;
-      if (this.messageIds.has(m.id)) return false;
-      this.messageIds.add(m.id);
-      return true;
-    });
+    const filtered = messages
+      .map(m => ({
+        ...m,
+        fechaEnvio: this.toIsoString((m as any).fechaEnvio) ?? m.fechaEnvio,
+      }))
+      .filter(m => {
+        if (m.id == null) return true;
+        if (this.messageIds.has(m.id)) return false;
+        this.messageIds.add(m.id);
+        return true;
+      });
     if (filtered.length === 0) return;
     this.messagesSubject.next([...current, ...filtered]);
   }

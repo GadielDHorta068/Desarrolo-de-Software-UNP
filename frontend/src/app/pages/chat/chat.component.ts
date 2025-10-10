@@ -1,9 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ChatService } from '../../services/chat.service';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, UserResponse } from '../../services/auth.service';
 import { Message } from '../../models/message.model';
 import { Observable, Subscription, switchMap, map, take } from 'rxjs';
 
@@ -15,12 +15,12 @@ import { Observable, Subscription, switchMap, map, take } from 'rxjs';
   <div class="max-w-4xl mx-auto h-[80vh] flex flex-col bg-white/80 backdrop-blur rounded-xl shadow border border-gray-200">
     <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
       <div>
-        <h2 class="text-lg font-semibold">Chat privado</h2>
-        <p class="text-sm text-gray-500">Conversación uno a uno</p>
+        <h2 class="text-lg font-semibold">{{ peerUser ? (peerUser.name + ' ' + peerUser.surname) : 'Cargando usuario...' }}</h2>
+        <p class="text-sm text-gray-500">{{ peerUser?.email || '' }}</p>
       </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-4 space-y-3" id="messages">
+    <div class="flex-1 overflow-y-auto p-4 space-y-3" id="messages" #messagesContainer>
       <ng-container *ngFor="let msg of messages | async; trackBy: trackByMessage">
         <div [ngClass]="msg.remitenteId === myUserId ? 'flex justify-end' : 'flex justify-start'">
           <div class="max-w-[70%] px-4 py-2 rounded-2xl" [ngClass]="msg.remitenteId === myUserId ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-gray-100 text-gray-800 rounded-bl-sm'">
@@ -40,35 +40,49 @@ import { Observable, Subscription, switchMap, map, take } from 'rxjs';
   </div>
   `
 })
-export class ChatComponent implements OnInit, OnDestroy {
+export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   destinatarioId!: number;
   myUserId?: number;
   messages!: Observable<Message[]>;
   newMessage = '';
   private sub?: Subscription;
+  private messagesSub?: Subscription;
+  peerUser?: UserResponse;
+  @ViewChild('messagesContainer') private messagesEl?: ElementRef<HTMLDivElement>;
 
-  constructor(private route: ActivatedRoute, private chat: ChatService, private authService: AuthService) {}
+  constructor(private route: ActivatedRoute, private chat: ChatService, private authService: AuthService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.messages = this.chat.messages$;
-    // Ejecutar la carga inicial una sola vez, evitando re-suscripciones
-    this.sub = this.route.paramMap.pipe(
-      take(1),
-      map(params => Number(params.get('userId')))
-    ).pipe(
-      switchMap(id => {
-        this.destinatarioId = id;
-        return this.authService.getCurrentUser().pipe(take(1), map(user => ({ id, user })));
-      })
-    ).subscribe(({ id, user }) => {
+    // Suscribirse a cambios de mensajes para autoscroll
+    this.messagesSub = this.chat.messages$.subscribe(() => this.scheduleScroll());
+    // Obtener el ID del destinatario de forma síncrona y arrancar flujo
+    const id = Number(this.route.snapshot.paramMap.get('userId'));
+    this.destinatarioId = id;
+
+    // Cargar usuario actual sin bloquear el resto
+    this.sub = this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
       this.myUserId = user.id;
-      this.chat.clearMessages();
-      // Cargar historial primero y luego conectar para evitar replays del backlog
-      this.chat.loadHistory(id).pipe(take(1)).subscribe(history => {
-        this.chat.appendMessages(history);
-        this.chat.connect();
-      });
     });
+
+    // Limpiar y precargar datos del destinatario e historial en paralelo
+    this.chat.clearMessages();
+    this.authService.getUserById(id).pipe(take(1)).subscribe(peer => { this.peerUser = peer; this.cdr.detectChanges(); });
+
+    this.chat.loadHistory(id).pipe(take(1)).subscribe({
+      next: history => { this.chat.appendMessages(history); this.cdr.detectChanges(); this.scheduleScroll(); },
+      error: () => {},
+      complete: () => {
+        // Conectar WS después de intentar cargar historial, exitoso o no
+        this.chat.connect();
+        this.scheduleScroll();
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Asegurar autoscroll una vez que la vista esté lista
+    this.scheduleScroll();
   }
 
   send(): void {
@@ -81,11 +95,27 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.messagesSub?.unsubscribe();
     // Evitar duplicación de suscripciones al salir
     this.chat.disconnect();
   }
 
   trackByMessage(index: number, msg: Message): number {
     return msg.id ?? index;
+  }
+
+  private scheduleScroll(): void {
+    // Esperar al siguiente frame para que el DOM se haya pintado
+    requestAnimationFrame(() => {
+      this.scrollToBottom();
+      // Fallback por si aún no se calculó el layout completo
+      setTimeout(() => this.scrollToBottom(), 50);
+    });
+  }
+
+  private scrollToBottom(): void {
+    const el = this.messagesEl?.nativeElement;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
   }
 }
