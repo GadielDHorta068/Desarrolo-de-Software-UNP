@@ -31,12 +31,14 @@ public class RaffleNumberService {
         return result;
     }
 
+    // agregar metodo para busqueda de participantes
+
     @Transactional
-    public List<RaffleNumber> createRaffleNumbers(Events aRaffle, User aUser, List<Integer> someNumbers) {
+    public List<RaffleNumber> createRaffleNumbers(Raffle aRaffle, User aUser, List<Integer> someNumbers) {
         List<RaffleNumber> result = new ArrayList<>();
         for (int i = 0; i < someNumbers.size(); i++) {
             int numberToBuy = someNumbers.get(i);
-            if (!raffleNumRepository.existsByRaffleAndNumber((Raffle)aRaffle, numberToBuy)) {
+            if (!raffleNumRepository.existsByRaffleAndNumber(aRaffle, numberToBuy)) {
                 RaffleNumber newNumber = new RaffleNumber(aRaffle, aUser, numberToBuy);
                 raffleNumRepository.save(newNumber);
                 result.add(newNumber);

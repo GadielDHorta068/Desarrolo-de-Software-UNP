@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
+import com.desarrollo.raffy.model.User;
 
 @Repository
 

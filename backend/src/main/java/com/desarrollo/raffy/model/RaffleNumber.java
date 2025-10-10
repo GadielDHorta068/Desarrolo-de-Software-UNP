@@ -39,7 +39,7 @@ public class RaffleNumber {
     @ManyToOne
     @JoinColumn(name = "raffle_id")
     @NotNull(message = "cada numero debe indicar a que rifa pertenece")
-    private Events raffle;
+    private Raffle raffle;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -49,7 +49,7 @@ public class RaffleNumber {
     // position: 0 = no ganador, >0 = lugar en el ranking
     private short position = 0;
 
-    public RaffleNumber(Events aRaffle, User aUser, int aNumber) {
+    public RaffleNumber(Raffle aRaffle, User aUser, int aNumber) {
         this.setNumber(aNumber);
         this.setRaffle(aRaffle);
         this.setNumberOwner(aUser);
