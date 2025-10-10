@@ -99,4 +99,8 @@ export class EventsService {
     });
     return this.http.get<any[]>(`${this.apiUrl}/participants/event/${eventId}`, { headers });
   }
+
+    getSoldNumbersByRaffleId(aRaffleId: number): Observable<number[]> {
+        return this.http.get<number[]>(`${this.apiUrl}/raffle/${aRaffleId}/sold-numbers`);
+    }
 }
