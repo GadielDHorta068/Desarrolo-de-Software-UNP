@@ -16,8 +16,19 @@ export class ChatService {
   private messagesSubject = new BehaviorSubject<Message[]>([]);
   public messages$ = this.messagesSubject.asObservable();
   private messageIds = new Set<number>();
+  private activePeerId: number | null = null;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
+
+  // Establece la conversación activa para filtrar mensajes en tiempo real
+  setActivePeer(id: number | null): void {
+    this.activePeerId = id;
+  }
+
+  private isForActivePeer(m: Message): boolean {
+    if (this.activePeerId == null) return true;
+    return m.remitenteId === this.activePeerId || m.destinatarioId === this.activePeerId;
+  }
 
   // Convierte formatos de fecha (ISO, epoch, arreglo [y,m,d,h,mm,ss]) a ISO string
   private toIsoString(dateLike: any): string | undefined {
@@ -113,6 +124,10 @@ export class ChatService {
       ...message,
       fechaEnvio: this.toIsoString((message as any).fechaEnvio) ?? message.fechaEnvio,
     };
+    // Filtrar mensajes que no pertenezcan a la conversación activa
+    if (!this.isForActivePeer(normalized)) {
+      return;
+    }
     if (normalized.id != null) {
       if (this.messageIds.has(normalized.id)) return;
       this.messageIds.add(normalized.id);
@@ -131,6 +146,7 @@ export class ChatService {
         fechaEnvio: this.toIsoString((m as any).fechaEnvio) ?? m.fechaEnvio,
       }))
       .filter(m => {
+        if (!this.isForActivePeer(m)) return false;
         if (m.id == null) return true;
         if (this.messageIds.has(m.id)) return false;
         this.messageIds.add(m.id);

@@ -59,6 +59,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     // Obtener el ID del destinatario de forma síncrona y arrancar flujo
     const id = Number(this.route.snapshot.paramMap.get('userId'));
     this.destinatarioId = id;
+    // Establecer conversación activa en el servicio para filtrar mensajes
+    this.chat.setActivePeer(this.destinatarioId);
 
     // Cargar usuario actual sin bloquear el resto
     this.sub = this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
@@ -97,6 +99,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     this.sub?.unsubscribe();
     this.messagesSub?.unsubscribe();
     // Evitar duplicación de suscripciones al salir
+    this.chat.setActivePeer(null);
     this.chat.disconnect();
   }
 
