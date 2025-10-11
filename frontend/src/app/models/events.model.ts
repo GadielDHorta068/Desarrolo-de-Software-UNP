@@ -86,3 +86,10 @@ export interface RaffleCreate extends EventsCreate {
     quantityOfNumbers: number;
     priceOfNumber: number;
 }
+
+// modelo de numeros de rifa para el front
+export interface RaffleNumber {
+    ticketNumber: number;
+    buyStatus: boolean;
+    selectStatus: boolean;
+}   
