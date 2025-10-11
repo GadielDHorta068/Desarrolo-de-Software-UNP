@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { RaffleNumber } from './RaffleNumber';
 import { CommonModule } from '@angular/common';
-import { EventsTemp, EventTypes } from '../../models/events.model';
+import { EventsTemp, EventTypes, RaffleNumber } from '../../models/events.model';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 import { EventsService } from '../../services/events.service';
 
