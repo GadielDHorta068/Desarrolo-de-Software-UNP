@@ -27,6 +27,14 @@
             <div class="text-base font-bold pt-2">Fecha de realización</div>
             <div class="p-2">{{event?.endDate | handleDatePipe}}</div>
         </div>
+        <div *ngIf="event?.eventType == eventTypes.RAFFLES" class="grid-row">
+            <div class="text-base font-bold pt-2">Cantida de números</div>
+            <div class="p-2">{{event?.quantityOfNumbers}}</div>
+        </div>
+        <div *ngIf="event?.eventType == eventTypes.RAFFLES" class="grid-row">
+            <div class="text-base font-bold pt-2">Precio del número</div>
+            <div class="p-2">{{event?.priceOfNumber}}</div>
+        </div>
     </div>
     <div *ngIf="event?.imageUrl">
         <div class="grid-row" style="align-items: start;">
