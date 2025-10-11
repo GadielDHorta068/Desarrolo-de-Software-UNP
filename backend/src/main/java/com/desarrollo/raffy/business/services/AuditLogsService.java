@@ -1,5 +1,6 @@
 package com.desarrollo.raffy.business.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.desarrollo.raffy.business.repository.AuditLogsRepository;
 import com.desarrollo.raffy.model.AuditLog;
 import com.desarrollo.raffy.model.AuditParticipant;
+import com.desarrollo.raffy.model.EventTypes;
 
 import jakarta.transaction.Transactional;
 
@@ -27,6 +29,21 @@ public class AuditLogsService {
         List<AuditLog> auditLogs = auditLogsRepository.getAuditLogByCreator(nickname)
         .orElseThrow(() -> new IllegalArgumentException("Auditoria no encontrada."));
         return auditLogs;
+    }
+
+    @Transactional
+    public List<AuditLog> getAuditLogByCreator(
+        String nickname, 
+        String title, 
+        EventTypes type, 
+        LocalDateTime from, 
+        LocalDateTime to){
+        
+            
+            List<AuditLog> auditLogs = auditLogsRepository.getAuditLogByCreator(nickname,title,type,from,to)
+            .orElseThrow(() -> new IllegalArgumentException("Auditoria no encontrada."));
+            
+            return auditLogs;
     }
 
     @Transactional
