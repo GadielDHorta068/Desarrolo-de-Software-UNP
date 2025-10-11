@@ -48,23 +48,30 @@ export class ManagementEvent {
     numeros: RaffleNumber[] = [];
   
 
-  constructor(
-    private adminEventService: AdminEventService,
-    private eventService: EventsService,
-    private handleDatePipe: HandleDatePipe,
-    private router: Router,
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef
-  ){
-    this.adminEventService.selectedEvent$.subscribe(
-      currentEvent => {
-        this.eventAux = currentEvent ? {...currentEvent}: null;
-        this.event = currentEvent;
-        console.log("[edicion] => evento seleccionado: ", this.event);
-        this.initForm();
-      }
-    )
-  }
+    constructor(
+        private adminEventService: AdminEventService,
+        private eventService: EventsService,
+        private handleDatePipe: HandleDatePipe,
+        private router: Router,
+        private authService: AuthService,
+        private cdr: ChangeDetectorRef
+    ) {
+        this.adminEventService.selectedEvent$.subscribe(currentEvent => {
+            // Guardamos una copia auxiliar y la original
+            this.eventAux = currentEvent ? { ...currentEvent } : null;
+            this.event = currentEvent;
+
+            console.log("[edicion] => evento seleccionado: ", this.event);
+            
+            // Inicializar formulario
+            this.initForm();
+
+            // Solo si es rifa, inicializamos los números
+            this.initForm();
+            this.initRaffleNumbers();
+        });
+    }
+
 
 
   private initForm(){
@@ -123,6 +130,55 @@ export class ManagementEvent {
     }
   }
 
+    private initRaffleNumbers(): void {
+        if (!this.event) {
+          console.warn('[Raffle] No hay evento cargado aún.');
+          return;
+        }
+    
+        console.log('[Raffle] Evento cargado:', this.event);
+    
+        if (this.event.eventType !== EventTypes.RAFFLES) {
+          console.log('[Raffle] El evento no es tipo RAFFLES. No se generan números.');
+          return;
+        }
+    
+        const total = this.event.quantityOfNumbers;
+        if (!total || total <= 0) {
+          console.warn('[Raffle] quantityOfNumbers inválido:', total);
+          this.numeros = [];
+          return;
+        }
+    
+        console.log('[Raffle] Total de números a generar:', total);
+    
+        this.eventService.getSoldNumbersByRaffleId(this.event.id).subscribe({
+          next: (boughtNumbers: number[]) => {
+            console.log('[Raffle] Números vendidos recibidos:', boughtNumbers);
+
+            this.numeros = Array.from({ length: total }, (_, i) => ({
+              ticketNumber: i + 1,
+              buyStatus: boughtNumbers.includes(i + 1),
+              selectStatus: false
+            }));
+        
+            console.log('[Raffle] Números generados:', this.numeros);
+            this.cdr.detectChanges(); // forzamos render
+          },
+          error: (err) => {
+            console.error('[Raffle] Error al obtener los números vendidos:', err);
+            // aunque haya error, podemos inicializar un array vacío para no romper la UI
+            this.numeros = Array.from({ length: total }, (_, i) => ({
+              ticketNumber: i + 1,
+              buyStatus: false,
+              selectStatus: false
+            }));
+            this.cdr.detectChanges();
+          }
+        });
+    }
+
+
     selectNumber(aRaffleNumber: RaffleNumber) :void {
         if(!aRaffleNumber.buyStatus) {
             aRaffleNumber.selectStatus = !aRaffleNumber.selectStatus; 
@@ -135,25 +191,4 @@ export class ManagementEvent {
         alert('Seleccionados: ' + seleccionados.map(n => n.ticketNumber).join(', '));
     }
 
-
-    ngOnInit() :void {
-        
-        if (this.event && this.event.eventType === EventTypes.RAFFLES) {
-            const total = this.event?.quantityOfNumbers;
-            
-            this.eventService.getSoldNumbersByRaffleId(this.event?.id).subscribe({
-                next: (boughtNumbers: number[]) => {
-                    this.numeros = Array.from({ length: total }, (_, i) => ({
-                        ticketNumber: i + 1,
-                        buyStatus: boughtNumbers.includes(i + 1), // ejemplo
-                        selectStatus: false
-                    }));
-                },
-                error: (err) => {
-                    console.error('Error al obtener los números vendidos: ', err);
-                }
-            });
-        }
-
-    }
 }
