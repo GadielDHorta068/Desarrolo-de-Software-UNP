@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { EventsTemp } from '../../../models/events.model';
+import { EventsTemp, EventTypes, RaffleEvent } from '../../../models/events.model';
 import { HandleDatePipe } from '../../../pipes/handle-date.pipe';
 import { CommonModule } from '@angular/common';
 import { HandleTypePipe } from '../../../pipes/handle-type.pipe';
@@ -14,6 +14,9 @@ import { TagCategory } from '../tag-category/tag-category';
 })
 export class InfoEvent {
 
+  eventTypes = EventTypes;
+
   @Input() event!: EventsTemp|null;
+  // @Input() event!: RaffleEvent|null;
 
 }

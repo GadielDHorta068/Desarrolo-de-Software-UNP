@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { Events, EventsCreate, EventsTemp, StatusEvent } from '../models/events.model';
+import { Events, EventsCreate, EventsTemp, RaffleCreate, StatusEvent } from '../models/events.model';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -16,12 +16,15 @@ export class EventsService {
     private authService: AuthService
   ) {}
 
-  createEvent(creatorId: string, event: EventsCreate): Observable<EventsTemp[]> {
+  // crea eventos del tipo SORTEO
+  // createEvent(creatorId: string, event: EventsCreate|RaffleCreate, eventType: string): Observable<EventsTemp[]> {
+  createEvent(creatorId: string, event: EventsCreate, eventType: string): Observable<EventsTemp[]> {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.authService.getToken()}`,
       'Content-Type': 'application/json'
     });
-    return this.http.post<EventsTemp[]>(`${this.apiUrl}/create/giveaway/${creatorId}`, event, { headers });
+    // return this.http.post<EventsTemp[]>(`${this.apiUrl}/create/giveaway/${creatorId}`, event, { headers });
+    return this.http.post<EventsTemp[]>(`${this.apiUrl}/create/${eventType}/${creatorId}`, event, { headers });
   }
 
   getEventsByParticipantId(userId: number): Observable<Events[]> {

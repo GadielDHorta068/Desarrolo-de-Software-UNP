@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EventsTemp, EventType, EventTypes, StatusEvent } from '../../models/events.model';
+import { EventsTemp, EventType, EventTypes, RaffleCreate, StatusEvent } from '../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 import { Category } from '../../services/category.service';
@@ -27,8 +27,8 @@ export class ManagementEvent {
   dataModal: InfoModal = {title: "Actualización de datos", message: ""};
 
   // evento en contexto (debe ser seteado desde donde se quiere interactuar con el dato, por ej el boton de EDITAR)
-  // event!: Events|null;
   event!: EventsTemp|null;
+  // event!: EventsTemp|RaffleCreate|null;
   eventAux!: EventsTemp|null;
   imageEvent: File|null = null;
 
