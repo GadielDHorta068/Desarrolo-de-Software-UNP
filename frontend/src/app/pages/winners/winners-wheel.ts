@@ -92,7 +92,8 @@ export class WinnersWheel {
           error: (err) => {
             this.spinning.set(false);
             this.loading.set(false);
-            const msg = err?.error?.message || err?.message || 'Error al obtener ganadores';
+            const msg = err?.error || err?.error?.message || err?.message || 'Error al obtener ganadores';
+            console.log("[endEvent] => no se pudo encontrar el/los ganadores");
             this.errorMessage.set(msg);
             this.notificationService.notifyError(msg);
           }
@@ -101,7 +102,9 @@ export class WinnersWheel {
       error: (err) => {
         this.spinning.set(false);
         this.loading.set(false);
-        const msg = err?.error?.message || err?.message || 'Error al obtener participantes';
+        console.log("[endEvent] => error: ", err);
+        const msg = err?.error || err?.error?.message || err?.message || 'Error al obtener participantes';
+        console.log("[endEvent] => no se pudo encontrar el/los ganadores");
         this.errorMessage.set(msg);
         this.notificationService.notifyError(msg);
       }
