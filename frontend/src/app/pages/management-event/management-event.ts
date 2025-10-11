@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EventsTemp, EventType, EventTypes, RaffleCreate, StatusEvent } from '../../models/events.model';
+import { EventsTemp, EventType, EventTypes, RaffleCreate, RaffleNumber, StatusEvent } from '../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 import { Category } from '../../services/category.service';
@@ -13,6 +13,7 @@ import { EventShareCardComponent } from '../../shared/event-share-card/event-sha
 import { AuthService } from '../../services/auth.service';
 import { ModalShareEvent } from '../../shared/components/modal-share-event/modal-share-event';
 import { QuestionaryComponent } from '../questionary/questionary.component';
+import { EventsService } from '../../services/events.service';
 
 @Component({
   selector: 'app-management-event',
@@ -42,8 +43,14 @@ export class ManagementEvent {
   showModalIncript = false;
   selectedEventId!: number;
 
+    // TABS
+    tab: 'info' | 'numeros' | 'registrados' = 'info';
+    numeros: RaffleNumber[] = [];
+  
+
   constructor(
     private adminEventService: AdminEventService,
+    private eventService: EventsService,
     private handleDatePipe: HandleDatePipe,
     private router: Router,
     private authService: AuthService,
@@ -116,4 +123,37 @@ export class ManagementEvent {
     }
   }
 
+    selectNumber(aRaffleNumber: RaffleNumber) :void {
+        if(!aRaffleNumber.buyStatus) {
+            aRaffleNumber.selectStatus = !aRaffleNumber.selectStatus; 
+        }
+    }
+
+    addToCart() : void {
+        const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
+        console.log('Números seleccionados:', seleccionados.map(n => n.ticketNumber));
+        alert('Seleccionados: ' + seleccionados.map(n => n.ticketNumber).join(', '));
+    }
+
+
+    ngOnInit() :void {
+        
+        if (this.event && this.event.eventType === EventTypes.RAFFLES) {
+            const total = this.event?.quantityOfNumbers;
+            
+            this.eventService.getSoldNumbersByRaffleId(this.event?.id).subscribe({
+                next: (boughtNumbers: number[]) => {
+                    this.numeros = Array.from({ length: total }, (_, i) => ({
+                        ticketNumber: i + 1,
+                        buyStatus: boughtNumbers.includes(i + 1), // ejemplo
+                        selectStatus: false
+                    }));
+                },
+                error: (err) => {
+                    console.error('Error al obtener los números vendidos: ', err);
+                }
+            });
+        }
+
+    }
 }
