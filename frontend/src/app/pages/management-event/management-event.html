@@ -22,6 +22,7 @@
 
         <!-- Tab: Números -->
         <span
+            *ngIf="event?.eventType === typesOfEventes.RAFFLES"
           class="pb-2 cursor-pointer font-semibold"
           [ngClass]="{
             'text-blue-600 border-b-2 border-blue-600': tab === 'numeros',
@@ -95,7 +96,7 @@
     </div>
 
     <!-- TAB: Números -->
-    <div *ngIf="tab === 'numeros'" class="flex flex-col gap-4">
+    <div *ngIf="tab === 'numeros' && event?.eventType === typesOfEventes.RAFFLES" class="flex flex-col gap-4">
       <div class="grid grid-cols-10 gap-2">
         <button
           *ngFor="let num of numeros"

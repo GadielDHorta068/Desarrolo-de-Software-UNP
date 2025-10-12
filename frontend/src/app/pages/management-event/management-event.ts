@@ -46,7 +46,7 @@ export class ManagementEvent {
     // TABS
     tab: 'info' | 'numeros' | 'registrados' = 'info';
     numeros: RaffleNumber[] = [];
-  
+    typesOfEventes = EventTypes;
 
     constructor(
         private adminEventService: AdminEventService,
