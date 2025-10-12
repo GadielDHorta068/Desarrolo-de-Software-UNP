@@ -30,7 +30,7 @@ public class RaffleNumberService {
         if (!(selectedRaffle instanceof Raffle)) {
             throw new IllegalArgumentException("Este metodo es solo eventos de tipo rifa");
         }
-        List<RaffleNumber> result = raffleNumRepository.findNumbersById(aRaffle.getId());
+        List<RaffleNumber> result = raffleNumRepository.findNumbersById(aRaffleId);
 
         return result;
     }
