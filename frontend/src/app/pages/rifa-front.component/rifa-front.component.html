@@ -8,44 +8,44 @@
 
     <!-- Tabs y botón -->
     <div class="flex justify-between items-center border-gray-300 dark:border-gray-700 pb-1">
-      <div class="flex space-x-6">
+        <div class="flex space-x-6">
 
-        <!-- Tab: Información -->
-        <span
-          class="pb-2 cursor-pointer font-semibold"
-          [ngClass]="{
-            'text-blue-600 border-b-2 border-blue-600': tab === 'info',
-            'text-gray-600 dark:text-gray-300': tab !== 'info'
-          }"
-          (click)="tab = 'info'"
-        >
-          Información
-        </span>
+            <!-- Tab: Información -->
+            <span
+            class="pb-2 cursor-pointer font-semibold"
+            [ngClass]="{
+                'text-blue-600 border-b-2 border-blue-600': tab === 'info',
+                'text-gray-600 dark:text-gray-300': tab !== 'info'
+            }"
+            (click)="tab = 'info'"
+            >
+                Información
+            </span>
 
-        <!-- Tab: Números -->
-        <span
-          class="pb-2 cursor-pointer font-semibold"
-          [ngClass]="{
-            'text-blue-600 border-b-2 border-blue-600': tab === 'numeros',
-            'text-gray-600 dark:text-gray-300': tab !== 'numeros'
-          }"
-          (click)="tab = 'numeros'"
-        >
-          Números
-        </span>
+            <!-- Tab: Números -->
+            <span
+              class="pb-2 cursor-pointer font-semibold"
+              [ngClass]="{
+                'text-blue-600 border-b-2 border-blue-600': tab === 'numeros',
+                'text-gray-600 dark:text-gray-300': tab !== 'numeros'
+              }"
+              (click)="tab = 'numeros'"
+            >
+              Números
+            </span>
 
-        <!-- Tab: Registrados -->
-        <span
-          class="pb-2 cursor-pointer font-semibold"
-          [ngClass]="{
-            'text-blue-600 border-b-2 border-blue-600': tab === 'registrados',
-            'text-gray-600 dark:text-gray-300': tab !== 'registrados'
-          }"
-          (click)="tab = 'registrados'"
-        >
-            Registrados
-        </span>
-      </div>
+            <!-- Tab: Registrados -->
+            <span
+              class="pb-2 cursor-pointer font-semibold"
+              [ngClass]="{
+                'text-blue-600 border-b-2 border-blue-600': tab === 'registrados',
+                'text-gray-600 dark:text-gray-300': tab !== 'registrados'
+              }"
+              (click)="tab = 'registrados'"
+            >
+                Registrados
+            </span>
+        </div>
 
         <!-- Botón (solo visible en info o números) -->
         <button

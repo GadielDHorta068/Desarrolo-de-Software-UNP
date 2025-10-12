@@ -33,6 +33,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
 import java.util.List;
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
@@ -479,11 +480,25 @@ public class EventsController {
     }
 
     @GetMapping("/raffle/{eventId}/sold-numbers")
-    public ResponseEntity<Object> getSoldNumbersById(Long aRaffleId) {
-        List<Integer> someSoldNumbers = raffleNumberService.findSoldNumbersById(aRaffleId);
-        
-        return new ResponseEntity<Object>(someSoldNumbers, HttpStatus.OK); // 
+    public ResponseEntity<Object> getSoldNumbersById(@PathVariable("eventId") Long aRaffleId) {
+        try {
+            List<Integer> someSoldNumbers = raffleNumberService.findSoldNumbersById(aRaffleId);
+            if (someSoldNumbers == null) {
+                someSoldNumbers = Collections.emptyList();
+            }
+            return ResponseEntity.ok(someSoldNumbers);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error al obtener los números vendidos: " + e.getMessage());
     }
+}
+
 
     @PostMapping("/{eventId}/buy-raffle-number")
     public ResponseEntity<Object> buyRaffleNumber(
