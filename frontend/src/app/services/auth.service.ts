@@ -402,6 +402,17 @@ export class AuthService {
   }
 
   /**
+   * Obtiene un usuario por su id (para encabezado del chat)
+   */
+  getUserById(userId: number): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${environment.apiUrl}/api/registered-users/${userId}`, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * Maneja errores de HTTP
    */
   private handleError = (error: any): Observable<never> => {

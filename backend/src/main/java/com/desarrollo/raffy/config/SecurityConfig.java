@@ -68,6 +68,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/users/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        // Permitir handshake de WebSocket/SockJS
+                        .requestMatchers("/ws", "/ws/**").permitAll()
                         .requestMatchers("/events/**").permitAll()
                         .requestMatchers("/categories/**").permitAll()
                         .requestMatchers("/api/images/**").permitAll()
