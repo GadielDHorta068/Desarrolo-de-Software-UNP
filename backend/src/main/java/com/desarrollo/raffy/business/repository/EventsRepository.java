@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.StatusEvent;
+import com.desarrollo.raffy.model.User;
 import com.desarrollo.raffy.model.EventTypes;
 import java.time.LocalDate;
 import java.util.List;
@@ -57,6 +58,9 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     @Query("SELECT e FROM Events e WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN AND e.endDate <= :today")
     List<Events> findOpenEventsToClose(@Param("today") LocalDate today);
 
+    // buscar participantes de un evento
+    @Query("SELECT e.participants FROM Events e WHERE e.id = :eventId")
+    List<User> findParticipantsByEventId(@Param("eventId") Long eventId);
 
 
     // Buscar eventos por creador
