@@ -41,18 +41,20 @@ export const routes: Routes = [
     path: 'panel',
     loadComponent: () => import('./pages/raffles-panel/raffles-panel').then(m => m.RafflesPanel),
     // canActivate: [GuestGuard],
-    title: 'Creación de sorteos - Raffy',
+    title: 'Creación de evento - Raffy',
     // data: { animation: 'register' }
   },
   {
-    path: 'event-edit',
+    // path: 'event-edit',
+    path: 'event/management/edit/:eventId',
     loadComponent: () => import('./pages/edit-event/edit-event').then(m => m.EditEvent),
     // canActivate: [GuestGuard],
-    title: 'Creación de sorteos - Raffy',
+    title: 'Edita tu evento - Raffy',
     // data: { animation: 'register' }
   },
   {
-    path: 'event-admin',
+    // path: 'event-admin',
+    path: 'event/management/:eventId',
     loadComponent: () => import('./pages/management-event/management-event').then(m => m.ManagementEvent),
     // canActivate: [GuestGuard],
     title: 'Gestiona tu evento - Raffy',

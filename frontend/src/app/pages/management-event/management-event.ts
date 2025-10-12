@@ -8,11 +8,12 @@ import { HandleDatePipe } from '../../pipes/handle-date.pipe';
 import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { InfoEvent } from '../../shared/components/info-event/info-event';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EventShareCardComponent } from '../../shared/event-share-card/event-share-card.component';
 import { AuthService } from '../../services/auth.service';
 import { ModalShareEvent } from '../../shared/components/modal-share-event/modal-share-event';
 import { QuestionaryComponent } from '../questionary/questionary.component';
+import { EventsService } from '../../services/events.service';
 
 @Component({
   selector: 'app-management-event',
@@ -31,6 +32,7 @@ export class ManagementEvent {
   // event!: EventsTemp|RaffleCreate|null;
   eventAux!: EventsTemp|null;
   imageEvent: File|null = null;
+  eventIdParam!: Number|null;
 
   formEvent!: FormGroup;
   // tipos de sorteo
@@ -46,17 +48,39 @@ export class ManagementEvent {
     private adminEventService: AdminEventService,
     private handleDatePipe: HandleDatePipe,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
+    private eventService: EventsService,
     private cdr: ChangeDetectorRef
   ){
     this.adminEventService.selectedEvent$.subscribe(
       currentEvent => {
         this.eventAux = currentEvent ? {...currentEvent}: null;
         this.event = currentEvent;
-        console.log("[edicion] => evento seleccionado: ", this.event);
-        this.initForm();
+        // console.log("[admin-event] => evento seleccionado: ", this.event);
+        if(this.event){
+          this.initForm();
+        }
       }
     )
+  }
+
+  ngOnInit() {
+    this.eventIdParam = Number(this.route.snapshot.paramMap.get('eventId'));
+    // console.log("[admin-event] => ide del evento recibido por param: ", this.eventIdParam);
+    // revisamos si los datos del evento ya fueron seteados desde la lista de eventos
+    if(!this.event){
+      this.eventService.getEventById(""+this.eventIdParam).subscribe(
+        resp => {
+          // console.log("[admin-event] => evento recuperado por id de param: ", resp);
+          this.event = resp;
+          if(this.event){
+            this.initForm();
+            this.cdr.detectChanges();
+          }
+        }
+      )
+    }
   }
 
 

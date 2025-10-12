@@ -27,6 +27,15 @@ export class EventsService {
     return this.http.post<EventsTemp[]>(`${this.apiUrl}/create/${eventType}/${creatorId}`, event, { headers });
   }
 
+  // recupera los datos de un evento segun el id recibido
+  getEventById(eventId: string): Observable<EventsTemp> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.get<EventsTemp>(`${this.apiUrl}/id/${eventId}`, { headers });
+  }
+
   getEventsByParticipantId(userId: number): Observable<Events[]> {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.authService.getToken()}`,
