@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.business.repository.RaffleNumberRepository;
+import com.desarrollo.raffy.dto.UserDTO;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
@@ -44,6 +45,14 @@ public class RaffleNumberService {
     }
 
     // agregar metodo para busqueda de participantes
+    public List<User> findRaffleOwnersByRaffleId(Long aRaffleId) {
+        try {
+            return raffleNumRepository.findParticipantsByEventId(aRaffleId);
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error al obtener los duenios de rifas " + aRaffleId, e);
+        }
+    }
 
     @Transactional
     public List<RaffleNumber> createRaffleNumbers(Raffle aRaffle, User aUser, List<Integer> someNumbers) {

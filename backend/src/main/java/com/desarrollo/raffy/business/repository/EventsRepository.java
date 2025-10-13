@@ -59,7 +59,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     List<Events> findOpenEventsToClose(@Param("today") LocalDate today);
 
     // buscar participantes de un evento
-    @Query("SELECT e.participants FROM Events e WHERE e.id = :eventId")
+    @Query("SELECT p.participant FROM Participant p WHERE p.event.id = :eventId")
     List<User> findParticipantsByEventId(@Param("eventId") Long eventId);
 
 

@@ -416,7 +416,7 @@ public class EventsService {
         }
     }
 
-    public List<User> getParticipantsByEventId(Long aEventId) {
+    public List<User> getUsersParticipantsByEventId(Long aEventId) {
         try {
             return eventsRepository.findParticipantsByEventId(aEventId);
         }
