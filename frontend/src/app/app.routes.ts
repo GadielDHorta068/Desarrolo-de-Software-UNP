@@ -79,6 +79,12 @@ export const routes: Routes = [
     title: 'Perfil - Raffy'
   },
   {
+    path: 'chat/:userId',
+    loadComponent: () => import('./pages/chat/chat.component').then(m => m.ChatComponent),
+    canActivate: [AuthGuard],
+    title: 'Chat privado - Raffy'
+  },
+  {
     path: 'event',
     loadComponent: () => import('./pages/event/event').then(m => m.Event),
     canActivate: [GuestGuard],

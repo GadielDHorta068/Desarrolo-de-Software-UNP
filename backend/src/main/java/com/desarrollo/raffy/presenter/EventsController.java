@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
@@ -26,6 +27,7 @@ import com.desarrollo.raffy.Response;
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.ParticipantService;
 import com.desarrollo.raffy.business.services.RaffleNumberService;
+import com.desarrollo.raffy.business.services.UserMapper;
 import com.desarrollo.raffy.business.services.UserService;
 
 import jakarta.validation.Valid;
@@ -33,6 +35,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
 import java.util.List;
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
@@ -41,6 +44,7 @@ import org.springframework.http.ResponseEntity;
 import com.desarrollo.raffy.dto.BuyRaffleNumberRequestDTO;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
 import com.desarrollo.raffy.dto.ParticipantDTO;
+import com.desarrollo.raffy.dto.UserDTO;
 import com.desarrollo.raffy.dto.WinnerDTO;
 
 
@@ -478,6 +482,27 @@ public class EventsController {
 
     }
 
+    @GetMapping("/raffle/{eventId}/sold-numbers")
+    public ResponseEntity<Object> getSoldNumbersById(@PathVariable("eventId") Long aRaffleId) {
+        try {
+            List<Integer> someSoldNumbers = raffleNumberService.findSoldNumbersById(aRaffleId);
+            if (someSoldNumbers == null) {
+                someSoldNumbers = Collections.emptyList();
+            }
+            return ResponseEntity.ok(someSoldNumbers);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error al obtener los números vendidos: " + e.getMessage());
+    }
+}
+
+
     @PostMapping("/{eventId}/buy-raffle-number")
     public ResponseEntity<Object> buyRaffleNumber(
         @Valid @RequestBody BuyRaffleNumberRequestDTO aBuyRequest,
@@ -581,4 +606,24 @@ public class EventsController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
+    @GetMapping("/{eventId}/get-users-participants")
+    public ResponseEntity<Object> findUsersParticipantsByEventId(@PathVariable("eventId") Long anEventId) {
+        try {
+            List<User> participantUsers = eventsService.getUsersParticipantsByEventId(anEventId);
+            if (participantUsers == null || participantUsers.isEmpty()) {
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+            }
+
+            List<UserDTO> result = participantUsers.stream().map(UserMapper::toDTO).toList(); 
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+        catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // @GetMapping("/{eventId}/get-raffle-owners")
+    // public ResponseEntity<Object> getRaffleOwnersByRaffleId() {
+           
+    // }
 }
