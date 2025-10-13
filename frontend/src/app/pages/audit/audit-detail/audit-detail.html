@@ -1,0 +1,43 @@
+<div *ngIf="loading" class="p-4">Cargando detalles de auditorias...</div>
+
+<div *ngIf="!loading && auditlog" class="p-6">
+  <h1 class="text-2xl font-bold mb-4">Detalles de auditoría</h1>
+  <div class="mb-6">
+    <p><strong>Evento:</strong> {{ auditlog.eventTitle }}</p>
+    <p><strong>Tipo:</strong> {{ auditlog.eventType | handleTypePipe}}</p>
+    <p><strong>Creador:</strong> {{ auditlog.creatorNickname }}</p>
+    <p><strong>Fecha de ejecución:</strong> {{ formatDate(auditlog.executeDate) }}</p>
+  </div>
+
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-2xl font-bold">Detalles de auditoría</h1>
+    <button 
+      (click)="goBack()" 
+      class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded"
+    >
+      Volver
+    </button>
+  </div>
+
+  <table class="min-w-full bg-black border border-gray-300 rounded-lg shadow-md">
+    <thead class="bg-black-100">
+      <tr>
+        <th class="px-4 py-2 text-left">Nombre</th>
+        <th class="px-4 py-2 text-left">Apellido</th>
+        <th class="px-4 py-2 text-left">Email</th>
+        <th class="px-4 py-2 text-left">Teléfono</th>
+        <th class="px-4 py-2 text-left">Posición</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of auditlog.participants" class="border-t">
+        <td class="px-4 py-2">{{ p.userName }}</td>
+        <td class="px-4 py-2">{{ p.userLastName }}</td>
+        <td class="px-4 py-2">{{ p.userEmail }}</td>
+        <td class="px-4 py-2">{{ p.userPhone }}</td>
+        <td class="px-4 py-2">{{ p.userPosition }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+

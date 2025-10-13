@@ -1,0 +1,36 @@
+<div *ngIf="loading" class="p-4">Cargando auditorias...</div>
+
+<div *ngIf="!loading && audits.length > 0" class="p-6">
+    <h1 class="text-2xl font-bold mb-4">Auditorías</h1>
+    <table class="min-w-full bg-black border border-gray-300 rounded-lg shadow-md">
+        <thead class="bg-black-100">
+            <tr>
+                <th class="py-2 px-4 border-b border-blue-300 text-left">Titulo del evento</th>
+                <th class="py-2 px-4 border-b border-blue-300 text-left">Tipo</th>
+                <th class="py-2 px-4 border-b border-blue-300 text-left">Fecha de ejecución</th>
+                <th class="py-2 px-4 border-b border-blue-300 text-left">Semilla</th>
+                <th class="py-2 px-4 border-b border-blue-300 text-left">Fecha de inicio</th>
+                <th class="py-2 px-4 border-b border-blue-300 text-left">Fecha de fin</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let audit of audits" class="border-t hover:bg-black-50 transition">
+                <td class="py-2 px-4 border-b border-blue-300">{{ audit.eventTitle }}</td>
+                <td class="py-2 px-4 border-b border-blue-300">{{ audit.eventType | handleTypePipe }}</td>
+                <td class="py-2 px-4 border-b border-blue-300">{{ formatDate(audit.executeDate) }}</td>
+                <td class="py-2 px-4 border-b border-blue-300">{{ audit.seed }}</td>
+                <td class="py-2 px-4 border-b border-blue-300">{{ formatDate(audit.eventStartDate) }}</td>
+                <td class="py-2 px-4 border-b border-blue-300">{{ formatDate(audit.eventEndDate) }}</td>
+                <td class="px-4 py-2 text-center">
+                    <a [routerLink]="['/audit', audit.creatorNickname]" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                        Ver detalles
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div *ngIf="!loading && audits.length === 0" class="p-4 text-gray-500">
+    No se encontraron auditorías.
+</div>

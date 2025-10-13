@@ -119,6 +119,18 @@ export const routes: Routes = [
     title: 'Ganadores - Raffy'
   },
   {
+    path: 'audit',
+    loadComponent: () => import('./pages/audit/audit-list/audit-list').then(m => m.AuditList),
+    canActivate: [AuthGuard],
+    title: 'Auditorías - Raffy'
+  },
+  {
+    path: 'audit/:nickname',
+    loadComponent: () => import('./pages/audit/audit-detail/audit-detail').then(m => m.AuditDetail),
+    canActivate: [AuthGuard],
+    title: 'Detalle de Auditoría - Raffy'
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }
