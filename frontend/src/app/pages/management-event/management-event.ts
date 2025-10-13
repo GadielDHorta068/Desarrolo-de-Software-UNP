@@ -193,8 +193,8 @@ export class ManagementEvent {
         alert('Seleccionados: ' + seleccionados.map(n => n.ticketNumber).join(', '));
     }
 
-    loadParticipants(eventId: number): void {
-        this.eventService.getParticipantUsersByEventId(eventId).subscribe({
+    loadParticipants(eventId: number, eventType: EventTypes): void {
+        this.eventService.getParticipantUsersByEventId(eventId, eventType).subscribe({
             next: (data) => {
                 this.participants = data;
                 console.log('[Participantes cargados]', data);
@@ -208,7 +208,7 @@ export class ManagementEvent {
     setTab(tabName: 'info' | 'numeros' | 'registrados'): void {
         this.tab = tabName;
         if (tabName === 'registrados' && this.event?.id) {
-            this.loadParticipants(this.event.id);
+            this.loadParticipants(this.event.id, this.event.eventType);
         }
     }
 

@@ -606,6 +606,9 @@ public class EventsController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
+
+    // REFACTORIZAR LOS SIG DOS METODOS EN UNO
+    // QUE OBTENGAN EL TIPO DE EVENTO DE LA URL Y DECIDA COMO OBTENER LOS PARTICIPANTES
     @GetMapping("/{eventId}/get-users-participants")
     public ResponseEntity<Object> findUsersParticipantsByEventId(@PathVariable("eventId") Long anEventId) {
         try {
@@ -622,8 +625,20 @@ public class EventsController {
         }
     }
 
-    // @GetMapping("/{eventId}/get-raffle-owners")
-    // public ResponseEntity<Object> getRaffleOwnersByRaffleId() {
-           
-    // }
+    @GetMapping("/{eventId}/get-raffle-owners")
+    public ResponseEntity<Object> getRaffleOwnersByRaffleId(@PathVariable("eventId") Long aRaffleId) {
+        // validar q sea tipo rifa???
+        try {
+            List<User> raffleOwners = raffleNumberService.findRaffleOwnersByRaffleId(aRaffleId);
+            if (raffleOwners == null || raffleOwners.isEmpty()) {
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+            }
+
+            List<UserDTO> result = raffleOwners.stream().map(UserMapper::toDTO).toList();
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+        catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }    
+    }
 }
