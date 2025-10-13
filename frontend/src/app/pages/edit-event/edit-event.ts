@@ -35,6 +35,7 @@ export class EditEvent implements OnInit{
   types: EventType[] = [];
   // categorias de sorteo
   categories: Category[] = [];
+  eventTypes = EventTypes;
 
   constructor(
     private route: ActivatedRoute,
@@ -115,7 +116,9 @@ export class EditEvent implements OnInit{
         },
         endDate: dataEvent.executionDate,
         winnersCount: dataEvent.winners,
-        image: dataEvent.image
+        image: dataEvent.image,
+        priceOfNumber: dataEvent.priceOfNumber,
+        quantityOfNumbers: dataEvent.quantityOfNumbers
       } as EventsCreate;
     }
 
@@ -148,6 +151,8 @@ export class EditEvent implements OnInit{
       winners: new FormControl({value: this.event?.winnersCount, disabled: true}, {validators:[ Validators.required ]}),
       description: new FormControl({value: this.event?.description, disabled: false}, {validators:[ Validators.required ]}),
       image: new FormControl({value: null, disabled: false}),
+      priceRaffle: new FormControl({value: this.event?.priceOfNumber, disabled: false}),
+      quantityNumbersRaffle: new FormControl({value: this.event?.quantityOfNumbers, disabled: false})
     });
   }
 
@@ -191,7 +196,9 @@ export class EditEvent implements OnInit{
       category: this.eventAux?.categoryId,
       executionDate: this.parseDate(dateEvent),
       winners: this.eventAux?.winnersCount,
-      description: this.eventAux?.description
+      description: this.eventAux?.description,
+      priceRaffle: this.eventAux?.priceOfNumber,
+      quantityNumbersRaffle: this.eventAux?.quantityOfNumbers
     });
   }
 

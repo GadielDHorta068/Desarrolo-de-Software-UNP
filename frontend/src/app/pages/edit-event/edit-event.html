@@ -36,7 +36,7 @@
                 <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Imagen de tu evento
                 </label>
-                <app-loader-image [srcImage]="event?.imageUrl" (changeSelectedImage)="onChangeSelectedImge($event)"></app-loader-image>
+                <app-loader-image [enabled]="true" [srcImage]="event?.imageUrl" (changeSelectedImage)="onChangeSelectedImge($event)"></app-loader-image>
             </div>
         </div>
 
@@ -96,6 +96,45 @@
                     name="Fecha de realización"
                     class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
                 />
+            </div>
+        </div>
+
+        <!-- seccion propia de los eventos tipo RIFA -->
+        <div *ngIf="event?.eventType == eventTypes.RAFFLES" class="grid-main gap-4 pt-4">
+            <!-- careacteristicas del sorteo, tipo y categoria -->
+            <div class="flex gap-2">
+                <div class="w-1/2">
+                    <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Cantidad de nros[50-500] (*)
+                    </label>
+                    <input
+                        type="text"
+                        id="cantNros"
+                        formControlName="quantityNumbersRaffle"
+                        name="cantidad de nros"
+                        class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
+                        placeholder="Ej. 100"
+                    />
+                    <div *ngIf="formEvent.get('quantityNumbersRaffle')?.invalid && formEvent.get('quantityNumbersRaffle')?.touched">
+                        <small class="text-red-600">Debés asignar una cantidad entre el rango especificado</small>
+                    </div>
+                </div>
+                <div class="w-1/2">
+                    <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Precio del numero(*)
+                    </label>
+                    <input
+                        type="text"
+                        id="precio"
+                        formControlName="priceRaffle"
+                        name="price"
+                        class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
+                        placeholder="Ej. 2000"
+                    />
+                    <div *ngIf="formEvent.get('price')?.invalid && formEvent.get('price')?.touched">
+                        <small class="text-red-600">Debés asignar un precio a la rifa</small>
+                    </div>
+                </div>
             </div>
         </div>
 
