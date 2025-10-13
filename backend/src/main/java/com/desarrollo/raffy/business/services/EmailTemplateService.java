@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 
 /**
  * Servicio para generar plantillas de correo electrónico profesionales.
@@ -194,7 +195,10 @@ public class EmailTemplateService {
                                                      int position,
                                                      String eventTitle,
                                                      String eventType,
-                                                     String eventUrl) {
+                                                     String eventUrl,
+                                                     String creatorName,
+                                                     String creatorEmail,
+                                                     String creatorPhone) {
         // Determinar el texto según el tipo de evento
         String eventTypeText = eventType != null && eventType.equals("GUESSING_CONTEST") ? "sorteo" : "rifa";
         
@@ -215,19 +219,121 @@ public class EmailTemplateService {
             positionText = position + "° lugar";
         }
         
-        // Construir el mensaje principal con formato HTML
-        String message = "Hola " + winnerName + ",\n\n" +
-                        "¡Tenemos excelentes noticias! Has resultado ganador en el " + eventTypeText + ":\n\n" +
-                        "📌 <strong>Evento:</strong> " + eventTitle + "\n" +
-                        "🏆 <strong>Posición:</strong> " + positionText + "\n\n" +
-                        "Estamos muy contentos de que hayas participado y te hayas llevado este reconocimiento. " +
-                        "Haz clic en el botón de abajo para ver los detalles completos del evento y obtener más información.";
+        // Construir el mensaje principal como HTML, incluyendo contacto del creador
+        StringBuilder msg = new StringBuilder();
+        msg.append("<p>")
+           .append("Hola ").append(escapeHtml(winnerName)).append(", ")
+           .append("¡Tenemos excelentes noticias! Has resultado ganador en el ")
+           .append(escapeHtml(eventTypeText)).append(".")
+           .append("</p>");
+
+        msg.append("<p>")
+           .append("📌 <strong>Evento:</strong> ").append(escapeHtml(eventTitle)).append("<br/>")
+           .append("🏆 <strong>Posición:</strong> ").append(escapeHtml(positionText))
+           .append("</p>");
+
+        // Bloque de información de contacto del creador del evento
+        msg.append("<div style=\"margin-top:16px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;\">")
+           .append("<p style=\"margin:0 0 8px 0;\"><strong>Contacto del creador del evento</strong></p>");
+        if (creatorName != null && !creatorName.isBlank()) {
+            msg.append("<p style=\"margin:0;\"><strong>Organizador:</strong> ")
+               .append(escapeHtml(creatorName))
+               .append("</p>");
+        }
+        if (creatorEmail != null && !creatorEmail.isBlank()) {
+            msg.append("<p style=\"margin:0;\"><strong>Email:</strong> ")
+               .append(escapeHtml(creatorEmail))
+               .append("</p>");
+        }
+        if (creatorPhone != null && !creatorPhone.isBlank()) {
+            msg.append("<p style=\"margin:0;\"><strong>Teléfono:</strong> ")
+               .append(escapeHtml(creatorPhone))
+               .append("</p>");
+        }
+        msg.append("</div>");
         
         String actionText = "Ver detalles del " + eventTypeText;
         String actionUrl = eventUrl;
         String footerMessage = "¡Gracias por participar en Rafify! Esperamos verte pronto en más eventos.";
         
-        return generateNotificationTemplate(title, message, actionText, actionUrl, footerMessage);
+        return renderNotificationFromTemplate(title, msg.toString(), actionText, actionUrl, footerMessage);
+    }
+
+    /**
+     * Genera una plantilla HTML con el resumen de ganadores para el creador del evento,
+     * incluyendo nombre, email, teléfono y posición.
+     *
+     * @param creatorName Nombre del creador
+     * @param eventTitle Título del evento
+     * @param eventType Tipo de evento (GIVEAWAY / GUESSING_CONTEST)
+     * @param eventUrl URL del evento en el frontend
+     * @param winners Lista de ganadores con datos de contacto
+     * @return HTML renderizado listo para enviar
+     */
+    public String generateCreatorWinnersSummaryTemplate(String creatorName,
+                                                        String eventTitle,
+                                                        String eventType,
+                                                        String eventUrl,
+                                                        Collection<com.desarrollo.raffy.dto.WinnerDTO> winners) {
+        String title = "Resumen de ganadores del evento";
+        String eventTypeText = eventType != null && eventType.equals("GUESSING_CONTEST") ? "sorteo" : "rifa";
+
+        StringBuilder msg = new StringBuilder();
+        if (creatorName != null && !creatorName.isBlank()) {
+            msg.append("<p>")
+               .append("Hola ").append(escapeHtml(creatorName)).append(", ")
+               .append("te compartimos el contacto de los ganadores de tu ")
+               .append(escapeHtml(eventTypeText)).append(".")
+               .append("</p>");
+        }
+        msg.append("<p>")
+           .append("📌 <strong>Evento:</strong> ").append(escapeHtml(eventTitle)).append("<br/>")
+           .append("🗂️ <strong>Tipo:</strong> ").append(escapeHtml(eventTypeText))
+           .append("</p>");
+
+        // Construir tabla de ganadores
+        msg.append("<table style=\"width:100%;border-collapse:collapse;margin-top:12px;\">")
+           .append("<thead>")
+           .append("<tr style=\"background:#f3f4f6;\">")
+           .append("<th style=\"text-align:left;padding:8px;border:1px solid #e5e7eb;\">Posición</th>")
+           .append("<th style=\"text-align:left;padding:8px;border:1px solid #e5e7eb;\">Nombre</th>")
+           .append("<th style=\"text-align:left;padding:8px;border:1px solid #e5e7eb;\">Email</th>")
+           .append("<th style=\"text-align:left;padding:8px;border:1px solid #e5e7eb;\">Teléfono</th>")
+           .append("</tr>")
+           .append("</thead><tbody>");
+
+        if (winners != null && !winners.isEmpty()) {
+            for (com.desarrollo.raffy.dto.WinnerDTO w : winners) {
+                String name = w.getName() != null ? w.getName() : "";
+                String surname = w.getSurname() != null ? w.getSurname() : "";
+                String fullName = (name + (surname.isEmpty() ? "" : (" " + surname))).trim();
+                msg.append("<tr>")
+                   .append("<td style=\"padding:8px;border:1px solid #e5e7eb;\">")
+                   .append(escapeHtml(String.valueOf(w.getPosition())))
+                   .append("</td>")
+                   .append("<td style=\"padding:8px;border:1px solid #e5e7eb;\">")
+                   .append(escapeHtml(fullName))
+                   .append("</td>")
+                   .append("<td style=\"padding:8px;border:1px solid #e5e7eb;\">")
+                   .append(escapeHtml(w.getEmail()))
+                   .append("</td>")
+                   .append("<td style=\"padding:8px;border:1px solid #e5e7eb;\">")
+                   .append(escapeHtml(w.getPhone()))
+                   .append("</td>")
+                   .append("</tr>");
+            }
+        } else {
+            msg.append("<tr>")
+               .append("<td colspan=\"4\" style=\"padding:8px;border:1px solid #e5e7eb;text-align:center;color:#6b7280;\">")
+               .append("No se registraron ganadores.")
+               .append("</td>")
+               .append("</tr>");
+        }
+        msg.append("</tbody></table>");
+
+        String actionText = "Ver detalles del evento";
+        String footerMessage = "Puedes coordinar directamente con los ganadores usando sus datos de contacto.";
+        return renderNotificationFromTemplate(title, msg.toString(), actionText, eventUrl, footerMessage);
     }
 
     /**

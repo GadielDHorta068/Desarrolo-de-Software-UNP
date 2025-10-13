@@ -73,7 +73,13 @@ public class EmailService {
      * @param eventTitle Título del evento
      * @param eventType Tipo de evento (GIVEAWAY o GUESSING_CONTEST)
      */
-    public void sendWinnerEmails(Collection<WinnerDTO> winners, Long eventId, String eventTitle, String eventType) {
+    public void sendWinnerEmails(Collection<WinnerDTO> winners,
+                                 Long eventId,
+                                 String eventTitle,
+                                 String eventType,
+                                 String creatorName,
+                                 String creatorEmail,
+                                 String creatorPhone) {
         // Validar que hay ganadores
         if (winners == null || winners.isEmpty()) {
             System.out.println("No hay ganadores a los que enviar correos");
@@ -104,19 +110,21 @@ public class EmailService {
                     winner.getPosition(),
                     eventTitle,
                     eventType,
-                    eventUrl
+                    eventUrl,
+                    creatorName,
+                    creatorEmail,
+                    creatorPhone
                 );
                 
                 // Determinar el asunto del correo según el tipo de evento
                 String eventTypeText = eventType != null && eventType.equals("GUESSING_CONTEST") ? "sorteo" : "rifa";
                 String subject = "🎉 ¡Felicidades! Has ganado en el " + eventTypeText + " - Rafify";
                 
-                // Enviar el correo con recursos inline (logo)
-                sendEmailWithInlineResources(
+                // Enviar el correo HTML sin adjuntos ni recursos inline
+                sendHtmlEmail(
                     winner.getEmail(),
                     subject,
-                    htmlContent,
-                    emailTemplateService.getDefaultInlineResources()
+                    htmlContent
                 );
                 
                 System.out.println("✅ Correo de ganador enviado exitosamente a: " + winner.getEmail() + 
@@ -131,6 +139,52 @@ public class EmailService {
         });
         
         System.out.println("✅ Proceso de envío de correos a ganadores completado");
+    }
+
+    /**
+     * Envía al creador del evento un resumen con el contacto de los ganadores.
+     * @param winners Colección de ganadores
+     * @param eventId ID del evento
+     * @param eventTitle Título del evento
+     * @param eventType Tipo del evento (GIVEAWAY / GUESSING_CONTEST)
+     * @param creatorName Nombre del creador (para saludo)
+     * @param creatorEmail Email del creador (destinatario)
+     */
+    public void sendWinnersContactToCreator(Collection<WinnerDTO> winners,
+                                            Long eventId,
+                                            String eventTitle,
+                                            String eventType,
+                                            String creatorName,
+                                            String creatorEmail) {
+        if (creatorEmail == null || creatorEmail.isBlank()) {
+            System.err.println("⚠️ El evento no tiene email de creador. No se enviará el resumen.");
+            return;
+        }
+
+        if (winners == null) {
+            System.err.println("⚠️ La lista de ganadores es nula. Enviaré el correo indicando que no hay ganadores.");
+        }
+
+        String eventUrl = frontendUrl + "/event/" + eventId;
+
+        String htmlContent = emailTemplateService.generateCreatorWinnersSummaryTemplate(
+                creatorName,
+                eventTitle,
+                eventType,
+                eventUrl,
+                winners
+        );
+
+        String eventTypeText = eventType != null && eventType.equals("GUESSING_CONTEST") ? "sorteo" : "rifa";
+        String subject = "📋 Resumen de ganadores de tu " + eventTypeText + " - Rafify";
+
+        try {
+            sendHtmlEmail(creatorEmail, subject, htmlContent);
+            System.out.println("✅ Resumen de ganadores enviado al creador: " + creatorEmail);
+        } catch (Exception e) {
+            System.err.println("❌ Error al enviar resumen al creador " + creatorEmail + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
