@@ -40,7 +40,7 @@
             'text-blue-600 border-b-2 border-blue-600': tab === 'registrados',
             'text-gray-600 dark:text-gray-300': tab !== 'registrados'
           }"
-          (click)="tab = 'registrados'"
+          (click)="setTab('registrados')"
         >
             Registrados
         </span>
@@ -116,9 +116,30 @@
 
     <!-- TAB: Registrados -->
     <div *ngIf="tab === 'registrados'" class="p-4">
-      <p class="text-gray-700 dark:text-gray-300 text-center italic">
-        (Próximamente: lista de usuarios registrados con sus números)
-      </p>
+      <div *ngIf="participants.length > 0; else noParticipants">
+        <table class="min-w-full border border-gray-300 dark:border-gray-700 rounded-lg shadow">
+          <thead>
+            <tr class="bg-gray-100 dark:bg-gray-700">
+              <th class="p-2 text-left">Nombre</th>
+              <th class="p-2 text-left">Apellido</th>
+              <th class="p-2 text-left">Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of participants" class="border-t border-gray-300 dark:border-gray-700">
+              <td class="p-2">{{ p.name }}</td>
+              <td class="p-2">{{ p.surname }}</td>
+              <td class="p-2">{{ p.email }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noParticipants>
+        <p class="text-gray-700 dark:text-gray-300 text-center italic">
+          No hay usuarios registrados todavía.
+        </p>
+      </ng-template>
     </div>
 
 </div>
