@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EventsTemp, EventType, EventTypes, RaffleCreate, StatusEvent } from '../../models/events.model';
+import { EventsTemp, EventType, EventTypes, RaffleCreate, RaffleNumber, StatusEvent } from '../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 import { Category } from '../../services/category.service';
@@ -13,6 +13,8 @@ import { EventShareCardComponent } from '../../shared/event-share-card/event-sha
 import { AuthService } from '../../services/auth.service';
 import { ModalShareEvent } from '../../shared/components/modal-share-event/modal-share-event';
 import { QuestionaryComponent } from '../questionary/questionary.component';
+import { EventsService } from '../../services/events.service';
+import { UserDTO } from '../../models/UserDTO';
 
 @Component({
   selector: 'app-management-event',
@@ -42,22 +44,36 @@ export class ManagementEvent {
   showModalIncript = false;
   selectedEventId!: number;
 
-  constructor(
-    private adminEventService: AdminEventService,
-    private handleDatePipe: HandleDatePipe,
-    private router: Router,
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef
-  ){
-    this.adminEventService.selectedEvent$.subscribe(
-      currentEvent => {
-        this.eventAux = currentEvent ? {...currentEvent}: null;
-        this.event = currentEvent;
-        console.log("[edicion] => evento seleccionado: ", this.event);
-        this.initForm();
-      }
-    )
-  }
+    // TABS
+    tab: 'info' | 'numeros' | 'registrados' = 'info';
+    numeros: RaffleNumber[] = [];
+    typesOfEventes = EventTypes;
+    participants: UserDTO[] = [];
+
+    constructor(
+        private adminEventService: AdminEventService,
+        private eventService: EventsService,
+        private handleDatePipe: HandleDatePipe,
+        private router: Router,
+        private authService: AuthService,
+        private cdr: ChangeDetectorRef
+    ) {
+        this.adminEventService.selectedEvent$.subscribe(currentEvent => {
+            // Guardamos una copia auxiliar y la original
+            this.eventAux = currentEvent ? { ...currentEvent } : null;
+            this.event = currentEvent;
+
+            console.log("[edicion] => evento seleccionado: ", this.event);
+            
+            // Inicializar formulario
+            this.initForm();
+
+            // Solo si es rifa, inicializamos los números
+            this.initForm();
+            this.initRaffleNumbers();
+        });
+    }
+
 
 
   private initForm(){
@@ -115,5 +131,85 @@ export class ManagementEvent {
       alert("Aca iria el componente de seleccion de nros de rifa")
     }
   }
+
+    private initRaffleNumbers(): void {
+        if (!this.event) {
+        //   console.warn('[Raffle] No hay evento cargado aún.');
+          return;
+        }
+    
+        // console.log('[Raffle] Evento cargado:', this.event);
+    
+        if (this.event.eventType !== EventTypes.RAFFLES) {
+        //   console.log('[Raffle] El evento no es tipo RAFFLES. No se generan números.');
+          return;
+        }
+    
+        const total = this.event.quantityOfNumbers;
+        if (!total || total <= 0) {
+          console.warn('[Raffle] quantityOfNumbers inválido:', total);
+          this.numeros = [];
+          return;
+        }
+    
+        // console.log('[Raffle] Total de números a generar:', total);
+    
+        this.eventService.getSoldNumbersByRaffleId(this.event.id).subscribe({
+          next: (boughtNumbers: number[]) => {
+            console.log('[Raffle] Números vendidos recibidos:', boughtNumbers);
+
+            this.numeros = Array.from({ length: total }, (_, i) => ({
+              ticketNumber: i + 1,
+              buyStatus: boughtNumbers.includes(i + 1),
+              selectStatus: false
+            }));
+        
+            // console.log('[Raffle] Números generados:', this.numeros);
+            this.cdr.detectChanges(); // forzamos render
+          },
+          error: (err) => {
+            console.error('[Raffle] Error al obtener los números vendidos:', err);
+            // aunque haya error, podemos inicializar un array vacío para no romper la UI
+            this.numeros = Array.from({ length: total }, (_, i) => ({
+              ticketNumber: i + 1,
+              buyStatus: false,
+              selectStatus: false
+            }));
+            this.cdr.detectChanges();
+          }
+        });
+    }
+
+
+    selectNumber(aRaffleNumber: RaffleNumber) :void {
+        if(!aRaffleNumber.buyStatus) {
+            aRaffleNumber.selectStatus = !aRaffleNumber.selectStatus; 
+        }
+    }
+
+    addToCart() : void {
+        const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
+        console.log('Números seleccionados:', seleccionados.map(n => n.ticketNumber));
+        alert('Seleccionados: ' + seleccionados.map(n => n.ticketNumber).join(', '));
+    }
+
+    loadParticipants(eventId: number): void {
+        this.eventService.getParticipantUsersByEventId(eventId).subscribe({
+            next: (data) => {
+                this.participants = data;
+                console.log('[Participantes cargados]', data);
+            },
+            error: (err) => {
+                console.error('Error al obtener participantes:', err);
+            }
+        });
+    }
+
+    setTab(tabName: 'info' | 'numeros' | 'registrados'): void {
+        this.tab = tabName;
+        if (tabName === 'registrados' && this.event?.id) {
+            this.loadParticipants(this.event.id);
+        }
+    }
 
 }

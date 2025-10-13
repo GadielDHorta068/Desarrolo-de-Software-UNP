@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { RaffleNumber } from './RaffleNumber';
 import { CommonModule } from '@angular/common';
-import { RaffleEvent } from '../../models/events.model';
+import { EventsTemp, EventTypes, RaffleNumber } from '../../models/events.model';
+import { AdminEventService } from '../../services/admin/adminEvent.service';
+import { EventsService } from '../../services/events.service';
 
 @Component({
   selector: 'app-rifa-front.component',
@@ -13,32 +14,46 @@ import { RaffleEvent } from '../../models/events.model';
 
 export class RifaFrontComponent {
 
-    constructor () {}
-
     tab: 'info' | 'numeros' | 'registrados' = 'info';
-
-    private raffle!: RaffleEvent;
-
     
-    // MOCK RIFA
-    rifa = {
-        titulo: 'Rifa de Camisetas Deportivas',
-        descripcion: 'Participá por increíbles camisetas deportivas de tu equipo favorito.',
-        precio: 1000,
-        etiquetas: ['Ropa', 'Deporte']
-    };
+    public raffle!: EventsTemp | null;
+    
+    
+    constructor (
+        private eventService: EventsService,
+        private adminEventService: AdminEventService
+    ) {
+        this.adminEventService.selectedEvent$.subscribe(
+            currentEvent => {
+                // this.eventAux = currentEvent ? {...currentEvent}: null;
+                this.raffle = currentEvent;
+                console.log("[edicion] => evento seleccionado: ", this.raffle);
+                // this.updateForm();
+            }
+        )
+    }
 
     numeros: RaffleNumber[] = [];
 
     ngOnInit() :void {
-        const total = 100;
+        
+        if (this.raffle && this.raffle.eventType === EventTypes.RAFFLES) {
+            const total = this.raffle?.quantityOfNumbers;
+            
+            this.eventService.getSoldNumbersByRaffleId(this.raffle?.id).subscribe({
+                next: (boughtNumbers: number[]) => {
+                    this.numeros = Array.from({ length: total }, (_, i) => ({
+                        ticketNumber: i + 1,
+                        buyStatus: boughtNumbers.includes(i + 1), // ejemplo
+                        selectStatus: false
+                    }));
+                },
+                error: (err) => {
+                    console.error('Error al obtener los números vendidos: ', err);
+                }
+            });
+        }
 
-        // En el futuro esto vendrá del backend (por ahora mock)
-        this.numeros = Array.from({ length: total }, (_, i) => ({
-            ticketNumber: i + 1,
-            buyStatus: [3, 15, 27].includes(i + 1), // ejemplo
-            selectStatus: false
-        }));
     }
 
     selectNumber(aRaffleNumber: RaffleNumber) :void {
