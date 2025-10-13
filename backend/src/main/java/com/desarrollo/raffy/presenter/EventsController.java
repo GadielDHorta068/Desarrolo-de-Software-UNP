@@ -261,7 +261,42 @@ public class EventsController {
             String eventTypeStr = event.getEventType() != null ? event.getEventType().toString() : "GIVEAWAY";
             log.info("Iniciando envío de correos a los ganadores...");
             try {
-                emailService.sendWinnerEmails(response, event.getId(), event.getTitle(), eventTypeStr);
+                // Preparar datos de contacto del creador del evento
+                String creatorName = null;
+                String creatorEmail = null;
+                String creatorPhone = null;
+                if (event.getCreator() != null) {
+                    String name = event.getCreator().getName();
+                    String surname = event.getCreator().getSurname();
+                    String nickname = event.getCreator().getNickname();
+                    String composedName = ((name != null ? name : "") + (surname != null ? (" " + surname) : "")).trim();
+                    creatorName = !composedName.isEmpty() ? composedName : (nickname != null ? nickname : null);
+                    creatorEmail = event.getCreator().getEmail();
+                    creatorPhone = event.getCreator().getCellphone();
+                }
+
+                emailService.sendWinnerEmails(
+                    response,
+                    event.getId(),
+                    event.getTitle(),
+                    eventTypeStr,
+                    creatorName,
+                    creatorEmail,
+                    creatorPhone
+                );
+                // Enviar resumen de contacto de ganadores al creador
+                try {
+                    emailService.sendWinnersContactToCreator(
+                        response,
+                        event.getId(),
+                        event.getTitle(),
+                        eventTypeStr,
+                        creatorName,
+                        creatorEmail
+                    );
+                } catch (Exception e) {
+                    log.warn("No se pudo enviar el resumen de ganadores al creador: {}", e.getMessage());
+                }
                 log.info("✅ Correos electrónicos enviados a los ganadores del evento: " + event.getTitle());
             } catch (Exception e) {
                 log.error("❌ Error al enviar correos a los ganadores: " + e.getMessage(), e);

@@ -14,4 +14,6 @@ public class CreatorSummaryDTO {
     private String name;
     private String surname;
     private String nickname;
+    private String email;
+    private String cellphone;
 }
