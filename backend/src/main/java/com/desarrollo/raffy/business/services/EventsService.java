@@ -23,6 +23,7 @@ import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
+import com.desarrollo.raffy.model.User;
 import com.desarrollo.raffy.util.ImageUtils;
 import com.desarrollo.raffy.util.OnCreate;
 
@@ -412,6 +413,15 @@ public class EventsService {
             return eventsRepository.findById(id).orElse(null);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public List<User> getUsersParticipantsByEventId(Long aEventId) {
+        try {
+            return eventsRepository.findParticipantsByEventId(aEventId);
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error al obtener los participantes del evento " + aEventId, e);
         }
     }
 }

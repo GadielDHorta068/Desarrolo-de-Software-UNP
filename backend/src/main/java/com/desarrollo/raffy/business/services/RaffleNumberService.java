@@ -3,13 +3,12 @@ package com.desarrollo.raffy.business.services;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.RaffleNumberRepository;
+import com.desarrollo.raffy.dto.UserDTO;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
@@ -22,16 +21,38 @@ public class RaffleNumberService {
     @Autowired
     private RaffleNumberRepository raffleNumRepository;
 
-    public List<RaffleNumber> findRaffleNumbersById(Raffle aRaffle) {
-        if (!(aRaffle instanceof Raffle)) {
+    @Autowired
+    private EventsService eventsService;
+
+    public List<RaffleNumber> findRaffleNumbersById(Long aRaffleId) {
+        Events selectedRaffle = eventsService.getById(aRaffleId);
+        if (!(selectedRaffle instanceof Raffle)) {
             throw new IllegalArgumentException("Este metodo es solo eventos de tipo rifa");
         }
-        List<RaffleNumber> result = raffleNumRepository.findNumbersById(aRaffle.getId());
+        List<RaffleNumber> result = raffleNumRepository.findNumbersById(aRaffleId);
 
         return result;
     }
 
+    public List<Integer> findSoldNumbersById(Long aRaffleId) {
+        Events selectedRaffle = eventsService.getById(aRaffleId);
+        if (!(selectedRaffle instanceof Raffle)) {
+            throw new IllegalArgumentException("Este metodo es solo eventos de tipo rifa");            
+        }
+        List<Integer> result = raffleNumRepository.findsoldNumbersById(aRaffleId);
+        
+        return result;
+    }
+
     // agregar metodo para busqueda de participantes
+    public List<User> findRaffleOwnersByRaffleId(Long aRaffleId) {
+        try {
+            return raffleNumRepository.findParticipantsByEventId(aRaffleId);
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error al obtener los duenios de rifas " + aRaffleId, e);
+        }
+    }
 
     @Transactional
     public List<RaffleNumber> createRaffleNumbers(Raffle aRaffle, User aUser, List<Integer> someNumbers) {
