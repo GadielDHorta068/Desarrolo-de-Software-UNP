@@ -14,6 +14,7 @@ import { AuthService } from '../../services/auth.service';
 import { ModalShareEvent } from '../../shared/components/modal-share-event/modal-share-event';
 import { QuestionaryComponent } from '../questionary/questionary.component';
 import { EventsService } from '../../services/events.service';
+import { UserDTO } from '../../models/UserDTO';
 
 @Component({
   selector: 'app-management-event',
@@ -47,6 +48,7 @@ export class ManagementEvent {
     tab: 'info' | 'numeros' | 'registrados' = 'info';
     numeros: RaffleNumber[] = [];
     typesOfEventes = EventTypes;
+    participants: UserDTO[] = [];
 
     constructor(
         private adminEventService: AdminEventService,
@@ -132,14 +134,14 @@ export class ManagementEvent {
 
     private initRaffleNumbers(): void {
         if (!this.event) {
-          console.warn('[Raffle] No hay evento cargado aún.');
+        //   console.warn('[Raffle] No hay evento cargado aún.');
           return;
         }
     
-        console.log('[Raffle] Evento cargado:', this.event);
+        // console.log('[Raffle] Evento cargado:', this.event);
     
         if (this.event.eventType !== EventTypes.RAFFLES) {
-          console.log('[Raffle] El evento no es tipo RAFFLES. No se generan números.');
+        //   console.log('[Raffle] El evento no es tipo RAFFLES. No se generan números.');
           return;
         }
     
@@ -150,7 +152,7 @@ export class ManagementEvent {
           return;
         }
     
-        console.log('[Raffle] Total de números a generar:', total);
+        // console.log('[Raffle] Total de números a generar:', total);
     
         this.eventService.getSoldNumbersByRaffleId(this.event.id).subscribe({
           next: (boughtNumbers: number[]) => {
@@ -162,7 +164,7 @@ export class ManagementEvent {
               selectStatus: false
             }));
         
-            console.log('[Raffle] Números generados:', this.numeros);
+            // console.log('[Raffle] Números generados:', this.numeros);
             this.cdr.detectChanges(); // forzamos render
           },
           error: (err) => {
@@ -189,6 +191,25 @@ export class ManagementEvent {
         const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
         console.log('Números seleccionados:', seleccionados.map(n => n.ticketNumber));
         alert('Seleccionados: ' + seleccionados.map(n => n.ticketNumber).join(', '));
+    }
+
+    loadParticipants(eventId: number): void {
+        this.eventService.getParticipantUsersByEventId(eventId).subscribe({
+            next: (data) => {
+                this.participants = data;
+                console.log('[Participantes cargados]', data);
+            },
+            error: (err) => {
+                console.error('Error al obtener participantes:', err);
+            }
+        });
+    }
+
+    setTab(tabName: 'info' | 'numeros' | 'registrados'): void {
+        this.tab = tabName;
+        if (tabName === 'registrados' && this.event?.id) {
+            this.loadParticipants(this.event.id);
+        }
     }
 
 }
