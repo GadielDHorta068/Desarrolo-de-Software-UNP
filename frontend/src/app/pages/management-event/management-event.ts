@@ -47,6 +47,7 @@ export class ManagementEvent {
     // TABS
     tab: 'info' | 'numeros' | 'registrados' = 'info';
     numeros: RaffleNumber[] = [];
+    selectedNumbers: number[] = [];
     typesOfEventes = EventTypes;
     participants: UserDTO[] = [];
 
@@ -187,11 +188,17 @@ export class ManagementEvent {
         }
     }
 
-    addToCart() : void {
-        const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
-        console.log('Números seleccionados:', seleccionados.map(n => n.ticketNumber));
-        alert('Seleccionados: ' + seleccionados.map(n => n.ticketNumber).join(', '));
+    addToCart(): void {
+        if (this.event?.id) {
+            const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
+            console.log('Números seleccionados:', seleccionados.map(n => n.ticketNumber));
+
+            this.selectedEventId = this.event.id;
+            this.selectedNumbers = seleccionados.map(n => n.ticketNumber); // 👈 guardamos los números
+            this.showModalIncript = true; // muestra el modal de Questionary
+        }
     }
+
 
     loadParticipants(eventId: number, eventType: EventTypes): void {
         this.eventService.getParticipantUsersByEventId(eventId, eventType).subscribe({

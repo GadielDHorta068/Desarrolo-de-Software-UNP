@@ -48,8 +48,8 @@ export class QuestionaryComponent {
         this.close.emit();
     }
 
-    onSubmit(eventType: EventTypes): void {
-        if (eventType != EventTypes.RAFFLES) {
+    onSubmit(): void {
+        if (this.eventType != EventTypes.RAFFLES) {
             this.questionaryService.save(
                 this.guestUser,
                 this.eventId //despues podria tener un objeto y usar un dto o algo asi
