@@ -1,6 +1,6 @@
-import { GuestUser } from "../pages/questionary/guestUser";
+import { UserDTO } from "./UserDTO";
 
 export interface BuyRaffleNumberDTO {
-    aGuestUser: GuestUser;
+    aGuestUser: UserDTO; 
     someNumbersToBuy: number[];
 }
