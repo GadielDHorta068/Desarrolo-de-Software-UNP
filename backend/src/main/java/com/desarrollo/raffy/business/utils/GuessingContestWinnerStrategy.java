@@ -99,7 +99,6 @@ public class GuessingContestWinnerStrategy implements WinnerSelectionStrategy {
         auditLog.setEventType(contest.getEventType());
         auditLog.setEventStartDate(contest.getStartDate());
         auditLog.setEventEndDate(contest.getEndDate());
-        contest.getCreator().getNickname();
 
         List<AuditParticipant> auditParticipants = participants.stream()
             .map(p -> new AuditParticipant(
