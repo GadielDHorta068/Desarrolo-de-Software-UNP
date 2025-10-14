@@ -65,7 +65,6 @@ export class ManagementEvent {
             this.eventAux = currentEvent ? { ...currentEvent } : null;
             this.event = currentEvent;
 
-            console.log("[edicion] => evento seleccionado: ", this.event);
             
             // Inicializar formulario
             this.initForm();
@@ -123,16 +122,16 @@ export class ManagementEvent {
             this.event?.statusEvent === StatusEvent.OPEN;
   }
 
-  onInscript(){
-    if(this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY){
-      // mostramos el form de inscripcion al sorteo
-      this.selectedEventId = this.event.id;
-      this.showModalIncript = true;
+    onInscript(){
+        if(this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY){
+          // mostramos el form de inscripcion al sorteo
+          this.selectedEventId = this.event.id;
+          this.showModalIncript = true;
+        }
+        if(this.event?.id && this.event?.eventType == EventTypes.RAFFLES){
+          alert("Aca iria el componente de seleccion de nros de rifa")
+        }
     }
-    if(this.event?.id && this.event?.eventType == EventTypes.RAFFLES){
-      alert("Aca iria el componente de seleccion de nros de rifa")
-    }
-  }
 
     private initRaffleNumbers(): void {
         if (!this.event) {
@@ -140,7 +139,6 @@ export class ManagementEvent {
           return;
         }
     
-        // console.log('[Raffle] Evento cargado:', this.event);
     
         if (this.event.eventType !== EventTypes.RAFFLES) {
         //   console.log('[Raffle] El evento no es tipo RAFFLES. No se generan números.');
@@ -154,11 +152,9 @@ export class ManagementEvent {
           return;
         }
     
-        // console.log('[Raffle] Total de números a generar:', total);
     
         this.eventService.getSoldNumbersByRaffleId(this.event.id).subscribe({
           next: (boughtNumbers: number[]) => {
-            console.log('[Raffle] Números vendidos recibidos:', boughtNumbers);
 
             this.numeros = Array.from({ length: total }, (_, i) => ({
               ticketNumber: i + 1,
@@ -166,7 +162,6 @@ export class ManagementEvent {
               selectStatus: false
             }));
         
-            // console.log('[Raffle] Números generados:', this.numeros);
             this.cdr.detectChanges(); // forzamos render
           },
           error: (err) => {
@@ -192,7 +187,6 @@ export class ManagementEvent {
     addToCart(): void {
         if (this.event?.id) {
             const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
-            console.log('Números seleccionados:', seleccionados.map(n => n.ticketNumber));
 
             this.selectedEventId = this.event.id;
             this.eventType = this.event.eventType;
@@ -201,12 +195,16 @@ export class ManagementEvent {
         }
     }
 
+    onModalClosed(): void {
+        this.showModalIncript = false; // oculta el modal
+        console.log('[Raffle] Modal cerrado → recargando números...');
+        setTimeout(() => this.initRaffleNumbers(), 500); // refresca los números
+    }
 
     loadParticipants(eventId: number, eventType: EventTypes): void {
         this.eventService.getParticipantUsersByEventId(eventId, eventType).subscribe({
             next: (data) => {
                 this.participants = data;
-                console.log('[Participantes cargados]', data);
             },
             error: (err) => {
                 console.error('Error al obtener participantes:', err);
