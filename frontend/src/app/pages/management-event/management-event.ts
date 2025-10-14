@@ -50,6 +50,7 @@ export class ManagementEvent {
     selectedNumbers: number[] = [];
     typesOfEventes = EventTypes;
     participants: UserDTO[] = [];
+    eventType!: EventTypes;
 
     constructor(
         private adminEventService: AdminEventService,
@@ -194,6 +195,7 @@ export class ManagementEvent {
             console.log('Números seleccionados:', seleccionados.map(n => n.ticketNumber));
 
             this.selectedEventId = this.event.id;
+            this.eventType = this.event.eventType;
             this.selectedNumbers = seleccionados.map(n => n.ticketNumber); // 👈 guardamos los números
             this.showModalIncript = true; // muestra el modal de Questionary
         }

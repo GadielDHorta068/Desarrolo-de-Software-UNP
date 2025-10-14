@@ -6,6 +6,7 @@ import { environment } from '../../environments/environment';
 import { GuestUser } from '../pages/questionary/guestUser';
 import { EventTypes } from '../models/events.model';
 import { BuyRaffleNumberDTO } from '../models/buyRaffleNumberDTO';
+import { UserDTO } from '../models/UserDTO';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,7 @@ export class QuestionaryService {
         private http: HttpClient
     ) {}
 
-    save(aGuestUser: GuestUser, aEventId: number): Observable<any> {
+    save(aGuestUser: UserDTO, aEventId: number): Observable<any> {
         
         return this.http.post<any>(
             `${this.API_URL}/${aEventId}/participants`,
