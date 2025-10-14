@@ -42,6 +42,16 @@
         >
             Agregar al carrito
         </button>
+
+        <!-- MODAL INSCRIPCION -->
+        <app-questionary
+            *ngIf="showModalIncript"
+            [eventId]="selectedEventId"
+            [selectedRaffleNumbers]="selectedNumbers"
+            [eventType]="eventType"
+            (close)="onModalClosed()">
+        </app-questionary>
+
     </div>
 
     <!-- TAB: Información -->

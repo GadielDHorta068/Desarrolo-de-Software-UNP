@@ -5,6 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { QuestionaryService } from '../../services/questionary.service';
 import { GuestUser } from './guestUser';
 import { NotificationService } from '../../services/notification.service';
+import { EventTypes } from '../../models/events.model';
+import { BuyRaffleNumberDTO } from '../../models/buyRaffleNumberDTO';
+import { UserDTO } from '../../models/UserDTO';
 
 
 @Component({
@@ -18,9 +21,11 @@ import { NotificationService } from '../../services/notification.service';
 export class QuestionaryComponent {
 
     @Input() eventId!: number;
+    @Input() eventType!: EventTypes;
+    @Input() selectedRaffleNumbers: number[] = [];
     @Output() close = new EventEmitter<void>();
 
-    guestUser!: GuestUser;
+    guestUser!: UserDTO;
 
     constructor(
         private questionaryService: QuestionaryService,
@@ -28,7 +33,7 @@ export class QuestionaryComponent {
     ) {}
 
     ngOnInit() {
-        this.guestUser = <GuestUser> {};
+        this.guestUser = <UserDTO> {};
     }
 
     validatePhoneInput(event: KeyboardEvent) {
@@ -45,29 +50,41 @@ export class QuestionaryComponent {
     }
 
     onSubmit(): void {
-        this.questionaryService.save(
-            this.guestUser,
-            this.eventId //despues podria tener un objeto y usar un dto o algo asi
-        ).subscribe({
-            next: (response) => {
-                console.log('Guardado en backend:', JSON.stringify(response)); // borrar
-                this.notificationService.notifySuccess(response.message);
-                this.closeModal();
-            },
-            error: (errorResponse) => {
-                console.log('LOG ERROR:', JSON.stringify(errorResponse)); // borrar
-                console.error('Error:', errorResponse);
-                this.notificationService.notifyError(errorResponse.error.message);
-            }
-        });
+        if (this.eventType != EventTypes.RAFFLES) {
+            this.questionaryService.save(
+                this.guestUser,
+                this.eventId //despues podria tener un objeto y usar un dto o algo asi
+            ).subscribe({
+                next: (response) => {
+                    console.log('Guardado en backend:', JSON.stringify(response)); // borrar
+                    this.notificationService.notifySuccess(response.message);
+                    this.closeModal();
+                },
+                error: (errorResponse) => {
+                    console.log('LOG ERROR:', JSON.stringify(errorResponse)); // borrar
+                    console.error('Error:', errorResponse);
+                    this.notificationService.notifyError(errorResponse.error.message);
+                }
+            });
+        }
+        else {
+            const request: BuyRaffleNumberDTO = {
+                aGuestUser: this.guestUser,
+                someNumbersToBuy: this.selectedRaffleNumbers
+            };
+            this.questionaryService.saveRaffleNumber(
+                this.eventId,
+                request
+            ).subscribe({
+                next: (response) => {
+                    this.notificationService.notifySuccess('Compra realizada con éxito');
+                    this.closeModal();
+                },
+                error: (errorResponse) => {
+                    console.error('Error en la compra:', errorResponse);
+                    this.notificationService.notifyError(errorResponse.error.message);
+                }
+            });
+        }
     }
 }
-
-/*
-    cambiar los Alert por alguno de los sig:
-    Angular Material (MatSnackBar)
-
-    SweetAlert2 (fácil de usar y se ve muy lindo)
-
-    PrimeNG Toast
-*/
