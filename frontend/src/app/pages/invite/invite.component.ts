@@ -22,8 +22,8 @@ export class InviteRedirectComponent implements OnInit {
 
   ngOnInit(): void {
     const shortcode = this.route.snapshot.paramMap.get('shortcode') || '';
-    // Usa el proxy de Angular dev server para delegar al backend
-    this.apiRedirectUrl = `/api/url/redirect/${shortcode}`;
+    // Same-origin sin prefijo /api
+    this.apiRedirectUrl = `/url/redirect/${shortcode}`;
     // Reemplaza la URL actual para evitar volver con back
     window.location.replace(this.apiRedirectUrl);
   }

@@ -9,7 +9,8 @@ import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private wsUrl = `${environment.apiUrl.replace('/api', '')}/ws`;
+  // WebSocket same-origin: usar /ws, confiando en el proxy de Nginx
+  private wsUrl = `/ws`;
   private client: Client | null = null;
   private privateSub: StompSubscription | null = null;
 
@@ -89,7 +90,7 @@ export class ChatService {
 
   loadHistory(destinatarioId: number): Observable<Message[]> {
     // Endpoint REST está bajo /api/chat en el backend
-    return this.http.get<Message[]>(`${environment.apiUrl}/api/chat/history/${destinatarioId}`).pipe(
+    return this.http.get<Message[]>(`${environment.apiUrl}/chat/history/${destinatarioId}`).pipe(
       // Normalizar a ISO string para que el date pipe funcione y respete el tipo
       map(list => list.map(m => ({
         ...m,
