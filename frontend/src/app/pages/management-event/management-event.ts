@@ -15,6 +15,7 @@ import { ModalShareEvent } from '../../shared/components/modal-share-event/modal
 import { QuestionaryComponent } from '../questionary/questionary.component';
 import { EventsService } from '../../services/events.service';
 import { UserDTO } from '../../models/UserDTO';
+import { AuditService, WinnersAudit } from '../../services/audit.service';
 
 @Component({
   selector: 'app-management-event',
@@ -54,6 +55,7 @@ export class ManagementEvent {
   numeros: RaffleNumber[] = [];
   typesOfEventes = EventTypes;
   participants: UserDTO[] = [];
+  winnersAudit: WinnersAudit[] = [];
 
   constructor(
     private adminEventService: AdminEventService,
@@ -62,6 +64,7 @@ export class ManagementEvent {
     private route: ActivatedRoute,
     private authService: AuthService,
     private eventService: EventsService,
+    private auditService: AuditService,
     private cdr: ChangeDetectorRef
   ){
     this.adminEventService.selectedEvent$.subscribe(
@@ -228,6 +231,41 @@ export class ManagementEvent {
         });
     }
 
+    // vamos a buscar los ganadores del sorteo si esta FINALIZADO
+    loadWinners(): void {
+      this.auditService.getAuditWinners(""+this.event?.id).subscribe({
+            next: (data) => {
+                // console.log('[ganadores-audit] => ganadores: ', data);
+                this.winnersAudit = data;
+                this.cdr.detectChanges();
+            },
+            error: (err) => {
+                console.error('Error al obtener los ganadores:', err);
+            }
+        });
+    }
+
+    // devuelve el lugar en el podio
+    getPlaceGoal(dataUser: UserDTO){
+      // voy a buscar el dato de la lista de ganadores
+      const dataPlace = this.winnersAudit.find(winner => winner.userEmail == dataUser.email);
+      // console.log("[podio] => datos del ganador: ", dataPlace);
+      if(!dataPlace)
+        return null;
+
+      // POR AHORA SOLO HASTA EL 3er premio
+      if(dataPlace.userPosition == 1){
+        return {goal: "1er PREMIO", idUser: dataPlace.id}
+      }
+      if(dataPlace.userPosition == 2){
+        return {goal: "2do PREMIO", idUser: dataPlace.id}
+      }
+      if(dataPlace.userPosition == 3){
+        return {goal: "#er PREMIO", idUser: dataPlace.id}
+      }
+      return null;
+    }
+
     // setTab(tabName: 'info' | 'numeros' | 'registrados'): void {
     //     this.tab = tabName;
     //     if (tabName === 'registrados' && this.event?.id) {
@@ -235,11 +273,11 @@ export class ManagementEvent {
     //     }
     // }
     setTab(tabName: string): void {
-        this.tab = tabName;
-        console.log("[setTab] => pestaña seleccionada: ", this.tab, " - idEvent: ", this.event?.id);
-        if (tabName === this.TAB_REGISTERED && this.event?.id) {
-            this.loadParticipants(this.event.id);
-        }
+      this.tab = tabName;
+      if (tabName === this.TAB_REGISTERED && this.event?.id) {
+          this.loadParticipants(this.event.id);
+          this.loadWinners();
+      }
     }
   
   // controles de pestaña
