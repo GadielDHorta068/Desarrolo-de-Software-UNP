@@ -7,6 +7,7 @@ import { GuestUser } from './guestUser';
 import { NotificationService } from '../../services/notification.service';
 import { EventTypes } from '../../models/events.model';
 import { BuyRaffleNumberDTO } from '../../models/buyRaffleNumberDTO';
+import { UserDTO } from '../../models/UserDTO';
 
 
 @Component({
@@ -24,7 +25,7 @@ export class QuestionaryComponent {
     @Input() selectedRaffleNumbers: number[] = [];
     @Output() close = new EventEmitter<void>();
 
-    guestUser!: GuestUser;
+    guestUser!: UserDTO;
 
     constructor(
         private questionaryService: QuestionaryService,
@@ -32,7 +33,7 @@ export class QuestionaryComponent {
     ) {}
 
     ngOnInit() {
-        this.guestUser = <GuestUser> {};
+        this.guestUser = <UserDTO> {};
     }
 
     validatePhoneInput(event: KeyboardEvent) {
@@ -87,12 +88,3 @@ export class QuestionaryComponent {
         }
     }
 }
-
-/*
-    cambiar los Alert por alguno de los sig:
-    Angular Material (MatSnackBar)
-
-    SweetAlert2 (fácil de usar y se ve muy lindo)
-
-    PrimeNG Toast
-*/
