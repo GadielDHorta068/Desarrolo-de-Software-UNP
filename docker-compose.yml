@@ -17,6 +17,7 @@ services:
     networks:
       - raffy-network
     restart: unless-stopped
+  
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -44,12 +45,38 @@ services:
     env_file:
       - docker/backend.env
       - docker/db.env
+    environment:
+      # Variables para integración con Evolution API dentro de la red de Docker
+      EVOLUTION_API_URL: http://evolution-api:8080
+      # Reutiliza la misma API key que usa el contenedor evolution-api; si no está definida, usa 'raffify2025'
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY:-raffify2025}
     ports:
       - "${APP_PORT:-8080}:8080"
     volumes: []
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - raffy-network
+    restart: unless-stopped
+    
+  evolution-api:
+    image: atendai/evolution-api:latest
+    container_name: evolution-api
+    environment:
+      # Clave de autenticación requerida por Evolution API (header 'apikey')
+      AUTHENTICATION_TYPE: apikey
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-raffify2025}
+      # Configuración de base de datos requerida por Evolution API v2
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://raffy_user:raffy_password@db:5432/raffy_db?schema=evolution
+    ports:
+      # Exponer para acceder a swagger/manager desde host; backend usa el nombre de servicio en la red
+      - "8081:8080"
+    volumes:
+      - evolution_store:/evolution/store
+      - evolution_instances:/evolution/instances
     networks:
       - raffy-network
     restart: unless-stopped
@@ -88,6 +115,8 @@ volumes:
   db_data:
   pgadmin_data:
   frontend_node_modules:
+  evolution_store:
+  evolution_instances:
       
 networks:
   raffy-network:
