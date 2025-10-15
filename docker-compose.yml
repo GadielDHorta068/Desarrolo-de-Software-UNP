@@ -71,12 +71,25 @@ services:
       DATABASE_ENABLED: "true"
       DATABASE_PROVIDER: postgresql
       DATABASE_CONNECTION_URI: postgresql://raffy_user:raffy_password@db:5432/raffy_db?schema=evolution
+      # Cache con Redis
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://redis:6379
+      CACHE_LOCAL_ENABLED: "false"
     ports:
       # Exponer para acceder a swagger/manager desde host; backend usa el nombre de servicio en la red
       - "8081:8080"
     volumes:
       - evolution_store:/evolution/store
       - evolution_instances:/evolution/instances
+    networks:
+      - raffy-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: raffy-redis
+    volumes:
+      - redis_data:/data
     networks:
       - raffy-network
     restart: unless-stopped
@@ -117,6 +130,7 @@ volumes:
   frontend_node_modules:
   evolution_store:
   evolution_instances:
+  redis_data:
       
 networks:
   raffy-network:
