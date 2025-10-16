@@ -220,7 +220,6 @@ export class ManagementEvent {
 
     onModalClosed(): void {
         this.showModalIncript = false; // oculta el modal
-        console.log('[Raffle] Modal cerrado → recargando números...');
         setTimeout(() => this.initRaffleNumbers(), 500); // refresca los números
     }
 
