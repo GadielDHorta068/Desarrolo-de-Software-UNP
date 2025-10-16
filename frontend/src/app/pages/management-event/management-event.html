@@ -43,15 +43,6 @@
             Agregar al carrito
         </button>
 
-        <!-- MODAL INSCRIPCION -->
-        <app-questionary
-            *ngIf="showModalIncript"
-            [eventId]="selectedEventId"
-            [selectedRaffleNumbers]="selectedNumbers"
-            [eventType]="eventType"
-            (close)="onModalClosed()">
-        </app-questionary>
-
     </div>
 
     <!-- TAB: Información -->
@@ -207,8 +198,16 @@
 
 <app-modal-info [dataModal]="dataModal" #modalInfo></app-modal-info>
 <app-modal-share-event #modalShareEvent></app-modal-share-event>
-<!-- incripcion a sorteo -->
-<app-questionary *ngIf="showModalIncript" (close)="showModalIncript=false" [eventId]="selectedEventId"></app-questionary>
+
+<!-- MODAL INSCRIPCION -->
+<!-- conectado al boton "addToCart" -->
+<app-questionary
+    *ngIf="showModalIncript"
+    [eventId]="selectedEventId"
+    [selectedRaffleNumbers]="selectedNumbers"
+    [eventType]="eventType"
+    (close)="onModalClosed()">
+</app-questionary>
 
 
 
