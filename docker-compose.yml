@@ -51,6 +51,7 @@ services:
       EVOLUTION_API_URL: http://evolution-api:8080
       # Reutiliza la misma API key que usa el contenedor evolution-api; si no está definida, usa 'raffify2025'
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY:-raffify2025}
+      DATABASE_PROVIDER: postgresql 
     ports:
       - "${APP_PORT:-8080}:8080"
     volumes: []
