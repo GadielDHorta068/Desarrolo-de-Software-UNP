@@ -17,6 +17,7 @@ services:
     networks:
       - raffy-network
     restart: unless-stopped
+  
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -25,10 +26,12 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@raffy.com
       PGADMIN_DEFAULT_PASSWORD: admin123
       PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
     ports:
       - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin-servers.json:/pgadmin4/servers.json:ro
     depends_on:
       db:
         condition: service_healthy
@@ -42,14 +45,56 @@ services:
       dockerfile: Dockerfile
     container_name: raffy-backend
     env_file:
-      - docker/backend.env
       - docker/db.env
+    environment:
+      # Variables para integración con Evolution API dentro de la red de Docker
+      EVOLUTION_API_URL: http://evolution-api:8080
+      # Reutiliza la misma API key que usa el contenedor evolution-api; si no está definida, usa 'raffify2025'
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY:-raffify2025}
+      DATABASE_PROVIDER: postgresql 
     ports:
       - "${APP_PORT:-8080}:8080"
     volumes: []
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - raffy-network
+    restart: unless-stopped
+    
+  evolution-api:
+    image: atendai/evolution-api:latest
+    container_name: evolution-api
+    environment:
+      # Clave de autenticación requerida por Evolution API (header 'apikey')
+      AUTHENTICATION_TYPE: apikey
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-raffify2025}
+      # Versión del cliente WhatsApp Web que Baileys debe emular.
+      # Actualiza este valor cuando WhatsApp Web cambie y no se genere QR.
+      CONFIG_SESSION_PHONE_VERSION: "2.3000.1023204200"
+      # Configuración de base de datos requerida por Evolution API v2
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://raffy_user:raffy_password@db:5432/raffy_db?schema=evolution
+      # Cache con Redis
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://redis:6379
+      CACHE_LOCAL_ENABLED: "false"
+    ports:
+      # Exponer para acceder a swagger/manager desde host; backend usa el nombre de servicio en la red
+      - "8081:8080"
+    volumes:
+      - evolution_store:/evolution/store
+      - evolution_instances:/evolution/instances
+    networks:
+      - raffy-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: raffy-redis
+    volumes:
+      - redis_data:/data
     networks:
       - raffy-network
     restart: unless-stopped
@@ -60,18 +105,10 @@ services:
       dockerfile: Dockerfile
     container_name: raffy-frontend
     working_dir: /app
-    command: sh -c "npm install --legacy-peer-deps && npm start"
     ports:
       - "4200:4200"
-    volumes:
-      - ./frontend:/app
-      - frontend_node_modules:/app/node_modules
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-      - CHOKIDAR_INTERVAL=1000
-      - WATCHPACK_POLLING=true
-      - NODE_ENV=development
-      - NG_CLI_ANALYTICS=false
+    volumes: []
+    environment: []
     depends_on: []
     restart: unless-stopped
     networks:
@@ -96,6 +133,9 @@ volumes:
   db_data:
   pgadmin_data:
   frontend_node_modules:
+  evolution_store:
+  evolution_instances:
+  redis_data:
       
 networks:
   raffy-network:

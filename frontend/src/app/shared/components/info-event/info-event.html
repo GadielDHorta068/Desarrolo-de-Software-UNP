@@ -27,6 +27,22 @@
             <div class="text-base font-bold pt-2">Fecha de realización</div>
             <div class="p-2">{{event?.endDate | handleDatePipe}}</div>
         </div>
+        <div class="grid-row">
+            <div class="text-base font-bold pt-2">Estado</div>
+            <div class="p-2">{{event?.statusEvent | handleStatusPipe}}</div>
+            <!-- <button disabled class="px-3 py-1 text-sm font-semibold rounded-full bg-green-500 text-white opacity-80 cursor-default">
+            Abierto
+            </button> -->
+        </div>
+        <!-- <div class="grid-row">
+            <div class="text-base font-bold pt-2">Estado</div>
+            <div class="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                <span class="text-green-700 font-medium">Abierto</span>
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+        </div> -->
         <div *ngIf="event?.eventType == eventTypes.RAFFLES" class="grid-row">
             <div class="text-base font-bold pt-2">Cantida de números</div>
             <div class="p-2">{{event?.quantityOfNumbers}}</div>

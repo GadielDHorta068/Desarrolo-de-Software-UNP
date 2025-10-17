@@ -11,6 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 /**
  * Servicio para generar plantillas de correo electrónico profesionales.
@@ -333,6 +337,62 @@ public class EmailTemplateService {
 
         String actionText = "Ver detalles del evento";
         String footerMessage = "Puedes coordinar directamente con los ganadores usando sus datos de contacto.";
+        return renderNotificationFromTemplate(title, msg.toString(), actionText, eventUrl, footerMessage);
+    }
+
+    /**
+     * Genera una plantilla para confirmar la compra de números de rifa.
+     * Incluye detalles del evento, precio por número y lista de números adquiridos.
+     * @param buyerName Nombre del comprador
+     * @param eventTitle Título de la rifa
+     * @param priceOfNumber Precio por número
+     * @param purchasedNumbers Lista de números comprados
+     * @param eventUrl URL para ver el evento en el frontend
+     * @return HTML renderizado listo para enviar
+     */
+    public String generateRaffleNumbersPurchasedTemplate(String buyerName,
+                                                         String eventTitle,
+                                                         double priceOfNumber,
+                                                         Collection<Integer> purchasedNumbers,
+                                                         String eventUrl) {
+        String title = "Confirmación de compra de números de rifa";
+
+        // Ordenar y formatear números
+        List<Integer> numbers = purchasedNumbers == null ? Collections.emptyList() : new ArrayList<>(purchasedNumbers);
+        Collections.sort(numbers);
+        String numbersHtml;
+        if (numbers.isEmpty()) {
+            numbersHtml = "<p style=\"color:#6b7280;\">No se registraron números adquiridos.</p>";
+        } else {
+            String items = numbers.stream()
+                .map(n -> "<li style=\"margin-bottom:4px;\"><strong>" + escapeHtml(String.valueOf(n)) + "</strong></li>")
+                .collect(Collectors.joining(""));
+            numbersHtml = "<ul style=\"list-style:disc;padding-left:20px;margin-top:8px;\">" + items + "</ul>";
+        }
+
+        StringBuilder msg = new StringBuilder();
+        msg.append("<p>")
+           .append("Hola ").append(escapeHtml(buyerName)).append(", ")
+           .append("¡gracias por tu compra!")
+           .append("</p>");
+
+        msg.append("<p>")
+           .append("Has adquirido números para la rifa <strong>")
+           .append(escapeHtml(eventTitle))
+           .append("</strong>.")
+           .append("</p>");
+
+        msg.append("<div style=\"margin-top:12px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;\">")
+           .append("<p style=\"margin:0 0 8px 0;\"><strong>Detalle de la compra</strong></p>")
+           .append("<p style=\"margin:0;\">Precio por número: <strong>$")
+           .append(escapeHtml(String.format("%.2f", priceOfNumber)))
+           .append("</strong></p>")
+           .append("<p style=\"margin:8px 0 0 0;\">Números adquiridos:</p>")
+           .append(numbersHtml)
+           .append("</div>");
+
+        String actionText = "Ver detalles de la rifa";
+        String footerMessage = "Conserva este correo como comprobante de tu compra.";
         return renderNotificationFromTemplate(title, msg.toString(), actionText, eventUrl, footerMessage);
     }
 

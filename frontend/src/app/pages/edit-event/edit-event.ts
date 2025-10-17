@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Events, EventsCreate, EventsTemp, EventType, EventTypes } from '../../models/events.model';
 import { CommonModule } from '@angular/common';
@@ -10,6 +10,7 @@ import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 import { EventsService } from '../../services/events.service';
 import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { ParseFileService } from '../../services/utils/parseFile.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-edit-event',
@@ -18,7 +19,7 @@ import { ParseFileService } from '../../services/utils/parseFile.service';
   styleUrl: './edit-event.css',
   providers: [HandleDatePipe]
 })
-export class EditEvent {
+export class EditEvent implements OnInit{
   @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
   dataModal: InfoModal = {title: "Actualización de datos", message: ""};
 
@@ -27,14 +28,17 @@ export class EditEvent {
   event!: EventsTemp|null;
   eventAux!: EventsTemp|null;
   imageEvent: File|null = null;
+  eventIdParam!: Number|null;
 
   formEvent!: FormGroup;
   // tipos de sorteo
   types: EventType[] = [];
   // categorias de sorteo
   categories: Category[] = [];
+  eventTypes = EventTypes;
 
   constructor(
+    private route: ActivatedRoute,
     private adminEventService: AdminEventService,
     private configService: configService,
     private datePipe: HandleDatePipe,
@@ -44,24 +48,36 @@ export class EditEvent {
   ){
     this.configService.initData();
     this.initDataLoadEvent();
-    // this.formEvent = new FormGroup({
-    //   title: new FormControl({value: this.event?.title, disabled: true}, {validators:[ Validators.required ]}),
-    //   drawType: new FormControl({value: this.event?.eventType, disabled: true}, {validators:[ Validators.required ]}),
-    //   category: new FormControl({value: this.event?.categoryName, disabled: false}),
-    //   executionDate: new FormControl({value: this.event?.endDate, disabled: false}, {validators:[ Validators.required ]}),
-    //   winners: new FormControl({value: '', disabled: true}, {validators:[ Validators.required ]}),
-    //   description: new FormControl({value: this.event?.description, disabled: false}, {validators:[ Validators.required ]}),
-    // });
 
     this.adminEventService.selectedEvent$.subscribe(
       currentEvent => {
         this.eventAux = currentEvent ? {...currentEvent}: null;
         this.event = currentEvent;
-        console.log("[edicion] => evento seleccionado: ", this.event);
-        this.initForm();
+        // console.log("[edit-event] => evento seleccionado: ", this.event);
+        if(this.event){
+          this.initForm();
+        }
         // this.updateForm();
       }
     )
+  }
+
+  ngOnInit() {
+    this.eventIdParam = Number(this.route.snapshot.paramMap.get('eventId'));
+    // console.log("[edit-event] => ide del evento recibido por param: ", this.eventIdParam);
+    // revisamos si los datos del evento ya fueron seteados desde la lista de eventos
+    if(!this.event){
+      this.eventService.getEventById(""+this.eventIdParam).subscribe(
+        resp => {
+          // console.log("[edit-event] => evento recuperado por id de param: ", resp);
+          this.event = resp;
+          if(this.event){
+            this.initForm();
+            this.cdr.detectChanges();
+          }
+        }
+      )
+    }
   }
 
   public async onSaveChanges(){
@@ -100,7 +116,9 @@ export class EditEvent {
         },
         endDate: dataEvent.executionDate,
         winnersCount: dataEvent.winners,
-        image: dataEvent.image
+        image: dataEvent.image,
+        priceOfNumber: dataEvent.priceOfNumber,
+        quantityOfNumbers: dataEvent.quantityOfNumbers
       } as EventsCreate;
     }
 
@@ -133,6 +151,8 @@ export class EditEvent {
       winners: new FormControl({value: this.event?.winnersCount, disabled: true}, {validators:[ Validators.required ]}),
       description: new FormControl({value: this.event?.description, disabled: false}, {validators:[ Validators.required ]}),
       image: new FormControl({value: null, disabled: false}),
+      priceRaffle: new FormControl({value: this.event?.priceOfNumber, disabled: false}),
+      quantityNumbersRaffle: new FormControl({value: this.event?.quantityOfNumbers, disabled: false})
     });
   }
 
@@ -176,7 +196,9 @@ export class EditEvent {
       category: this.eventAux?.categoryId,
       executionDate: this.parseDate(dateEvent),
       winners: this.eventAux?.winnersCount,
-      description: this.eventAux?.description
+      description: this.eventAux?.description,
+      priceRaffle: this.eventAux?.priceOfNumber,
+      quantityNumbersRaffle: this.eventAux?.quantityOfNumbers
     });
   }
 

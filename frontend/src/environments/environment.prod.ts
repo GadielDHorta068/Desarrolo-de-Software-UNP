@@ -2,5 +2,6 @@
 // Nginx debe tener una regla que proxyee '/api' hacia el backend.
 export const environment = {
   production: true,
-  apiUrl: '/api'
+  // Same-origin sin prefijo /api
+  apiUrl: ''
 };

@@ -120,3 +120,10 @@ logging:
     com.zaxxer.hikari: DEBUG
     org.springframework.security: DEBUG
     com.desarrollo.raffy: DEBUG
+
+# Configuración de Evolution API
+evolution:
+  url: ${EVOLUTION_API_URL:http://evolution-api:8080}
+  apikey: ${EVOLUTION_API_KEY:change-me}
+  # Instancia por defecto opcional para simplificar llamadas
+  defaultInstance: ${EVOLUTION_INSTANCE:raffy}

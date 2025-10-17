@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ChatService } from '../../services/chat.service';
 import { AuthService, UserResponse } from '../../services/auth.service';
 import { Message } from '../../models/message.model';
-import { Observable, Subscription, switchMap, map, take } from 'rxjs';
+import { Observable, Subscription, take } from 'rxjs';
 
 @Component({
   selector: 'app-chat',
@@ -77,6 +77,11 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       complete: () => {
         // Conectar WS después de intentar cargar historial, exitoso o no
         this.chat.connect();
+        // Marcar como leído tras abrir (después de cargar y conectar)
+        this.chat.markAsRead(this.destinatarioId).pipe(take(1)).subscribe({
+          next: () => {},
+          error: () => {}
+        });
         this.scheduleScroll();
       }
     });

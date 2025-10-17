@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { Events, EventsCreate, EventsTemp, RaffleCreate, StatusEvent } from '../models/events.model';
+import { Events, EventsCreate, EventsTemp, EventTypes, RaffleCreate, StatusEvent } from '../models/events.model';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { UserDTO } from '../models/UserDTO';
@@ -26,6 +26,15 @@ export class EventsService {
     });
     // return this.http.post<EventsTemp[]>(`${this.apiUrl}/create/giveaway/${creatorId}`, event, { headers });
     return this.http.post<EventsTemp[]>(`${this.apiUrl}/create/${eventType}/${creatorId}`, event, { headers });
+  }
+
+  // recupera los datos de un evento segun el id recibido
+  getEventById(eventId: string): Observable<EventsTemp> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.get<EventsTemp>(`${this.apiUrl}/id/${eventId}`, { headers });
   }
 
   getEventsByParticipantId(userId: number): Observable<Events[]> {
@@ -105,11 +114,14 @@ export class EventsService {
         return this.http.get<number[]>(`${this.apiUrl}/raffle/${aRaffleId}/sold-numbers`);
     }
 
-    getParticipantUsersByEventId(anEventId: number): Observable<UserDTO[]> {
+    getParticipantUsersByEventId(anEventId: number, anEventType: EventTypes): Observable<UserDTO[]> {
         const headers = new HttpHeaders({
             'Authorization': `Bearer ${this.authService.getToken()}`,
             'Content-Type': 'application/json'
         });
-        return this.http.get<UserDTO[]>(`${this.apiUrl}/${anEventId}/get-users-participants`, { headers });
+        if (anEventType != EventTypes.RAFFLES) {
+            return this.http.get<UserDTO[]>(`${this.apiUrl}/${anEventId}/get-users-participants`, { headers });
+        }
+        return this.http.get<UserDTO[]>(`${this.apiUrl}/${anEventId}/get-raffle-owners`, { headers });
     }
 }

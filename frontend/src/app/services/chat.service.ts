@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { Message } from '../models/message.model';
+import { Message, UnreadChatSummary } from '../models/message.model';
 import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private wsUrl = `${environment.apiUrl.replace('/api', '')}/ws`;
+  // WebSocket same-origin: usar /ws, confiando en el proxy de Nginx
+  private wsUrl = `/ws`;
   private client: Client | null = null;
   private privateSub: StompSubscription | null = null;
 
@@ -96,6 +97,39 @@ export class ChatService {
         fechaEnvio: this.toIsoString((m as any).fechaEnvio),
       })))
     );
+  }
+
+  // Nuevo: obtener lista de peers con mensajes no leídos
+  getUnreadPeers(): Observable<UnreadChatSummary[]> {
+    return this.http.get<UnreadChatSummary[]>(`${environment.apiUrl}/api/chat/unread-peers`).pipe(
+      map(list => list.map(item => ({
+        ...item,
+        lastMessageTimestamp: this.toIsoString((item as any).lastMessageTimestamp) || new Date().toISOString()
+      })))
+    );
+  }
+
+  markAsRead(peerId: number): Observable<number> {
+    return this.http.put<number>(`${environment.apiUrl}/api/chat/mark-read/${peerId}`, {}).pipe(
+      tap(() => {
+        // Actualiza localmente el estado de leido en los mensajes de esta conversación
+        const current = this.messagesSubject.value;
+        const updated = current.map(m => {
+          if (this.activePeerId != null && (m.remitenteId === this.activePeerId || m.destinatarioId === this.activePeerId)) {
+            // Si yo soy el destinatario de mensajes de ese peer, marcarlos como leídos
+            if (m.remitenteId === this.activePeerId) {
+              return { ...m, leido: true } as Message;
+            }
+          }
+          return m;
+        });
+        this.messagesSubject.next(updated);
+      })
+    );
+  }
+
+  getUnreadCount(): Observable<number> {
+    return this.http.get<number>(`${environment.apiUrl}/api/chat/unread-count`);
   }
 
   sendMessage(message: Message): void {

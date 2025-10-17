@@ -1,5 +1,5 @@
 <!-- Card: encabezado con título y tabs -->
-<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow flex flex-col gap-4">
+<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow flex flex-col gap-4 m-1">
     <!-- Título -->
     <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ event?.title }}</h1>
     <hr class="border-gray-300 dark:border-gray-700" />
@@ -9,94 +9,62 @@
       <div class="flex space-x-6">
 
         <!-- Tab: Información -->
-        <span
-          class="pb-2 cursor-pointer font-semibold"
+        <span class="pb-2 cursor-pointer font-semibold"
           [ngClass]="{
-            'text-blue-600 border-b-2 border-blue-600': tab === 'info',
-            'text-gray-600 dark:text-gray-300': tab !== 'info'
-          }"
-          (click)="tab = 'info'"
-        >
-          Información
-        </span>
+            'text-blue-600 border-b-2 border-blue-600': isInfoTab(),
+            'text-gray-600 dark:text-gray-300': !isInfoTab()
+          }" (click)="tab = TAB_INFO"
+        >Información</span>
 
         <!-- Tab: Números -->
-        <span
-            *ngIf="event?.eventType === typesOfEventes.RAFFLES"
-          class="pb-2 cursor-pointer font-semibold"
+        <span *ngIf="event?.eventType === typesOfEventes.RAFFLES" class="pb-2 cursor-pointer font-semibold"
           [ngClass]="{
-            'text-blue-600 border-b-2 border-blue-600': tab === 'numeros',
-            'text-gray-600 dark:text-gray-300': tab !== 'numeros'
-          }"
-          (click)="tab = 'numeros'"
-        >
-          Números
-        </span>
+            'text-blue-600 border-b-2 border-blue-600': isNumbersTab(),
+            'text-gray-600 dark:text-gray-300': !isNumbersTab()
+          }" (click)="tab = TAB_NUMBERS"
+        >Números</span>
 
         <!-- Tab: Registrados -->
-        <span
-          class="pb-2 cursor-pointer font-semibold"
+        <span *ngIf="isUserCreator" class="pb-2 cursor-pointer font-semibold"
           [ngClass]="{
-            'text-blue-600 border-b-2 border-blue-600': tab === 'registrados',
-            'text-gray-600 dark:text-gray-300': tab !== 'registrados'
-          }"
-          (click)="setTab('registrados')"
-        >
-            Registrados
-        </span>
+            'text-blue-600 border-b-2 border-blue-600': isRegisteredTab(),
+            'text-gray-600 dark:text-gray-300': !isRegisteredTab()
+          }" (click)="setTab(TAB_REGISTERED)"
+        >Registrados</span>
+
       </div>
 
         <!-- Botón (solo visible en info o números) -->
         <button
-            *ngIf="tab === 'numeros'"
+            *ngIf="isNumbersTab()"
             (click)="addToCart()"
             class="h-9 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-sm"
         >
             Agregar al carrito
         </button>
-    </div>
-  </div>
 
-  <!-- Card: Contenido dinámico según tab -->
-  <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow flex-1 overflow-auto">
+    </div>
 
     <!-- TAB: Información -->
-    <div *ngIf="tab === 'info'" class="flex flex-col gap-4">
-        <div class="container">
-            <div class="max-w-2xl pb-2">
-                <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">Gestiona tu evento</h2>
+    <div *ngIf="isInfoTab()" class="flex flex-col gap-4">
+      <div class="rounded-[6px] p-[10px] border-2 border-[darkslategray]">
+        <div class="flex justify-between items-center">
+            <h3 class="text-[1.2rem] text-[mediumseagreen] pb-2">Información del evento</h3>
+            <button *ngIf="canUserInscript" class="bg-orange-600 dark:bg-orange-500 hover:bg-orange-700 dark:hover:bg-orange-600 text-white px-2 py-1 rounded-lg text-sm font-medium transition-colors"
+                (click)="onInscript()">Inscribirme</button>
+            <div *ngIf="canEdit && (event?.statusEvent == 'OPEN')" class="flex gap-1">
+                <button class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-2 py-1 rounded-lg text-sm font-medium transition-colors" routerLink="/event/management/edit/{{event?.id}}">Ir a edición</button>
+                <button class="bg-green-500 text-white py-[1px] px-2 rounded" title="Compartir" (click)="modalShareEvent.open()">
+                  <img class="w-6 h-6 filter invert" src="assets/link.png" alt="">
+                </button>
             </div>
-
-            <div class="rounded-[6px] p-[10px] border-2 border-[darkslategray]">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-[1.2rem] text-[mediumseagreen] pb-2">Información del evento</h3>
-                    <button *ngIf="canUserInscript" class="bg-orange-600 dark:bg-orange-500 hover:bg-orange-700 dark:hover:bg-orange-600 text-white px-2 py-1 rounded-lg text-sm font-medium transition-colors"
-                        (click)="onInscript()">Inscribirme</button>
-                    <div *ngIf="canEdit" class="flex gap-1">
-                        <button class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-2 py-1 rounded-lg text-sm font-medium transition-colors" routerLink="/event-edit">Ir a edición</button>
-                        <button class="bg-green-500 text-white py-[1px] px-2 rounded" title="Compartir" (click)="modalShareEvent.open()">
-                          <img class="w-6 h-6 filter invert" src="assets/link.png" alt="">
-                        </button>
-                    </div>
-                </div>
-                <app-info-event [event]="event"></app-info-event>
-            </div>
-            <!-- <div class="rounded-[6px] p-[10px] border-2 border-[darkslategray]">
-                <h3 class="pb-2">Compartir evento</h3>
-            </div> -->
-        
         </div>
-
-        <app-modal-info [dataModal]="dataModal" #modalInfo></app-modal-info>
-        <app-modal-share-event #modalShareEvent></app-modal-share-event>
-
-        <!-- incripcion a sorteo -->
-        <app-questionary *ngIf="showModalIncript" (close)="showModalIncript=false" [eventId]="selectedEventId"></app-questionary>
-
+          <app-info-event [event]="event"></app-info-event>
+        </div>
     </div>
 
-    <!-- TAB: Números -->
-    <div *ngIf="tab === 'numeros' && event?.eventType === typesOfEventes.RAFFLES" class="flex flex-col gap-4">
+    <!-- TAB: numeros -->
+    <div *ngIf="isNumbersTab() && event?.eventType === typesOfEventes.RAFFLES" class="flex flex-col gap-4">
       <div class="grid grid-cols-10 gap-2">
         <button
           *ngFor="let num of numeros"
@@ -115,7 +83,91 @@
     </div>
 
     <!-- TAB: Registrados -->
-    <div *ngIf="tab === 'registrados'" class="p-4">
+    <div *ngIf="isRegisteredTab()" class="p-4">
+      <div *ngIf="participants.length > 0; else noParticipants">
+        <table class="min-w-full border border-gray-300 dark:border-gray-700 rounded-lg shadow">
+          <thead>
+            <tr class="bg-gray-100 dark:bg-gray-700">
+              <th class="p-2 text-left">Nombre</th>
+              <th class="p-2 text-left">Apellido</th>
+              <th class="p-2 text-left">Email</th>
+              <th class="p-2 text-left">Podio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of participants" class="border-t border-gray-300 dark:border-gray-700">
+              <td class="p-2">{{ p.name }}</td>
+              <td class="p-2">{{ p.surname }}</td>
+              <td class="p-2">{{ p.email }}</td>
+              <td class="p-2">
+                <div>
+                  <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-semibold">
+                    <!-- <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17 3H7v2H3v2c0 2.21 1.79 4 4 4h.35c.41 1.16 1.52 2 2.83 2h4.64c1.31 0 2.42-.84 2.83-2H17c2.21 0 4-1.79 4-4V5h-4V3zm-1.16 10H8.16c-.38-.55-.6-1.21-.6-1.91V11h8v.09c0 .7-.22 1.36-.6 1.91zM5 7V6h2v1c0 .73-.41 1.37-1 1.72C5.41 8.37 5 7.73 5 7zm14 0c0 .73-.41 1.37-1 1.72-.59-.35-1-1-1-1.72V6h2v1z"/>
+                    </svg> -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 2a1 1 0 0 0-1 1v2H5a1 1 0 0 0-1 1v2c0 2.21 1.79 4 4 4h.09a5.002 5.002 0 0 0 9.82 0H16c2.21 0 4-1.79 4-4V6a1 1 0 0 0-1-1h-2V3a1 1 0 0 0-1-1H8zm1 4V4h6v2H9zm-4 2V7h2v1c0 .73-.41 1.37-1 1.72A2.003 2.003 0 0 1 5 8zm14 0a2.003 2.003 0 0 1-2 1.72c-.59-.35-1-1-1-1.72V7h2v1zM12 13a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 12 13zm-1 3h2v2h3v2H8v-2h3v-2z"/>
+                    </svg>
+                    GANADOR
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noParticipants>
+        <p class="text-gray-700 dark:text-gray-300 text-center italic">
+          No hay usuarios registrados todavía.
+        </p>
+      </ng-template>
+    </div>
+
+  </div>
+
+  <!-- Card: Contenido dinámico según tab -->
+  <!-- <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow flex-1 overflow-auto"> -->
+
+    <!-- TAB: Información -->
+    <!-- <div *ngIf="isInfoTab()" class="flex flex-col gap-4">
+      <div class="rounded-[6px] p-[10px] border-2 border-[darkslategray]">
+        <div class="flex justify-between items-center">
+            <h3 class="text-[1.2rem] text-[mediumseagreen] pb-2">Información del evento</h3>
+            <button *ngIf="canUserInscript" class="bg-orange-600 dark:bg-orange-500 hover:bg-orange-700 dark:hover:bg-orange-600 text-white px-2 py-1 rounded-lg text-sm font-medium transition-colors"
+                (click)="onInscript()">Inscribirme</button>
+            <div *ngIf="canEdit && (event?.statusEvent == 'OPEN')" class="flex gap-1">
+                <button class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-2 py-1 rounded-lg text-sm font-medium transition-colors" routerLink="/event/management/edit/{{event?.id}}">Ir a edición</button>
+                <button class="bg-green-500 text-white py-[1px] px-2 rounded" title="Compartir" (click)="modalShareEvent.open()">
+                  <img class="w-6 h-6 filter invert" src="assets/link.png" alt="">
+                </button>
+            </div>
+        </div>
+          <app-info-event [event]="event"></app-info-event>
+        </div>
+    </div> -->
+
+    <!-- TAB: Números -->
+    <!-- <div *ngIf="isNumbersTab() && event?.eventType === typesOfEventes.RAFFLES" class="flex flex-col gap-4">
+      <div class="grid grid-cols-10 gap-2">
+        <button
+          *ngFor="let num of numeros"
+          (click)="selectNumber(num)"
+          [disabled]="num.buyStatus"
+          class="w-20 h-20 flex items-center justify-center border rounded-lg shadow transition"
+          [ngClass]="{
+            'bg-red-500 bg-opacity-70 text-white cursor-not-allowed': num.buyStatus,
+            'bg-blue-600 text-white': num.selectStatus && !num.buyStatus,
+            'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-blue-100 dark:hover:bg-blue-600': !num.selectStatus && !num.buyStatus
+          }"
+        >
+          {{ num.ticketNumber }}
+        </button>
+      </div>
+    </div> -->
+
+    <!-- TAB: Registrados -->
+    <!-- <div *ngIf="isRegisteredTab()" class="p-4">
       <div *ngIf="participants.length > 0; else noParticipants">
         <table class="min-w-full border border-gray-300 dark:border-gray-700 rounded-lg shadow">
           <thead>
@@ -140,9 +192,22 @@
           No hay usuarios registrados todavía.
         </p>
       </ng-template>
-    </div>
+    </div> -->
 
-</div>
+<!-- </div> -->
+
+<app-modal-info [dataModal]="dataModal" #modalInfo></app-modal-info>
+<app-modal-share-event #modalShareEvent></app-modal-share-event>
+
+<!-- MODAL INSCRIPCION -->
+<!-- conectado al boton "addToCart" -->
+<app-questionary
+    *ngIf="showModalIncript"
+    [eventId]="selectedEventId"
+    [selectedRaffleNumbers]="selectedNumbers"
+    [eventType]="eventType"
+    (close)="onModalClosed()">
+</app-questionary>
 
 
 

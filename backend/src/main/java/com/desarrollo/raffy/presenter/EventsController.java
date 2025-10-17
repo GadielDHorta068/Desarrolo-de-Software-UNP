@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
@@ -497,17 +496,8 @@ public class EventsController {
 
     @PostMapping("/{eventId}/participants")
     public ResponseEntity<Object> registerParticipantToGiveaway(
-        @Valid @RequestBody GuestUser aGuestUser,
+        @Valid @RequestBody UserDTO aGuestUser,
         @PathVariable("eventId") Long aEventId) {
-            if (aGuestUser.getId() != null && aGuestUser.getId() != 0) {
-                return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Esta intentando crear un guest user. Este no puede tener un id definido.");
-            }
-            // normalizar id=0 a null para permitir persistencia con IDENTITY
-            if (aGuestUser.getId() != null && aGuestUser.getId() == 0) {
-                aGuestUser.setId(null);
-            }
 
             Events eventToParticipate = eventsService.getById(aEventId);
             if (eventToParticipate == null) {
@@ -521,7 +511,12 @@ public class EventsController {
             // chequea si ya existe el usuario en la base de datos
             if (userFromDb == null) {
                 // si el usuario no existe, lo guarda
-                savedGuestUser = userService.save(aGuestUser);
+                GuestUser guestUserToSave = new GuestUser();
+                guestUserToSave.setName(aGuestUser.getName());
+                guestUserToSave.setSurname(aGuestUser.getSurname());
+                guestUserToSave.setEmail(aGuestUser.getEmail());
+                guestUserToSave.setCellphone(aGuestUser.getCellphone());
+                savedGuestUser = userService.save(guestUserToSave);
             }
             else {
                 // si el usuario existe lo actualizo
@@ -542,69 +537,88 @@ public class EventsController {
     }
 
     @GetMapping("/raffle/{eventId}/sold-numbers")
-    public ResponseEntity<Object> getSoldNumbersById(@PathVariable("eventId") Long aRaffleId) {
-        try {
-            List<Integer> someSoldNumbers = raffleNumberService.findSoldNumbersById(aRaffleId);
-            if (someSoldNumbers == null) {
-                someSoldNumbers = Collections.emptyList();
+        public ResponseEntity<Object> getSoldNumbersById(@PathVariable("eventId") Long aRaffleId) {
+            try {
+                List<Integer> someSoldNumbers = raffleNumberService.findSoldNumbersById(aRaffleId);
+                if (someSoldNumbers == null) {
+                    someSoldNumbers = Collections.emptyList();
+                }
+                return ResponseEntity.ok(someSoldNumbers);
             }
-            return ResponseEntity.ok(someSoldNumbers);
+            catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+            } 
+            catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al obtener los números vendidos: " + e.getMessage());
         }
-        catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(e.getMessage());
-        } 
-        catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error al obtener los números vendidos: " + e.getMessage());
     }
-}
+
+    // DEBUG
+    // @PostMapping("/{eventId}/buy-raffle-number")
+    // public ResponseEntity<Object> buyRaffleNumber(
+    //         @RequestBody BuyRaffleNumberRequestDTO aRequest,
+    //         @PathVariable("eventId") Long aEventId) {
+
+    //     System.out.println("DTO recibido:");
+    //     System.out.println("User: " + aRequest.getAGuestUser());
+    //     System.out.println("Numbers: " + aRequest.getSomeNumbersToBuy());
+
+    //     return ResponseEntity.ok("ok");
+    // }
+
 
 
     @PostMapping("/{eventId}/buy-raffle-number")
     public ResponseEntity<Object> buyRaffleNumber(
         @Valid @RequestBody BuyRaffleNumberRequestDTO aBuyRequest,
         @PathVariable("eventId") Long aEventId) {
-            GuestUser aGuestUser = aBuyRequest.getAGuestUser();
-            if (aGuestUser.getId() != null && aGuestUser.getId() != 0) {
-                return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Esta intentando crear un guest user. Este no puede tener un id definido.");
-            }
-            // normalizar id=0 a null para permitir persistencia con IDENTITY
-            if (aGuestUser.getId() != null && aGuestUser.getId() == 0) {
-                aGuestUser.setId(null);
-            }
 
-            Raffle eventToParticipate = (Raffle) eventsService.getById(aEventId);
-            if (eventToParticipate == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("El evento con id " + aEventId + " no existe");
-            }
+        System.out.println("aBuyRequest: " + aBuyRequest);
+        System.out.println("aBuyRequest.getAGuestUser(): " + aBuyRequest.getAGuestUser());
+        UserDTO aGuestUser = aBuyRequest.getAGuestUser();
+        
+        // Buscar el evento (Raffle)
+        Raffle eventToParticipate = (Raffle) eventsService.getById(aEventId);
+        if (eventToParticipate == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("El evento con id " + aEventId + " no existe");
+        }
+    
+        // Buscar usuario existente o crear uno nuevo
+        User savedGuestUser;
+        User userFromDb = userService.findByEmail(aGuestUser.getEmail());
+    
+        if (userFromDb == null) {
+            // No existe → crear uno nuevo
+            GuestUser guestUserToSave = new GuestUser();
+            guestUserToSave.setName(aGuestUser.getName());
+            guestUserToSave.setSurname(aGuestUser.getSurname());
+            guestUserToSave.setEmail(aGuestUser.getEmail());
+            guestUserToSave.setCellphone(aGuestUser.getCellphone());
+            savedGuestUser = userService.save(guestUserToSave);
+        } else {
+            // Existe → actualizar datos
+            userFromDb.setName(aGuestUser.getName());
+            userFromDb.setSurname(aGuestUser.getSurname());
+            userFromDb.setCellphone(aGuestUser.getCellphone());
+            savedGuestUser = userService.save(userFromDb);
+        }
+    
+        // Crear los números comprados
+        @SuppressWarnings("unused")
+        List<RaffleNumber> someBoughtRaffleNumbers = 
+            raffleNumberService.createRaffleNumbers(
+                eventToParticipate,
+                savedGuestUser,
+                aBuyRequest.getSomeNumbersToBuy()
+            );
+    
+        return Response.ok(null, "Números adquiridos exitosamente");
+    }
 
-            User savedGuestUser;
-            User userFromDb = userService.findByEmail(aGuestUser.getEmail());
-            
-            // chequea si ya existe el usuario en la base de datos
-            if (userFromDb == null) {
-                // si el usuario no existe, lo guarda
-                savedGuestUser = userService.save(aGuestUser);
-            }
-            else {
-                // si el usuario existe lo actualizo
-                userFromDb.setName(aGuestUser.getName());
-                userFromDb.setSurname(aGuestUser.getSurname());
-                userFromDb.setCellphone(aGuestUser.getCellphone());
-                
-                savedGuestUser = userService.save(userFromDb);
-            }
-
-            @SuppressWarnings("unused")
-            List<RaffleNumber> someBoughtRaffleNumbers = raffleNumberService.createRaffleNumbers(eventToParticipate, savedGuestUser, aBuyRequest.getSomeNumbersToBuy());
-
-            return Response.ok(null, "Numeros adquiridos exitosamente"); // CAMBIAR!
-    } 
 
     @GetMapping("/giveaways/search")
     public ResponseEntity<?> searchGiveawaysByDateRange(
@@ -644,6 +658,7 @@ public class EventsController {
             return new ResponseEntity<>("Debe especificar el estado del evento (statusEvent)", HttpStatus.BAD_REQUEST);
         }
 
+        @SuppressWarnings("unused")
         StatusEvent requestedStatus;
         try {
             requestedStatus = StatusEvent.valueOf(statusStr.trim().toUpperCase());
@@ -665,6 +680,9 @@ public class EventsController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
+
+    // REFACTORIZAR LOS SIG DOS METODOS EN UNO
+    // QUE OBTENGAN EL TIPO DE EVENTO DE LA URL Y DECIDA COMO OBTENER LOS PARTICIPANTES
     @GetMapping("/{eventId}/get-users-participants")
     public ResponseEntity<Object> findUsersParticipantsByEventId(@PathVariable("eventId") Long anEventId) {
         try {
@@ -681,8 +699,20 @@ public class EventsController {
         }
     }
 
-    // @GetMapping("/{eventId}/get-raffle-owners")
-    // public ResponseEntity<Object> getRaffleOwnersByRaffleId() {
-           
-    // }
+    @GetMapping("/{eventId}/get-raffle-owners")
+    public ResponseEntity<Object> getRaffleOwnersByRaffleId(@PathVariable("eventId") Long aRaffleId) {
+        // validar q sea tipo rifa???
+        try {
+            List<User> raffleOwners = raffleNumberService.findRaffleOwnersByRaffleId(aRaffleId);
+            if (raffleOwners == null || raffleOwners.isEmpty()) {
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+            }
+
+            List<UserDTO> result = raffleOwners.stream().map(UserMapper::toDTO).toList();
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+        catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }    
+    }
 }

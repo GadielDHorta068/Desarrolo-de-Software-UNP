@@ -92,14 +92,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Orígenes permitidos en desarrollo y detrás de Cloudflare
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost",
-                "http://localhost:8080",
-                "http://localhost:4200",
-                "https://raffyfy.argcloud.com.ar",
-                "https://raffyfy.argcloud.com.ar:8080"
-        ));
+        // Orígenes permitidos: cualquiera
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
