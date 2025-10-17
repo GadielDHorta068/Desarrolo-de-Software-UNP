@@ -205,20 +205,26 @@ public class EventsService {
     }
 
     @Transactional
-    public List<Participant> finalizedEvent(Long eventId){
+    public List<?> finalizedEvent(Long eventId){
         Events event = eventsRepository.findById(eventId)
-            .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+        .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+        
         log.info("Finalizando evento: " + event.getTitle() + " con estado: " + event.getStatusEvent());
+        
         if (event.getStatusEvent() != StatusEvent.CLOSED) {
             throw new IllegalStateException("El evento debe estar cerrado para poder finalizarse");
         }
+
         // Cambia el estado del evento a FINALIZED
         event.setStatusEvent(StatusEvent.FINALIZED);
 
         //Delega la selección de ganadores a ParticipantService
-        List<Participant> winners = participantService.runEvent(event);
+        List<?> winners = participantService.runEvent(event);
+        
         log.info("Ganadores seleccionados: " + winners.size());
+        
         eventsRepository.save(event);
+        
         return winners;
     }
 

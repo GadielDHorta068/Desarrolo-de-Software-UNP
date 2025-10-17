@@ -24,7 +24,7 @@ import com.desarrollo.raffy.model.Participant;
 
 
 @Component
-public class GuessingContestWinnerStrategy implements WinnerSelectionStrategy {
+public class GuessingContestWinnerStrategy implements WinnerSelectionStrategy<Participant> {
 
     @Autowired
     private AuditLogsService auditLogsService;

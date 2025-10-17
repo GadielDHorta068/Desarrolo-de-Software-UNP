@@ -12,14 +12,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WinnerStrategyFactory {
 
-    private final List<WinnerSelectionStrategy> strategies;
+    private final List<WinnerSelectionStrategy<?>> strategies;
 
-    public WinnerSelectionStrategy getStrategy(EventTypes eventType){
-        return strategies.stream()
-        .filter(s -> s.supports(eventType))
-        .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException(
-            "No funciona el strategy para el tipo de evento: " + eventType
-        ));
+    @SuppressWarnings("unchecked")
+    public <T>WinnerSelectionStrategy<T> getStrategy(EventTypes eventType){
+        return (WinnerSelectionStrategy<T>) strategies.stream()
+                .filter(s -> s.supports(eventType))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "No funciona el strategy para el tipo de evento: " + eventType
+                ));
     }
 }

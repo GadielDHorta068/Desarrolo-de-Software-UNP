@@ -9,12 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.desarrollo.raffy.business.services.AuditLogsService;
-import com.desarrollo.raffy.business.services.RaffleNumberService;
 import com.desarrollo.raffy.model.AuditLog;
 import com.desarrollo.raffy.model.AuditParticipant;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
-import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
 
@@ -22,10 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class RaffleWinnerStrategyFactory implements WinnerSelectionStrategy {
+public class RaffleWinnerStrategyFactory implements WinnerSelectionStrategy<RaffleNumber> {
 
-    @Autowired
-    private RaffleNumberService raffleNumberService;
 
     @Autowired
     private AuditLogsService auditLogsService;
@@ -36,13 +32,13 @@ public class RaffleWinnerStrategyFactory implements WinnerSelectionStrategy {
     }
 
     @Override
-    public void selectWinners(Events event, List<Participant> participants) {
+    public void selectWinners(Events event, List<RaffleNumber> participants) {
         Raffle raffle = (Raffle) event;
 
         int winnersCount = raffle.getWinnersCount();
         
         //Buscamos los RaffleNumbers
-        List<RaffleNumber> numbers = raffleNumberService.findRaffleNumbersById(raffle.getId());
+        List<RaffleNumber> numbers = participants;
         if(numbers.isEmpty()){
             throw new RuntimeException("La rifa no tiene números asignados.");
         }
