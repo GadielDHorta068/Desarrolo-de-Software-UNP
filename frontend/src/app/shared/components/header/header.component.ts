@@ -1,7 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { ChatService } from '../../../services/chat.service';
+import { interval, Subscription, switchMap, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -10,14 +12,18 @@ import { AuthService } from '../../../services/auth.service';
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   currentUser: any = null;
   isMenuOpen = false;
   isUserMenuOpen = false;
+  unreadCount = 0;
+
+  private unreadSub?: Subscription;
 
   constructor(
     private authService: AuthService,
+    private chatService: ChatService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -31,12 +37,36 @@ export class HeaderComponent implements OnInit {
       this.isAuthenticated = isAuth;
       if (isAuth) {
         this.loadCurrentUser();
+        this.startUnreadPolling();
       } else {
         this.currentUser = null;
+        this.stopUnreadPolling();
+        this.unreadCount = 0;
       }
       // Forzar detección de cambios
       this.cdr.detectChanges();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.stopUnreadPolling();
+  }
+
+  private startUnreadPolling(): void {
+    this.stopUnreadPolling();
+    // Polling ligero cada 15s, arrancando inmediato
+    this.unreadSub = interval(15000).pipe(
+      startWith(0),
+      switchMap(() => this.chatService.getUnreadCount())
+    ).subscribe({
+      next: count => { this.unreadCount = count; this.cdr.detectChanges(); },
+      error: () => { /* ignorar errores para no romper el header */ }
+    });
+  }
+
+  private stopUnreadPolling(): void {
+    this.unreadSub?.unsubscribe();
+    this.unreadSub = undefined;
   }
 
   private loadCurrentUser(): void {

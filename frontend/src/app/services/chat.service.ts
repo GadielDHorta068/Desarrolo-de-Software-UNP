@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { Message } from '../models/message.model';
@@ -90,13 +90,36 @@ export class ChatService {
 
   loadHistory(destinatarioId: number): Observable<Message[]> {
     // Endpoint REST está bajo /api/chat en el backend
-    return this.http.get<Message[]>(`${environment.apiUrl}/chat/history/${destinatarioId}`).pipe(
+    return this.http.get<Message[]>(`${environment.apiUrl}/api/chat/history/${destinatarioId}`).pipe(
       // Normalizar a ISO string para que el date pipe funcione y respete el tipo
       map(list => list.map(m => ({
         ...m,
         fechaEnvio: this.toIsoString((m as any).fechaEnvio),
       })))
     );
+  }
+
+  markAsRead(peerId: number): Observable<number> {
+    return this.http.put<number>(`${environment.apiUrl}/api/chat/mark-read/${peerId}`, {}).pipe(
+      tap(() => {
+        // Actualiza localmente el estado de leido en los mensajes de esta conversación
+        const current = this.messagesSubject.value;
+        const updated = current.map(m => {
+          if (this.activePeerId != null && (m.remitenteId === this.activePeerId || m.destinatarioId === this.activePeerId)) {
+            // Si yo soy el destinatario de mensajes de ese peer, marcarlos como leídos
+            if (m.remitenteId === this.activePeerId) {
+              return { ...m, leido: true } as Message;
+            }
+          }
+          return m;
+        });
+        this.messagesSubject.next(updated);
+      })
+    );
+  }
+
+  getUnreadCount(): Observable<number> {
+    return this.http.get<number>(`${environment.apiUrl}/api/chat/unread-count`);
   }
 
   sendMessage(message: Message): void {

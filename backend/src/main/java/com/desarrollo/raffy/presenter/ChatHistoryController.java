@@ -5,8 +5,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,5 +38,28 @@ public class ChatHistoryController {
 
         List<Message> history = messageRepository.findConversation(currentUser.getId(), destinatarioId);
         return ResponseEntity.ok(history);
+    }
+
+    @PutMapping("/mark-read/{peerId}")
+    @Transactional
+    public ResponseEntity<?> markConversationAsRead(@PathVariable("peerId") Long peerId, Authentication authentication) {
+        String currentEmail = authentication.getName();
+        User currentUser = userRepository.findByEmail(currentEmail).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+        int updated = messageRepository.markAsRead(currentUser.getId(), peerId);
+        return ResponseEntity.ok().body(updated);
+    }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<Long> getUnreadCount(Authentication authentication) {
+        String currentEmail = authentication.getName();
+        User currentUser = userRepository.findByEmail(currentEmail).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+        long count = messageRepository.countUnread(currentUser.getId());
+        return ResponseEntity.ok(count);
     }
 }
