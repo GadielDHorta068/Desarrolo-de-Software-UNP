@@ -267,7 +267,7 @@ public class EventsController {
             //log.info("Evento obtenido: " + event.getTitle() + " - Tipo: " + event.getEventType());
             
             // Enviar correos a los ganadores con la plantilla personalizada
-/*             String eventTypeStr = event.getEventType() != null ? event.getEventType().toString() : "GIVEAWAYS";
+            String eventTypeStr = event.getEventType() != null ? event.getEventType().toString() : "GIVEAWAYS";
             //log.info("Iniciando envío de correos a los ganadores...");
             try {
                 // Preparar datos de contacto del creador del evento
@@ -311,7 +311,7 @@ public class EventsController {
                 log.error("❌ Error al enviar correos a los ganadores: " + e.getMessage(), e);
                 // Continuar aunque falle el envío de correos
             } 
-*/
+
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (IllegalStateException e) {
