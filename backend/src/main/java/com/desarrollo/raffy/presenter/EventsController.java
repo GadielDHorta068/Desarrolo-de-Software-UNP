@@ -481,27 +481,8 @@ public class EventsController {
                     .body("El evento con id " + aEventId + " no existe");
             }
 
-            User savedGuestUser;
-            User userFromDb = userService.findByEmail(aGuestUser.getEmail());
+            User savedGuestUser = createOrUpdateUser(aGuestUser);
             
-            // chequea si ya existe el usuario en la base de datos
-            if (userFromDb == null) {
-                // si el usuario no existe, lo guarda
-                GuestUser guestUserToSave = new GuestUser();
-                guestUserToSave.setName(aGuestUser.getName());
-                guestUserToSave.setSurname(aGuestUser.getSurname());
-                guestUserToSave.setEmail(aGuestUser.getEmail());
-                guestUserToSave.setCellphone(aGuestUser.getCellphone());
-                savedGuestUser = userService.save(guestUserToSave);
-            }
-            else {
-                // si el usuario existe lo actualizo
-                userFromDb.setName(aGuestUser.getName());
-                userFromDb.setSurname(aGuestUser.getSurname());
-                userFromDb.setCellphone(aGuestUser.getCellphone());
-                
-                savedGuestUser = userService.save(userFromDb);
-            }
             // intento guardar la participacion del usuario
             @SuppressWarnings("unused")
             Participant created = participantService.registerToGiveaway(savedGuestUser, eventToParticipate);
@@ -532,21 +513,6 @@ public class EventsController {
         }
     }
 
-    // DEBUG
-    // @PostMapping("/{eventId}/buy-raffle-number")
-    // public ResponseEntity<Object> buyRaffleNumber(
-    //         @RequestBody BuyRaffleNumberRequestDTO aRequest,
-    //         @PathVariable("eventId") Long aEventId) {
-
-    //     System.out.println("DTO recibido:");
-    //     System.out.println("User: " + aRequest.getAGuestUser());
-    //     System.out.println("Numbers: " + aRequest.getSomeNumbersToBuy());
-
-    //     return ResponseEntity.ok("ok");
-    // }
-
-
-
     @PostMapping("/{eventId}/buy-raffle-number")
     public ResponseEntity<Object> buyRaffleNumber(
         @Valid @RequestBody BuyRaffleNumberRequestDTO aBuyRequest,
@@ -564,24 +530,7 @@ public class EventsController {
         }
     
         // Buscar usuario existente o crear uno nuevo
-        User savedGuestUser;
-        User userFromDb = userService.findByEmail(aGuestUser.getEmail());
-    
-        if (userFromDb == null) {
-            // No existe → crear uno nuevo
-            GuestUser guestUserToSave = new GuestUser();
-            guestUserToSave.setName(aGuestUser.getName());
-            guestUserToSave.setSurname(aGuestUser.getSurname());
-            guestUserToSave.setEmail(aGuestUser.getEmail());
-            guestUserToSave.setCellphone(aGuestUser.getCellphone());
-            savedGuestUser = userService.save(guestUserToSave);
-        } else {
-            // Existe → actualizar datos
-            userFromDb.setName(aGuestUser.getName());
-            userFromDb.setSurname(aGuestUser.getSurname());
-            userFromDb.setCellphone(aGuestUser.getCellphone());
-            savedGuestUser = userService.save(userFromDb);
-        }
+        User savedGuestUser = createOrUpdateUser(aGuestUser);
     
         // Crear los números comprados
         @SuppressWarnings("unused")
@@ -593,6 +542,35 @@ public class EventsController {
             );
     
         return Response.ok(null, "Números adquiridos exitosamente");
+    }
+
+    private User createOrUpdateUser(UserDTO aUserCandidate) {
+        // User savedGuestUser;
+        User userFromDb = userService.findByEmail(aUserCandidate.getEmail());
+        
+        // chequea si ya existe el usuario en la base de datos
+        if (userFromDb == null) {
+            // si el usuario no existe:
+            // Crea un nuevo usuario
+            GuestUser guestUserToSave = new GuestUser();
+            guestUserToSave.setName(aUserCandidate.getName());
+            guestUserToSave.setSurname(aUserCandidate.getSurname());
+            guestUserToSave.setEmail(aUserCandidate.getEmail());
+            guestUserToSave.setCellphone(aUserCandidate.getCellphone());
+
+            // Guarda el nuevo usuario
+            return userService.save(guestUserToSave);
+        }
+        else {
+            // si el usuario existe:
+            // lo actualiza
+            userFromDb.setName(aUserCandidate.getName());
+            userFromDb.setSurname(aUserCandidate.getSurname());
+            userFromDb.setCellphone(aUserCandidate.getCellphone());
+            
+            // Guarda el usuario actualizado
+            return userService.save(userFromDb);
+        }
     }
 
 
