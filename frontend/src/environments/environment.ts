@@ -2,5 +2,6 @@
 // de Angular se encarga de la redirección al backend vía proxy.
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080'
+  // Same-origin sin prefijo /api
+  apiUrl: ''
 };
