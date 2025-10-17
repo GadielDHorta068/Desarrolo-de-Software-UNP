@@ -22,4 +22,13 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Modifying
     @Query("UPDATE Message m SET m.leido = true WHERE m.destinatarioId = :recipientId AND m.remitenteId = :senderId AND m.leido = false")
     int markAsRead(@Param("recipientId") Long recipientId, @Param("senderId") Long senderId);
+
+    @Query("""
+        SELECT m.remitenteId as peerId, COUNT(m) as unreadCount, MAX(m.fechaEnvio) as lastMessageAt
+        FROM Message m
+        WHERE m.destinatarioId = :recipientId AND m.leido = false
+        GROUP BY m.remitenteId
+        ORDER BY MAX(m.fechaEnvio) DESC
+    """)
+    List<Object[]> findUnreadPeersSummary(@Param("recipientId") Long recipientId);
 }

@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { ChatService } from '../../../services/chat.service';
 import { interval, Subscription, switchMap, startWith } from 'rxjs';
+import { UnreadChatSummary } from '../../../models/message.model';
 
 @Component({
   selector: 'app-header',
@@ -19,7 +20,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isUserMenuOpen = false;
   unreadCount = 0;
 
+  // Dropdown de chats no leídos
+  isUnreadOpen = false;
+  unreadPeers: UnreadChatSummary[] = [];
+
   private unreadSub?: Subscription;
+  private unreadPeersSub?: Subscription;
 
   constructor(
     private authService: AuthService,
@@ -38,10 +44,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
       if (isAuth) {
         this.loadCurrentUser();
         this.startUnreadPolling();
+        this.loadUnreadPeers();
       } else {
         this.currentUser = null;
         this.stopUnreadPolling();
         this.unreadCount = 0;
+        this.unreadPeers = [];
       }
       // Forzar detección de cambios
       this.cdr.detectChanges();
@@ -50,6 +58,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopUnreadPolling();
+    this.unreadPeersSub?.unsubscribe();
   }
 
   private startUnreadPolling(): void {
@@ -61,6 +70,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: count => { this.unreadCount = count; this.cdr.detectChanges(); },
       error: () => { /* ignorar errores para no romper el header */ }
+    });
+  }
+
+  private loadUnreadPeers(): void {
+    this.unreadPeersSub?.unsubscribe();
+    this.unreadPeersSub = this.chatService.getUnreadPeers().subscribe({
+      next: peers => { this.unreadPeers = peers; this.cdr.detectChanges(); },
+      error: () => {}
     });
   }
 
@@ -101,9 +118,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isUserMenuOpen = !this.isUserMenuOpen;
   }
 
+  toggleUnread(): void {
+    this.isUnreadOpen = !this.isUnreadOpen;
+    if (this.isUnreadOpen) {
+      this.loadUnreadPeers();
+    }
+  }
+
   closeMenus(): void {
     this.isMenuOpen = false;
     this.isUserMenuOpen = false;
+    this.isUnreadOpen = false;
+  }
+
+  openChat(peerId: number): void {
+    this.closeMenus();
+    this.router.navigate([`/chat/${peerId}`]);
   }
 
   logout(): void {

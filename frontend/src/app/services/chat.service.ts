@@ -4,7 +4,7 @@ import { environment } from '../../environments/environment';
 import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { Message } from '../models/message.model';
+import { Message, UnreadChatSummary } from '../models/message.model';
 import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
@@ -95,6 +95,16 @@ export class ChatService {
       map(list => list.map(m => ({
         ...m,
         fechaEnvio: this.toIsoString((m as any).fechaEnvio),
+      })))
+    );
+  }
+
+  // Nuevo: obtener lista de peers con mensajes no leídos
+  getUnreadPeers(): Observable<UnreadChatSummary[]> {
+    return this.http.get<UnreadChatSummary[]>(`${environment.apiUrl}/api/chat/unread-peers`).pipe(
+      map(list => list.map(item => ({
+        ...item,
+        lastMessageTimestamp: this.toIsoString((item as any).lastMessageTimestamp) || new Date().toISOString()
       })))
     );
   }
