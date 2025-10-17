@@ -10,5 +10,5 @@ public class CreateInstanceRequest {
     private Boolean qrcode = true;
     private String token;
     private String number;
-    private String integration; // e.g., WHATSAPP-BAILEYS or WHATSAPP-CLOUD
+    private String integration = "WHATSAPP-BAILEYS";
 }

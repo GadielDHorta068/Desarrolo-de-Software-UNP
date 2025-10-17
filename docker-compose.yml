@@ -69,6 +69,9 @@ services:
       # Clave de autenticación requerida por Evolution API (header 'apikey')
       AUTHENTICATION_TYPE: apikey
       AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-raffify2025}
+      # Versión del cliente WhatsApp Web que Baileys debe emular.
+      # Actualiza este valor cuando WhatsApp Web cambie y no se genere QR.
+      CONFIG_SESSION_PHONE_VERSION: "2.3000.1023204200"
       # Configuración de base de datos requerida por Evolution API v2
       DATABASE_ENABLED: "true"
       DATABASE_PROVIDER: postgresql
