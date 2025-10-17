@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -24,6 +24,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isUnreadOpen = false;
   unreadPeers: UnreadChatSummary[] = [];
 
+  // Tema
+  isDarkMode = false;
+
   private unreadSub?: Subscription;
   private unreadPeersSub?: Subscription;
 
@@ -31,12 +34,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private chatService: ChatService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private elRef: ElementRef<HTMLElement>
   ) {}
 
   ngOnInit(): void {
     // Inicializar datos del usuario si están disponibles
     this.authService.initializeUserData();
+
+    // Tema
+    this.initTheme();
     
     // Suscribirse al estado de autenticación
     this.authService.isAuthenticated$.subscribe(isAuth => {
@@ -59,6 +66,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.stopUnreadPolling();
     this.unreadPeersSub?.unsubscribe();
+  }
+
+  // Cerrar menús al hacer clic fuera
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as Node | null;
+    if (!target) return;
+    if (!this.elRef.nativeElement.contains(target)) {
+      this.closeMenus();
+      this.cdr.detectChanges();
+    }
+  }
+
+  // Cerrar con tecla Escape
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeMenus();
   }
 
   private startUnreadPolling(): void {
@@ -148,33 +172,34 @@ export class HeaderComponent implements OnInit, OnDestroy {
     });
   }
 
-  navigateToProfile(): void {
-    this.router.navigate(['/profile']);
-    this.closeMenus();
+  // Navegaciones directas ya no necesarias para desktop; se mantienen por compatibilidad móvil
+  navigateToProfile(): void { this.router.navigate(['/profile']); this.closeMenus(); }
+  navigateToSettings(): void { this.router.navigate(['/settings']); this.closeMenus(); }
+  navigateToHome(): void { this.router.navigate(['/']); this.closeMenus(); }
+  navigateToLogin(): void { this.router.navigate(['/login']); this.closeMenus(); }
+  navigateToRegister(): void { this.router.navigate(['/register']); this.closeMenus(); }
+  public navigateToAllDraws(): void { this.router.navigate(['/draws/all']); this.closeMenus(); }
+
+  // ------ Tema oscuro ------
+  toggleTheme(): void {
+    this.isDarkMode = !this.isDarkMode;
+    this.applyTheme();
+    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
   }
 
-  navigateToSettings(): void {
-    this.router.navigate(['/settings']);
-    this.closeMenus();
+  private initTheme(): void {
+    const stored = localStorage.getItem('theme');
+    if (stored === 'dark' || stored === 'light') {
+      this.isDarkMode = stored === 'dark';
+    } else {
+      // fallback al media query del sistema
+      this.isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    this.applyTheme();
   }
 
-  navigateToHome(): void {
-    this.router.navigate(['/']);
-    this.closeMenus();
-  }
-
-  navigateToLogin(): void {
-    this.router.navigate(['/login']);
-    this.closeMenus();
-  }
-
-  navigateToRegister(): void {
-    this.router.navigate(['/register']);
-    this.closeMenus();
-  }
-
-  public navigateToAllDraws(): void {
-    this.router.navigate(['/draws/all']);
-    this.closeMenus();
+  private applyTheme(): void {
+    const root = document.documentElement; // <html>
+    root.classList.toggle('dark', this.isDarkMode);
   }
 }

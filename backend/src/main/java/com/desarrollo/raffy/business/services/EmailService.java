@@ -559,6 +559,42 @@ public class EmailService {
     }
 
     /**
+     * Envía confirmación de compra de números de rifa al comprador.
+     * @param to Email del comprador
+     * @param buyerName Nombre completo del comprador
+     * @param eventId ID de la rifa para construir URL
+     * @param eventTitle Título del evento
+     * @param priceOfNumber Precio por número
+     * @param purchasedNumbers Lista de números adquiridos
+     */
+    public void sendRaffleNumbersPurchasedEmail(String to,
+                                                String buyerName,
+                                                Long eventId,
+                                                String eventTitle,
+                                                double priceOfNumber,
+                                                Collection<Integer> purchasedNumbers) {
+        if (to == null || to.isBlank()) return;
+        String eventUrl = frontendUrl + "/event/" + eventId;
+        String htmlContent = emailTemplateService.generateRaffleNumbersPurchasedTemplate(
+                buyerName, eventTitle, priceOfNumber, purchasedNumbers, eventUrl);
+
+        String textBody = "Hola " + buyerName + ",\n\n" +
+                "Gracias por tu compra. Has adquirido números para la rifa '" + eventTitle + "'.\n" +
+                "Precio por número: $" + String.format("%.2f", priceOfNumber) + "\n" +
+                "Números: " + (purchasedNumbers == null ? "" : purchasedNumbers.stream().sorted().map(String::valueOf).reduce((a,b) -> a + ", " + b).orElse("")) + "\n\n" +
+                "Puedes ver los detalles aquí: " + eventUrl + "\n\n" +
+                "Conserva este correo como comprobante de tu compra.";
+
+        try {
+            sendEmailWithInlineResources(to, "Confirmación de compra - Rafify", htmlContent,
+                    emailTemplateService.getDefaultInlineResources());
+        } catch (Exception e) {
+            // Fallback a HTML simple si falla inline resources
+            sendHtmlEmail(to, "Confirmación de compra - Rafify", htmlContent);
+        }
+    }
+
+    /**
      * Recurso inline para referenciar via CID en HTML.
      */
     public static class InlineResource {
