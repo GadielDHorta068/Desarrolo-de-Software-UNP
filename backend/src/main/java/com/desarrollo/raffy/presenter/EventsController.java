@@ -235,12 +235,15 @@ public class EventsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retorna los ganadores de un evento.
+     */
     @GetMapping("/winners/event/{eventId}")
     public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable("eventId") Long eventId){
         try {
             // Obtener los ganadores del evento
             List<Participant> winners = eventsService.finalizedEvent(eventId);
-            log.info("Número de ganadores obtenidos: " + winners.size());
+            //log.info("Número de ganadores obtenidos: " + winners.size());
             
             if(winners.isEmpty()){
                 return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
@@ -250,7 +253,7 @@ public class EventsController {
             List<WinnerDTO> response = winners.stream()
                 .map(this::toWinnerDTO)
                 .toList();
-            log.info("WinnerDTO generados: " + response.size());
+            //log.info("WinnerDTO generados: " + response.size());
             
             // Obtener la información del evento para enviar en los correos
             log.info("Obteniendo información del evento con ID: " + eventId);
@@ -259,11 +262,11 @@ public class EventsController {
                 log.warn("No se pudo obtener la información del evento con ID: " + eventId);
                 return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
             }
-            log.info("Evento obtenido: " + event.getTitle() + " - Tipo: " + event.getEventType());
+            //log.info("Evento obtenido: " + event.getTitle() + " - Tipo: " + event.getEventType());
             
             // Enviar correos a los ganadores con la plantilla personalizada
             String eventTypeStr = event.getEventType() != null ? event.getEventType().toString() : "GIVEAWAY";
-            log.info("Iniciando envío de correos a los ganadores...");
+            //log.info("Iniciando envío de correos a los ganadores...");
             try {
                 // Preparar datos de contacto del creador del evento
                 String creatorName = null;
@@ -414,6 +417,7 @@ public class EventsController {
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
+    //Mejorar para los filtros
     @GetMapping("/active")
     public ResponseEntity<?> getActiveEvents() {
         List<EventSummaryDTO> events = eventsService.getActiveEventSummaries();
