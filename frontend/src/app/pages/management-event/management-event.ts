@@ -139,8 +139,11 @@ export class ManagementEvent {
     // 1. Está autenticado
     // 2. No es el creador del evento
     // 3. No está ya registrado
-    return this.authService.isAuthenticated() && 
-            !this.isUserCreator && 
+    // return this.authService.isAuthenticated() && 
+    //         !this.isUserCreator && 
+    //         !this.event?.isUserRegistered &&
+    //         this.event?.statusEvent === StatusEvent.OPEN;
+    return !this.isUserCreator && 
             !this.event?.isUserRegistered &&
             this.event?.statusEvent === StatusEvent.OPEN;
   }

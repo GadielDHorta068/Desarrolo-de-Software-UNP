@@ -13,6 +13,7 @@ import { Observable } from 'rxjs';
 })
 export class LoaderImage implements OnChanges{
 
+  inMobile: boolean = false;
   selectedImage: File | null = null;
   imagePreview: string | null = null;
   currentImagePreview: string | null = null;
@@ -56,6 +57,8 @@ export class LoaderImage implements OnChanges{
       }
       this.cdr.detectChanges();
     });
+
+    this.inMobile = this.isMobile(); 
   }
 
   // detectamos el cambio del input q puede null inicialmente
@@ -182,6 +185,10 @@ export class LoaderImage implements OnChanges{
         this.changeSelectedImage.emit(this.selectedImage);
       });
     }
+  }
+
+  isMobile(): boolean {
+    return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
   }
 
 }

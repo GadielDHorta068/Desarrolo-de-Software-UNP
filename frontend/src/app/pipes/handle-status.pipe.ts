@@ -20,7 +20,7 @@ export class HandleStatusPipe implements PipeTransform {
       case 'BLOCKED' :
         newStatus = 'BLOQUEADO';
         break;
-      case 'FINISHED' :
+      case 'FINALIZED' :
         newStatus = 'FINALIZADO';
     }
 

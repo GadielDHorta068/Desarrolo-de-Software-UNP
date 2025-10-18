@@ -490,6 +490,11 @@ public class EventsController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("El evento con id " + aEventId + " no existe");
             }
+            // controlamos que el evento no haya cerrado
+            if(eventToParticipate.getStatusEvent() != StatusEvent.OPEN){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("El evento con id " + aEventId + " se encuentra cerrado. No es posible inscribirse.");
+            }
 
             User savedGuestUser;
             User userFromDb = userService.findByEmail(aGuestUser.getEmail());
