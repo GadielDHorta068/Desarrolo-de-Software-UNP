@@ -1,9 +1,11 @@
-package com.desarrollo.raffy.model;
+package com.desarrollo.raffy.model.auditlog;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.desarrollo.raffy.model.EventTypes;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

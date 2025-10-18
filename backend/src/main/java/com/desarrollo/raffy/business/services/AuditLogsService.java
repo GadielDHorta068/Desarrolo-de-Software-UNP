@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.desarrollo.raffy.business.repository.AuditLogsRepository;
-import com.desarrollo.raffy.model.AuditLog;
-import com.desarrollo.raffy.model.AuditParticipant;
+import com.desarrollo.raffy.model.auditlog.AuditLog;
 import com.desarrollo.raffy.model.EventTypes;
+import com.desarrollo.raffy.model.auditlog.AuditParticipant;
 
 import jakarta.transaction.Transactional;
 

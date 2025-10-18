@@ -9,13 +9,12 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.desarrollo.raffy.model.AuditLog;
-import com.desarrollo.raffy.model.AuditParticipant;
+import com.desarrollo.raffy.model.auditlog.AuditLog;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.Participant;
-
+import com.desarrollo.raffy.model.auditlog.AuditParticipant;
 import com.desarrollo.raffy.business.services.AuditLogsService;
 
 import lombok.extern.slf4j.Slf4j;

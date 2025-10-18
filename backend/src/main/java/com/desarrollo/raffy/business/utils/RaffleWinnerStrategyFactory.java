@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.desarrollo.raffy.business.services.AuditLogsService;
-import com.desarrollo.raffy.model.AuditLog;
-import com.desarrollo.raffy.model.AuditParticipant;
+import com.desarrollo.raffy.model.auditlog.AuditLog;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
+import com.desarrollo.raffy.model.auditlog.AuditParticipant;
 
 import lombok.extern.slf4j.Slf4j;
 

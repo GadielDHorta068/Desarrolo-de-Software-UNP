@@ -1,4 +1,4 @@
-package com.desarrollo.raffy.model;
+package com.desarrollo.raffy.model.auditlog;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

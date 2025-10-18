@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.desarrollo.raffy.business.services.AuditLogsService;
-import com.desarrollo.raffy.model.AuditLog;
-import com.desarrollo.raffy.model.AuditParticipant;
+import com.desarrollo.raffy.model.auditlog.AuditLog;
 import com.desarrollo.raffy.model.EventTypes;
+import com.desarrollo.raffy.model.auditlog.AuditParticipant;
 
 @RestController
 @RequestMapping("/audit")
