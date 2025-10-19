@@ -1,0 +1,28 @@
+<div
+    *ngIf="event?.eventType === typesOfEventes.RAFFLES" 
+    class="flex flex-col gap-4"
+>
+    <div>
+        <button
+        class="h-9 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-sm"
+        (click) = "purchaseNumbers()"
+        >
+            Adquirir numeros
+        </button>
+    </div>
+    <div class="grid grid-cols-10 gap-2">
+        <button
+          *ngFor="let num of numeros"
+          (click)="selectNumber(num)"
+          [disabled]="num.buyStatus"
+          class="w-20 h-20 flex items-center justify-center border rounded-lg shadow transition"
+          [ngClass]="{
+            'bg-red-500 bg-opacity-70 text-white cursor-not-allowed': num.buyStatus,
+            'bg-blue-600 text-white': num.selectStatus && !num.buyStatus,
+            'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-blue-100 dark:hover:bg-blue-600': !num.selectStatus && !num.buyStatus
+          }"
+        >
+          {{ num.ticketNumber }}
+        </button>
+    </div>
+</div>

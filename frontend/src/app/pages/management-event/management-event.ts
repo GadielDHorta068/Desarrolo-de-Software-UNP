@@ -213,7 +213,7 @@ export class ManagementEvent {
 
             this.selectedEventId = this.event.id;
             this.eventType = this.event.eventType;
-            this.selectedNumbers = seleccionados.map(n => n.ticketNumber); // 👈 guardamos los números
+            this.selectedNumbers = seleccionados.map(n => n.ticketNumber); // guardamos los números
             this.showModalIncript = true; // muestra el modal de Questionary
         }
     }
@@ -236,12 +236,6 @@ export class ManagementEvent {
         });
     }
 
-    // setTab(tabName: 'info' | 'numeros' | 'registrados'): void {
-    //     this.tab = tabName;
-    //     if (tabName === 'registrados' && this.event?.id) {
-    //         this.loadParticipants(this.event.id);
-    //     }
-    // }
     setTab(tabName: string): void {
         this.tab = tabName;
         console.log("[setTab] => pestaña seleccionada: ", this.tab, " - idEvent: ", this.event?.id);
