@@ -13,6 +13,7 @@ import { Subscription } from 'rxjs';
 import { InfoModal, ModalInfo } from '../modal-info/modal-info';
 import { EventsService } from '../../../services/events.service';
 import { NotificationService } from '../../../services/notification.service';
+import { DataStatusEvent } from '../../../models/response.model';
 
 @Component({
   selector: 'app-draw-card',
@@ -47,7 +48,8 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
     private eventsService: EventsService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private eventService: EventsService
   ){
     this.userCurrent = this.authService.getCurrentUserValue();
     // console.log("[card-event] => usuario actual: ", this.userCurrent);
@@ -116,15 +118,47 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     return this.isUserRegistered;
   }
 
-  onInscript(){
-    if(this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY){
-      // mostramos el form de inscripcion al sorteo
-      this.selectedEventId = this.event.id;
-      this.showFormGiveaway = true;
-    }
-    if(this.event?.id && this.event?.eventType == EventTypes.RAFFLES){
-      alert("Aca iria el componente de seleccion de nros de rifa")
-    }
+  // onInscript(){
+  //   if(this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY){
+  //     // mostramos el form de inscripcion al sorteo
+  //     this.selectedEventId = this.event.id;
+  //     this.showFormGiveaway = true;
+  //   }
+  //   if(this.event?.id && this.event?.eventType == EventTypes.RAFFLES){
+  //     alert("Aca iria el componente de seleccion de nros de rifa")
+  //   }
+  // }
+  onInscript() {
+    // controlamos que el evento este abierto
+    this.eventService.getStatusEventById("" + this.event?.id).subscribe({
+      next: (data) => {
+        console.log('[drawCard] => estado del evento: ', data);
+        const dataStatus: DataStatusEvent = data.data as DataStatusEvent;
+        // this.dataModal.message = "Estado del evento: ", dataStatus.status;
+        if (dataStatus.status == StatusEvent.OPEN) {
+          // TODO: aca permitimos la inscripcion    
+          if (this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY) {
+            // mostramos el form de inscripcion al sorteo
+            this.selectedEventId = this.event?.id;
+            this.showFormGiveaway = true;
+          }
+          if (this.event?.id && this.event?.eventType == EventTypes.RAFFLES) {
+            alert("Aca iria el componente de seleccion de nros de rifa")
+          }
+        }
+        else {
+          if (this.event) {
+            this.event.statusEvent = dataStatus.status as StatusEvent
+          }
+        }
+        this.modalInfoRef.open();       // no muestra el estado, ver
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al obtener el estado del evento:', err);
+        // console.error('Error al obtener el estado del evento:', err);
+      }
+    })
   }
 
   // modal de inscripcion a sorteos

@@ -99,13 +99,6 @@ export class ManagementEvent {
             this.eventService.getEventById("" + this.eventIdParam).subscribe(
                 resp => {
                     // console.log("[admin-event] => evento recuperado por id de param: ", resp);
-                    // this.event = resp;
-                    // if (this.event) {
-                    //     this.initForm();
-                    //     this.initRaffleNumbers();
-                    //     this.cdr.detectChanges();
-                    // }
-
                     this.adminEventService.setSelectedEvent(resp);
                 }
             )
@@ -167,11 +160,22 @@ export class ManagementEvent {
             next: (data) => {
                 console.log('[estadoEvento] => estado del evento: ', data);
                 const dataStatus: DataStatusEvent = data.data as DataStatusEvent;
-                this.dataModal.message = "Estado del evento: ", dataStatus.status;
-                console.log('[estadoEvento] => el estado del evento es: ', dataStatus.status);
-                // TODO: seguir aca
-                if(dataStatus.status != StatusEvent.OPEN){
-                    // TODO: aca dejar inscribirse!!    
+                // this.dataModal.message = "Estado del evento: ", dataStatus.status;
+                if(dataStatus.status == StatusEvent.OPEN){
+                    // TODO: aca permitimos la inscripcion    
+                    if (this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY) {
+                        // mostramos el form de inscripcion al sorteo
+                        this.selectedEventId = this.event?.id;
+                        this.showModalIncript = true;
+                    }
+                    if (this.event?.id && this.event?.eventType == EventTypes.RAFFLES) {
+                        alert("Aca iria el componente de seleccion de nros de rifa")
+                    }
+                }
+                else{
+                    if(this.event){
+                        this.event.statusEvent = dataStatus.status as StatusEvent
+                    }
                 }
                 this.modalInfoRef.open();       // no muestra el estado, ver
                 this.cdr.detectChanges();
@@ -181,16 +185,6 @@ export class ManagementEvent {
                 // console.error('Error al obtener el estado del evento:', err);
             }
         })
-        return;
-
-        if (this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY) {
-            // mostramos el form de inscripcion al sorteo
-            this.selectedEventId = this.event?.id;
-            this.showModalIncript = true;
-        }
-        if (this.event?.id && this.event?.eventType == EventTypes.RAFFLES) {
-            alert("Aca iria el componente de seleccion de nros de rifa")
-        }
     }
 
     // inicializamos la grilla de numeros de las rifas
@@ -265,7 +259,7 @@ export class ManagementEvent {
         this.eventService.getParticipantUsersByEventId(eventId, eventType).subscribe({
             next: (data) => {
                 this.participants = data;
-                console.log('[Participantes cargados]', data);
+                // console.log('[Participantes cargados]', data);
                 this.cdr.detectChanges();
             },
             error: (err) => {
@@ -282,18 +276,6 @@ export class ManagementEvent {
         if (!dataPlace)
             return { idUser: null, position: -1 }
 
-        // POR AHORA SOLO HASTA EL 3er premio
-        // if (dataPlace.userPosition == 1) {
-        //     return { goal: "1er PREMIO", idUser: dataPlace.id, position: ""+dataPlace.userPosition }
-        // }
-        // if (dataPlace.userPosition == 2) {
-        //     return { goal: "2do PREMIO", idUser: dataPlace.id, position: ""+dataPlace.userPosition }
-        // }
-        // if (dataPlace.userPosition == 3) {
-        //     return { goal: "#er PREMIO", idUser: dataPlace.id, position: ""+dataPlace.userPosition }
-        // }
-        // return null;
-        // return dataPlace.userPosition as number;
         return { idUser: dataPlace.id, position: dataPlace.userPosition as number }
     }
 
