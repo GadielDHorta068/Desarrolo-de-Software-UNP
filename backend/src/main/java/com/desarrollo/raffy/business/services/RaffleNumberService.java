@@ -126,9 +126,12 @@ public class RaffleNumberService {
                 .map(String::valueOf)
                 .collect(Collectors.joining(", "));
             String displayName = buyerName.trim().isEmpty() ? (aUser.getEmail() != null ? aUser.getEmail() : "Usuario") : buyerName.trim();
-            String msg = "Hola " + displayName + ", confirmamos tu compra de números para la rifa '" + aRaffle.getTitle() + "'. "
-                       + "Precio por número: $" + String.format("%.2f", aRaffle.getPriceOfNumber()) + ". "
-                       + "Números adquiridos: " + numbersText + ". ¡Gracias por participar!";
+            String msg = "Hola " + displayName + ",\n"
+                       + "*Confirmación de compra de números*\n"
+                       + "Rifa: _" + aRaffle.getTitle() + "_\n"
+                       + "Precio por número: *$" + String.format("%.2f", aRaffle.getPriceOfNumber()) + "*\n"
+                       + "Números adquiridos: " + numbersText + "\n"
+                       + "_¡Gracias por participar!_";
             sendWhatsAppText(aUser.getCellphone(), msg);
         } catch (Exception e) {
             System.err.println("⚠️ Error enviando WhatsApp de confirmación de compra: " + e.getMessage());

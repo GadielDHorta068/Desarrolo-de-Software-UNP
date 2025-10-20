@@ -176,14 +176,15 @@ public class EventsService {
             event.setStatusEvent(StatusEvent.CLOSED);
             eventsRepository.save(event);
             
-            // Notificar al creador con un breve resumen del cierre
             try {
                 int participantsCount = participantRepository.findParticipantsByEventId(event.getId()).size();
                 String categoryName = event.getCategory() != null ? event.getCategory().getName() : "";
                 String eventTypeText = event.getEventType() != null ? event.getEventType().name() : "EVENTO";
-                String msg = "Tu " + eventTypeText + " '" + event.getTitle() + "' ha sido CERRADO. "
-                           + "Categoría: " + categoryName + ", Participantes: " + participantsCount 
-                           + ", Finaliza: " + event.getEndDate() + ". Luego podrás finalizar para elegir ganadores.";
+                String msg = "Tu *" + eventTypeText + "* '" + event.getTitle() + "' ha sido *CERRADO*.\n"
+                           + "Categoría: _" + categoryName + "_\n"
+                           + "Participantes: *" + participantsCount + "*\n"
+                           + "Finaliza: " + event.getEndDate() + "\n"
+                           + "_Luego podrás finalizar para elegir ganadores._";
                 String creatorPhone = event.getCreator() != null ? event.getCreator().getCellphone() : null;
                 sendWhatsAppText(creatorPhone, msg);
             } catch (Exception ex) {
@@ -294,10 +295,12 @@ public class EventsService {
             for (Participant p : winners) {
                 User u = p.getParticipant();
                 String fullName = (u.getName() != null ? u.getName() : "") + " " + (u.getSurname() != null ? u.getSurname() : "");
-                String msg = "Hola " + fullName.trim() + ", ¡has ganado en la " + eventTypeText + " '" + event.getTitle() + "'! "
-                           + "Posición: " + p.getPosition() + ". Contacto del organizador: "
-                           + (creatorEmail != null ? ("Email " + creatorEmail) : "")
-                           + (creatorPhone != null ? (" | Tel " + creatorPhone) : "");
+                String msg = "Hola " + fullName.trim() + ",\n"
+                           + "¡Felicidades! Has ganado en la " + eventTypeText + " _" + event.getTitle() + "_.\n"
+                           + "Posición: *" + p.getPosition() + "*\n"
+                           + "Contacto del organizador:\n"
+                           + (creatorEmail != null ? ("Email: " + creatorEmail + "\n") : "")
+                           + (creatorPhone != null ? ("Tel: " + creatorPhone) : "");
                 sendWhatsAppText(u.getCellphone(), msg);
             }
         } catch (Exception ex) {
