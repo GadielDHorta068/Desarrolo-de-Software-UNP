@@ -5,7 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import java.util.Map;
+import java.util.HashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -35,6 +39,8 @@ import com.desarrollo.raffy.dto.GiveawaysDTO;
 import com.desarrollo.raffy.dto.GuessingContestDTO;
 import com.desarrollo.raffy.dto.RaffleDTO;
 
+import com.desarrollo.raffy.business.services.EvolutionService;
+
 @Service
 @Slf4j
 public class EventsService {
@@ -53,6 +59,12 @@ public class EventsService {
 
     @Autowired
     private ParticipantService participantService;
+
+    @Autowired 
+    private EvolutionService evolutionService;
+
+    @Value("${evolution.defaultInstance:raffy}")
+    private String defaultEvolutionInstance;
 
     @Transactional
     @Validated(OnCreate.class)
@@ -137,6 +149,20 @@ public class EventsService {
      * @return true si el evento se cerró correctamente, false si ya estaba cerrado o finalizado.
      * @throws RuntimeException si el evento no se encuentra o hay un error al guardar.
      */
+    private void sendWhatsAppText(String number, String text) {
+        try {
+            if (number == null || number.isBlank() || text == null || text.isBlank()) {
+                return;
+            }
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("number", number);
+            payload.put("text", text);
+            evolutionService.sendText(defaultEvolutionInstance, payload);
+        } catch (Exception e) {
+            log.error("Error enviando mensaje a {}: {}", number, e.getMessage());
+        }
+    }
+
     public boolean closeEvent(Long idEvent){
         try {
             Events event = eventsRepository.findById(idEvent)
@@ -149,6 +175,20 @@ public class EventsService {
             
             event.setStatusEvent(StatusEvent.CLOSED);
             eventsRepository.save(event);
+            
+            // Notificar al creador con un breve resumen del cierre
+            try {
+                int participantsCount = participantRepository.findParticipantsByEventId(event.getId()).size();
+                String categoryName = event.getCategory() != null ? event.getCategory().getName() : "";
+                String eventTypeText = event.getEventType() != null ? event.getEventType().name() : "EVENTO";
+                String msg = "Tu " + eventTypeText + " '" + event.getTitle() + "' ha sido CERRADO. "
+                           + "Categoría: " + categoryName + ", Participantes: " + participantsCount 
+                           + ", Finaliza: " + event.getEndDate() + ". Luego podrás finalizar para elegir ganadores.";
+                String creatorPhone = event.getCreator() != null ? event.getCreator().getCellphone() : null;
+                sendWhatsAppText(creatorPhone, msg);
+            } catch (Exception ex) {
+                log.warn("No se pudo enviar resumen de cierre: {}", ex.getMessage());
+            }
             
             return true;
         } catch (Exception e) {
@@ -215,10 +255,55 @@ public class EventsService {
         // Cambia el estado del evento a FINALIZED
         event.setStatusEvent(StatusEvent.FINALIZED);
 
+        
         //Delega la selección de ganadores a ParticipantService
         List<Participant> winners = participantService.runEvent(event);
         log.info("Ganadores seleccionados: " + winners.size());
         eventsRepository.save(event);
+
+        // Enviar resumen al creador con contactos de ganadores
+        try {
+            StringBuilder sb = new StringBuilder();
+            String eventTypeText = event.getEventType() != null && event.getEventType() == EventTypes.RAFFLES ? "rifa" : "sorteo";
+            sb.append("Tu ").append(eventTypeText).append(" '").append(event.getTitle()).append("' ha sido FINALIZADO.\n");
+            if (winners != null && !winners.isEmpty()) {
+                sb.append("Ganadores:\n");
+                for (Participant p : winners) {
+                    User u = p.getParticipant();
+                    String fullName = (u.getName() != null ? u.getName() : "") + " " + (u.getSurname() != null ? u.getSurname() : "");
+                    sb.append("- Posición ").append(p.getPosition())
+                      .append(": ").append(fullName.trim())
+                      .append(" | Email: ").append(u.getEmail() != null ? u.getEmail() : "-")
+                      .append(" | Tel: ").append(u.getCellphone() != null ? u.getCellphone() : "-")
+                      .append("\n");
+                }
+            } else {
+                sb.append("No hubo ganadores registrados.");
+            }
+            String creatorPhone = event.getCreator() != null ? event.getCreator().getCellphone() : null;
+            sendWhatsAppText(creatorPhone, sb.toString());
+        } catch (Exception ex) {
+            log.warn("No se pudo enviar resumen de finalización al creador: {}", ex.getMessage());
+        }
+
+        // Avisar a cada ganador del resultado con contacto del creador
+        try {
+            String creatorEmail = event.getCreator() != null ? event.getCreator().getEmail() : null;
+            String creatorPhone = event.getCreator() != null ? event.getCreator().getCellphone() : null;
+            String eventTypeText = event.getEventType() != null && event.getEventType() == EventTypes.RAFFLES ? "rifa" : "sorteo";
+            for (Participant p : winners) {
+                User u = p.getParticipant();
+                String fullName = (u.getName() != null ? u.getName() : "") + " " + (u.getSurname() != null ? u.getSurname() : "");
+                String msg = "Hola " + fullName.trim() + ", ¡has ganado en la " + eventTypeText + " '" + event.getTitle() + "'! "
+                           + "Posición: " + p.getPosition() + ". Contacto del organizador: "
+                           + (creatorEmail != null ? ("Email " + creatorEmail) : "")
+                           + (creatorPhone != null ? (" | Tel " + creatorPhone) : "");
+                sendWhatsAppText(u.getCellphone(), msg);
+            }
+        } catch (Exception ex) {
+            log.warn("No se pudo notificar a los ganadores: {}", ex.getMessage());
+        }
+
         return winners;
     }
 
