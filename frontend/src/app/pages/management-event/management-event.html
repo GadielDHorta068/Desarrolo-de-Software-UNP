@@ -53,7 +53,7 @@
           </button>
         </div>
       </div>
-      <app-info-event [event]="event"></app-info-event>
+      <app-info-event [event]="event" [winners]="winnersAudit"></app-info-event>
     </div>
   </div>
 
@@ -89,20 +89,8 @@
             <td class="p-2">{{ p.surname }}</td>
             <td class="p-2">{{ p.email }}</td>
             <td class="p-2">
-              <!-- <div *ngIf="getPlaceGoal(p) as dataGoal"> -->
               <div *ngIf="getPlaceGoal(p) as dataGoal" class="flex items-center gap-[5px]">
-                <span
-                  class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-semibold">
-                  <!-- <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17 3H7v2H3v2c0 2.21 1.79 4 4 4h.35c.41 1.16 1.52 2 2.83 2h4.64c1.31 0 2.42-.84 2.83-2H17c2.21 0 4-1.79 4-4V5h-4V3zm-1.16 10H8.16c-.38-.55-.6-1.21-.6-1.91V11h8v.09c0 .7-.22 1.36-.6 1.91zM5 7V6h2v1c0 .73-.41 1.37-1 1.72C5.41 8.37 5 7.73 5 7zm14 0c0 .73-.41 1.37-1 1.72-.59-.35-1-1-1-1.72V6h2v1z"/>
-                    </svg> -->
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-600" fill="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      d="M8 2a1 1 0 0 0-1 1v2H5a1 1 0 0 0-1 1v2c0 2.21 1.79 4 4 4h.09a5.002 5.002 0 0 0 9.82 0H16c2.21 0 4-1.79 4-4V6a1 1 0 0 0-1-1h-2V3a1 1 0 0 0-1-1H8zm1 4V4h6v2H9zm-4 2V7h2v1c0 .73-.41 1.37-1 1.72A2.003 2.003 0 0 1 5 8zm14 0a2.003 2.003 0 0 1-2 1.72c-.59-.35-1-1-1-1.72V7h2v1zM12 13a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 12 13zm-1 3h2v2h3v2H8v-2h3v-2z" />
-                  </svg>
-                  {{dataGoal.goal}}
-                </span>
+                <app-tag-prize [position]="dataGoal.position"></app-tag-prize>
                 <span class="font-bold"><a [routerLink]="['/chat', dataGoal.idUser]">Ir al chat</a></span>
               </div>
             </td>
@@ -122,8 +110,16 @@
 
 <app-modal-info [dataModal]="dataModal" #modalInfo></app-modal-info>
 <app-modal-share-event #modalShareEvent></app-modal-share-event>
-<!-- incripcion a sorteo -->
-<app-questionary *ngIf="showModalIncript" (close)="showModalIncript=false" [eventId]="selectedEventId"></app-questionary>
+
+<!-- MODAL INSCRIPCION -->
+<!-- conectado al boton "addToCart" -->
+<app-questionary
+    *ngIf="showModalIncript && selectedEventId"
+    [eventId]="selectedEventId"
+    [selectedRaffleNumbers]="selectedNumbers"
+    [eventType]="eventType"
+    (close)="onModalClosed()">
+</app-questionary>
 
 
 

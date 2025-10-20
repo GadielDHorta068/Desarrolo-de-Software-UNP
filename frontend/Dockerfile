@@ -1,29 +1,32 @@
-# Etapa de desarrollo optimizada para hot reload
-FROM node:22-alpine
+# Build stage
+FROM node:22-alpine AS build
 
-# Directorio de trabajo
 WORKDIR /app
 
-# Instalar dependencias del sistema
 RUN apk add --no-cache python3 make g++
 
-# Copiar archivos de configuración y dependencias
 COPY package*.json ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
+COPY angular.json ./
+COPY tsconfig*.json ./
+COPY src ./src
+COPY public ./public
 
-# Instalar dependencias
 RUN npm install --legacy-peer-deps
 
-# Exponer puerto
+# Genera artefactos de producción en dist/temp-angular
+RUN npm run build
+
+# Run stage (Nginx)
+FROM nginx:alpine AS run
+
+# Copiar configuración de Nginx específica de la SPA
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copiar artefactos construidos al docroot de Nginx
+COPY --from=build /app/dist/temp-angular/ /usr/share/nginx/html/
+
 EXPOSE 4200
 
-# Configurar variables de entorno para evitar problemas de memoria y optimizar hot reload
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-ENV CHOKIDAR_USEPOLLING=true
-ENV CHOKIDAR_INTERVAL=1000
-ENV WATCHPACK_POLLING=true
-ENV NODE_ENV=development
-
-# Comando por defecto
-CMD ["npm", "start"]
+CMD ["nginx", "-g", "daemon off;"]

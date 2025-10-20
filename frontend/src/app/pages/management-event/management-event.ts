@@ -15,214 +15,254 @@ import { ModalShareEvent } from '../../shared/components/modal-share-event/modal
 import { QuestionaryComponent } from '../questionary/questionary.component';
 import { EventsService } from '../../services/events.service';
 import { UserDTO } from '../../models/UserDTO';
-import { AuditService, WinnersAudit } from '../../services/audit.service';
+import { WinnersAudit } from '../../services/audit.service';
+import { DataStatusEvent } from '../../models/response.model';
+import { TagPrize } from '../../shared/components/tag-prize/tag-prize';
 
 @Component({
-  selector: 'app-management-event',
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent, HandleDatePipe, EventShareCardComponent, ModalShareEvent, QuestionaryComponent],
-  templateUrl: './management-event.html',
-  styleUrl: './management-event.css',
-  providers: [HandleDatePipe]
+    selector: 'app-management-event',
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent, HandleDatePipe,
+            EventShareCardComponent, ModalShareEvent, QuestionaryComponent, TagPrize],
+    templateUrl: './management-event.html',
+    styleUrl: './management-event.css',
+    providers: [HandleDatePipe]
 })
 export class ManagementEvent {
-  @ViewChild('modalShareEvent') modalShareEvent!: ModalShareEvent;
-  @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
-  dataModal: InfoModal = {title: "Actualización de datos", message: ""};
+    @ViewChild('modalShareEvent') modalShareEvent!: ModalShareEvent;
+    @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
+    dataModal: InfoModal = { title: "Actualización de datos", message: "" };
 
-  // evento en contexto (debe ser seteado desde donde se quiere interactuar con el dato, por ej el boton de EDITAR)
-  event!: EventsTemp|null;
-  // event!: EventsTemp|RaffleCreate|null;
-  eventAux!: EventsTemp|null;
-  imageEvent: File|null = null;
-  eventIdParam!: Number|null;
+    // evento en contexto (debe ser seteado desde donde se quiere interactuar con el dato, por ej el boton de EDITAR)
+    event!: EventsTemp | null;
+    // event!: EventsTemp|RaffleCreate|null;
+    eventAux!: EventsTemp | null;
+    imageEvent: File | null = null;
+    eventIdParam!: Number | null;
 
-  formEvent!: FormGroup;
-  // tipos de sorteo
-  types: EventType[] = [];
-  // categorias de sorteo
-  categories: Category[] = [];
+    formEvent!: FormGroup;
+    // tipos de sorteo
+    types: EventType[] = [];
+    // categorias de sorteo
+    categories: Category[] = [];
 
-  // PRUEBA QUESTIONARY MODAL
-  showModalIncript = false;
-  selectedEventId!: number;
+    // PRUEBA QUESTIONARY MODAL
+    showModalIncript = false;
+    selectedEventId?: number;
 
-  readonly TAB_INFO = 'info';
-  readonly TAB_NUMBERS = 'numeros';
-  readonly TAB_REGISTERED = 'registrados';
+    // TABS
+    readonly TAB_INFO = 'info';
+    readonly TAB_NUMBERS = 'numeros';
+    readonly TAB_REGISTERED = 'registrados';
+    tab: string = this.TAB_INFO;
+    numeros: RaffleNumber[] = [];
+    selectedNumbers: number[] = [];
+    typesOfEventes = EventTypes;
+    participants: UserDTO[] = [];
+    eventType!: EventTypes;
+    winnersAudit: WinnersAudit[] = [];
 
-  // TABS
-  tab: string = this.TAB_INFO;
-  numeros: RaffleNumber[] = [];
-  typesOfEventes = EventTypes;
-  participants: UserDTO[] = [];
-  winnersAudit: WinnersAudit[] = [];
+    constructor(
+        private adminEventService: AdminEventService,
+        private handleDatePipe: HandleDatePipe,
+        private router: Router,
+        private route: ActivatedRoute,
+        private authService: AuthService,
+        private eventService: EventsService,
+        private cdr: ChangeDetectorRef
+    ) {
+        this.adminEventService.selectedEvent$.subscribe(
+            currentEvent => {
+                this.eventAux = currentEvent ? { ...currentEvent } : null;
+                this.event = currentEvent;
+                // console.log("[admin-event] => evento seleccionado: ", this.event);
+                if (this.event) {
+                    this.initForm();
+                    this.initRaffleNumbers();
+                    this.cdr.detectChanges();
+                }
+            }
+        )
 
-  constructor(
-    private adminEventService: AdminEventService,
-    private handleDatePipe: HandleDatePipe,
-    private router: Router,
-    private route: ActivatedRoute,
-    private authService: AuthService,
-    private eventService: EventsService,
-    private auditService: AuditService,
-    private cdr: ChangeDetectorRef
-  ){
-    this.adminEventService.selectedEvent$.subscribe(
-      currentEvent => {
-        this.eventAux = currentEvent ? {...currentEvent}: null;
-        this.event = currentEvent;
-        // console.log("[admin-event] => evento seleccionado: ", this.event);
-        if(this.event){
-          this.initForm();
-          this.initRaffleNumbers();
-        }
-      }
-    )
-  }
-
-  ngOnInit() {
-    this.eventIdParam = Number(this.route.snapshot.paramMap.get('eventId'));
-    // console.log("[admin-event] => ide del evento recibido por param: ", this.eventIdParam);
-    // revisamos si los datos del evento ya fueron seteados desde la lista de eventos
-    if(!this.event){
-      this.eventService.getEventById(""+this.eventIdParam).subscribe(
-        resp => {
-          // console.log("[admin-event] => evento recuperado por id de param: ", resp);
-          this.event = resp;
-          if(this.event){
-            this.initForm();
-            this.initRaffleNumbers();
-            this.cdr.detectChanges();
-          }
-        }
-      )
+        this.adminEventService.winnersEvent$.subscribe(
+            winners => {
+                this.winnersAudit = winners;
+                this.cdr.detectChanges();
+            }
+        )
     }
-  }
+
+    ngOnInit() {
+        this.eventIdParam = Number(this.route.snapshot.paramMap.get('eventId'));
+        // console.log("[admin-event] => ide del evento recibido por param: ", this.eventIdParam);
+        // revisamos si los datos del evento ya fueron seteados desde la lista de eventos
+        if (!this.event) {
+            this.eventService.getEventById("" + this.eventIdParam).subscribe(
+                resp => {
+                    // console.log("[admin-event] => evento recuperado por id de param: ", resp);
+                    // this.event = resp;
+                    // if (this.event) {
+                    //     this.initForm();
+                    //     this.initRaffleNumbers();
+                    //     this.cdr.detectChanges();
+                    // }
+
+                    this.adminEventService.setSelectedEvent(resp);
+                }
+            )
+        }
+    }
 
 
-  private initForm(){
-    let dateEvent = this.event?.endDate ? this.handleDatePipe.transform(this.event?.endDate): "";
+    private initForm() {
+        let dateEvent = this.event?.endDate ? this.handleDatePipe.transform(this.event?.endDate) : "";
 
-    this.formEvent = new FormGroup({
-      title: new FormControl({value: this.event?.title, disabled: true}, {validators:[ Validators.required ]}),
-      drawType: new FormControl({value: this.event?.eventType, disabled: true}, {validators:[ Validators.required ]}),
-      category: new FormControl({value: this.event?.categoryId, disabled: false}),
-      executionDate: new FormControl({value: this.parseDate(dateEvent), disabled: false}, {validators:[ Validators.required ]}),
-      winners: new FormControl({value: this.event?.winnersCount, disabled: true}, {validators:[ Validators.required ]}),
-      description: new FormControl({value: this.event?.description, disabled: false}, {validators:[ Validators.required ]}),
-      image: new FormControl({value: null, disabled: false}),
-    });
-    this.formEvent.disable();
-  }
+        this.formEvent = new FormGroup({
+            title: new FormControl({ value: this.event?.title, disabled: true }, { validators: [Validators.required] }),
+            drawType: new FormControl({ value: this.event?.eventType, disabled: true }, { validators: [Validators.required] }),
+            category: new FormControl({ value: this.event?.categoryId, disabled: false }),
+            executionDate: new FormControl({ value: this.parseDate(dateEvent), disabled: false }, { validators: [Validators.required] }),
+            winners: new FormControl({ value: this.event?.winnersCount, disabled: true }, { validators: [Validators.required] }),
+            description: new FormControl({ value: this.event?.description, disabled: false }, { validators: [Validators.required] }),
+            image: new FormControl({ value: null, disabled: false }),
+        });
+        this.formEvent.disable();
+    }
 
-  private parseDate(fecha: string): string {
-    const [dia, mes, anio] = fecha.split('-');
+    private parseDate(fecha: string): string {
+        const [dia, mes, anio] = fecha.split('-');
 
-    const diaFormateado = dia.padStart(2, '0');
-    const mesFormateado = mes.padStart(2, '0');
+        const diaFormateado = dia.padStart(2, '0');
+        const mesFormateado = mes.padStart(2, '0');
 
-    return `${anio}-${mesFormateado}-${diaFormateado}`;
-  }
+        return `${anio}-${mesFormateado}-${diaFormateado}`;
+    }
 
-  // Métodos para determinar qué botones mostrar
-  get canEdit(): boolean {
-    return this.authService.isAuthenticated() && this.isUserCreator;
-  }
+    // Métodos para determinar qué botones mostrar
+    get canEdit(): boolean {
+        return this.authService.isAuthenticated() && this.isUserCreator;
+    }
 
-  // Métodos para determinar qué botones mostrar
-  get isUserCreator(): boolean {
-    return this.authService.getCurrentUserValue()?.id === this.event?.creator?.id;
-  }
+    // Métodos para determinar qué botones mostrar
+    get isUserCreator(): boolean {
+        return this.authService.getCurrentUserValue()?.id === this.event?.creator?.id;
+    }
 
-  get canUserInscript(): boolean {
-    // El usuario puede inscribirse si:
-    // 1. Está autenticado
-    // 2. No es el creador del evento
-    // 3. No está ya registrado
-    // return this.authService.isAuthenticated() && 
-    //         !this.isUserCreator && 
-    //         !this.event?.isUserRegistered &&
-    //         this.event?.statusEvent === StatusEvent.OPEN;
-    return !this.isUserCreator && 
+    get canUserInscript(): boolean {
+        // El usuario puede inscribirse si:
+        // 1. Está autenticado
+        // 2. No es el creador del evento
+        // 3. No está ya registrado
+        // return this.authService.isAuthenticated() && 
+        //         !this.isUserCreator && 
+        //         !this.event?.isUserRegistered &&
+        //         this.event?.statusEvent === StatusEvent.OPEN;
+        return !this.isUserCreator &&
             !this.event?.isUserRegistered &&
             this.event?.statusEvent === StatusEvent.OPEN;
-  }
-
-  onInscript(){
-    if(this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY){
-      // mostramos el form de inscripcion al sorteo
-      this.selectedEventId = this.event.id;
-      this.showModalIncript = true;
     }
-    if(this.event?.id && this.event?.eventType == EventTypes.RAFFLES){
-      alert("Aca iria el componente de seleccion de nros de rifa")
-    }
-  }
 
-  // inicializamos la grilla de numeros de las rifas
+    onInscript() {
+        // controlamos que el evento este abierto
+        this.eventService.getStatusEventById(""+this.event?.id).subscribe({
+            next: (data) => {
+                console.log('[estadoEvento] => estado del evento: ', data);
+                const dataStatus: DataStatusEvent = data.data as DataStatusEvent;
+                this.dataModal.message = "Estado del evento: ", dataStatus.status;
+                console.log('[estadoEvento] => el estado del evento es: ', dataStatus.status);
+                // TODO: seguir aca
+                if(dataStatus.status != StatusEvent.OPEN){
+                    // TODO: aca dejar inscribirse!!    
+                }
+                this.modalInfoRef.open();       // no muestra el estado, ver
+                this.cdr.detectChanges();
+            },
+            error: (err) => {
+                console.error('Error al obtener el estado del evento:', err);
+                // console.error('Error al obtener el estado del evento:', err);
+            }
+        })
+        return;
+
+        if (this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY) {
+            // mostramos el form de inscripcion al sorteo
+            this.selectedEventId = this.event?.id;
+            this.showModalIncript = true;
+        }
+        if (this.event?.id && this.event?.eventType == EventTypes.RAFFLES) {
+            alert("Aca iria el componente de seleccion de nros de rifa")
+        }
+    }
+
+    // inicializamos la grilla de numeros de las rifas
     private initRaffleNumbers(): void {
         if (!this.event) {
-        //   console.warn('[Raffle] No hay evento cargado aún.');
-          return;
+            //   console.warn('[Raffle] No hay evento cargado aún.');
+            return;
         }
-    
-        // console.log('[Raffle] Evento cargado:', this.event);
-    
+
+
         if (this.event.eventType !== EventTypes.RAFFLES) {
-        //   console.log('[Raffle] El evento no es tipo RAFFLES. No se generan números.');
-          return;
+            //   console.log('[Raffle] El evento no es tipo RAFFLES. No se generan números.');
+            return;
         }
-    
+
         const total = this.event.quantityOfNumbers;
         if (!total || total <= 0) {
-          console.warn('[Raffle] quantityOfNumbers inválido:', total);
-          this.numeros = [];
-          return;
+            console.warn('[Raffle] quantityOfNumbers inválido:', total);
+            this.numeros = [];
+            return;
         }
-    
-        // console.log('[Raffle] Total de números a generar:', total);
-    
-        this.eventService.getSoldNumbersByRaffleId(this.event.id).subscribe({
-          next: (boughtNumbers: number[]) => {
-            console.log('[Raffle] Números vendidos recibidos:', boughtNumbers);
 
-            this.numeros = Array.from({ length: total }, (_, i) => ({
-              ticketNumber: i + 1,
-              buyStatus: boughtNumbers.includes(i + 1),
-              selectStatus: false
-            }));
-        
-            // console.log('[Raffle] Números generados:', this.numeros);
-            this.cdr.detectChanges(); // forzamos render
-          },
-          error: (err) => {
-            console.error('[Raffle] Error al obtener los números vendidos:', err);
-            // aunque haya error, podemos inicializar un array vacío para no romper la UI
-            this.numeros = Array.from({ length: total }, (_, i) => ({
-              ticketNumber: i + 1,
-              buyStatus: false,
-              selectStatus: false
-            }));
-            this.cdr.detectChanges();
-          }
+
+        this.eventService.getSoldNumbersByRaffleId(this.event.id).subscribe({
+            next: (boughtNumbers: number[]) => {
+
+                this.numeros = Array.from({ length: total }, (_, i) => ({
+                    ticketNumber: i + 1,
+                    buyStatus: boughtNumbers.includes(i + 1),
+                    selectStatus: false
+                }));
+
+                this.cdr.detectChanges(); // forzamos render
+            },
+            error: (err) => {
+                console.error('[Raffle] Error al obtener los números vendidos:', err);
+                // aunque haya error, podemos inicializar un array vacío para no romper la UI
+                this.numeros = Array.from({ length: total }, (_, i) => ({
+                    ticketNumber: i + 1,
+                    buyStatus: false,
+                    selectStatus: false
+                }));
+                this.cdr.detectChanges();
+            }
         });
     }
 
 
-    selectNumber(aRaffleNumber: RaffleNumber) :void {
-        if(!aRaffleNumber.buyStatus) {
-            aRaffleNumber.selectStatus = !aRaffleNumber.selectStatus; 
+    selectNumber(aRaffleNumber: RaffleNumber): void {
+        if (!aRaffleNumber.buyStatus) {
+            aRaffleNumber.selectStatus = !aRaffleNumber.selectStatus;
         }
     }
 
-    addToCart() : void {
-        const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
-        console.log('Números seleccionados:', seleccionados.map(n => n.ticketNumber));
-        alert('Seleccionados: ' + seleccionados.map(n => n.ticketNumber).join(', '));
+    addToCart(): void {
+        if (this.event?.id) {
+            const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
+
+            this.selectedEventId = this.event.id;
+            this.eventType = this.event.eventType;
+            this.selectedNumbers = seleccionados.map(n => n.ticketNumber); // 👈 guardamos los números
+            this.showModalIncript = true; // muestra el modal de Questionary
+        }
     }
 
-    loadParticipants(eventId: number): void {
-        this.eventService.getParticipantUsersByEventId(eventId).subscribe({
+    onModalClosed(): void {
+        this.showModalIncript = false; // oculta el modal
+        setTimeout(() => this.initRaffleNumbers(), 500); // refresca los números
+    }
+
+    loadParticipants(eventId: number, eventType: EventTypes): void {
+        this.eventService.getParticipantUsersByEventId(eventId, eventType).subscribe({
             next: (data) => {
                 this.participants = data;
                 console.log('[Participantes cargados]', data);
@@ -234,67 +274,47 @@ export class ManagementEvent {
         });
     }
 
-    // vamos a buscar los ganadores del sorteo si esta FINALIZADO
-    loadWinners(): void {
-      this.auditService.getAuditWinners(""+this.event?.id).subscribe({
-            next: (data) => {
-                // console.log('[ganadores-audit] => ganadores: ', data);
-                this.winnersAudit = data;
-                this.cdr.detectChanges();
-            },
-            error: (err) => {
-                console.error('Error al obtener los ganadores:', err);
-            }
-        });
-    }
-
     // devuelve el lugar en el podio
-    getPlaceGoal(dataUser: UserDTO){
-      // voy a buscar el dato de la lista de ganadores
-      const dataPlace = this.winnersAudit.find(winner => winner.userEmail == dataUser.email);
-      // console.log("[podio] => datos del ganador: ", dataPlace);
-      if(!dataPlace)
-        return null;
+    getPlaceGoal(dataUser: UserDTO): any {
+        // voy a buscar el dato de la lista de ganadores
+        const dataPlace = this.winnersAudit.find(winner => winner.userEmail == dataUser.email);
+        // console.log("[podio] => datos del ganador: ", dataPlace);
+        if (!dataPlace)
+            return { idUser: null, position: -1 }
 
-      // POR AHORA SOLO HASTA EL 3er premio
-      if(dataPlace.userPosition == 1){
-        return {goal: "1er PREMIO", idUser: dataPlace.id}
-      }
-      if(dataPlace.userPosition == 2){
-        return {goal: "2do PREMIO", idUser: dataPlace.id}
-      }
-      if(dataPlace.userPosition == 3){
-        return {goal: "#er PREMIO", idUser: dataPlace.id}
-      }
-      return null;
+        // POR AHORA SOLO HASTA EL 3er premio
+        // if (dataPlace.userPosition == 1) {
+        //     return { goal: "1er PREMIO", idUser: dataPlace.id, position: ""+dataPlace.userPosition }
+        // }
+        // if (dataPlace.userPosition == 2) {
+        //     return { goal: "2do PREMIO", idUser: dataPlace.id, position: ""+dataPlace.userPosition }
+        // }
+        // if (dataPlace.userPosition == 3) {
+        //     return { goal: "#er PREMIO", idUser: dataPlace.id, position: ""+dataPlace.userPosition }
+        // }
+        // return null;
+        // return dataPlace.userPosition as number;
+        return { idUser: dataPlace.id, position: dataPlace.userPosition as number }
     }
 
-    // setTab(tabName: 'info' | 'numeros' | 'registrados'): void {
-    //     this.tab = tabName;
-    //     if (tabName === 'registrados' && this.event?.id) {
-    //         this.loadParticipants(this.event.id);
-    //     }
-    // }
     setTab(tabName: string): void {
-      this.tab = tabName;
-      if (tabName === this.TAB_REGISTERED && this.event?.id) {
-          this.loadParticipants(this.event.id);
-          this.loadWinners();
-      }
+        this.tab = tabName;
+        if (tabName === this.TAB_REGISTERED && this.event?.id) {
+            this.loadParticipants(this.event.id, this.event.eventType);
+        }
     }
-  
-  // controles de pestaña
-  isRegisteredTab(): boolean {
-    return this.tab === this.TAB_REGISTERED;
-  }
 
-  isNumbersTab(): boolean {
-    return this.tab === this.TAB_NUMBERS;
-  }
+    // controles de pestaña
+    isRegisteredTab(): boolean {
+        return this.tab === this.TAB_REGISTERED;
+    }
 
-  isInfoTab(): boolean {
-    return this.tab === this.TAB_INFO;
-  }
+    isNumbersTab(): boolean {
+        return this.tab === this.TAB_NUMBERS;
+    }
 
+    isInfoTab(): boolean {
+        return this.tab === this.TAB_INFO;
+    }
 
 }

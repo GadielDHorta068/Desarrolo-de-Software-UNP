@@ -1,0 +1,8 @@
+<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold"
+    [ngClass]="getClassColor(position)">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+        <path
+            d="M8 2a1 1 0 0 0-1 1v2H5a1 1 0 0 0-1 1v2c0 2.21 1.79 4 4 4h.09a5.002 5.002 0 0 0 9.82 0H16c2.21 0 4-1.79 4-4V6a1 1 0 0 0-1-1h-2V3a1 1 0 0 0-1-1H8zm1 4V4h6v2H9zm-4 2V7h2v1c0 .73-.41 1.37-1 1.72A2.003 2.003 0 0 1 5 8zm14 0a2.003 2.003 0 0 1-2 1.72c-.59-.35-1-1-1-1.72V7h2v1zM12 13a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 12 13zm-1 3h2v2h3v2H8v-2h3v-2z" />
+    </svg>
+    {{getLabelGoal(position)}}
+</span>

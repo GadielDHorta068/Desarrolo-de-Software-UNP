@@ -7,9 +7,9 @@ module.exports = {
     "./src/**/*.component.html",
     "./src/**/*.component.ts"
   ],
-  // Configuración para modo oscuro que detecta automáticamente el tema del sistema
-  darkMode: 'media',
-  safelist: ['bg-red-500', 'bg-green-500', 'text-white'],
+  // Cambiamos a 'class' para que el toggle del tema pueda controlar el modo oscuro
+  darkMode: 'class',
+  safelist: ['bg-red-500', 'bg-green-500', 'text-white', 'dark'],
   theme: {
     extend: {
       // Aquí puedes personalizar el tema de Tailwind

@@ -2,13 +2,13 @@ package com.desarrollo.raffy.business.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.business.repository.RaffleNumberRepository;
-import com.desarrollo.raffy.dto.UserDTO;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
@@ -54,6 +54,9 @@ public class RaffleNumberService {
         }
     }
 
+    @Autowired
+    private EmailService emailService;
+
     @Transactional
     public List<RaffleNumber> createRaffleNumbers(Raffle aRaffle, User aUser, List<Integer> someNumbers) {
         List<RaffleNumber> result = new ArrayList<>();
@@ -68,6 +71,26 @@ public class RaffleNumberService {
                 // Remplazar por una excepcion mejor
                 throw new IllegalArgumentException("Estas intentando comprar un numero que ya tiene dueño");
             }
+        }
+        try {
+            // Construimos datos para el correo
+            String buyerName = (aUser.getName() != null ? aUser.getName() : "") +
+                               (aUser.getSurname() != null ? (" " + aUser.getSurname()) : "");
+            List<Integer> purchasedNumbers = result.stream()
+                .map(RaffleNumber::getNumber)
+                .sorted()
+                .collect(Collectors.toList());
+            emailService.sendRaffleNumbersPurchasedEmail(
+                aUser.getEmail(),
+                buyerName.trim().isEmpty() ? (aUser.getEmail() != null ? aUser.getEmail() : "Usuario") : buyerName.trim(),
+                aRaffle.getId(),
+                aRaffle.getTitle(),
+                aRaffle.getPriceOfNumber(),
+                purchasedNumbers
+            );
+        } catch (Exception e) {
+            System.err.println("⚠️ Error enviando correo de confirmación de números de rifa: " + e.getMessage());
+            e.printStackTrace();
         }
         return result;
     }

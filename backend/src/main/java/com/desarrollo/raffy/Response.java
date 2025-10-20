@@ -3,6 +3,7 @@ package com.desarrollo.raffy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +17,20 @@ public class Response {
 		map.put("data", responseObj);
 
 		return new ResponseEntity<Object>(map, status);
+	}
+
+	// response generico en caso exitoso
+	public static ResponseEntity<Object> responseOk(String message, Object responseObj) {
+		Map<String, Object> response = new HashMap<String, Object>();
+		
+		response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.OK.value());
+        response.put("data", responseObj);
+        response.put("message", message);
+        response.put("path", null);
+		response.put("error", null);
+
+		return new ResponseEntity<Object>(response, status);
 	}
 
 	public static ResponseEntity<Object> ok(Object responseObj) {
