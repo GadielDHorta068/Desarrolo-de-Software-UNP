@@ -15,7 +15,7 @@ import { HandleTypePipe } from '../../../pipes/handle-type.pipe';
   styleUrls: ['./audit-list.css']
 })
 export class AuditList {
-  audits: AuditLog[] = [];
+  /* audits: AuditLog[] = [];
   loading = true;
   nickname: string = '';
 
@@ -59,6 +59,6 @@ export class AuditList {
     const [year, month, day, hours = 0, minutes = 0, seconds = 0] = dateArray;
     const d = new Date(year, month - 1, day, hours, minutes, seconds);
     return d.toLocaleString();
-  }
+  } */
 
 }

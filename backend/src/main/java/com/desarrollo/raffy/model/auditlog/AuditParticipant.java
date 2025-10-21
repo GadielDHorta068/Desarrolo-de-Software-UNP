@@ -16,12 +16,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter @Getter
-@Table(name = "audit_participant")
+@Table(name = "audit_participants")
 public class AuditParticipant {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+   
+    @Column(name = "user_position", nullable = false)
+    private short userPosition;
 
     @Column(name = "user_name", nullable = false)
     private String userName;
@@ -34,8 +37,4 @@ public class AuditParticipant {
 
     @Column(name = "user_phone", nullable = true)
     private String userPhone;
-
-    @Column(name = "user_position", nullable = false)
-    private short userPosition;
-
 }

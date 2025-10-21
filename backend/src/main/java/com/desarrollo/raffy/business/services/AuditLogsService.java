@@ -1,15 +1,18 @@
 package com.desarrollo.raffy.business.services;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.desarrollo.raffy.business.repository.AuditLogsRepository;
-import com.desarrollo.raffy.model.auditlog.AuditLog;
+import com.desarrollo.raffy.business.repository.AuditActionRepository;
+import com.desarrollo.raffy.business.repository.AuditEventRepository;
 import com.desarrollo.raffy.model.EventTypes;
-import com.desarrollo.raffy.model.auditlog.AuditParticipant;
+import com.desarrollo.raffy.model.auditlog.AuditAction;
+import com.desarrollo.raffy.model.auditlog.AuditActionType;
+import com.desarrollo.raffy.model.auditlog.AuditEvent;
 
 import jakarta.transaction.Transactional;
 
@@ -17,38 +20,33 @@ import jakarta.transaction.Transactional;
 public class AuditLogsService {
     
     @Autowired
-    private AuditLogsRepository auditLogsRepository;
+    private AuditEventRepository auditEventRepository;
+
+    @Autowired
+    private AuditActionRepository actionRepository;
 
     @Transactional
-    public AuditLog save(AuditLog auditLog){
-        return auditLogsRepository.save(auditLog);
+    public AuditEvent save(AuditEvent auditevent){
+        return auditEventRepository.save(auditevent);
     }
 
     @Transactional
-    public List<AuditLog> getAuditLogByCreator(String nickname){
-        List<AuditLog> auditLogs = auditLogsRepository.getAuditLogByCreator(nickname)
-        .orElseThrow(() -> new IllegalArgumentException("Auditoria no encontrada."));
-        return auditLogs;
+    public List<AuditEvent> getAuditEventByCreator(String creator, EventTypes type, LocalDate start, LocalDate end){
+        List<AuditEvent> auditEvents = auditEventRepository.getEventsByCreator(creator,type,start,end);
+        return auditEvents;
     }
 
     @Transactional
-    public List<AuditLog> getAuditLogByCreator(
-        String nickname, 
-        String title, 
-        EventTypes type, 
-        LocalDateTime from, 
-        LocalDateTime to){
-        
-            
-            List<AuditLog> auditLogs = auditLogsRepository.getAuditLogByCreator(nickname,title,type,from,to)
-            .orElseThrow(() -> new IllegalArgumentException("Auditoria no encontrada."));
-            
-            return auditLogs;
+    public List<AuditAction> getActionsByFilters(Long eventId, AuditActionType action, LocalDateTime from, LocalDateTime to){
+        List<AuditAction> actions = actionRepository.getByFiltersAction(eventId, action, from, to);
+        return actions;
     }
 
     @Transactional
-    public List<AuditParticipant> getAuditLogWinnersByEventId(Long eventId){
-        List<AuditParticipant> auditParticipants = auditLogsRepository.getAuditLogWinnersByEventId(eventId);
-        return auditParticipants;
+    public AuditEvent getAuditEventById(Long eventId){
+        AuditEvent aEvent = auditEventRepository
+        .getAuditEventById(eventId)
+        .orElseThrow(() -> new IllegalArgumentException("No se encontro la auditoría"));
+        return aEvent;
     }
 }

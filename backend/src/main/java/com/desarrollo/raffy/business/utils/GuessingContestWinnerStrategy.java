@@ -1,7 +1,6 @@
 package com.desarrollo.raffy.business.utils;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -14,13 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.desarrollo.raffy.business.services.AuditLogsService;
-import com.desarrollo.raffy.model.auditlog.AuditLog;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.GuessAttempt;
 import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.Participant;
-import com.desarrollo.raffy.model.auditlog.AuditParticipant;
 
 
 @Component
@@ -88,32 +85,6 @@ public class GuessingContestWinnerStrategy implements WinnerSelectionStrategy<Pa
                 .findFirst()
                 .ifPresent(p -> p.setPosition((short) position.getAndIncrement()));
         }
-
-        // Registro de auditoría
-        AuditLog auditLog = new AuditLog();
-        auditLog.setExecuteDate(LocalDateTime.now());
-        auditLog.setCreatorNickname(contest.getCreator().getNickname());
-        auditLog.setSeed(null);
-        auditLog.setEventId(contest.getId());
-        auditLog.setEventTitle(contest.getTitle());
-        auditLog.setEventType(contest.getEventType());
-        auditLog.setEventStartDate(contest.getStartDate());
-        auditLog.setEventEndDate(contest.getEndDate());
-
-        List<AuditParticipant> auditParticipants = participants.stream()
-            .map(p -> new AuditParticipant(
-                null,
-                p.getParticipant().getName(),
-                p.getParticipant().getSurname(),
-                p.getParticipant().getEmail(),
-                p.getParticipant().getCellphone(),
-                p.getPosition()
-            ))
-            .toList();
-
-        auditLog.setParticipants(auditParticipants);
-
-        auditLogsService.save(auditLog);
     }
 
     /**

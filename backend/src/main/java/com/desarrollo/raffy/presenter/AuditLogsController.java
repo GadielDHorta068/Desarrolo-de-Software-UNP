@@ -1,5 +1,6 @@
 package com.desarrollo.raffy.presenter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,9 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.desarrollo.raffy.business.services.AuditLogsService;
-import com.desarrollo.raffy.model.auditlog.AuditLog;
 import com.desarrollo.raffy.model.EventTypes;
-import com.desarrollo.raffy.model.auditlog.AuditParticipant;
+import com.desarrollo.raffy.model.auditlog.AuditAction;
+import com.desarrollo.raffy.model.auditlog.AuditActionType;
+import com.desarrollo.raffy.model.auditlog.AuditEvent;
 
 @RestController
 @RequestMapping("/audit")
@@ -28,80 +30,66 @@ public class AuditLogsController {
     private AuditLogsService service;
 
     @PostMapping("/save")
-    public ResponseEntity<?> saveAuditLog(@RequestBody AuditLog auditLog){
+    public ResponseEntity<?> saveAuditLog(@RequestBody AuditEvent auditEvent){
         
-        if(auditLog.getCreatorNickname() == null || auditLog.getCreatorNickname().isBlank()) {
+        if(auditEvent.getEventId() == null) {
             return new ResponseEntity<>("No hay un usuario relacionado con la auditoria.", HttpStatus.BAD_REQUEST);
         }
 
-        if(auditLog.getExecuteDate() == null){
-            return new ResponseEntity<>("No hay fecha y hora de ejecución.", HttpStatus.BAD_REQUEST);
+        if(auditEvent.getStartDate() == null && auditEvent.getEndDate() == null){
+            return new ResponseEntity<>("No hay fecha.", HttpStatus.BAD_REQUEST);
         }
 
-        AuditLog auditLog2 = service.save(auditLog);
-        if(auditLog2 != null){   
-            return new ResponseEntity<>(auditLog2, HttpStatus.CREATED);
+        AuditEvent audit = service.save(auditEvent);
+        if(audit != null){   
+            return new ResponseEntity<>(audit, HttpStatus.CREATED);
         } else{
             return new ResponseEntity<>("Error al crear la Auditoria.", HttpStatus.BAD_REQUEST);
         }
     }
 
-
-    @GetMapping("/obtain/nickname/{userNickname}")
-    public ResponseEntity<?> getAuditLogByCreator(@PathVariable("userNickname") String userNickname){
+    @GetMapping("/filter/event/{creator}/{eventType}/{from}/{to}")
+    public ResponseEntity<?> getAuditsByCreator(
+        @PathVariable("creator") String creatorEvent,
+        @RequestParam(required = false) EventTypes eventTypes,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate from,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate to
+    ){
         try {
-
-            List<AuditLog> auditLogs = service.getAuditLogByCreator(userNickname);
-
-            if(auditLogs.isEmpty()){
-                return new ResponseEntity<>("No se encontraron Auditoria para el usuario: " + userNickname, HttpStatus.NOT_FOUND);
+            List<AuditEvent> auditEvents = service.getAuditEventByCreator(creatorEvent, eventTypes, from, to);
+            if(auditEvents.isEmpty()){
+                return new ResponseEntity<>("No hay auditoría para este usuario: " + creatorEvent + ". Revise si tienes sorteos creados", HttpStatus.BAD_REQUEST);
             }
 
-            return new ResponseEntity<>(auditLogs, HttpStatus.OK);
-        } catch (IllegalStateException e) {
-            return new ResponseEntity<>("Error al encontrar las auditorias", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(auditEvents, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error interno al obtener las auditorías: " + e.getMessage());
         }
     }
 
-    @GetMapping("/obtain/nickname/{userNickname}/{title}/{type}/{from}/{to}")
-    public ResponseEntity<?> getAuditLogByCreator(
-        @PathVariable("userNickname") String userNickname,
-        @RequestParam(required = false) String title,
-        @RequestParam(required = false) EventTypes type,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
-        ){
+    @GetMapping("/filter/action/{eventId}")
+    public ResponseEntity<?> getActionsByFilters(
+        @PathVariable("eventId") Long eventId,
+        @RequestParam(required = false) AuditActionType action,
+        @RequestParam(required = false) 
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+        @RequestParam(required = false) 
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
+    ) {
         try {
+            List<AuditAction> actions = service.getActionsByFilters(eventId, action, from, to);
 
-            // Validación de coherencia temporal
-            if (from != null && to != null && from.isAfter(to)) {
-                return new ResponseEntity<>("El rango de fechas es inválido: 'from' no puede ser posterior a 'to'.", HttpStatus.BAD_REQUEST);
-            }
-            
-            List<AuditLog> auditLogs = service.getAuditLogByCreator(userNickname,title,type,from,to);
-
-            if(auditLogs.isEmpty()){
-                return new ResponseEntity<>("No se encontraron Auditoria para el usuario: " + userNickname, HttpStatus.NOT_FOUND);
+            if (actions.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No se encontraron acciones para los filtros especificados.");
             }
 
-            return new ResponseEntity<>(auditLogs, HttpStatus.OK);
-        } catch (IllegalStateException e) {
-            return new ResponseEntity<>("Error al procesar la solicitud: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (Exception e){
-            return new ResponseEntity<>("Error interno al obtener auditorías: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-
+            return ResponseEntity.ok(actions);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error interno al obtener las acciones de auditoría: " + e.getMessage());
         }
     }
-
-    @GetMapping("/obtain/event/{eventId}/winners")
-    public ResponseEntity<?> getWinnersAuditByEvent(@PathVariable Long eventId) {
-        List<AuditParticipant> winners = service.getAuditLogWinnersByEventId(eventId);
-
-        if (winners.isEmpty()) {
-            return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(winners, HttpStatus.OK);
-    }
-
 }
