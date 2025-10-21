@@ -120,18 +120,25 @@
           <label for="cellphone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Teléfono <span class="text-gray-400 text-xs">(opcional)</span>
           </label>
-          <input
-            id="cellphone"
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-xl z-10" aria-hidden="true">🇦🇷</span>
+            <input
+              id="cellphone"
               type="tel"
               formControlName="cellphone"
+              (input)="onCellphoneInput($event)"
               (focus)="onFieldFocus('cellphone')"
               (blur)="onFieldBlur()"
-              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              maxlength="10"
+              class="appearance-none relative block w-full pl-12 pr-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
               [class.border-red-500]="getFieldError('cellphone')"
               [class.ring-4]="isFieldFocused('cellphone')"
               [class.ring-emerald-200]="isFieldFocused('cellphone')"
-              placeholder="+1234567890"
-          />
+              placeholder="2804123456"
+            />
+          </div>
           <div *ngIf="getFieldError('cellphone')" class="mt-1 text-sm text-red-600">
             {{ getFieldError('cellphone') }}
           </div>
