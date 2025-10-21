@@ -5,9 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { QuestionaryService } from '../../services/questionary.service';
 import { GuestUser } from './guestUser';
 import { NotificationService } from '../../services/notification.service';
-import { EventTypes } from '../../models/events.model';
+import { EventsTemp, EventTypes, StatusEvent } from '../../models/events.model';
 import { BuyRaffleNumberDTO } from '../../models/buyRaffleNumberDTO';
 import { UserDTO } from '../../models/UserDTO';
+import { EventsService } from '../../services/events.service';
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -21,19 +23,38 @@ import { UserDTO } from '../../models/UserDTO';
 export class QuestionaryComponent {
 
     @Input() eventId!: number;
-    @Input() eventType!: EventTypes;
-    @Input() selectedRaffleNumbers: number[] = [];
+
+    @Output() onInscript = new EventEmitter<UserDTO>();
     @Output() close = new EventEmitter<void>();
+
+    
+    // eventIdParam!: Number;
+    event!: EventsTemp | null;
+    allEventTypes = EventTypes;
+    allEventStates = StatusEvent;
 
     guestUser!: UserDTO;
 
     constructor(
+        private eventService: EventsService,
+        private activatedRoute: ActivatedRoute,
         private questionaryService: QuestionaryService,
         private notificationService: NotificationService
     ) {}
 
     ngOnInit() {
-        this.guestUser = <UserDTO> {};
+        const eventIdParam = this.eventId ?? Number(this.activatedRoute.snapshot.paramMap.get('eventId'));
+        if (eventIdParam != null) {
+            this.eventService.getEventById("" + eventIdParam).subscribe(
+                resp => {
+                    this.event = resp;
+                    if (this.event && this.event.statusEvent === this.allEventStates.OPEN) {
+                        this.guestUser = <UserDTO> {};
+                    }
+                    // HACER ALGO SI NO ESTA ABIERTO EL EVENTO
+                }
+            );
+        }
     }
 
     validatePhoneInput(event: KeyboardEvent) {
@@ -45,46 +66,13 @@ export class QuestionaryComponent {
         }
     }
 
+    onConfirmInscription(): void {
+        this.onInscript.emit(this.guestUser);
+        this.close.emit();
+    }
+
     closeModal(): void {
         this.close.emit();
     }
 
-    onSubmit(): void {
-        if (this.eventType != EventTypes.RAFFLES) {
-            this.questionaryService.save(
-                this.guestUser,
-                this.eventId //despues podria tener un objeto y usar un dto o algo asi
-            ).subscribe({
-                next: (response) => {
-                    console.log('Guardado en backend:', JSON.stringify(response)); // borrar
-                    this.notificationService.notifySuccess(response.message);
-                    this.closeModal();
-                },
-                error: (errorResponse) => {
-                    console.log('LOG ERROR:', JSON.stringify(errorResponse)); // borrar
-                    console.error('Error:', errorResponse);
-                    this.notificationService.notifyError(errorResponse.error.message);
-                }
-            });
-        }
-        else {
-            const request: BuyRaffleNumberDTO = {
-                aGuestUser: this.guestUser,
-                someNumbersToBuy: this.selectedRaffleNumbers
-            };
-            this.questionaryService.saveRaffleNumber(
-                this.eventId,
-                request
-            ).subscribe({
-                next: (response) => {
-                    this.notificationService.notifySuccess('Compra realizada con éxito');
-                    this.closeModal();
-                },
-                error: (errorResponse) => {
-                    console.error('Error en la compra:', errorResponse);
-                    this.notificationService.notifyError(errorResponse.error.message);
-                }
-            });
-        }
-    }
 }

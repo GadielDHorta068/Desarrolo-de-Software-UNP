@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-raffle-numbers.component',
+  selector: 'app-raffle-numbers',
   standalone: true,
   imports: [CommonModule, QuestionaryComponent],
   templateUrl: './raffle-numbers.component.html',
@@ -16,10 +16,10 @@ import { CommonModule } from '@angular/common';
 
 export class RaffleNumbersComponent {
 
-    @Output() closeRaffleNumberMmodal = new EventEmitter<void>()
+    @Output() closeRaffleNumberModal = new EventEmitter<void>()
     @Output() proceedToInscript = new EventEmitter<number[]>();
 
-    eventIdParam!: Number ;
+    eventIdParam!: Number;
     event!: EventsTemp | null;
     allEventTypes = EventTypes;
     actualEventType!: EventTypes;
@@ -48,33 +48,51 @@ export class RaffleNumbersComponent {
             this.eventService.getEventById("" + this.eventIdParam).subscribe(
                 resp => {
                     this.event = resp;
-                    if (this.event) {
+                    if (this.event && this.event.statusEvent === this.allEventStates.OPEN) {
                         this.initRaffleNumbers();
                     }
+                    // HACER ALGO SI NO ESTA ABIERTO EL EVENTO
+
                 }
             );
         }
     }
 
-    onModalClosed(): void {
-        this.showModalIncript = false; // oculta el modal
-        this.subscription?.unsubscribe(); // Elimina todas las subscripciones????
-        setTimeout(() => this.initRaffleNumbers(), 500); // refresca los números
-    }
-
+    // onModalClosed(): void {
+    //     this.showModalIncript = false; // oculta el modal
+    //     this.subscription?.unsubscribe(); // Elimina todas las subscripciones????
+    //     setTimeout(() => this.initRaffleNumbers(), 500); // refresca los números
+    // }
+    
     onConfirmSelection(): void {
         this.proceedToInscript.emit(this.selectedNumbers);
-        this.closeRaffleNumberMmodal.emit()
+        this.closeRaffleNumberModal.emit()
     }
     
     closeModal(): void {
-        this.closeRaffleNumberMmodal.emit();
+        this.subscription?.unsubscribe(); // Elimina todas las subscripciones????
+        this.closeRaffleNumberModal.emit();
     }
+
+    // selectNumber(aRaffleNumber: RaffleNumber): void {
+    //     if (!aRaffleNumber.buyStatus) {
+    //         aRaffleNumber.selectStatus = !aRaffleNumber.selectStatus;
+    //     }
+    // }
 
     selectNumber(aRaffleNumber: RaffleNumber): void {
         if (!aRaffleNumber.buyStatus) {
             aRaffleNumber.selectStatus = !aRaffleNumber.selectStatus;
+
+            if (aRaffleNumber.selectStatus) {
+                // Si se seleccionó, agregamos el número
+                this.selectedNumbers.push(aRaffleNumber.ticketNumber);
+            } else {
+                // Si se deseleccionó, lo removemos
+                this.selectedNumbers = this.selectedNumbers.filter(n => n !== aRaffleNumber.ticketNumber);
+            }
         }
+        console.log(this.selectNumber);
     }
 
     // inicializamos la grilla de numeros de las rifas
@@ -122,15 +140,15 @@ export class RaffleNumbersComponent {
         });
     }
 
-    purchaseNumbers(): void {
-        if (this.event?.statusEvent === this.allEventStates.OPEN) {
-            const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
-            this.selectedNumbers = seleccionados.map(n => n.ticketNumber); // guardamos los números
+    // purchaseNumbers(): void {
+    //     if (this.event?.statusEvent === this.allEventStates.OPEN) {
+    //         const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
+    //         this.selectedNumbers = seleccionados.map(n => n.ticketNumber); // guardamos los números
             
-            this.showModalIncript = true; // muestra el modal de Questionary
+    //         this.showModalIncript = true; // muestra el modal de Questionary
 
-            // this.selectedEventId = this.event.id;
-            // this.actualEventType = this.event.eventType;
-        }
-    }
+    //         // this.selectedEventId = this.event.id;
+    //         // this.actualEventType = this.event.eventType;
+    //     }
+    // }
 }

@@ -8,7 +8,7 @@
     
 
         <!-- Formulario -->
-        <form (ngSubmit) = "onSubmit()" class="space-y-4">
+        <form (ngSubmit) = "onConfirmInscription()" class="space-y-4">
 
             <!-- Inputs -->
             <div>
@@ -102,8 +102,9 @@
                 </button>
 
                 <button
-                    type="submit"
+                    type="button"
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg"
+                    (click) = "onConfirmInscription()"
                 >
                     Inscribirse
                 </button>
