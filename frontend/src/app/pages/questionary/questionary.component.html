@@ -1,116 +1,77 @@
 <!-- Overlay -->
-<div
-    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
->
-    <!-- Caja del modal -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg w-full max-w-md p-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Formulario de inscripción</h2>
-    
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  <!-- Caja del modal -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg w-full max-w-md p-6">
+    <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Formulario de inscripción</h2>
 
-        <!-- Formulario -->
-        <form (ngSubmit) = "onConfirmInscription()" class="space-y-4">
+    <!-- Formulario reactivo -->
+    <form [formGroup]="form" (ngSubmit)="onConfirmInscription()" class="space-y-4" novalidate>
 
-            <!-- Inputs -->
-            <div>
-                <label class = "block text-sm font-medium text-gray-700 dark:text-gray-200">Nombre</label>
-                <input
-                    type = "text"
-                    [(ngModel)] = "guestUser.name"
-                    name = "name"
-                    required
-                    #name = "ngModel"
-                    class = "w-full border rounded-lg px-3 py-2 focus:ring focus:ring-red-300 focus:outline-none
-                        bg-white text-gray-900
-                        dark:bg-gray-800 dark:text-gray-100"
-                />
-                <div *ngIf = "name.invalid && (name.dirty || name.touched)"
-                    class = "text-red-600 text-sm mt-1"                
-                >
-                    <div *ngIf = "name.errors?.['required']">
-                        El nombre es obligatorio.
-                    </div>
-                </div>
-            </div>
+      <!-- Nombre -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nombre</label>
+        <input
+          type="text"
+          formControlName="name"
+          class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-red-300 focus:outline-none bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+        />
+        <div *ngIf="nameControl?.invalid && (nameControl?.dirty || nameControl?.touched)" class="text-red-600 text-sm mt-1">
+          <div *ngIf="nameControl?.errors?.['required']">El nombre es obligatorio.</div>
+        </div>
+      </div>
 
-            <div>
-                <label class = "block text-sm font-medium text-gray-700 dark:text-gray-200">Apellido</label>
-                <input
-                    type = "text"
-                    [(ngModel)] = "guestUser.surname"
-                    name = "surname"
-                    required
-                    #surname = "ngModel"
-                    class = "w-full border rounded-lg px-3 py-2 focus:ring focus:ring-red-300 focus:outline-none
-                        bg-white text-gray-900
-                        dark:bg-gray-800 dark:text-gray-100"
-                />
-                <div *ngIf = "surname.invalid && (surname.dirty || surname.touched)"
-                    class = "text-red-600 text-sm mt-1"
-                >
-                    <div *ngIf = "surname.errors?.['required']">
-                        El apellido es obligatorio.
-                    </div>
-                </div>
-            </div>
+      <!-- Apellido -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Apellido</label>
+        <input
+          type="text"
+          formControlName="surname"
+          class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-red-300 focus:outline-none bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+        />
+        <div *ngIf="surnameControl?.invalid && (surnameControl?.dirty || surnameControl?.touched)" class="text-red-600 text-sm mt-1">
+          <div *ngIf="surnameControl?.errors?.['required']">El apellido es obligatorio.</div>
+        </div>
+      </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Email</label>
-                <input
-                    type = "email"
-                    [(ngModel)] = "guestUser.email"
-                    name = "email"
-                    required
-                    #email = "ngModel"
-                    class = "w-full border rounded-lg px-3 py-2 focus:ring focus:ring-red-300 focus:outline-none
-                        bg-white text-gray-900
-                        dark:bg-gray-800 dark:text-gray-100"
-                />
-                <div *ngIf = "email.invalid && (email.dirty || email.touched)"
-                    class = "text-red-600 text-sm mt-1"
-                >
-                    <div *ngIf = "email.errors?.['required']">
-                        El correo es obligatorio.
-                    </div>
-                    <div *ngIf = "email.errors?.['email']">
-                        El correo no tiene un formato válido.
-                    </div>
-                </div>
-            </div>
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Email</label>
+        <input
+          type="email"
+          formControlName="email"
+          class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-red-300 focus:outline-none bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+        />
+        <div *ngIf="emailControl?.invalid && (emailControl?.dirty || emailControl?.touched)" class="text-red-600 text-sm mt-1">
+          <div *ngIf="emailControl?.errors?.['required']">El correo es obligatorio.</div>
+          <div *ngIf="emailControl?.errors?.['email']">El correo no tiene un formato válido.</div>
+        </div>
+      </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Celular (opcional)</label>
-                <input
-                    type = "text"
-                    [(ngModel)] = "guestUser.cellphone"
-                    name = "cellphone"
-                    pattern = "^\+?[0-9]*$"
-                    (keypress) = "validatePhoneInput($event)"
-                    class = "w-full border rounded-lg px-3 py-2 focus:ring focus:ring-red-300 focus:outline-none
-                        bg-white text-gray-900
-                        dark:bg-gray-800 dark:text-gray-100"
-                />
-            </div>
+      <!-- Celular -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Celular (opcional)</label>
+        <input
+          type="text"
+          formControlName="cellphone"
+          (keypress)="validatePhoneInput($event)"
+          class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-red-300 focus:outline-none bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+        />
+      </div>
 
-            <!-- Botonera -->
-            <div class="flex justify-end space-x-2">
-                <button
-                    type="button"
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg"
-                    (click)="closeModal()"
-                >
-                    Cancelar
-                </button>
+      <!-- Botonera -->
+      <div class="flex justify-end space-x-2">
+        <button type="button" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg" (click)="closeModal()">
+          Cancelar
+        </button>
 
-                <button
-                    type="button"
-                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg"
-                    (click) = "onConfirmInscription()"
-                >
-                    Inscribirse
-                </button>
-            </div>
-        </form>
-    </div>
+        <button
+          type="submit"
+          [disabled]="form.invalid"
+          class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Inscribirse
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
-
-

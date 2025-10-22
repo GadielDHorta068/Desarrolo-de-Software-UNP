@@ -3,5 +3,5 @@
 export const environment = {
   production: false,
   // Same-origin sin prefijo /api
-  apiUrl: ''
+  apiUrl: 'http://localhost:8080'
 };

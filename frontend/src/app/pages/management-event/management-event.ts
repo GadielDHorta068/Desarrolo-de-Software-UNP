@@ -151,37 +151,28 @@ export class ManagementEvent {
     }
 
     onInscript() {
-    console.log('CLICK DETECTADO - eventType:', this.event?.eventType, 'Enum.RAFFLES:', EventTypes.RAFFLES);
-
-    if (this.event?.id && this.event?.eventType === EventTypes.GIVEAWAY) {
-        console.log('→ Entra en GIVEAWAY');
-        this.showModalIncript = true;
-        console.log('→ showModalIncript seteado');
-    }
-
-    if (this.event?.id && this.event?.eventType === EventTypes.RAFFLES) {
-        console.log('→ Entra en RAFFLE');
-
-        try {
-            this.showRaffleModal = true;
-            console.log('→ showRaffleModal seteado:', this.showRaffleModal);
-
-            this.cdr.detectChanges();
-            console.log('→ detectChanges() ejecutado correctamente');
-        } catch (err) {
-            console.error('💥 ERROR dentro de onInscript (bloque RAFFLE):', err);
+        
+        if (this.event?.id && this.event?.eventType === EventTypes.GIVEAWAY) {
+            this.showModalIncript = true;
         }
 
-        console.log('→ Fin del bloque RAFFLE');
+        if (this.event?.id && this.event?.eventType === EventTypes.RAFFLES) {
+
+            try {
+                this.showRaffleModal = true;
+                this.cdr.detectChanges();
+            } catch (err) {
+                console.error('ERROR dentro de onInscript (bloque RAFFLE):', err);
+            }
+
+        }
+
     }
 
-    console.log('→ Fin de onInscript completo');
-}
-
     onProceedToQuestionary(numbersToBuy: number[]): void {
-        console.log('Numeros como parametro' + numbersToBuy);
+        console.log('Numeros como parametro: ' + numbersToBuy);
         this.selectedRaffleNumbers = numbersToBuy;
-        console.log('Numeros ya asignados' + this.selectedRaffleNumbers);
+        console.log('Numeros ya asignados: ' + this.selectedRaffleNumbers);
 
         this.showRaffleModal = false;
         this.showModalIncript = true;
