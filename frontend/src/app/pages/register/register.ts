@@ -54,7 +54,7 @@ export class Register implements OnInit, OnDestroy {
       name: ['', [Validators.required, Validators.minLength(2)]],
       surname: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      cellphone: [''],
+      cellphone: ['', [Validators.maxLength(10), Validators.pattern(/^\d*$/)]],
       nickname: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
@@ -87,6 +87,11 @@ export class Register implements OnInit, OnDestroy {
 
       const { confirmPassword, ...registerData } = this.registerForm.value;
       const registerRequest: RegisterRequest = registerData;
+
+      // Formatear teléfono a número argentino guardado como 54 + dígitos
+      if (registerRequest.cellphone) {
+        registerRequest.cellphone = this.formatArgPhone(registerRequest.cellphone);
+      }
 
       this.authService.register(registerRequest).subscribe({
         next: (response) => {
@@ -147,6 +152,12 @@ export class Register implements OnInit, OnDestroy {
         const minLength = field.errors['minlength'].requiredLength;
         return `Debe tener al menos ${minLength} caracteres`;
       }
+      if (field.errors['maxlength']) {
+        return 'Máximo 10 dígitos';
+      }
+      if (field.errors['pattern']) {
+        return 'Solo números';
+      }
       if (field.errors['passwordMismatch']) {
         return 'Las contraseñas no coinciden';
       }
@@ -183,5 +194,15 @@ export class Register implements OnInit, OnDestroy {
   
   isFieldFocused(fieldName: string): boolean {
     return this.focusedField === fieldName;
+  }
+  onCellphoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = (input.value || '').replace(/\D/g, '').slice(0, 10);
+    this.registerForm.get('cellphone')?.setValue(digits, { emitEvent: false });
+  }
+  private formatArgPhone(input: string): string {
+    const digits = (input || '').replace(/\D/g, '');
+    if (!digits) return '';
+    return digits.startsWith('54') ? digits : '54' + digits;
   }
 }

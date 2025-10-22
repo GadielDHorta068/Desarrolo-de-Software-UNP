@@ -246,67 +246,27 @@ public class EventsService {
     }
 
     @Transactional
-    public List<Participant> finalizedEvent(Long eventId){
+    public List<?> finalizedEvent(Long eventId){
         Events event = eventsRepository.findById(eventId)
-            .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+        .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+        
         log.info("Finalizando evento: " + event.getTitle() + " con estado: " + event.getStatusEvent());
+        
         if (event.getStatusEvent() != StatusEvent.CLOSED) {
             throw new IllegalStateException("El evento debe estar cerrado para poder finalizarse");
         }
+
         // Cambia el estado del evento a FINALIZED
         event.setStatusEvent(StatusEvent.FINALIZED);
 
         
         //Delega la selección de ganadores a ParticipantService
-        List<Participant> winners = participantService.runEvent(event);
+        List<?> winners = participantService.runEvent(event);
+        
         log.info("Ganadores seleccionados: " + winners.size());
+        
         eventsRepository.save(event);
-
-        // Enviar resumen al creador con contactos de ganadores
-        try {
-            StringBuilder sb = new StringBuilder();
-            String eventTypeText = event.getEventType() != null && event.getEventType() == EventTypes.RAFFLES ? "rifa" : "sorteo";
-            sb.append("Tu ").append(eventTypeText).append(" '").append(event.getTitle()).append("' ha sido FINALIZADO.\n");
-            if (winners != null && !winners.isEmpty()) {
-                sb.append("Ganadores:\n");
-                for (Participant p : winners) {
-                    User u = p.getParticipant();
-                    String fullName = (u.getName() != null ? u.getName() : "") + " " + (u.getSurname() != null ? u.getSurname() : "");
-                    sb.append("- Posición ").append(p.getPosition())
-                      .append(": ").append(fullName.trim())
-                      .append(" | Email: ").append(u.getEmail() != null ? u.getEmail() : "-")
-                      .append(" | Tel: ").append(u.getCellphone() != null ? u.getCellphone() : "-")
-                      .append("\n");
-                }
-            } else {
-                sb.append("No hubo ganadores registrados.");
-            }
-            String creatorPhone = event.getCreator() != null ? event.getCreator().getCellphone() : null;
-            sendWhatsAppText(creatorPhone, sb.toString());
-        } catch (Exception ex) {
-            log.warn("No se pudo enviar resumen de finalización al creador: {}", ex.getMessage());
-        }
-
-        // Avisar a cada ganador del resultado con contacto del creador
-        try {
-            String creatorEmail = event.getCreator() != null ? event.getCreator().getEmail() : null;
-            String creatorPhone = event.getCreator() != null ? event.getCreator().getCellphone() : null;
-            String eventTypeText = event.getEventType() != null && event.getEventType() == EventTypes.RAFFLES ? "rifa" : "sorteo";
-            for (Participant p : winners) {
-                User u = p.getParticipant();
-                String fullName = (u.getName() != null ? u.getName() : "") + " " + (u.getSurname() != null ? u.getSurname() : "");
-                String msg = "Hola " + fullName.trim() + ",\n"
-                           + "¡Felicidades! Has ganado en la " + eventTypeText + " _" + event.getTitle() + "_.\n"
-                           + "Posición: *" + p.getPosition() + "*\n"
-                           + "Contacto del organizador:\n"
-                           + (creatorEmail != null ? ("Email: " + creatorEmail + "\n") : "")
-                           + (creatorPhone != null ? ("Tel: " + creatorPhone) : "");
-                sendWhatsAppText(u.getCellphone(), msg);
-            }
-        } catch (Exception ex) {
-            log.warn("No se pudo notificar a los ganadores: {}", ex.getMessage());
-        }
-
+        
         return winners;
     }
 

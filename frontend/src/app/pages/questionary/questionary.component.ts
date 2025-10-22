@@ -37,7 +37,7 @@ export class QuestionaryComponent {
     }
 
     validatePhoneInput(event: KeyboardEvent) {
-        const allowedChars = /[0-9+]/;
+        const allowedChars = /[0-9]/; // Solo dígitos
         const inputChar = event.key;
 
         if (!allowedChars.test(inputChar)) {
@@ -45,11 +45,28 @@ export class QuestionaryComponent {
         }
     }
 
+    onCellphoneInput(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const digits = (input.value || '').replace(/\D/g, '').slice(0, 10);
+        this.guestUser.cellphone = digits;
+    }
+
+    private formatArgPhone(input: string): string {
+        const digits = (input || '').replace(/\D/g, '');
+        if (!digits) return '';
+        return digits.startsWith('54') ? digits : '54' + digits;
+    }
+
     closeModal(): void {
         this.close.emit();
     }
 
     onSubmit(): void {
+        // Formatear teléfono: solo dígitos y prefijo 54 si corresponde
+        if (this.guestUser?.cellphone) {
+            this.guestUser.cellphone = this.formatArgPhone(this.guestUser.cellphone);
+        }
+
         if (this.eventType != EventTypes.RAFFLES) {
             this.questionaryService.save(
                 this.guestUser,
