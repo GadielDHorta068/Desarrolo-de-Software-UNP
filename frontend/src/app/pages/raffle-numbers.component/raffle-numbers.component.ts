@@ -92,7 +92,7 @@ export class RaffleNumbersComponent {
                 this.selectedNumbers = this.selectedNumbers.filter(n => n !== aRaffleNumber.ticketNumber);
             }
         }
-        console.log(this.selectNumber);
+        console.log('Numeros en el modal' + this.selectNumber);
     }
 
     // inicializamos la grilla de numeros de las rifas
