@@ -70,7 +70,7 @@ export class SettingsComponent implements OnInit {
       surname: ['', [Validators.required, Validators.minLength(2), this.onlyLettersValidator]],
       email: [{value: '', disabled: true}],
       nickname: ['', [Validators.required, Validators.minLength(3)]],
-      cellphone: ['', [this.onlyNumbersValidator]],
+      cellphone: ['', [this.onlyNumbersValidator, Validators.maxLength(10)]],
       imagen: ['']
     });
 
@@ -108,7 +108,7 @@ export class SettingsComponent implements OnInit {
     if (!control.value) {
       return null; // No validar si está vacío (campo opcional)
     }
-    const numbersOnlyRegex = /^[0-9+\s-]+$/;
+    const numbersOnlyRegex = /^[0-9]*$/;
     const valid = numbersOnlyRegex.test(control.value);
     return valid ? null : { onlyNumbers: true };
   }
@@ -122,7 +122,7 @@ export class SettingsComponent implements OnInit {
           surname: user.surname,
           email: user.email,
           nickname: user.nickname,
-          cellphone: user.cellphone || '',
+          cellphone: (user.cellphone ? user.cellphone.replace(/\D/g, '').slice(0, 10) : ''),
           imagen: user.imagen || ''
         });
         // Mostrar imagen actual si existe
@@ -152,6 +152,11 @@ export class SettingsComponent implements OnInit {
       // Incluir el email del usuario actual ya que el campo está deshabilitado
       if (this.currentUser && this.currentUser.email) {
         profileData.email = this.currentUser.email;
+      }
+      
+      // Formatear teléfono a número argentino guardado como 54 + dígitos
+      if (profileData.cellphone) {
+        profileData.cellphone = this.formatArgPhone(profileData.cellphone);
       }
       
       // Agregar imagen en base64 si existe una nueva seleccionada
@@ -285,6 +290,9 @@ export class SettingsComponent implements OnInit {
       if (field.errors['minlength']) {
         return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
       }
+      if (field.errors['maxlength']) {
+        return 'Máximo 10 dígitos';
+      }
       if (field.errors['passwordMismatch']) {
         return 'Las contraseñas no coinciden';
       }
@@ -292,7 +300,7 @@ export class SettingsComponent implements OnInit {
         return 'Solo se permiten letras';
       }
       if (field.errors['onlyNumbers']) {
-        return 'Solo se permiten números, espacios, guiones y el símbolo +';
+        return 'Solo números';
       }
     }
     return null;
@@ -649,5 +657,16 @@ export class SettingsComponent implements OnInit {
       }
       resolve(new File([u8arr], filename, { type: mime }));
     });
+  }
+
+  private formatArgPhone(input: string): string {
+    const digits = (input || '').replace(/\D/g, '');
+    if (!digits) return '';
+    return digits.startsWith('54') ? digits : '54' + digits;
+  }
+  onCellphoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = (input.value || '').replace(/\D/g, '').slice(0, 10);
+    this.profileForm.get('cellphone')?.setValue(digits, { emitEvent: false });
   }
 }

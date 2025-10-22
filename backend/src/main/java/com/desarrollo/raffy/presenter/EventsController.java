@@ -50,6 +50,7 @@ import com.desarrollo.raffy.dto.WinnerDTO;
 import org.modelmapper.ModelMapper;
 import java.util.stream.Collectors;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -234,12 +235,15 @@ public class EventsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retorna los ganadores de un evento.
+     */
     @GetMapping("/winners/event/{eventId}")
     public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable("eventId") Long eventId){
         try {
             // Obtener los ganadores del evento
-            List<Participant> winners = eventsService.finalizedEvent(eventId);
-            log.info("Número de ganadores obtenidos: " + winners.size());
+            List<?> winners = eventsService.finalizedEvent(eventId);
+            //log.info("Número de ganadores obtenidos: " + winners.size());
             
             if(winners.isEmpty()){
                 return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
@@ -248,21 +252,22 @@ public class EventsController {
             // Convertir la lista de participantes a WinnerDTO
             List<WinnerDTO> response = winners.stream()
                 .map(this::toWinnerDTO)
+                .filter(Objects::nonNull)
                 .toList();
-            log.info("WinnerDTO generados: " + response.size());
+            //log.info("WinnerDTO generados: " + response.size());
             
             // Obtener la información del evento para enviar en los correos
-            log.info("Obteniendo información del evento con ID: " + eventId);
+            //log.info("Obteniendo información del evento con ID: " + eventId);
             EventSummaryDTO event = eventsService.getEventSummaryById(eventId);
             if (event == null) {
                 log.warn("No se pudo obtener la información del evento con ID: " + eventId);
                 return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
             }
-            log.info("Evento obtenido: " + event.getTitle() + " - Tipo: " + event.getEventType());
+            //log.info("Evento obtenido: " + event.getTitle() + " - Tipo: " + event.getEventType());
             
             // Enviar correos a los ganadores con la plantilla personalizada
-            String eventTypeStr = event.getEventType() != null ? event.getEventType().toString() : "GIVEAWAY";
-            log.info("Iniciando envío de correos a los ganadores...");
+            String eventTypeStr = event.getEventType() != null ? event.getEventType().toString() : "GIVEAWAYS";
+            //log.info("Iniciando envío de correos a los ganadores...");
             try {
                 // Preparar datos de contacto del creador del evento
                 String creatorName = null;
@@ -304,7 +309,8 @@ public class EventsController {
             } catch (Exception e) {
                 log.error("❌ Error al enviar correos a los ganadores: " + e.getMessage(), e);
                 // Continuar aunque falle el envío de correos
-            }
+            } 
+
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (IllegalStateException e) {
@@ -336,17 +342,34 @@ public class EventsController {
         }
     }
 
-    private WinnerDTO toWinnerDTO(Participant participant) {
+    private WinnerDTO toWinnerDTO(Object winner) {
         WinnerDTO dto = new WinnerDTO();
-        dto.setParticipantId(participant.getParticipant().getId());
-        dto.setName(participant.getParticipant().getName());
-        dto.setSurname(participant.getParticipant().getSurname());
-        dto.setPosition(participant.getPosition());
-        dto.setEmail(participant.getParticipant().getEmail());
-        dto.setPhone(participant.getParticipant().getCellphone());
-        dto.setEventId(participant.getEvent().getId());
-        dto.setEventTitle(participant.getEvent().getTitle());
+        if(winner instanceof Participant participant){
+            dto.setParticipantId(participant.getParticipant().getId());
+            dto.setName(participant.getParticipant().getName());
+            dto.setSurname(participant.getParticipant().getSurname());
+            dto.setPosition(participant.getPosition());
+            dto.setEmail(participant.getParticipant().getEmail());
+            dto.setPhone(participant.getParticipant().getCellphone());
+            dto.setEventId(participant.getEvent().getId());
+            dto.setEventTitle(participant.getEvent().getTitle());
+        } else if (winner instanceof RaffleNumber raffleNumber) {
+            dto.setParticipantId(raffleNumber.getNumberOwner().getId());
+            dto.setName(raffleNumber.getNumberOwner().getName());
+            dto.setSurname(raffleNumber.getNumberOwner().getSurname());
+            dto.setEmail(raffleNumber.getNumberOwner().getEmail());
+            dto.setPhone(raffleNumber.getNumberOwner().getCellphone());
+            dto.setPosition(raffleNumber.getPosition());
+            dto.setEventId(raffleNumber.getRaffle().getId());
+            dto.setEventTitle(raffleNumber.getRaffle().getTitle());
+        } 
+        else {
+            log.warn("Tipo de ganador desconocido: {}", winner.getClass().getSimpleName());
+            return null;
+        }
+            
         return dto;
+            
     }
 
     private ParticipantDTO toParticipantDTO(Participant participant) {
@@ -413,6 +436,7 @@ public class EventsController {
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
+    //Mejorar para los filtros
     @GetMapping("/active")
     public ResponseEntity<?> getActiveEvents() {
         List<EventSummaryDTO> events = eventsService.getActiveEventSummaries();
