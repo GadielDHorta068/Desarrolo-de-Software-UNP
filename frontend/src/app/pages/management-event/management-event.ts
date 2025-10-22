@@ -179,9 +179,9 @@ export class ManagementEvent {
 }
 
     onProceedToQuestionary(numbersToBuy: number[]): void {
-        console.log('Numeros como parametro' + numbersToBuy);
+        console.log('Numeros como parametro: ' + numbersToBuy);
         this.selectedRaffleNumbers = numbersToBuy;
-        console.log('Numeros ya asignados' + this.selectedRaffleNumbers);
+        console.log('Numeros ya asignados: ' + this.selectedRaffleNumbers);
 
         this.showRaffleModal = false;
         this.showModalIncript = true;
