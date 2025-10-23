@@ -5,6 +5,7 @@ import { Events, EventsCreate, EventsTemp, EventTypes, RaffleCreate, StatusEvent
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { UserDTO } from '../models/UserDTO';
+import { Response } from '../models/response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +36,15 @@ export class EventsService {
       'Content-Type': 'application/json'
     });
     return this.http.get<EventsTemp>(`${this.apiUrl}/id/${eventId}`, { headers });
+  }
+
+  // recupera el estado de un evento segun el id recibido
+  getStatusEventById(eventId: string): Observable<Response> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.get<Response>(`${this.apiUrl}/status/id/${eventId}`, { headers });
   }
 
   getEventsByParticipantId(userId: number): Observable<Events[]> {

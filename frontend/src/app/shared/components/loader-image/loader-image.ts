@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { ParseFileService } from '../../../services/utils/parseFile.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-loader-image',
@@ -10,8 +11,9 @@ import { ParseFileService } from '../../../services/utils/parseFile.service';
   templateUrl: './loader-image.html',
   styleUrl: './loader-image.css'
 })
-export class LoaderImage {
+export class LoaderImage implements OnChanges{
 
+  inMobile: boolean = false;
   selectedImage: File | null = null;
   imagePreview: string | null = null;
   currentImagePreview: string | null = null;
@@ -26,6 +28,9 @@ export class LoaderImage {
 
   @Input() srcImage!: string|undefined;
   @Input() enabled!: boolean;
+  @Input() setTrigger!: Observable<any>;
+
+
   @Output() changeSelectedImage = new EventEmitter<File|null>();
 
   constructor(
@@ -38,10 +43,29 @@ export class LoaderImage {
     }
   }
 
+  ngOnInit() {
+    this.setTrigger?.subscribe((resp) => {
+      // console.log("[trigger] => dato recibido: ", resp);
+
+      // seteamos la imag del evento o nula si no la tiene
+      this.srcImage = resp ? "data:image/png;base64,"+resp: undefined;
+      this.croppedImage = resp ? ""+this.srcImage: '';
+      this.imagePreview = resp ? ""+this.srcImage: '';
+      if(!resp){
+        this.currentImagePreview = null;
+        this.selectedImage = null;
+      }
+      this.cdr.detectChanges();
+    });
+
+    this.inMobile = this.isMobile(); 
+  }
+
   // detectamos el cambio del input q puede null inicialmente
   ngOnChanges(changes: SimpleChanges) {
-    // console.log('[loaderImg] => Hubo cambios en el loader de la img!!');
+    // console.log("[loader] => Cambios detectados:", changes);
     if (changes['srcImage'] && changes['srcImage'].currentValue) {
+      // console.log("[srcImage] => se detecta el cambio: ", changes['srcImage'].currentValue);
       this.srcImage = "data:image/png;base64,"+changes['srcImage'].currentValue;
       // console.log('[loaderImg] => src de la img generada:', this.srcImage);
       this.cdr.detectChanges();
@@ -161,6 +185,10 @@ export class LoaderImage {
         this.changeSelectedImage.emit(this.selectedImage);
       });
     }
+  }
+
+  isMobile(): boolean {
+    return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
   }
 
 }

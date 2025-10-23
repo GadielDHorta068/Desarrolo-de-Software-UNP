@@ -4,7 +4,7 @@
     </div>
 
     <!-- form de datos del sorteo -->
-    <form [formGroup]="formEvent" (ngSubmit)="onSaveChanges()">
+    <form *ngIf="formEvent" [formGroup]="formEvent" (ngSubmit)="onSaveChanges()">
         <div class="grid-name-description-image">
             <div class="pt-2 item-name">
                 <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -36,66 +36,72 @@
                 <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Imagen de tu evento
                 </label>
-                <app-loader-image [enabled]="true" [srcImage]="event?.imageUrl" (changeSelectedImage)="onChangeSelectedImge($event)"></app-loader-image>
+                <app-loader-image [enabled]="true" [setTrigger]="setImageTrigger$" (changeSelectedImage)="onChangeSelectedImge($event)"></app-loader-image>
             </div>
         </div>
 
-        <div class="grid-custom-2 pt-2">
-            <!-- careacteristicas del sorteo, tipo y categoria -->
-            <div>
-                <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo (*)</label>
-                
-                <select formControlName="drawType" id="draw" class="bg-gray-800 text-white rounded-md px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  [ngClass]="formEvent.get('drawType')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' ">
-                    <option value="">-- Seleccioná el tipo --</option>
-                    <option *ngFor="let type of types" [value]="type.code">
-                        {{ type.name }}
-                    </option>
-                </select>
-                <div *ngIf="formEvent.get('drawType')?.invalid && formEvent.get('drawType')?.touched">
-                  <small>Debés seleccionar un tipo.</small>
+        <div class="grid-main pt-4 gap-4">
+            <div class="flex gap-2">
+                <div class="w-1/2">
+                    <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo (*)</label>
+                    <select formControlName="drawType" id="draw" class="bg-gray-800 text-white rounded-md px-4 py-2 w-full border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    [ngClass]="formEvent.get('drawType')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' ">
+                        <!-- <option value="">-- Seleccioná el tipo --</option> -->
+                        <option *ngFor="let type of types" [value]="type.code">
+                            {{ type.name }}
+                        </option>
+                    </select>
+                    <div *ngIf="formEvent.get('drawType')?.invalid && formEvent.get('drawType')?.touched">
+                    <small>Debés seleccionar un tipo.</small>
+                    </div>
+                </div>
+                <div class="w-1/2">
+                    <label for="executionDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Fecha de realización (*)
+                    </label>
+                    <input
+                        type="date"
+                        id="executionDate"
+                        formControlName="executionDate"
+                        name="Fecha de realización"
+                        class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
+                    />
+                    <div *ngIf="formEvent.get('executionDate')?.invalid && formEvent.get('executionDate')?.touched">
+                        <small class="text-red-600">Debés asignar una fecha</small>
+                    </div>
                 </div>
             </div>
-            <div>
-                <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
-                
-                <select formControlName="category" id="category" class="bg-gray-800 text-white rounded-md px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]">
-                    <option value="">-- Seleccioná una categoria --</option>
-                    <option *ngFor="let category of categories" [value]="category.id">
-                        {{ category.name }}
-                    </option>
-                </select>
-            </div>
-        </div>
-
-        <div class="grid-custom-2 pt-4">
-            <!-- fecha de realizacion -->
-            <div>
-                <label for="winners" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <div class="flex gap-2">
+                <div class="w-1/2">
+                    <label for="winners" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Cantidad de ganadores (*)
-                </label>
-                <input
-                    type="number"
-                    id="winners"
-                    max=1
-                    min=10
-                    formControlName="winners"
-                    name="Cantidad de ganadores"
-                    class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                    [ngClass]="formEvent.get('winners')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' "
-                />
-            </div>
-            <div>
-                <label for="executionDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Fecha de realización (*)
-                </label>
-                <input
-                    type="date"
-                    id="executionDate"
-                    formControlName="executionDate"
-                    name="Fecha de realización"
-                    class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
-                />
+                    </label>
+                    <input
+                        type="number"
+                        id="winners"
+                        max=1
+                        min=10
+                        formControlName="winners"
+                        name="Cantidad de ganadores"
+                        class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        [ngClass]="formEvent.get('winners')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' "
+                    />
+                    <div *ngIf="formEvent.get('winners')?.invalid && formEvent.get('winners')?.touched">
+                        <small class="text-red-600">Debés asignar un cantidad</small>
+                    </div>
+                </div>
+                <div class="w-1/2">
+                    <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
+                    <select formControlName="category" id="category" class="bg-gray-800 text-white rounded-md px-4 py-2 w-full border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]">
+                        <!-- <option value="">-- Seleccioná una categoria --</option> -->
+                        <option *ngFor="let category of categories" [value]="category.id">
+                            {{ category.name }}
+                        </option>
+                    </select>
+                    <div *ngIf="formEvent.get('category')?.invalid && formEvent.get('category')?.touched">
+                        <small class="text-red-600">Debés asignar una categoria</small>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -112,7 +118,7 @@
                         id="cantNros"
                         formControlName="quantityNumbersRaffle"
                         name="cantidad de nros"
-                        class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
+                        class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg"
                         placeholder="Ej. 100"
                     />
                     <div *ngIf="formEvent.get('quantityNumbersRaffle')?.invalid && formEvent.get('quantityNumbersRaffle')?.touched">
@@ -128,7 +134,7 @@
                         id="precio"
                         formControlName="priceRaffle"
                         name="price"
-                        class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
+                        class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg"
                         placeholder="Ej. 2000"
                     />
                     <div *ngIf="formEvent.get('price')?.invalid && formEvent.get('price')?.touched">
@@ -142,7 +148,7 @@
             <button *ngIf="formEvent.dirty" type="button" (click)="onDiscardChanges()"
                 class="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >Descartar cambios</button>
-            <button type="submit"
+            <button type="submit" [ngStyle]="formEvent.dirty ? {'opacity': '1'} : {'opacity': '0.6'}"
                 class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >Guardar cambios</button>
         </div>

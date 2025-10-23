@@ -15,10 +15,14 @@ import { ModalShareEvent } from '../../shared/components/modal-share-event/modal
 import { QuestionaryComponent } from '../questionary/questionary.component';
 import { EventsService } from '../../services/events.service';
 import { UserDTO } from '../../models/UserDTO';
+import { WinnersAudit } from '../../services/audit.service';
+import { DataStatusEvent } from '../../models/response.model';
+import { TagPrize } from '../../shared/components/tag-prize/tag-prize';
 
 @Component({
     selector: 'app-management-event',
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent, HandleDatePipe, EventShareCardComponent, ModalShareEvent, QuestionaryComponent],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent, HandleDatePipe,
+            EventShareCardComponent, ModalShareEvent, QuestionaryComponent, TagPrize],
     templateUrl: './management-event.html',
     styleUrl: './management-event.css',
     providers: [HandleDatePipe]
@@ -43,7 +47,7 @@ export class ManagementEvent {
 
     // PRUEBA QUESTIONARY MODAL
     showModalIncript = false;
-    selectedEventId!: number;
+    selectedEventId?: number;
 
     // TABS
     readonly TAB_INFO = 'info';
@@ -55,7 +59,7 @@ export class ManagementEvent {
     typesOfEventes = EventTypes;
     participants: UserDTO[] = [];
     eventType!: EventTypes;
-
+    winnersAudit: WinnersAudit[] = [];
 
     constructor(
         private adminEventService: AdminEventService,
@@ -74,7 +78,15 @@ export class ManagementEvent {
                 if (this.event) {
                     this.initForm();
                     this.initRaffleNumbers();
+                    this.cdr.detectChanges();
                 }
+            }
+        )
+
+        this.adminEventService.winnersEvent$.subscribe(
+            winners => {
+                this.winnersAudit = winners;
+                this.cdr.detectChanges();
             }
         )
     }
@@ -87,12 +99,7 @@ export class ManagementEvent {
             this.eventService.getEventById("" + this.eventIdParam).subscribe(
                 resp => {
                     // console.log("[admin-event] => evento recuperado por id de param: ", resp);
-                    this.event = resp;
-                    if (this.event) {
-                        this.initForm();
-                        this.initRaffleNumbers();
-                        this.cdr.detectChanges();
-                    }
+                    this.adminEventService.setSelectedEvent(resp);
                 }
             )
         }
@@ -138,21 +145,46 @@ export class ManagementEvent {
         // 1. Está autenticado
         // 2. No es el creador del evento
         // 3. No está ya registrado
-        return this.authService.isAuthenticated() &&
-            !this.isUserCreator &&
+        // return this.authService.isAuthenticated() && 
+        //         !this.isUserCreator && 
+        //         !this.event?.isUserRegistered &&
+        //         this.event?.statusEvent === StatusEvent.OPEN;
+        return !this.isUserCreator &&
             !this.event?.isUserRegistered &&
             this.event?.statusEvent === StatusEvent.OPEN;
     }
 
     onInscript() {
-        if (this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY) {
-            // mostramos el form de inscripcion al sorteo
-            this.selectedEventId = this.event.id;
-            this.showModalIncript = true;
-        }
-        if (this.event?.id && this.event?.eventType == EventTypes.RAFFLES) {
-            alert("Aca iria el componente de seleccion de nros de rifa")
-        }
+        // controlamos que el evento este abierto
+        this.eventService.getStatusEventById(""+this.event?.id).subscribe({
+            next: (data) => {
+                console.log('[estadoEvento] => estado del evento: ', data);
+                const dataStatus: DataStatusEvent = data.data as DataStatusEvent;
+                // this.dataModal.message = "Estado del evento: ", dataStatus.status;
+                if(dataStatus.status == StatusEvent.OPEN){
+                    // TODO: aca permitimos la inscripcion    
+                    if (this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY) {
+                        // mostramos el form de inscripcion al sorteo
+                        this.selectedEventId = this.event?.id;
+                        this.showModalIncript = true;
+                    }
+                    if (this.event?.id && this.event?.eventType == EventTypes.RAFFLES) {
+                        alert("Aca iria el componente de seleccion de nros de rifa")
+                    }
+                }
+                else{
+                    if(this.event){
+                        this.event.statusEvent = dataStatus.status as StatusEvent
+                    }
+                }
+                this.modalInfoRef.open();       // no muestra el estado, ver
+                this.cdr.detectChanges();
+            },
+            error: (err) => {
+                console.error('Error al obtener el estado del evento:', err);
+                // console.error('Error al obtener el estado del evento:', err);
+            }
+        })
     }
 
     // inicializamos la grilla de numeros de las rifas
@@ -227,7 +259,7 @@ export class ManagementEvent {
         this.eventService.getParticipantUsersByEventId(eventId, eventType).subscribe({
             next: (data) => {
                 this.participants = data;
-                console.log('[Participantes cargados]', data);
+                // console.log('[Participantes cargados]', data);
                 this.cdr.detectChanges();
             },
             error: (err) => {
@@ -236,9 +268,19 @@ export class ManagementEvent {
         });
     }
 
+    // devuelve el lugar en el podio
+    getPlaceGoal(dataUser: UserDTO): any {
+        // voy a buscar el dato de la lista de ganadores
+        const dataPlace = this.winnersAudit.find(winner => winner.userEmail == dataUser.email);
+        // console.log("[podio] => datos del ganador: ", dataPlace);
+        if (!dataPlace)
+            return { idUser: null, position: -1 }
+
+        return { idUser: dataPlace.id, position: dataPlace.userPosition as number }
+    }
+
     setTab(tabName: string): void {
         this.tab = tabName;
-        console.log("[setTab] => pestaña seleccionada: ", this.tab, " - idEvent: ", this.event?.id);
         if (tabName === this.TAB_REGISTERED && this.event?.id) {
             this.loadParticipants(this.event.id, this.event.eventType);
         }
@@ -256,6 +298,5 @@ export class ManagementEvent {
     isInfoTab(): boolean {
         return this.tab === this.TAB_INFO;
     }
-
 
 }

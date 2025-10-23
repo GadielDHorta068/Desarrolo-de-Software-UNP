@@ -11,6 +11,7 @@ import { EventsService } from '../../services/events.service';
 import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { ParseFileService } from '../../services/utils/parseFile.service';
 import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-edit-event',
@@ -29,6 +30,8 @@ export class EditEvent implements OnInit{
   eventAux!: EventsTemp|null;
   imageEvent: File|null = null;
   eventIdParam!: Number|null;
+  discardedChanges: boolean = false;
+  setImageTrigger$ = new BehaviorSubject<any>(null);
 
   formEvent!: FormGroup;
   // tipos de sorteo
@@ -46,6 +49,7 @@ export class EditEvent implements OnInit{
     private parseFileService: ParseFileService,
     private cdr: ChangeDetectorRef
   ){
+    // this.formEvent = new FormGroup({});
     this.configService.initData();
     this.initDataLoadEvent();
 
@@ -56,6 +60,7 @@ export class EditEvent implements OnInit{
         // console.log("[edit-event] => evento seleccionado: ", this.event);
         if(this.event){
           this.initForm();
+          this.cdr.detectChanges();
         }
         // this.updateForm();
       }
@@ -69,9 +74,10 @@ export class EditEvent implements OnInit{
     if(!this.event){
       this.eventService.getEventById(""+this.eventIdParam).subscribe(
         resp => {
-          // console.log("[edit-event] => evento recuperado por id de param: ", resp);
+          console.log("[edit-event] => evento recuperado por id de param: ", resp);
           this.event = resp;
           if(this.event){
+            this.eventAux = {...this.event};
             this.initForm();
             this.cdr.detectChanges();
           }
@@ -84,9 +90,7 @@ export class EditEvent implements OnInit{
     if(this.imageEvent){
       this.formEvent.get('image')?.setValue(await this.getB64Image(this.imageEvent));
     }
-    // console.log("[crearSorteo] => datos del sorteo: ", this.formEvent.value);
-    console.log("[crearSorteo] => datos del sorteo completos: ", this.formEvent.getRawValue());
-    // TODO: aca falta recuperar la imagen si se subio
+    // console.log("[crearSorteo] => datos del sorteo completos: ", this.formEvent.getRawValue());
     const dataNewEvent = this.getNewEvent(this.formEvent.getRawValue());
     // console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
     this.eventService.updateGiveaways(dataNewEvent, ""+this.event?.id, this.event?.creator?.id, ).subscribe({
@@ -137,11 +141,13 @@ export class EditEvent implements OnInit{
   private cleanForm() {
     this.formEvent.markAsPristine();
     this.cdr.detectChanges();
-    console.log("[edicion] => form modificado: ", this.formEvent.dirty);
+    // console.log("[edicion] => form modificado: ", this.formEvent.dirty);
   }
 
   private initForm(){
     let dateEvent = this.event?.endDate ? this.datePipe.transform(this.event?.endDate): "";
+    this.setImageTrigger$.next(this.event?.imageUrl);
+    // console.log("[img-init] => datos del evento aux: ", this.eventAux);
 
     this.formEvent = new FormGroup({
       title: new FormControl({value: this.event?.title, disabled: true}, {validators:[ Validators.required ]}),
@@ -151,8 +157,8 @@ export class EditEvent implements OnInit{
       winners: new FormControl({value: this.event?.winnersCount, disabled: true}, {validators:[ Validators.required ]}),
       description: new FormControl({value: this.event?.description, disabled: false}, {validators:[ Validators.required ]}),
       image: new FormControl({value: null, disabled: false}),
-      priceRaffle: new FormControl({value: this.event?.priceOfNumber, disabled: false}),
-      quantityNumbersRaffle: new FormControl({value: this.event?.quantityOfNumbers, disabled: false})
+      priceRaffle: new FormControl({value: this.event?.priceOfNumber, disabled: true}),
+      quantityNumbersRaffle: new FormControl({value: this.event?.quantityOfNumbers, disabled: true})
     });
   }
 
@@ -185,11 +191,15 @@ export class EditEvent implements OnInit{
 
   public onChangeSelectedImge(image: File|null){
     // console.log("[imagen] => archivo seleccionado desde el componente de carga: ", image);
+    this.formEvent.markAsDirty();
     this.imageEvent = image;
   }
 
   private customResetForm(){
+    console.log("[img-reset] => datos del evento aux: ", this.eventAux);
     let dateEvent = this.eventAux?.endDate ? this.datePipe.transform(this.eventAux?.endDate): "";
+    this.setImageTrigger$.next(this.eventAux?.imageUrl);
+    
     this.formEvent.reset({
       title: this.eventAux?.title,
       drawType: this.eventAux?.eventType,
@@ -200,6 +210,7 @@ export class EditEvent implements OnInit{
       priceRaffle: this.eventAux?.priceOfNumber,
       quantityNumbersRaffle: this.eventAux?.quantityOfNumbers
     });
+    this.discardedChanges = false;
   }
 
   private async getB64Image(image: File){

@@ -2,7 +2,7 @@ export enum StatusEvent {
     ACTIVE = 'ACTIVE',
     OPEN = 'OPEN',
     CLOSED = 'CLOSED',
-    FINISHED = 'FINISHED',
+    FINISHED = 'FINALIZED',
     BLOCKED = 'BLOCKED'
 }
 

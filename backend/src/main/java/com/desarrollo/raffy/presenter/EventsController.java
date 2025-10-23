@@ -46,10 +46,13 @@ import com.desarrollo.raffy.dto.ParticipantDTO;
 import com.desarrollo.raffy.dto.UserDTO;
 import com.desarrollo.raffy.dto.WinnerDTO;
 
+import com.desarrollo.raffy.exception.NoInscriptEventExeption;
+
 
 import org.modelmapper.ModelMapper;
 import java.util.stream.Collectors;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Objects;
 
 @Slf4j
@@ -157,6 +160,26 @@ public class EventsController {
         EventSummaryDTO event = eventsService.getEventSummaryById(id);
         if (event != null) {
             return new ResponseEntity<>(event, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/status/id/{id}")
+    public ResponseEntity<?> getStatusById(@PathVariable @NotNull @Positive Long id) {
+        if (id <= 0) {
+            return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
+        }
+        // VOLVER
+        EventSummaryDTO event = eventsService.getEventSummaryById(id);
+        if (event != null) {
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("id", id);
+            eventData.put("status", event.getStatusEvent());
+            // eventData.put("status", "elEstado");
+            // return Response.response("OK", "Recurso encontrado", eventData);
+            return Response.responseOk("Recurso encontrado", eventData);
+            // return new ResponseEntity<>(eventData, HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
         }
@@ -503,6 +526,12 @@ public class EventsController {
             if (eventToParticipate == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("El evento con id " + aEventId + " no existe");
+            }
+            // controlamos que el evento no haya cerrado
+            if(eventToParticipate.getStatusEvent() != StatusEvent.OPEN){
+                // return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                //     .body("El evento con id " + aEventId + " se encuentra cerrado. No es posible inscribirse. TESTTTT");
+                throw new NoInscriptEventExeption("No es posible inscribirse a este evento");
             }
 
             User savedGuestUser = createOrUpdateUser(aGuestUser);

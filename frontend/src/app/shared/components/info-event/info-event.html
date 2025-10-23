@@ -44,12 +44,21 @@
             </div>
         </div> -->
         <div *ngIf="event?.eventType == eventTypes.RAFFLES" class="grid-row">
-            <div class="text-base font-bold pt-2">Cantida de números</div>
+            <div class="text-base font-bold pt-2">Cantidad de números</div>
             <div class="p-2">{{event?.quantityOfNumbers}}</div>
         </div>
         <div *ngIf="event?.eventType == eventTypes.RAFFLES" class="grid-row">
             <div class="text-base font-bold pt-2">Precio del número</div>
             <div class="p-2">{{event?.priceOfNumber}}</div>
+        </div>
+        <div *ngIf="event?.statusEvent == eventStatus.FINISHED " class="grid-row">
+            <div class="text-base font-bold pt-2">Ganadores</div>
+            <div *ngFor="let winner of winners; let i = index" class="p-2">
+                <div class="flex gap-4" style="align-items: anchor-center;">
+                    <label>{{winner?.userName}} {{winner?.userLastName}}</label>
+                    <app-tag-prize [position]="i+1"></app-tag-prize>
+                </div>
+            </div>
         </div>
     </div>
     <div *ngIf="event?.imageUrl">
