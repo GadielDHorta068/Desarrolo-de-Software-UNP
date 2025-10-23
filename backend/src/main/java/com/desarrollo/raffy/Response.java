@@ -30,7 +30,7 @@ public class Response {
         response.put("path", null);
 		response.put("error", null);
 
-		return new ResponseEntity<Object>(response, status);
+		return new ResponseEntity<Object>(response, HttpStatus.OK);
 	}
 
 	public static ResponseEntity<Object> ok(Object responseObj) {

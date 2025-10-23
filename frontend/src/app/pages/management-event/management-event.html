@@ -14,11 +14,6 @@
             'text-gray-600 dark:text-gray-300': !isInfoTab()
           }" (click)="tab = TAB_INFO">Información</span>
 
-      <!-- Tab: Números -->
-      <span *ngIf="event?.eventType === typesOfEventes.RAFFLES" class="pb-2 cursor-pointer font-semibold" [ngClass]="{
-            'text-blue-600 border-b-2 border-blue-600': isNumbersTab(),
-            'text-gray-600 dark:text-gray-300': !isNumbersTab()
-          }" (click)="tab = TAB_NUMBERS">Números</span>
 
       <!-- Tab: Registrados -->
       <span *ngIf="isUserCreator" class="pb-2 cursor-pointer font-semibold" [ngClass]="{
@@ -28,11 +23,7 @@
 
     </div>
 
-    <!-- Botón (solo visible en info o números) -->
-    <button *ngIf="isNumbersTab()" (click)="addToCart()"
-      class="h-9 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-sm">
-      Agregar al carrito
-    </button>
+    
   </div>
 
   <!-- TAB: Información -->
@@ -54,20 +45,6 @@
         </div>
       </div>
       <app-info-event [event]="event" [winners]="winnersAudit"></app-info-event>
-    </div>
-  </div>
-
-  <!-- TAB: numeros -->
-  <div *ngIf="isNumbersTab() && event?.eventType === typesOfEventes.RAFFLES" class="flex flex-col gap-4">
-    <div class="grid grid-cols-10 gap-2">
-      <button *ngFor="let num of numeros" (click)="selectNumber(num)" [disabled]="num.buyStatus"
-        class="w-20 h-20 flex items-center justify-center border rounded-lg shadow transition" [ngClass]="{
-            'bg-red-500 bg-opacity-70 text-white cursor-not-allowed': num.buyStatus,
-            'bg-blue-600 text-white': num.selectStatus && !num.buyStatus,
-            'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-blue-100 dark:hover:bg-blue-600': !num.selectStatus && !num.buyStatus
-          }">
-        {{ num.ticketNumber }}
-      </button>
     </div>
   </div>
 
@@ -114,12 +91,18 @@
 <!-- MODAL INSCRIPCION -->
 <!-- conectado al boton "addToCart" -->
 <app-questionary
-    *ngIf="showModalIncript && selectedEventId"
-    [eventId]="selectedEventId"
-    [selectedRaffleNumbers]="selectedNumbers"
-    [eventType]="eventType"
-    (close)="onModalClosed()">
+    *ngIf="showModalIncript"
+    (close)="onInscriptClosed()"
+    (onInscript) = "onQuestionarySubmit($event)"
+>
 </app-questionary>
+
+<app-raffle-numbers
+    *ngIf = "showRaffleModal"
+    (closeRaffleNumberModal) = "onRaffleClosed()"
+    (proceedToInscript)="onProceedToQuestionary($event)"
+>
+</app-raffle-numbers>
 
 
 
