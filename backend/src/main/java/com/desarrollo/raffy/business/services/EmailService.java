@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -73,6 +74,7 @@ public class EmailService {
      * @param eventTitle Título del evento
      * @param eventType Tipo de evento (GIVEAWAY o GUESSING_CONTEST)
      */
+    @Async
     public void sendWinnerEmails(Collection<WinnerDTO> winners,
                                  Long eventId,
                                  String eventTitle,
@@ -150,6 +152,7 @@ public class EmailService {
      * @param creatorName Nombre del creador (para saludo)
      * @param creatorEmail Email del creador (destinatario)
      */
+    @Async
     public void sendWinnersContactToCreator(Collection<WinnerDTO> winners,
                                             Long eventId,
                                             String eventTitle,

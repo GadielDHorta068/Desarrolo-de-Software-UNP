@@ -9,70 +9,18 @@
     <div class="loading-dots"><span></span><span></span><span></span></div>
   </div>
 
-  <!-- Shuffle/Ticker -->
-  <div *ngIf="phase() === 'shuffle'" class="w-full max-w-5xl">
-    <div class="ticker">
-      <div class="ticker-track">
-        <span *ngFor="let name of tickerLoop()" class="ticker-item">{{ name }}</span>
-      </div>
-    </div>
-    <div class="text-center text-yellow-300 mt-3">Mezclando nombres…</div>
-  </div>
-
-  <!-- Reveal: Spotlight por ganador -->
-  <div *ngIf="phase() === 'reveal'" class="w-full max-w-4xl">
-    <div class="spotlight">
-      <div *ngFor="let w of winners(); let i = index" class="spotlight-item" [class.active]="i === spotlightIndex()">
-        <div class="rank">{{ w.position }}</div>
-        <div class="name">{{ w.name }} {{ w.surname }}</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Podio -->
-  <div *ngIf="phase() === 'podium' && podium().length" class="w-full max-w-4xl">
-    <h2 class="text-3xl font-bold text-center text-yellow-300 mb-6">🏆 Podio de Ganadores 🏆</h2>
-    <div class="podium-container">
-      <div *ngIf="podium()[2]" class="podium-step third-place">
-        <div class="podium-number">3</div>
-        <div class="participant-info">
-          <div class="participant-name">{{ podium()[2].name }} {{ podium()[2].surname }}</div>
-          <div class="participant-position">🥉 Tercer Lugar</div>
+  <!-- Jackpot -->
+  <div *ngIf="phase() === 'jackpot'" class="jackpot-container">
+    <div class="jackpot-machine">
+      <div class="jackpot-header">GANADORES</div>
+      <div class="jackpot-reels">
+        <div *ngFor="let reel of reels(); let i = index" class="jackpot-reel-container">
+          <div class="jackpot-reel" #reelElements>
+            <div *ngFor="let p of reel.participants" class="jackpot-item">{{ p.name }} {{ p.surname }}</div>
+          </div>
         </div>
       </div>
-      <div *ngIf="podium()[0]" class="podium-step first-place">
-        <div class="podium-number">1</div>
-        <div class="participant-info">
-          <div class="participant-name winner-glow">{{ podium()[0].name }} {{ podium()[0].surname }}</div>
-          <div class="participant-position">🥇 ¡Ganador!</div>
-        </div>
-        <div class="crown">👑</div>
-      </div>
-      <div *ngIf="podium()[1]" class="podium-step second-place">
-        <div class="podium-number">2</div>
-        <div class="participant-info">
-          <div class="participant-name">{{ podium()[1].name }} {{ podium()[1].surname }}</div>
-          <div class="participant-position">🥈 Segundo Lugar</div>
-        </div>
-      </div>
-    </div>
-    <div class="celebration-message" *ngIf="mainWinner()">
-      <div class="text-2xl text-yellow-300">🎊 ¡Felicitaciones {{ mainWinner().name }} {{ mainWinner().surname }}! 🎊</div>
-      <div class="text-gray-300">Ganador del evento "{{ mainWinner().eventTitle }}"</div>
-    </div>
-  </div>
-
-  <!-- Final: Lista completa de ganadores -->
-  <div *ngIf="phase() === 'final' && winners().length" class="w-full max-w-3xl">
-    <h2 class="text-2xl font-bold text-center text-yellow-300 mb-4">🎯 Ganadores del evento</h2>
-    <div class="participants-grid">
-      <div *ngFor="let w of winners()" class="participant-card" [class.highlighted]="w.position === 1">
-        <div class="participant-rank">{{ w.position }}</div>
-        <div class="participant-details">
-          <div class="participant-name">{{ w.name }} {{ w.surname }}</div>
-          <div class="participant-status" [class.winner]="w.position === 1">{{ w.position === 1 ? '🏆 Ganador' : 'Finalista' }}</div>
-        </div>
-      </div>
+      <div class="slot-handle"></div>
     </div>
   </div>
 
