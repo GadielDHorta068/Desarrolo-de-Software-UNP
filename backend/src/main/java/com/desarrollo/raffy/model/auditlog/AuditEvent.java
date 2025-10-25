@@ -38,6 +38,9 @@ public class AuditEvent {
     @Column(name = "creator_event", nullable = false)
     private String creatorEvent; // Le pasamos el nickname
 
+    @Column(name = "related_event", nullable = false)
+    private Long relatedEventId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "event_type", nullable = false)
     private EventTypes type;

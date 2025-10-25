@@ -12,6 +12,9 @@ import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
+import com.desarrollo.raffy.model.auditlog.AuditActionType;
+import com.desarrollo.raffy.model.auditlog.AuditEvent;
+import com.desarrollo.raffy.model.auditlog.AuditParticipant;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,6 +54,27 @@ public class RaffleWinnerStrategyFactory implements WinnerSelectionStrategy<Raff
         for(RaffleNumber rn: numbers.stream().limit(winnersCount).toList()){
             rn.setPosition(pos++);
         }
+
+        AuditEvent auditEvent = auditLogsService.getAuditEventById(raffle.getId());
+        List<AuditParticipant> auditParticipants = numbers.stream()
+        .map(n -> new AuditParticipant(
+            null,
+            n.getPosition(),
+            n.getNumberOwner().getName(),
+            n.getNumberOwner().getSurname(),
+            n.getNumberOwner().getEmail(),
+            n.getNumberOwner().getCellphone(),
+            auditEvent
+        ))
+        .toList();
+
+        auditLogsService.logActionFinalized(
+            raffle.getId(), 
+            raffle.getCreator().getNickname(), 
+            AuditActionType.EVENT_EXECUTED, 
+            String.format("Se Ejecuto la selección de ganadores para el evento: '%s'.", raffle.getTitle()), 
+            seed,
+            auditParticipants);
     }
     
 }

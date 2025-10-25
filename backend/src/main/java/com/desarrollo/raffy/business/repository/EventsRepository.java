@@ -28,8 +28,24 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     List<Events> findByCategoryId(@Param("categoryId") Long categoryId);
     
     // Buscar eventos activos (no finalizados ni bloqueados)
-    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.statusEvent IN ('OPEN', 'CLOSED')")
-    List<Events> findActiveEvents();
+    
+    @Query("""
+        SELECT e FROM Events e
+        JOIN FETCH e.category c
+        WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
+        AND (:type IS NULL OR e.eventType = :type)
+        AND (:catName IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :catName, '%')))
+        AND (:start IS NULL OR e.startDate >= :start)
+        AND (:end IS NULL OR e.endDate <= :end)
+        AND (:winnerCount IS NULL OR e.winnersCount = :winnerCount)
+        ORDER BY e.startDate DESC
+    """)
+    List<Events> findActiveEvents(
+        @Param("type") EventTypes type,
+        @Param("catName") String categorie,
+        @Param("start") LocalDate start,
+        @Param("end") LocalDate end,
+        @Param("winnerCount") Integer winnerCount);
     
     // Buscar eventos por rango de fechas
     @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.startDate >= :startDate AND e.endDate <= :endDate")

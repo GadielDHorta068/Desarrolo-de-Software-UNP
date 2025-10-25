@@ -16,8 +16,8 @@ import com.desarrollo.raffy.model.auditlog.AuditEvent;
 public interface AuditEventRepository extends JpaRepository<AuditEvent, Long>{
     @Query("""
         SELECT a FROM AuditEvent a
-        WHERE (:creator LOWER(a.creatorEvent) LIKE LOWER(CONCAT('%', :creator, '%')))
-        AND (:type IS NULL OR a.eventType = :type)
+        WHERE LOWER(a.creatorEvent) LIKE LOWER(CONCAT('%', :creator, '%'))
+        AND (:type IS NULL OR a.type = :type)
         AND (:start IS NULL OR a.startDate >= :start)
         AND (:end IS NULL OR a.endDate <= :end)
         ORDER BY eventId DESC
@@ -29,6 +29,6 @@ public interface AuditEventRepository extends JpaRepository<AuditEvent, Long>{
         @Param("end") LocalDate endDate
     );
  
-    @Query("SELECT a FROM AuditEvent a WHERE a.eventId = :id")
-    Optional<AuditEvent> getAuditEventById(@Param("id") Long eventId);
+    @Query("SELECT a FROM AuditEvent a WHERE a.relatedEventId = :id")
+    Optional<AuditEvent> findByRelatedEventId(@Param("id") Long relatedEventId);
 }

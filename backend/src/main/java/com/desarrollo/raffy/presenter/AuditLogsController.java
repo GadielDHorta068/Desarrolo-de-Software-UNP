@@ -58,7 +58,7 @@ public class AuditLogsController {
         try {
             List<AuditEvent> auditEvents = service.getAuditEventByCreator(creatorEvent, eventTypes, from, to);
             if(auditEvents.isEmpty()){
-                return new ResponseEntity<>("No hay auditoría para este usuario: " + creatorEvent + ". Revise si tienes sorteos creados", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("No hay auditoría para este usuario: " + creatorEvent + ". Revise si tienes sorteos creados.", HttpStatus.BAD_REQUEST);
             }
 
             return new ResponseEntity<>(auditEvents, HttpStatus.OK);
@@ -69,7 +69,7 @@ public class AuditLogsController {
         }
     }
 
-    @GetMapping("/filter/action/{eventId}")
+    @GetMapping("/filter/action/{eventId}/{action}/{from}/{to}")
     public ResponseEntity<?> getActionsByFilters(
         @PathVariable("eventId") Long eventId,
         @RequestParam(required = false) AuditActionType action,

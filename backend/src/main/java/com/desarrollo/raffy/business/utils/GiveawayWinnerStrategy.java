@@ -12,6 +12,9 @@ import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.model.auditlog.AuditActionType;
+import com.desarrollo.raffy.model.auditlog.AuditEvent;
+import com.desarrollo.raffy.model.auditlog.AuditParticipant;
 import com.desarrollo.raffy.business.services.AuditLogsService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +54,26 @@ public class GiveawayWinnerStrategy implements WinnerSelectionStrategy<Participa
             p.setPosition(pos);
             pos++;
         }
-    }
-    
+        AuditEvent auditEvent = auditLogsService.getAuditEventById(giveaway.getId());
+
+        List<AuditParticipant> auditParticipants = participants.stream()
+        .map(p -> new AuditParticipant(
+            null,
+            p.getPosition(),
+            p.getParticipant().getName(),
+            p.getParticipant().getSurname(),
+            p.getParticipant().getEmail(),
+            p.getParticipant().getCellphone(),
+            auditEvent
+        ))
+        .toList();
+
+        auditLogsService.logActionFinalized(
+            giveaway.getId(), 
+            giveaway.getCreator().getNickname(), 
+            AuditActionType.EVENT_EXECUTED, 
+            String.format("Se Ejecuto la selección de ganadores para el evento: '%s'.", giveaway.getTitle()), 
+            seed, 
+            auditParticipants);
+    }  
 }

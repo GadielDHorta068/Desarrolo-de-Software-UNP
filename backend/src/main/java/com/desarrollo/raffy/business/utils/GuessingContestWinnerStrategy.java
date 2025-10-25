@@ -18,6 +18,9 @@ import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.GuessAttempt;
 import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.model.auditlog.AuditActionType;
+import com.desarrollo.raffy.model.auditlog.AuditEvent;
+import com.desarrollo.raffy.model.auditlog.AuditParticipant;
 
 
 @Component
@@ -85,8 +88,28 @@ public class GuessingContestWinnerStrategy implements WinnerSelectionStrategy<Pa
                 .findFirst()
                 .ifPresent(p -> p.setPosition((short) position.getAndIncrement()));
         }
-    }
 
+        AuditEvent auditEvent = auditLogsService.getAuditEventById(contest.getId());
+        List<AuditParticipant> auditParticipants = participants.stream()
+        .map(p -> new AuditParticipant(
+            null,
+            p.getPosition(),
+            p.getParticipant().getName(),
+            p.getParticipant().getSurname(),
+            p.getParticipant().getEmail(),
+            p.getParticipant().getCellphone(),
+            auditEvent
+        ))
+        .toList();
+
+        auditLogsService.logActionFinalized(
+            contest.getId(), 
+            contest.getCreator().getNickname(), 
+            AuditActionType.EVENT_EXECUTED, 
+            String.format("Se Ejecuto la selección de ganadores para el evento: '%s'.", contest.getTitle()), 
+            null, 
+            auditParticipants);
+    }
     /**
      * Clase auxiliar para medir rendimiento de cada usuario.
      */

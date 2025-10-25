@@ -1,14 +1,11 @@
 package com.desarrollo.raffy.model.auditlog;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
-import com.desarrollo.raffy.util.JsonConverter;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -28,7 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter @Getter
-@Table(name = "audit_logs")
+@Table(name = "audit_action")
 public class AuditAction {
     
     @Id
@@ -49,9 +46,9 @@ public class AuditAction {
     @Column(name = "details", nullable = true)
     private String details;
 
-    @Column(name = "metadata", columnDefinition = "jsonb")
+   /*  @Column(name = "metadata", columnDefinition = "jsonb", nullable = true)
     @Convert(converter = JsonConverter.class)
-    private Map<String, Object> metadata = new HashMap<>();
+    private String metadata; */
 
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)

@@ -17,7 +17,7 @@ public interface AuditActionRepository extends JpaRepository<AuditAction, Long>{
     @Query("""
         SELECT a FROM AuditAction a
         WHERE a.event.eventId = :eventId
-        AND (:action IS NULL OR a.actionType = :action)
+        AND (:action IS NULL OR a.action = :action)
         AND (:from IS NULL OR a.timestamp >= :from)
         AND (:to IS NULL OR a.timestamp <= :to)
         ORDER BY a.timestamp DESC
