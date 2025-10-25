@@ -613,20 +613,27 @@ public class EventsController {
     }
 
     //Mejorar para los filtros
+    //-------------------------- GADIEL, ESTOS SON LOS FILTROS --------------------------
     @GetMapping("/active")
-    public ResponseEntity<List<EventSummaryDTO>> getActiveEvents(
+    public ResponseEntity<?> getActiveEvents(
             @RequestParam(required = false) EventTypes type,
             @RequestParam(required = false) String categorie,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
             @RequestParam(required = false) Integer winnerCount) {
 
+        
+        if (start != null && end != null && !end.isAfter(start)) {
+            return ResponseEntity.badRequest().body("La fecha de fin debe ser posterior a la fecha de inicio");
+
+        }
         List<EventSummaryDTO> events = eventsService.getActiveEventSummaries(
                 type, categorie, start, end, winnerCount
         );
 
         return ResponseEntity.ok(events);
     }
+    //-------------------------- OBVIAMENTE ACA TERMINA LOS FILTROS --------------------------
 
 
     @GetMapping("/date-range")
