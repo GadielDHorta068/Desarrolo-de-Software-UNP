@@ -264,7 +264,7 @@ public class EventsService {
 
         
         //Delega la selección de ganadores a ParticipantService
-        List<?> winners = participantService.runEvent(event);
+        List<?> winners = participantService.runEvents(event);
         
         log.info("Ganadores seleccionados: " + winners.size());
         
