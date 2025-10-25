@@ -1,0 +1,22 @@
+.search-input {
+  outline: none;
+}
+
+.skeleton-card {
+  height: 180px;
+  border-radius: 8px;
+  background-color: #27272a;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* mejoras mínimas para contenedores */
+.container {
+  max-width: 1200px;
+}
+

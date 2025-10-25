@@ -97,7 +97,7 @@ export const routes: Routes = [
       {
         path: 'all',
         loadComponent: () => import('./pages/public-events/public-events').then(m => m.PublicEvents),
-        title: 'Sorteos públicos - Raffy'
+        title: 'HUB de eventos - Raffy'
       },
       { path: 'edit',
         loadComponent: () => import('./pages/edit-event/edit-event').then(m => m.EditEvent),

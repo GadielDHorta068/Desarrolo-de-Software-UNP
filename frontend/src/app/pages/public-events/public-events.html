@@ -1,36 +1,97 @@
 <div class="container mx-auto px-4 py-6">
   <div class="flex items-center justify-between mb-4">
-    <h2 class="text-2xl font-bold text-emerald-600">Sorteos públicos</h2>
-    <!-- Botón Nuevo evento -->
-    <a *ngIf="userLogged" routerLink="/panel" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">Nuevo evento</a>
+    <h2 class="text-2xl font-bold text-emerald-600">HUB de eventos</h2>
+    <!-- CTA: si está autenticado muestra Nuevo evento; si no, botón trampa -->
+    <ng-container>
+      <a *ngIf="userLogged" routerLink="/panel" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">Nuevo evento</a>
+      <button *ngIf="!userLogged" (click)="openLoginModal()" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">
+        Crear Sorteo Gratis
+      </button>
+    </ng-container>
   </div>
 
-  <!-- Filtro por estado -->
-  <div class="mb-6 flex items-center gap-3">
-    <label class="text-gray-400">Filtrar por estado:</label>
-    <select [(ngModel)]="selectedStatus" (change)="applyFilter(selectedStatus)" class="border rounded px-2 py-1 bg-gray-900">
-      <option value="ALL">Todos</option>
-      <option [ngValue]="StatusEvent.OPEN">Abiertos</option>
-      <option [ngValue]="StatusEvent.CLOSED">Cerrados</option>
-      <option [ngValue]="StatusEvent.FINISHED">Finalizados</option>
-      <option [ngValue]="StatusEvent.ACTIVE">Activos</option>
-      <option [ngValue]="StatusEvent.BLOCKED">Bloqueados</option>
-    </select>
+  <!-- Buscador -->
+  <div class="mb-6 p-4 rounded-lg border border-zinc-700 bg-zinc-900/60 backdrop-blur flex flex-col md:flex-row items-start md:items-end gap-4">
+    <div class="w-full md:w-2/3">
+      <label class="text-gray-400 block mb-1">Buscar</label>
+      <input type="text"
+             [(ngModel)]="searchTerm"
+             (ngModelChange)="onSearchTermChange($event)"
+             placeholder="Título o descripción"
+             class="search-input w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600" />
+    </div>
+
+    <div class="w-full md:w-1/3 flex items-end gap-3">
+      <div class="flex-1">
+        <label class="text-gray-400 block mb-1">Filtrar por estado</label>
+        <select [(ngModel)]="selectedStatus" (change)="applyFilter(selectedStatus)"
+                class="w-full bg-zinc-900 border border-zinc-700 text-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600">
+          <option value="ALL">Todos</option>
+          <option [ngValue]="StatusEvent.OPEN">Abiertos</option>
+          <option [ngValue]="StatusEvent.CLOSED">Cerrados</option>
+          <option [ngValue]="StatusEvent.FINISHED">Finalizados</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="text-gray-500">Cargando eventos...</div>
+  <div *ngIf="loading" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div class="skeleton-card" *ngFor="let s of [1,2,3,4,5,6,7,8,9]"></div>
+  </div>
 
   <!-- Error -->
   <div *ngIf="!loading && error" class="text-red-500">{{ error }}</div>
 
   <!-- Empty state -->
-  <div *ngIf="!loading && !error && filteredEvents.length === 0" class="text-gray-400">
+  <div *ngIf="!loading && !error && visibleEvents.length === 0" class="text-gray-400">
     No hay eventos disponibles por ahora.
   </div>
 
+  <!-- Indicador de resultados -->
+  <div *ngIf="!loading && !error" class="text-sm text-gray-400 mb-3">Mostrando {{visibleEvents.length}} resultados</div>
+
   <!-- Events list -->
-  <div *ngIf="!loading && !error && filteredEvents.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-    <app-draw-card *ngFor="let evt of filteredEvents" [event]="evt" [customBackground]="'bg-zinc-800'"></app-draw-card>
+  <div *ngIf="!loading && !error && visibleEvents.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <app-draw-card *ngFor="let evt of visibleEvents" [event]="evt" [customBackground]="'bg-zinc-800'"></app-draw-card>
+  </div>
+
+  <!-- Sentinel para lazy loading -->
+  <div #sentinel class="w-full h-2"></div>
+
+  <!-- Modal de Registro (reutilizado del Home) -->
+  <div *ngIf="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" (click)="closeLoginModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all" (click)="$event.stopPropagation()">
+      <div class="text-center">
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mb-4">
+          <svg class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          ¡Únete a RAFFIFY!
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          Para crear sorteos necesitas tener una cuenta. Es gratis y solo toma unos minutos.
+        </p>
+        <div class="flex flex-col gap-3">
+          <button 
+            (click)="navigateToRegister()"
+            class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+            Crear cuenta gratis
+          </button>
+          <button 
+            (click)="navigateToLogin()"
+            class="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-3 px-4 rounded-lg transition-colors">
+            Ya tengo cuenta
+          </button>
+        </div>
+        <button 
+          (click)="closeLoginModal()"
+          class="mt-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+          Cancelar
+        </button>
+      </div>
+    </div>
   </div>
 </div>
