@@ -14,7 +14,11 @@
                 ESTAS INSCRITO
             </div>
             <div class="block" style="padding-top: 8px;">
-                <p class="text-sm text-gray-200"><b>Dia de realizacion</b></p>
+                <p class="text-sm text-gray-200"><b>Descripción</b></p>
+                <p class="text-sm text-gray-400 mb-1">{{event?.description}}</p>
+            </div>
+            <div class="block">
+                <p class="text-sm text-gray-200"><b>Fecha fin</b></p>
                 <p class="text-sm text-gray-400 mb-1">{{event?.endDate | handleDatePipe}}</p>
             </div>
             <div class="block">
@@ -39,14 +43,6 @@
         <!-- <button class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" (click)="modalEventInfo.open()">Ver detalles</button> -->
         <button class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" (click)="redirectAdmin()">Ver detalles</button>
         
-        <!-- Botón Editar - solo visible para el creador -->
-        <!-- <button 
-            *ngIf="showEditButton"
-            class="bg-blue-600 dark:bg-blue-300 hover:bg-blue-500 dark:hover:bg-blue-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
-            (click)="redirectEdit()">
-            Editar
-        </button> -->
-
         <!-- Botón Cerrar inscripciones - sólo creador y cuando está ABIERTO -->
         <button
             *ngIf="isUserCreator && event?.statusEvent === StatusEvent.OPEN"
@@ -71,16 +67,6 @@
             (click)="onInscript()">
             Inscribirme
         </button>
-        
-        <!-- Estado Inscrito - visible si el usuario ya está registrado -->
-        <!-- <div 
-            *ngIf="showRegisteredStatus"
-            class="bg-green-600 dark:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-            </svg>
-            Inscrito
-        </div> -->
         
         <!-- Botón Inscribirme para invitados (sin autenticación) -->
         <button 
