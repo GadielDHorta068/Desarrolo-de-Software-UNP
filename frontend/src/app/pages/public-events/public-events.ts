@@ -4,10 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { EventsService } from '../../services/events.service';
-import { EventsTemp, StatusEvent } from '../../models/events.model';
+import { EventsTemp, StatusEvent, EventTypes } from '../../models/events.model';
 import { DrawCard } from '../../shared/components/draw-card/draw-card';
 import { AuthService } from '../../services/auth.service';
-import { Subject, of } from 'rxjs';
+import { Subject, of, Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 
 @Component({
@@ -24,7 +24,9 @@ export class PublicEvents implements OnInit, AfterViewInit {
   loading = true;
   error = '';
   public StatusEvent = StatusEvent;
+  public EventTypes = EventTypes;
   selectedStatus: 'ALL' | StatusEvent = 'ALL';
+  selectedType: 'ALL' | EventTypes = 'ALL';
   userLogged: boolean = false;
 
   // modal de invitación
@@ -50,7 +52,7 @@ export class PublicEvents implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.userLogged = this.authService.isAuthenticated();
     this.setupSearch();
-    // disparo inicial para traer por estado seleccionado (OPEN por defecto)
+    // disparo inicial para traer por estado seleccionado (ALL por defecto)
     this.searchInput$.next('');
   }
 
@@ -75,19 +77,9 @@ export class PublicEvents implements OnInit, AfterViewInit {
               })
             );
           } else {
-            // traer por estado, si es ALL traigo todo
-            if (this.selectedStatus === 'ALL') {
-              return this.eventsService.getAllEvents().pipe(
-                catchError(err => {
-                  console.error('[PublicEvents] Error cargando todos:', err);
-                  this.error = 'No se pudieron cargar los eventos.';
-                  return of([]);
-                })
-              );
-            }
-            return this.eventsService.getEventsByStatus(this.selectedStatus as StatusEvent).pipe(
+            return this.getSourceByFilters().pipe(
               catchError(err => {
-                console.error('[PublicEvents] Error cargando por estado:', err);
+                console.error('[PublicEvents] Error cargando por filtros:', err);
                 this.error = 'No se pudieron cargar los eventos.';
                 return of([]);
               })
@@ -97,16 +89,34 @@ export class PublicEvents implements OnInit, AfterViewInit {
       )
       .subscribe(results => {
         this.events = results || [];
-        // si hay término de búsqueda, aplicar filtro de estado localmente
-        if (this.searchTerm && this.searchTerm.length >= 3 && this.selectedStatus !== 'ALL') {
-          this.filteredEvents = this.events.filter(evt => evt.statusEvent === this.selectedStatus);
+        // aplicar filtros locales según corresponda
+        if (this.searchTerm && this.searchTerm.length >= 3) {
+          this.filteredEvents = this.events
+            .filter(evt => this.selectedStatus === 'ALL' || evt.statusEvent === this.selectedStatus)
+            .filter(evt => this.selectedType === 'ALL' || evt.eventType === this.selectedType);
         } else {
-          this.filteredEvents = this.events;
+          // si la fuente fue por tipo y también hay estado, aplico estado localmente
+          if (this.selectedType !== 'ALL' && this.selectedStatus !== 'ALL') {
+            this.filteredEvents = this.events.filter(evt => evt.statusEvent === this.selectedStatus);
+          } else {
+            this.filteredEvents = this.events;
+          }
         }
         this.resetVisible();
         this.loading = false;
         this.cdr.detectChanges();
       });
+  }
+
+  // Decide qué fuente usar cuando NO hay búsqueda activa
+  private getSourceByFilters(): Observable<EventsTemp[]> {
+    if (this.selectedType !== 'ALL') {
+      return this.eventsService.getEventsByType(this.selectedType as EventTypes);
+    }
+    if (this.selectedStatus !== 'ALL') {
+      return this.eventsService.getEventsByStatus(this.selectedStatus as StatusEvent);
+    }
+    return this.eventsService.getAllEvents();
   }
 
   private setupInfiniteScroll(): void {
@@ -142,37 +152,82 @@ export class PublicEvents implements OnInit, AfterViewInit {
   public applyFilter(status: 'ALL' | StatusEvent): void {
     this.selectedStatus = status;
 
-    // Si hay búsqueda activa (>=3), aplico el filtro local sobre los resultados de búsqueda
+    // Si hay búsqueda activa (>=3), aplico filtros locales
     if (this.searchTerm && this.searchTerm.length >= 3) {
-      this.filteredEvents = status === 'ALL'
-        ? this.events
-        : this.events.filter(evt => evt.statusEvent === status);
+      this.filteredEvents = this.events
+        .filter(evt => this.selectedStatus === 'ALL' || evt.statusEvent === this.selectedStatus)
+        .filter(evt => this.selectedType === 'ALL' || evt.eventType === this.selectedType);
       this.resetVisible();
       this.cdr.detectChanges();
       return;
     }
 
-    // Sin búsqueda activa: traer datos desde el servidor según el estado seleccionado
+    // Sin búsqueda: obtengo por tipo si aplica, o por estado, o todos
     this.loading = true;
     this.error = '';
-    const source$ = status === 'ALL'
-      ? this.eventsService.getAllEvents()
-      : this.eventsService.getEventsByStatus(status as StatusEvent);
-
-    source$.pipe(
+    this.getSourceByFilters().pipe(
       catchError(err => {
-        console.error('[PublicEvents] Error al aplicar filtro por estado:', err);
-        this.error = 'No se pudieron cargar los eventos por estado.';
+        console.error('[PublicEvents] Error al aplicar filtro:', err);
+        this.error = 'No se pudieron cargar los eventos por filtro.';
         this.loading = false;
         return of([]);
       })
     ).subscribe(results => {
       this.events = results || [];
-      this.filteredEvents = this.events;
+      // si hay tipo y estado, aplicar estado localmente
+      if (this.selectedType !== 'ALL' && this.selectedStatus !== 'ALL') {
+        this.filteredEvents = this.events.filter(evt => evt.statusEvent === this.selectedStatus);
+      } else {
+        this.filteredEvents = this.events;
+      }
       this.resetVisible();
       this.loading = false;
       this.cdr.detectChanges();
     });
+  }
+
+  public applyTypeFilter(type: 'ALL' | EventTypes): void {
+    this.selectedType = type;
+
+    // Con búsqueda activa: filtros locales
+    if (this.searchTerm && this.searchTerm.length >= 3) {
+      this.filteredEvents = this.events
+        .filter(evt => this.selectedStatus === 'ALL' || evt.statusEvent === this.selectedStatus)
+        .filter(evt => this.selectedType === 'ALL' || evt.eventType === this.selectedType);
+      this.resetVisible();
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // Sin búsqueda: obtengo por tipo si aplica, o por estado, o todos
+    this.loading = true;
+    this.error = '';
+    this.getSourceByFilters().pipe(
+      catchError(err => {
+        console.error('[PublicEvents] Error al aplicar filtro por tipo:', err);
+        this.error = 'No se pudieron cargar los eventos por tipo.';
+        this.loading = false;
+        return of([]);
+      })
+    ).subscribe(results => {
+      this.events = results || [];
+      // si hay tipo y estado, aplicar estado localmente
+      if (this.selectedType !== 'ALL' && this.selectedStatus !== 'ALL') {
+        this.filteredEvents = this.events.filter(evt => evt.statusEvent === this.selectedStatus);
+      } else {
+        this.filteredEvents = this.events;
+      }
+      this.resetVisible();
+      this.loading = false;
+      this.cdr.detectChanges();
+    });
+  }
+
+  public clearFilters(): void {
+    this.selectedStatus = 'ALL';
+    this.selectedType = 'ALL';
+    this.searchTerm = '';
+    this.searchInput$.next(''); // recargar sin búsqueda y sin filtros
   }
 
   // navegación y modal para la invitación

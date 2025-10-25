@@ -144,4 +144,10 @@ export class EventsService {
   getEventsByStatus(status: StatusEvent): Observable<EventsTemp[]> {
     return this.http.get<EventsTemp[]>(`${this.apiUrl}/status/${status}`);
   }
+ //Obtener eventos por tipo (endpoint público)
+  getEventsByType(type: EventTypes): Observable<EventsTemp[]> {
+    return this.http.get<EventsTemp[]>(`${this.apiUrl}/type/${type}`);
+  }
+
+
 }
