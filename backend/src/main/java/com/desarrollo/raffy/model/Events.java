@@ -65,7 +65,6 @@ public abstract class Events {
     private String description;
 
     @NotNull(message = "Se debe tener fecha de inicio")
-    //@Future(message = "La fecha de inicio debe ser futura")
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 

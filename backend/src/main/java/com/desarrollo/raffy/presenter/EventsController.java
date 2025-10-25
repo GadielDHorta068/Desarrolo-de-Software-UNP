@@ -17,8 +17,18 @@ import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
+import com.desarrollo.raffy.model.auditlog.AuditAction;
+import com.desarrollo.raffy.model.auditlog.AuditActionType;
+import com.desarrollo.raffy.model.auditlog.AuditEvent;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.desarrollo.raffy.model.Categories;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.business.services.AuditLogsService;
 import com.desarrollo.raffy.business.services.EmailService;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
@@ -37,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Collections;
 import java.util.List;
 import java.time.LocalDate;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -50,6 +61,7 @@ import com.desarrollo.raffy.exception.NoInscriptEventExeption;
 
 
 import org.modelmapper.ModelMapper;
+
 import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
@@ -77,6 +89,9 @@ public class EventsController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private AuditLogsService auditLogsService;
+
 
     @PostMapping("/create/giveaway/{idUser}")
     public ResponseEntity<?> createGiveaway(
@@ -92,8 +107,11 @@ public class EventsController {
         }
         
         Giveaways created = eventsService.create(giveaways, idUser);
+
         if (created != null) {
+            auditLogsService.createAuditEvent(created);
             EventSummaryDTO dto = eventsService.getEventSummaryById(created.getId());
+            
             return new ResponseEntity<>(dto, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
@@ -115,6 +133,7 @@ public class EventsController {
         
         GuessingContest created = eventsService.create(guessingContest, idUser);
         if (created != null) {
+            auditLogsService.createAuditEvent(created);
             EventSummaryDTO dto = eventsService.getEventSummaryById(created.getId());
             return new ResponseEntity<>(dto, HttpStatus.CREATED);
         } else {
@@ -138,12 +157,130 @@ public class EventsController {
         
         Raffle newRaffle = eventsService.create(aRaffle, idUser);
         if (newRaffle != null) {
+            auditLogsService.createAuditEvent(newRaffle);
             EventSummaryDTO dto = eventsService.getEventSummaryById(newRaffle.getId());
             return new ResponseEntity<>(dto, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
         }
     }
+
+/* 
+    @PostMapping("/create/{userId}")
+    public ResponseEntity<?> createEvents(
+        @RequestBody Map<String, Object> requestData,
+        @PathVariable("userId") Long userId
+    ) {
+        try {
+            log.info("Datos recibidos: {}", requestData);
+            
+            String eventTypeStr = (String) requestData.get("eventType");
+            log.info("EventType del JSON: '{}'", eventTypeStr);
+            
+            if (eventTypeStr == null) {
+                return ResponseEntity.badRequest().body("Debe especificar el tipo de evento.");
+            }
+
+            EventTypes eventType;
+            try {
+                eventType = EventTypes.valueOf(eventTypeStr.toUpperCase().trim());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body("Tipo de evento no válido: " + eventTypeStr);
+            }
+
+            // Configurar ObjectMapper más específicamente
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+
+            // Crear evento manualmente según el tipo
+            Events event;
+            switch (eventType) {
+                case GIVEAWAYS:
+                    event = createGiveaway(requestData, mapper);
+                    break;
+                case GUESSING_CONTEST:
+                    event = createGuessingContest(requestData, mapper);
+                    break;
+                case RAFFLES:
+                    event = createRaffle(requestData, mapper);
+                    break;
+                default:
+                    return ResponseEntity.badRequest().body("Tipo de evento no válido: " + eventTypeStr);
+            }
+
+            // Establecer manualmente el eventType
+            event.setEventType(eventType);
+
+            log.info("Evento creado - Tipo: {}", event.getEventType());
+            
+            // Validaciones
+            if (event.getEndDate() == null) {
+                return ResponseEntity.badRequest().body("Debe especificar la fecha de fin del evento.");
+            }
+
+            if (event.getEndDate().isBefore(LocalDate.now())) {
+                return ResponseEntity.badRequest().body("La fecha de fin debe ser posterior a la fecha actual.");
+            }
+
+            // Resto del código igual...
+            Events created = eventsService.create(event, userId);
+            auditLogsService.createAuditEvent(created);
+            EventSummaryDTO dto = eventsService.getEventSummaryById(created.getId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+
+        } catch (IllegalArgumentException e) {
+            log.error("Error de validación: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error interno: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().body("Error al crear el evento: " + e.getMessage());
+        }
+    }
+
+    private Giveaways createGiveaway(Map<String, Object> data, ObjectMapper mapper) {
+        return mapper.convertValue(data, Giveaways.class);
+    }
+
+    private GuessingContest createGuessingContest(Map<String, Object> data, ObjectMapper mapper) {
+        GuessingContest contest = mapper.convertValue(data, GuessingContest.class);
+        
+        // Establecer campos específicos manualmente si es necesario
+        if (data.containsKey("minValue")) {
+            contest.setMinValue(((Number) data.get("minValue")).intValue());
+        }
+        if (data.containsKey("maxValue")) {
+            contest.setMaxValue(((Number) data.get("maxValue")).intValue());
+        }
+        if (data.containsKey("maxAttempts")) {
+            contest.setMaxAttempts(((Number) data.get("maxAttempts")).intValue());
+        }
+        if (data.containsKey("targetNumber")) {
+            contest.setTargetNumber(((Number) data.get("targetNumber")).intValue());
+        }
+        
+        log.info("GuessingContest creado - Min: {}, Max: {}, Attempts: {}", 
+                contest.getMinValue(), contest.getMaxValue(), contest.getMaxAttempts());
+        
+        return contest;
+    }
+
+    private Raffle createRaffle(Map<String, Object> data, ObjectMapper mapper) {
+        Raffle raffle = mapper.convertValue(data, Raffle.class);
+        
+        // Establecer campos específicos manualmente si es necesario
+        if (data.containsKey("quantityOfNumbers")) {
+            raffle.setQuantityOfNumbers(((Number) data.get("quantityOfNumbers")).intValue());
+        }
+        if (data.containsKey("priceOfNumber")) {
+            raffle.setPriceOfNumber(((Number) data.get("priceOfNumber")).doubleValue());
+        }
+        
+        return raffle;
+    } */
+
 
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
@@ -230,6 +367,14 @@ public class EventsController {
             @RequestBody Giveaways event) {
 
         Giveaways updatedEvent = eventsService.update(idEvent, event, idUser);
+        //Auditoría
+        auditLogsService.logAction(
+            idEvent,
+            updatedEvent.getCreator().getNickname(),
+            AuditActionType.EVENT_UPDATED,
+            String.format("El evento: '%s' se actualizó.", updatedEvent.getTitle())
+        );
+        //Fin auditoría
         EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
         return ResponseEntity.ok(dto);
     }
@@ -241,6 +386,14 @@ public class EventsController {
             @RequestBody GuessingContest event) {
 
         GuessingContest updatedEvent = eventsService.update(idEvent, event, idUser);
+        //Auditoría
+        auditLogsService.logAction(
+            idEvent,
+            updatedEvent.getCreator().getNickname(),
+            AuditActionType.EVENT_UPDATED,
+            String.format("El evento: '%s' se actualizó.", updatedEvent.getTitle())
+        );
+        //Fin auditoría
         EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
         return ResponseEntity.ok(dto);
     }
@@ -328,9 +481,9 @@ public class EventsController {
                 } catch (Exception e) {
                     log.warn("No se pudo enviar el resumen de ganadores al creador: {}", e.getMessage());
                 }
-                log.info("✅ Correos electrónicos enviados a los ganadores del evento: " + event.getTitle());
+                log.info("Correos electrónicos enviados a los ganadores del evento: " + event.getTitle());
             } catch (Exception e) {
-                log.error("❌ Error al enviar correos a los ganadores: " + e.getMessage(), e);
+                log.error("Error al enviar correos a los ganadores: " + e.getMessage(), e);
                 // Continuar aunque falle el envío de correos
             } 
 
@@ -461,10 +614,20 @@ public class EventsController {
 
     //Mejorar para los filtros
     @GetMapping("/active")
-    public ResponseEntity<?> getActiveEvents() {
-        List<EventSummaryDTO> events = eventsService.getActiveEventSummaries();
-        return new ResponseEntity<>(events, HttpStatus.OK);
+    public ResponseEntity<List<EventSummaryDTO>> getActiveEvents(
+            @RequestParam(required = false) EventTypes type,
+            @RequestParam(required = false) String categorie,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
+            @RequestParam(required = false) Integer winnerCount) {
+
+        List<EventSummaryDTO> events = eventsService.getActiveEventSummaries(
+                type, categorie, start, end, winnerCount
+        );
+
+        return ResponseEntity.ok(events);
     }
+
 
     @GetMapping("/date-range")
     public ResponseEntity<?> getByDateRange(
@@ -682,8 +845,13 @@ public class EventsController {
         } catch (Exception e) {
             return new ResponseEntity<>("No se pudo cerrar el evento: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         EventSummaryDTO dto = eventsService.getEventSummaryById(idEvent);
+        auditLogsService.logAction(
+                idEvent,
+                dto.getCreator().getNickname(),
+                AuditActionType.EVENT_CLOSED, 
+                String.format("El evento '%s' se cerró.", dto.getTitle())
+                );
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

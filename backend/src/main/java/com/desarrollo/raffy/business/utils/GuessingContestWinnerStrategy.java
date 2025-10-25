@@ -1,7 +1,6 @@
 package com.desarrollo.raffy.business.utils;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -14,13 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.desarrollo.raffy.business.services.AuditLogsService;
-import com.desarrollo.raffy.model.AuditLog;
-import com.desarrollo.raffy.model.AuditParticipant;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.GuessAttempt;
 import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.model.auditlog.AuditActionType;
+import com.desarrollo.raffy.model.auditlog.AuditEvent;
+import com.desarrollo.raffy.model.auditlog.AuditParticipant;
 
 
 @Component
@@ -89,33 +89,27 @@ public class GuessingContestWinnerStrategy implements WinnerSelectionStrategy<Pa
                 .ifPresent(p -> p.setPosition((short) position.getAndIncrement()));
         }
 
-        // Registro de auditoría
-        AuditLog auditLog = new AuditLog();
-        auditLog.setExecuteDate(LocalDateTime.now());
-        auditLog.setCreatorNickname(contest.getCreator().getNickname());
-        auditLog.setSeed(null);
-        auditLog.setEventId(contest.getId());
-        auditLog.setEventTitle(contest.getTitle());
-        auditLog.setEventType(contest.getEventType());
-        auditLog.setEventStartDate(contest.getStartDate());
-        auditLog.setEventEndDate(contest.getEndDate());
-
+        AuditEvent auditEvent = auditLogsService.getAuditEventById(contest.getId());
         List<AuditParticipant> auditParticipants = participants.stream()
-            .map(p -> new AuditParticipant(
-                null,
-                p.getParticipant().getName(),
-                p.getParticipant().getSurname(),
-                p.getParticipant().getEmail(),
-                p.getParticipant().getCellphone(),
-                p.getPosition()
-            ))
-            .toList();
+        .map(p -> new AuditParticipant(
+            null,
+            p.getPosition(),
+            p.getParticipant().getName(),
+            p.getParticipant().getSurname(),
+            p.getParticipant().getEmail(),
+            p.getParticipant().getCellphone(),
+            auditEvent
+        ))
+        .toList();
 
-        auditLog.setParticipants(auditParticipants);
-
-        auditLogsService.save(auditLog);
+        auditLogsService.logActionFinalized(
+            contest.getId(), 
+            contest.getCreator().getNickname(), 
+            AuditActionType.EVENT_EXECUTED, 
+            String.format("Se Ejecuto la selección de ganadores para el evento: '%s'.", contest.getTitle()), 
+            null, 
+            auditParticipants);
     }
-
     /**
      * Clase auxiliar para medir rendimiento de cada usuario.
      */

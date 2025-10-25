@@ -12,9 +12,11 @@ import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
 import com.desarrollo.raffy.dto.GiveawaysDTO;
 import com.desarrollo.raffy.dto.GuessingContestDTO;
+import com.desarrollo.raffy.dto.RaffleDTO;
 import com.desarrollo.raffy.dto.CreatorSummaryDTO;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.GuessingContest;
+import com.desarrollo.raffy.model.Raffle;
 
 /**
  * Configuración de ModelMapper para el mapeo automático entre entidades y DTOs
@@ -133,6 +135,7 @@ public class ModelMapperConfig {
                     Events src = (Events) request.getSource();
                     if(src instanceof Giveaways) return new GiveawaysDTO();
                     if(src instanceof GuessingContest) return new GuessingContestDTO();
+                    if (src instanceof Raffle) return mapper.map(src, RaffleDTO.class);
                     return new EventSummaryDTO();
                 });
         mapper.createTypeMap(Giveaways.class, GiveawaysDTO.class)
@@ -140,12 +143,29 @@ public class ModelMapperConfig {
                 m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
                 m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
             });
-        mapper.createTypeMap(GuessingContest.class, GuessingContestDTO.class)
+        /* mapper.createTypeMap(GuessingContest.class, GuessingContestDTO.class)
             .addMappings(m -> {
                 m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
                 m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
-            });
+            }); */
 
+        // Configuración específica para GuessingContest -> GuessingContestDTO
+        mapper.createTypeMap(GuessingContest.class, GuessingContestDTO.class)
+              .addMappings(m -> {
+                  m.using(categoryIdConverter).map(src -> src, GuessingContestDTO::setCategoryId);
+                  m.using(categoryNameConverter).map(src -> src, GuessingContestDTO::setCategoryName);
+                  m.map(GuessingContest::getMinValue, GuessingContestDTO::setMinValue);
+                  m.map(GuessingContest::getMaxValue, GuessingContestDTO::setMaxValue);
+                  m.map(GuessingContest::getMaxAttempts, GuessingContestDTO::setMaxAttempts);
+              });
+        // Configuración para Raffle -> RaffleDTO (si tienes uno)
+        mapper.createTypeMap(Raffle.class, RaffleDTO.class)
+              .addMappings(m -> {
+                  m.using(categoryIdConverter).map(src -> src, RaffleDTO::setCategoryId);
+                  m.using(categoryNameConverter).map(src -> src, RaffleDTO::setCategoryName);
+                  m.map(Raffle::getQuantityOfNumbers, RaffleDTO::setQuantityOfNumbers);
+                  m.map(Raffle::getPriceOfNumber, RaffleDTO::setPriceOfNumber);
+              });
 
         return mapper;
     }
