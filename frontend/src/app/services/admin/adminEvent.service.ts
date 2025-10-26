@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { EventsTemp, StatusEvent } from '../../models/events.model';
+import { EventsTemp, EventTypes, StatusEvent } from '../../models/events.model';
 import { AuditService, WinnersAudit } from '../audit.service';
+import { EventsService } from '../events.service';
+import { DataStatusEvent } from '../../models/response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +20,7 @@ export class AdminEventService {
   public winnersEvent$ = this.winnersEventSubject.asObservable();
 
   constructor(
+    private eventService: EventsService,
     private auditService: AuditService
   ) {}
 
@@ -46,6 +49,6 @@ export class AdminEventService {
                 console.error('[loadWinners] => Error al obtener los ganadores del evento '+eventId+':', err);
             }
         });
-    }
+  }
   
 }

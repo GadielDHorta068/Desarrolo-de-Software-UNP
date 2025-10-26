@@ -85,24 +85,8 @@
 
 </div>
 
-<app-modal-info [dataModal]="dataModal" #modalInfo></app-modal-info>
+<!-- <app-modal-info [dataModal]="dataModal" #modalInfo></app-modal-info> -->
 <app-modal-share-event #modalShareEvent></app-modal-share-event>
-
-<!-- MODAL INSCRIPCION -->
-<!-- conectado al boton "addToCart" -->
-<app-questionary
-    *ngIf="showModalIncript"
-    (close)="onInscriptClosed()"
-    (onInscript) = "onQuestionarySubmit($event)"
->
-</app-questionary>
-
-<app-raffle-numbers
-    *ngIf = "showRaffleModal"
-    (closeRaffleNumberModal) = "onRaffleClosed()"
-    (proceedToInscript)="onProceedToQuestionary($event)"
->
-</app-raffle-numbers>
 
 
 

@@ -1,13 +1,17 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { RouterOutlet, ChildrenOutletContexts } from '@angular/router';
 import { HeaderComponent } from './shared/components/header/header.component';
 import { slideInAnimation } from './animations/route-animations';
-import { configService } from './services/config.service';
+import { QuestionaryComponent } from './pages/questionary/questionary.component';
+import { RaffleNumbersComponent } from './pages/raffle-numbers.component/raffle-numbers.component';
+import { CommonModule } from '@angular/common';
+import { AdminInscriptService } from './services/admin/adminInscript';
+import { NotificationService } from './services/notification.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent],
+  imports: [CommonModule, RouterOutlet, HeaderComponent, QuestionaryComponent, RaffleNumbersComponent],
   template: `
     <main class="min-h-screen flex flex-col font-sans bg-gray-50 dark:bg-gray-900">
       <header class="bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 text-white shadow-lg">
@@ -85,6 +89,18 @@ import { configService } from './services/config.service';
       </div>
     </footer>
     </main>
+
+    <app-questionary
+        *ngIf="showModalInscript"
+        (close)="onInscriptClosed()"
+        (onInscript) = "onQuestionarySubmit($event)"
+    ></app-questionary>
+
+    <app-raffle-numbers
+        *ngIf = "showRaffleModal"
+        (closeRaffleNumberModal) = "onRaffleClosed()"
+        (proceedToInscript)="onProceedToQuestionary($event)"
+    ></app-raffle-numbers>
   `,
   styles: [],
   animations: [slideInAnimation],
@@ -93,13 +109,61 @@ import { configService } from './services/config.service';
 export class AppComponent {
   // Componente principal de la aplicación
   // Utiliza OnPush para mejor rendimiento
+
+  showModalInscript: boolean = false;
+  showRaffleModal: boolean = false;
   
   constructor(
-    private contexts: ChildrenOutletContexts
+    private contexts: ChildrenOutletContexts,
+    private cdr: ChangeDetectorRef,
+    private adminInscriptService: AdminInscriptService,
+    private notificationService: NotificationService
   ) {
     // Removido initData() - ahora se llama solo en las páginas que lo necesitan
+    this.adminInscriptService.openInscription$.subscribe(
+      resp => {
+        this.showModalInscript = resp;
+        this.cdr.detectChanges();
+      }
+    )
+
+    this.adminInscriptService.openRaffleNUmbers$.subscribe(
+      resp => {
+        this.showRaffleModal = resp;
+        this.cdr.detectChanges();
+      }
+    )
   }
   
+  openModalRaffle(){
+    this.showRaffleModal = !this.showRaffleModal;
+  }
+  openModalInscript(){
+    this.showModalInscript = !this.showModalInscript;
+  }
+
+  onRaffleClosed(){
+    this.adminInscriptService.setOpenModalRaffle(false);
+  }
+  onInscriptClosed(){
+    this.adminInscriptService.setOpenModalInscript(false);
+  }
+
+  async onQuestionarySubmit(data: any){
+    const respInscript: any = await this.adminInscriptService.onInscript(data);
+    // console.log("[inscripcion] => resp de la inscripcion: ", respInscript.message);
+    if(respInscript.status == 200){
+      this.notificationService.notifySuccess(respInscript.message)
+    }
+    else{
+      this.notificationService.notifyError("Ha ocurrido en la inscripcion al evento.");
+    }
+    this.cdr.detectChanges();
+  }
+  onProceedToQuestionary(data: any){
+    this.adminInscriptService.toBuyNumbersRaffle(data);
+  }
+
   getRouteAnimationData() {
     return this.contexts.getContext('primary')?.route?.snapshot?.data?.['animation'];
   }

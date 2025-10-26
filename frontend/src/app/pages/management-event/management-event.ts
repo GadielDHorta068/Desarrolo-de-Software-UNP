@@ -22,6 +22,7 @@ import { QuestionaryService } from '../../services/questionary.service';
 import { NotificationService } from '../../services/notification.service';
 import { BuyRaffleNumberDTO } from '../../models/buyRaffleNumberDTO';
 import { RaffleNumbersComponent } from '../raffle-numbers.component/raffle-numbers.component';
+import { AdminInscriptService } from '../../services/admin/adminInscript';
 
 @Component({
     selector: 'app-management-event',
@@ -33,8 +34,8 @@ import { RaffleNumbersComponent } from '../raffle-numbers.component/raffle-numbe
 })
 export class ManagementEvent {
     @ViewChild('modalShareEvent') modalShareEvent!: ModalShareEvent;
-    @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
-    dataModal: InfoModal = { title: "Actualización de datos", message: "" };
+    // @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
+    // dataModal: InfoModal = { title: "Actualización de datos", message: "" };
 
     // evento en contexto (debe ser seteado desde donde se quiere interactuar con el dato, por ej el boton de EDITAR)
     event!: EventsTemp | null;
@@ -75,7 +76,8 @@ export class ManagementEvent {
         private eventService: EventsService,
         private cdr: ChangeDetectorRef,
         private questionaryService: QuestionaryService,
-        private notificationService: NotificationService
+        private notificationService: NotificationService,
+        private adminInscriptService: AdminInscriptService
     ) {
         this.adminEventService.selectedEvent$.subscribe(
             currentEvent => {
@@ -160,99 +162,107 @@ export class ManagementEvent {
             this.event?.statusEvent === StatusEvent.OPEN;
     }
 
-    onInscript() {
-        // controlamos que el evento este abierto
-        this.eventService.getStatusEventById(""+this.event?.id).subscribe({
-            next: (data) => {
-                console.log('[estadoEvento] => estado del evento: ', data);
-                const dataStatus: DataStatusEvent = data.data as DataStatusEvent;
-                // this.dataModal.message = "Estado del evento: ", dataStatus.status;
-                if(dataStatus.status === StatusEvent.OPEN){
-                    // TODO: aca permitimos la inscripcion    
-                    if (this.event?.id && this.event?.eventType === EventTypes.GIVEAWAY) {
-                        // mostramos el form de inscripcion al sorteo
-                        this.showModalIncript = true;
-                    }
-                    if (this.event?.id && this.event?.eventType === EventTypes.RAFFLES) {
-                        try {
-                            this.showRaffleModal = true;
-                            // this.cdr.detectChanges();
-                        } catch (err) {
-                            console.error('ERROR dentro de onInscript (bloque RAFFLE):', err);
-                        }
-                    }
-                }
-                else{
-                    if(this.event){
-                        this.event.statusEvent = dataStatus.status as StatusEvent
-                    }
-                }
-                // this.modalInfoRef.open();       // no muestra el estado, ver
-                this.cdr.detectChanges();
-            },
-            error: (err) => {
-                console.error('Error al obtener el estado del evento:', err);
-            }
-        })
-    }
-
-        
-
-
-    onProceedToQuestionary(numbersToBuy: number[]): void {
-        console.log('Numeros como parametro: ' + numbersToBuy);
-        this.selectedRaffleNumbers = numbersToBuy;
-        console.log('Numeros ya asignados: ' + this.selectedRaffleNumbers);
-
-        this.showRaffleModal = false;
-        this.showModalIncript = true;
-    }
-
-    onRaffleClosed(): void {
-        this.showRaffleModal = false; // oculta el modal de rifa
-    }
-
-    onInscriptClosed(): void {
-        this.showModalIncript = false; // Oculta modal de inscripcion
-    }
-
-    onQuestionarySubmit(user: UserDTO): void {
-        if (!this.event) return;
-
-        if (this.event.eventType === this.typesOfEventes.RAFFLES) {
-            const buyNumRequest: BuyRaffleNumberDTO = {
-                aGuestUser: user,
-                someNumbersToBuy: this.selectedRaffleNumbers
-            }
-            this.questionaryService.saveRaffleNumber(
-                this.event.id,
-                buyNumRequest
-            ).subscribe({
-                next: (response) => {
-                    this.notificationService.notifySuccess(response.message);
-                },
-                error: (errorResponse) => {
-                    console.log('error 1');
-                    this.notificationService.notifyError(errorResponse.error.message);
-                }
-            });
+    // onInscript() {
+    //     // controlamos que el evento este abierto
+    //     this.eventService.getStatusEventById(""+this.event?.id).subscribe({
+    //         next: (data) => {
+    //             console.log('[estadoEvento] => estado del evento: ', data);
+    //             const dataStatus: DataStatusEvent = data.data as DataStatusEvent;
+    //             // this.dataModal.message = "Estado del evento: ", dataStatus.status;
+    //             if(dataStatus.status === StatusEvent.OPEN){
+    //                 // TODO: aca permitimos la inscripcion    
+    //                 if (this.event?.id && this.event?.eventType === EventTypes.GIVEAWAY) {
+    //                     // mostramos el form de inscripcion al sorteo
+    //                     this.showModalIncript = true;
+    //                 }
+    //                 if (this.event?.id && this.event?.eventType === EventTypes.RAFFLES) {
+    //                     try {
+    //                         this.showRaffleModal = true;
+    //                         // this.cdr.detectChanges();
+    //                     } catch (err) {
+    //                         console.error('ERROR dentro de onInscript (bloque RAFFLE):', err);
+    //                     }
+    //                 }
+    //             }
+    //             else{
+    //                 if(this.event){
+    //                     this.event.statusEvent = dataStatus.status as StatusEvent
+    //                 }
+    //             }
+    //             // this.modalInfoRef.open();       // no muestra el estado, ver
+    //             this.cdr.detectChanges();
+    //         },
+    //         error: (err) => {
+    //             console.error('Error al obtener el estado del evento:', err);
+    //         }
+    //     })
+    // }
+    async onInscript(){
+        const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
+        if(!respStatus){
+            this.notificationService.notifyError("No fue posible realizar la operación");
         }
-        else {
-            this.questionaryService.save(
-                user,
-                this.event.id
-            ).subscribe({
-                next: (response) => {
-                    this.notificationService.notifySuccess(response.message);
-                },
-                error: (errorResponse) => {
-                    console.log('LOG ERROR:', JSON.stringify(errorResponse)); // borrar
-                    this.notificationService.notifyError(errorResponse.error.message);
-                }
-            });
+        else{
+            if(respStatus != StatusEvent.OPEN){
+                this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
+            }
         }
-
     }
+
+    // onProceedToQuestionary(numbersToBuy: number[]): void {
+    //     console.log('Numeros como parametro: ' + numbersToBuy);
+    //     this.selectedRaffleNumbers = numbersToBuy;
+    //     console.log('Numeros ya asignados: ' + this.selectedRaffleNumbers);
+
+    //     this.showRaffleModal = false;
+    //     this.showModalIncript = true;
+    // }
+
+    // onRaffleClosed(): void {
+    //     this.showRaffleModal = false; // oculta el modal de rifa
+    // }
+
+    // onInscriptClosed(): void {
+    //     this.showModalIncript = false; // Oculta modal de inscripcion
+    // }
+
+    // onQuestionarySubmit(user: UserDTO): void {
+    //     if (!this.event) return;
+
+    //     if (this.event.eventType === this.typesOfEventes.RAFFLES) {
+    //         const buyNumRequest: BuyRaffleNumberDTO = {
+    //             aGuestUser: user,
+    //             someNumbersToBuy: this.selectedRaffleNumbers
+    //         }
+    //         this.questionaryService.saveRaffleNumber(
+    //             this.event.id,
+    //             buyNumRequest
+    //         ).subscribe({
+    //             next: (response) => {
+    //                 this.notificationService.notifySuccess(response.message);
+    //             },
+    //             error: (errorResponse) => {
+    //                 console.log('error 1');
+    //                 this.notificationService.notifyError(errorResponse.error.message);
+    //             }
+    //         });
+    //     }
+    //     else {
+    //         this.questionaryService.save(
+    //             user,
+    //             this.event.id
+    //         ).subscribe({
+    //             next: (response) => {
+    //                 this.notificationService.notifySuccess(response.message);
+    //             },
+    //             error: (errorResponse) => {
+    //                 console.log('LOG ERROR:', JSON.stringify(errorResponse)); // borrar
+    //                 this.notificationService.notifyError(errorResponse.error.message);
+    //             }
+    //         });
+    //     }
+
+    // }
     
     allEventStates = StatusEvent;
     purchaseNumbers(): void {
