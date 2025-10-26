@@ -134,4 +134,20 @@ export class EventsService {
         }
         return this.http.get<UserDTO[]>(`${this.apiUrl}/${anEventId}/get-raffle-owners`, { headers });
     }
+
+  // Buscar eventos por título (endpoint público)
+  searchEvents(title: string): Observable<EventsTemp[]> {
+    return this.http.get<EventsTemp[]>(`${this.apiUrl}/search`, { params: { title } });
+  }
+
+  // Obtener eventos por estado (endpoint público)
+  getEventsByStatus(status: StatusEvent): Observable<EventsTemp[]> {
+    return this.http.get<EventsTemp[]>(`${this.apiUrl}/status/${status}`);
+  }
+ //Obtener eventos por tipo (endpoint público)
+  getEventsByType(type: EventTypes): Observable<EventsTemp[]> {
+    return this.http.get<EventsTemp[]>(`${this.apiUrl}/type/${type}`);
+  }
+
+
 }

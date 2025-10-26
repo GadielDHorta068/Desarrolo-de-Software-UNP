@@ -1,10 +1,12 @@
-package com.desarrollo.raffy.model;
+package com.desarrollo.raffy.model.auditlog;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,12 +18,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter @Getter
-@Table(name = "audit_participant")
+@Table(name = "audit_participants")
 public class AuditParticipant {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+   
+    @Column(name = "user_position", nullable = false)
+    private short userPosition;
 
     @Column(name = "user_name", nullable = false)
     private String userName;
@@ -35,7 +40,7 @@ public class AuditParticipant {
     @Column(name = "user_phone", nullable = true)
     private String userPhone;
 
-    @Column(name = "user_position", nullable = false)
-    private short userPosition;
-
+    @ManyToOne
+    @JoinColumn(name = "event_id", nullable = false)
+    private AuditEvent event;
 }

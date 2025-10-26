@@ -23,11 +23,11 @@ import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.GuessingContest;
-import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
+import com.desarrollo.raffy.model.auditlog.AuditActionType;
 import com.desarrollo.raffy.util.ImageUtils;
 import com.desarrollo.raffy.util.OnCreate;
 
@@ -39,7 +39,6 @@ import com.desarrollo.raffy.dto.GiveawaysDTO;
 import com.desarrollo.raffy.dto.GuessingContestDTO;
 import com.desarrollo.raffy.dto.RaffleDTO;
 
-import com.desarrollo.raffy.business.services.EvolutionService;
 
 @Service
 @Slf4j
@@ -73,7 +72,12 @@ public class EventsService {
         if(eventsRepository.existsByTitle(event.getTitle())){
             throw new IllegalArgumentException("Ya existe un sorteo con el título: "+ event.getTitle());
         }
-        Optional<RegisteredUser> creator = registeredUserRepository.findById(idUser);        
+        Optional<RegisteredUser> creator = registeredUserRepository.findById(idUser);
+        
+        if (creator.isEmpty()) {
+            throw new IllegalArgumentException("Usuario no encontrado con ID: " + idUser);
+        }
+
         event.setCreator(creator.get());
         event.setStatusEvent(StatusEvent.OPEN);
         event.setStartDate(LocalDate.now());
@@ -190,7 +194,6 @@ public class EventsService {
             } catch (Exception ex) {
                 log.warn("No se pudo enviar resumen de cierre: {}", ex.getMessage());
             }
-            
             return true;
         } catch (Exception e) {
             throw new RuntimeException("Error al finalizar el sorteo " + e.getMessage(), e);
@@ -261,7 +264,7 @@ public class EventsService {
 
         
         //Delega la selección de ganadores a ParticipantService
-        List<?> winners = participantService.runEvent(event);
+        List<?> winners = participantService.runEvents(event);
         
         log.info("Ganadores seleccionados: " + winners.size());
         
@@ -311,10 +314,19 @@ public class EventsService {
             .collect(Collectors.toList());
     }
 
-    public List<EventSummaryDTO> getActiveEventSummaries(){
-        return eventsRepository.findActiveEvents().stream()
+    @Transactional
+    public List<EventSummaryDTO> getActiveEventSummaries(
+        EventTypes type, 
+        String categorie, 
+        LocalDate start, 
+        LocalDate end, 
+        Integer winnerCount){
+        
+            return eventsRepository.findActiveEvents(type, categorie, start, end, winnerCount)
+            .stream()
             .map(this::toEventSummaryDTO)
-            .collect(Collectors.toList());
+            .collect(Collectors
+            .toList());
     }
 
     public List<EventSummaryDTO> getEventSummariesByDateRange(LocalDate startDate, LocalDate endDate){
@@ -394,14 +406,14 @@ public class EventsService {
         }
     }
     
-    public List<Events> getActiveEvents() {
+    /* public List<Events> getActiveEvents() {
         try {
             List<Events> events = eventsRepository.findActiveEvents();
             return events != null ? events : List.of();
         } catch (Exception e) {
             return List.of();
         }
-    }
+    } */
     
     public List<Events> getByDateRange(LocalDate startDate, LocalDate endDate) {
         try {

@@ -13,9 +13,9 @@ import { HandleTypePipe } from '../../../pipes/handle-type.pipe';
   templateUrl: './audit-detail.html',
   styleUrls: ['./audit-detail.css']
 })
-export class AuditDetail implements OnInit {
+export class AuditDetail {
 
-  auditlog?: AuditLog;
+ /*  auditlog?: AuditLog;
   loading = true;
 
   constructor (
@@ -69,5 +69,5 @@ export class AuditDetail implements OnInit {
     const d = new Date(year, month - 1, day, hours, minutes, seconds);
     console.log('Fecha formateada: ', d.toLocaleString());
     return d.toLocaleString();
-  }
+  } */
 }

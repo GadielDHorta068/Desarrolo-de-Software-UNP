@@ -7,9 +7,11 @@ import com.desarrollo.raffy.business.repository.EventsRepository;
 import java.time.LocalDate;
 import java.util.List;
 import com.desarrollo.raffy.model.Events;
+import com.desarrollo.raffy.model.auditlog.AuditActionType;
 
 import lombok.extern.slf4j.Slf4j;
 
+import com.desarrollo.raffy.business.services.AuditLogsService;
 import com.desarrollo.raffy.business.services.EventsService;
 
 @Slf4j
@@ -22,6 +24,9 @@ public class Cron {
 
     @Autowired
     private EventsService eventsService;
+
+    @Autowired
+    private AuditLogsService auditLogsService;
 
     /*
      * En esta funcion se actualiza el estado de los eventos
@@ -37,6 +42,14 @@ public class Cron {
             log.info("Cerrando evento: {} - {}", event.getId(), event.getTitle());
             try {
                 eventsService.closeEvent(event.getId());
+                //Auditoría
+                auditLogsService.logAction(
+                event.getId(),
+                "Sistema",
+                AuditActionType.EVENT_CLOSED, 
+                String.format("El evento '%s' se cerró.", event.getTitle())
+                );
+                //Fin Auditoría
             } catch (Exception e) {
                 log.error("Error al cerrar evento {}", event.getId(), e);
             }

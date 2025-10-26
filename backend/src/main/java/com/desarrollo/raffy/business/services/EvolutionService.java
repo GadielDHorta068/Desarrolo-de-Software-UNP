@@ -21,7 +21,7 @@ public class EvolutionService {
     @Value("${EVOLUTION_API_URL:http://evolution-api:8080}")
     private String baseUrl;
 
-    @Value("${EVOLUTION_API_KEY:change-me}")
+    @Value("${EVOLUTION_API_KEY:raffify2025}")
     private String apiKey;
 
     public EvolutionService(RestTemplate restTemplate) {

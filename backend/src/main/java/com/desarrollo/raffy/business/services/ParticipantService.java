@@ -34,7 +34,7 @@ public class ParticipantService {
     @Autowired
     private WinnerStrategyFactory strategyFactory;
 
-    public List<Participant> runEvent(Events event){
+    /* public List<Participant> runEvent(Events event){
         try {       
             log.info("Evento encontrado: " + event.getTitle() + " con estado " + event.getStatusEvent());
 
@@ -65,7 +65,7 @@ public class ParticipantService {
             throw e; // Re-lanzar la excepción para que pueda ser manejada por el controlador
         }
         
-        }
+        } */
 
     @Transactional
     public List<?> runEvents(Events event) {
