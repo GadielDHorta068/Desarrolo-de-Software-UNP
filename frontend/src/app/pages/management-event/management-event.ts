@@ -199,12 +199,17 @@ export class ManagementEvent {
     // }
     async onInscript(){
         const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
+        console.log("[onInscript] => estado del evento: ", respStatus);
         if(!respStatus){
             this.notificationService.notifyError("No fue posible realizar la operación");
         }
         else{
             if(respStatus != StatusEvent.OPEN){
                 this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
+                if(this.event){
+                    this.event.statusEvent = respStatus as StatusEvent;
+                    this.cdr.detectChanges();
+                }
             }
         }
     }

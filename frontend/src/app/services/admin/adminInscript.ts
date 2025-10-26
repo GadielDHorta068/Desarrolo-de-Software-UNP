@@ -168,13 +168,13 @@ export class AdminInscriptService {
         if (this.event.eventType === EventTypes.RAFFLES) {
           this.setOpenModalRaffle(true);
         }
-        return "OK";
+        // return this.event.statusEvent;
       } else {
         this.event.statusEvent = dataStatus.status as StatusEvent;
-        return this.event.statusEvent;
+        // return this.event.statusEvent;
       }
 
-      return dataStatus.status;
+      return this.event.statusEvent;
     } catch (err) {
       console.error('Error al obtener el estado del evento:', err);
       return null;

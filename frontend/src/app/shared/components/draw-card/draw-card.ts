@@ -120,51 +120,26 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     return this.isUserRegistered;
   }
 
-  // onInscript() {
-  //   // controlamos que el evento este abierto
-  //   this.eventService.getStatusEventById("" + this.event?.id).subscribe({
-  //     next: (data) => {
-  //       console.log('[drawCard] => estado del evento: ', data);
-  //       const dataStatus: DataStatusEvent = data.data as DataStatusEvent;
-  //       // this.dataModal.message = "Estado del evento: ", dataStatus.status;
-  //       if (dataStatus.status == StatusEvent.OPEN) {
-  //         // TODO: aca permitimos la inscripcion    
-  //         if (this.event?.id && this.event?.eventType == EventTypes.GIVEAWAY) {
-  //           // mostramos el form de inscripcion al sorteo
-  //           this.selectedEventId = this.event?.id;
-  //           this.showFormGiveaway = true;
-  //         }
-  //         if (this.event?.id && this.event?.eventType == EventTypes.RAFFLES) {
-  //           alert("Aca iria el componente de seleccion de nros de rifa")
-  //         }
-  //       }
-  //       else {
-  //         if (this.event) {
-  //           this.event.statusEvent = dataStatus.status as StatusEvent
-  //         }
-  //       }
-  //       this.modalInfoRef.open();       // no muestra el estado, ver
-  //       this.cdr.detectChanges();
-  //     },
-  //     error: (err) => {
-  //       console.error('Error al obtener el estado del evento:', err);
-  //       // console.error('Error al obtener el estado del evento:', err);
-  //     }
-  //   })
+  // onInscript(){
+  //   this.adminEventService.setSelectedEvent(this.event);
+  //   this.adminInscriptService.checkStatusEventToInscript();
   // }
-
-  // modal de inscripcion a sorteos
-  // openInscriptionGiveayas(aEventId?: number) {
-  //   if (!aEventId) {
-  //     console.warn("eventId inválido:", aEventId); //borrar
-  //   return;
-  //   }
-  //   this.selectedEventId = aEventId;
-  //   this.showFormGiveaway = true;
-  // }
-  onInscript(){
+  async onInscript() {
     this.adminEventService.setSelectedEvent(this.event);
-    this.adminInscriptService.checkStatusEventToInscript();
+    const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
+    console.log("[onInscript] => estado del evento: ", respStatus);
+    if (!respStatus) {
+      this.notificationService.notifyError("No fue posible realizar la operación");
+    }
+    else {
+      if (respStatus != StatusEvent.OPEN) {
+        this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
+        if (this.event) {
+          this.event.statusEvent = respStatus as StatusEvent;
+          this.cdr.detectChanges();
+        }
+      }
+    }
   }
 
   ngAfterViewInit(){
