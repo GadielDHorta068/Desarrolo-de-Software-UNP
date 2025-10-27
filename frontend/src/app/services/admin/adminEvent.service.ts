@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { EventsTemp, EventTypes, StatusEvent } from '../../models/events.model';
-import { AuditService, WinnersAudit } from '../audit.service';
+import { WinnerDTO } from '../../models/winner.model';
 import { EventsService } from '../events.service';
 import { DataStatusEvent } from '../../models/response.model';
 
@@ -15,13 +15,12 @@ export class AdminEventService {
   private selectedEventSubject = new BehaviorSubject<EventsTemp | null>(null);
   public selectedEvent$ = this.selectedEventSubject.asObservable();
 
-  // maneja una referencia a los ganadores del evento seleccionado
-  private winnersEventSubject = new BehaviorSubject<WinnersAudit[]|[]>([]);
+  // maneja una referencia a los ganadores del evento seleccionado (WinnerDTO)
+  private winnersEventSubject = new BehaviorSubject<WinnerDTO[]>([]);
   public winnersEvent$ = this.winnersEventSubject.asObservable();
 
   constructor(
-    private eventService: EventsService,
-    private auditService: AuditService
+    private eventService: EventsService
   ) {}
 
   // public setSelectedEvent(event: EventsTemp|null){
@@ -38,17 +37,17 @@ export class AdminEventService {
     }
   }
 
-  // vamos a buscar los ganadores del sorteo si esta FINALIZADO
+  // vamos a buscar los ganadores del sorteo si está FINALIZADO (independiente de auditoría)
   private loadWinners(eventId: string): void {
-        this.auditService.getAuditWinners(eventId).subscribe({
-            next: (data) => {
-                // console.log("[loadWinners] => ganadores recuperados del evento "+eventId+": ", data);
-                this.winnersEventSubject.next(data);
-            },
-            error: (err) => {
-                console.error('[loadWinners] => Error al obtener los ganadores del evento '+eventId+':', err);
-            }
-        });
+    this.eventService.getWinnersListByEventId(Number(eventId)).subscribe({
+      next: (data) => {
+        // console.log(`[loadWinners] => ganadores recuperados del evento ${eventId}: `, data);
+        this.winnersEventSubject.next(data);
+      },
+      error: (err) => {
+        console.error(`[loadWinners] => Error al obtener los ganadores del evento ${eventId}:`, err);
+      }
+    });
   }
   
 }

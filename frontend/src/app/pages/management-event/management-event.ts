@@ -15,7 +15,7 @@ import { ModalShareEvent } from '../../shared/components/modal-share-event/modal
 import { QuestionaryComponent } from '../questionary/questionary.component';
 import { EventsService } from '../../services/events.service';
 import { UserDTO } from '../../models/UserDTO';
-import { WinnersAudit } from '../../services/audit.service';
+import { WinnerDTO } from '../../models/winner.model';
 import { DataStatusEvent } from '../../models/response.model';
 import { TagPrize } from '../../shared/components/tag-prize/tag-prize';
 import { QuestionaryService } from '../../services/questionary.service';
@@ -65,7 +65,7 @@ export class ManagementEvent {
     typesOfEventes = EventTypes;
     participants: UserDTO[] = [];
     eventType!: EventTypes;
-    winnersAudit: WinnersAudit[] = [];
+    winners: WinnerDTO[] = [];
 
     constructor(
         private adminEventService: AdminEventService,
@@ -93,7 +93,7 @@ export class ManagementEvent {
 
         this.adminEventService.winnersEvent$.subscribe(
             winners => {
-                this.winnersAudit = winners;
+                this.winners = winners;
                 this.cdr.detectChanges();
             }
         )
@@ -293,13 +293,11 @@ export class ManagementEvent {
 
     // devuelve el lugar en el podio
     getPlaceGoal(dataUser: UserDTO): any {
-        // voy a buscar el dato de la lista de ganadores
-        const dataPlace = this.winnersAudit.find(winner => winner.userEmail == dataUser.email);
-        // console.log("[podio] => datos del ganador: ", dataPlace);
+        // buscar el ganador por email en la lista WinnerDTO
+        const dataPlace = this.winners.find(winner => winner.email === dataUser.email);
         if (!dataPlace)
-            return { idUser: null, position: -1 }
-
-        return { idUser: dataPlace.id, position: dataPlace.userPosition as number }
+            return { idUser: null, position: -1 };
+        return { idUser: dataPlace.participantId, position: dataPlace.position };
     }
 
     setTab(tabName: string): void {

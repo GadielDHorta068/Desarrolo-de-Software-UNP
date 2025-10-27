@@ -151,12 +151,13 @@ export class AppComponent {
 
   async onQuestionarySubmit(data: any){
     const respInscript: any = await this.adminInscriptService.onInscript(data);
-    // console.log("[inscripcion] => resp de la inscripcion: ", respInscript.message);
-    if(respInscript.status == 200){
-      this.notificationService.notifySuccess(respInscript.message)
-    }
-    else{
-      this.notificationService.notifyError("Ha ocurrido en la inscripcion al evento.");
+    // console.log("[inscripcion] => resp de la inscripcion: ", respInscript?.message);
+    if (respInscript?.status === 200) {
+      this.notificationService.notifySuccess(respInscript.message);
+    } else {
+      // Mostrar siempre el mensaje devuelto por el backend cuando exista
+      const backendMsg = respInscript?.error?.message ?? respInscript?.message ?? 'No fue posible inscribirte.';
+      this.notificationService.notifyError(backendMsg);
     }
     this.cdr.detectChanges();
   }

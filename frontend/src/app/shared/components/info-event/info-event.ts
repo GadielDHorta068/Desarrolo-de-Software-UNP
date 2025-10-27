@@ -6,7 +6,7 @@ import { HandleTypePipe } from '../../../pipes/handle-type.pipe';
 import { HandleIconTypePipe } from '../../../pipes/handle-icon-type.pipe';
 import { TagCategory } from '../tag-category/tag-category';
 import { HandleStatusPipe } from '../../../pipes/handle-status.pipe';
-import { WinnersAudit } from '../../../services/audit.service';
+import { WinnerDTO } from '../../../models/winner.model';
 import { TagPrize } from '../tag-prize/tag-prize';
 
 @Component({
@@ -22,7 +22,7 @@ export class InfoEvent implements OnInit, OnChanges{
 
   @Input() event!: EventsTemp|null;
   // @Input() event!: RaffleEvent|null;
-  @Input() winners: WinnersAudit[] = [];
+  @Input() winners: WinnerDTO[] = [];
 
   ngOnInit(): void {
     console.log("[infoEvent] => ganadores recibidos: ", this.winners);
