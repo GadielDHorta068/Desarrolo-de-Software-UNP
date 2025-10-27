@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, input, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -19,6 +19,8 @@ import { ActivatedRoute } from '@angular/router';
 export class QuestionaryComponent {
 
   @Input() eventId!: number;
+
+  @Input() loggedUser?: UserDTO;
   @Output() onInscript = new EventEmitter<UserDTO>();
   @Output() close = new EventEmitter<void>();
 
@@ -42,6 +44,10 @@ export class QuestionaryComponent {
             email: ['', [Validators.required, Validators.email]],
             cellphone: ['']
         });
+
+        if (this.loggedUser) {
+          this.form.patchValue(this.loggedUser);
+        }
 
         // cargar evento si hace falta (opcional, mantiene lo que tenías)
         // const eventIdParam = this.eventId ?? Number(this.activatedRoute.snapshot.paramMap.get('eventId'));

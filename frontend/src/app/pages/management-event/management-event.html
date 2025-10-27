@@ -92,6 +92,7 @@
 <!-- conectado al boton "addToCart" -->
 <app-questionary
     *ngIf="showModalIncript"
+    [loggedUser] = "userLogged"
     (close)="onInscriptClosed()"
     (onInscript) = "onQuestionarySubmit($event)"
 >

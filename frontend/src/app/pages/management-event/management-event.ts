@@ -52,6 +52,7 @@ export class ManagementEvent {
     // PRUEBA QUESTIONARY MODAL
     showModalIncript = false;
     showRaffleModal = false;
+    userLogged!: UserDTO;
     selectedEventId!: number;
 
     // TABS
@@ -171,7 +172,12 @@ export class ManagementEvent {
                     // TODO: aca permitimos la inscripcion    
                     if (this.event?.id && this.event?.eventType === EventTypes.GIVEAWAY) {
                         // mostramos el form de inscripcion al sorteo
-                        this.showModalIncript = true;
+                        if (this.authService.isAuthenticated()){
+                            this.initializeUserLogged();
+                        }
+                        else {
+                            this.showModalIncript = true;
+                        }
                     }
                     if (this.event?.id && this.event?.eventType === EventTypes.RAFFLES) {
                         try {
@@ -197,16 +203,44 @@ export class ManagementEvent {
     }
 
         
-
-
     onProceedToQuestionary(numbersToBuy: number[]): void {
-        console.log('Numeros como parametro: ' + numbersToBuy);
-        this.selectedRaffleNumbers = numbersToBuy;
-        console.log('Numeros ya asignados: ' + this.selectedRaffleNumbers);
-
         this.showRaffleModal = false;
-        this.showModalIncript = true;
+
+        if (numbersToBuy.length === 0) {
+            this.notificationService.notifyError("No se selecciono ningun numero");
+            return;
+        }
+
+        this.selectedRaffleNumbers = numbersToBuy;
+
+        if (this.authService.isAuthenticated()) {
+            this.initializeUserLogged(); // modal se abrirá solo si hay éxito
+        } else {
+            this.showModalIncript = true; // modal abierto para usuario invitado
+        }
     }
+
+    private initializeUserLogged(): void {
+        this.authService.getCurrentUser().subscribe({
+            next: (resp) => {
+                const userDto: UserDTO = {
+                    name: resp.name ?? '',
+                    surname: resp.surname ?? '',
+                    email: resp.email ?? '',
+                    cellphone: resp.cellphone ?? ''
+                };
+
+                this.userLogged = userDto;
+                console.log("userLogged: ", this.userLogged);
+                this.showModalIncript = true; // SOLO se abre si tenemos el usuario
+            },
+            error: (err) => {
+                console.error('error al obtener el userLogged: ', err);
+                // modal NO se abre si falla
+            }
+        });
+    }
+
 
     onRaffleClosed(): void {
         this.showRaffleModal = false; // oculta el modal de rifa
@@ -254,15 +288,14 @@ export class ManagementEvent {
 
     }
     
-    allEventStates = StatusEvent;
-    purchaseNumbers(): void {
-        if (this.event?.statusEvent === this.allEventStates.OPEN) {
-            const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
-            this.selectedRaffleNumbers = seleccionados.map(n => n.ticketNumber); // guardamos los números
-            
-            this.showModalIncript = true; // muestra el modal de Questionary
-        }
-    }
+    // allEventStates = StatusEvent;
+    // purchaseNumbers(): void {
+    //     if (this.event?.statusEvent === this.allEventStates.OPEN) { // control redundante? 
+    //         const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
+    //         this.selectedRaffleNumbers = seleccionados.map(n => n.ticketNumber); // guardamos los números
+    //         this.showModalIncript = true; // muestra el modal de Questionary     
+    //     }
+    // }
 
     loadParticipants(eventId: number, eventType: EventTypes): void {
         this.eventService.getParticipantUsersByEventId(eventId, eventType).subscribe({
