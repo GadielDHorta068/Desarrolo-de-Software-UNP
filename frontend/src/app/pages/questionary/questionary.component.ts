@@ -51,20 +51,6 @@ export class QuestionaryComponent {
         if (this.loggedUser) {
           this.form.patchValue(this.loggedUser);
         }
-
-        // cargar evento si hace falta (opcional, mantiene lo que tenías)
-        // const eventIdParam = this.eventId ?? Number(this.activatedRoute.snapshot.paramMap.get('eventId'));
-        // if (eventIdParam != null) {
-        //     this.eventService.getEventById('' + eventIdParam).subscribe({
-        //         next: resp => {
-        //             this.event = resp;
-        //             // si necesitás precondiciones para habilitar el form, las podés controlar con this.event
-        //         },
-        //         error: err => {
-        //             console.error('Error al cargar evento:', err);
-        //         }
-        //     });
-        // }
     }
 
     private initializeUserLogged(): void {
