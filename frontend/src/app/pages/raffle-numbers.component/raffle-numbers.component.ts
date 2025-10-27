@@ -5,6 +5,7 @@ import { QuestionaryComponent } from '../questionary/questionary.component';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { AdminEventService } from '../../services/admin/adminEvent.service';
 
 @Component({
   selector: 'app-raffle-numbers',
@@ -36,26 +37,40 @@ export class RaffleNumbersComponent {
     constructor (
         private eventService: EventsService,
         private activatedRoute: ActivatedRoute,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private adminEventService: AdminEventService
     ) {
 
     }
 
+    // lo de Seba
+    // ngOnInit() {
+    //     this.eventIdParam = Number(this.activatedRoute.snapshot.paramMap.get('eventId'));
+    //     if (this.eventIdParam != null) {
+    //         this.eventService.getEventById("" + this.eventIdParam).subscribe(
+    //             resp => {
+    //                 this.event = resp;
+    //                 if (this.event && this.event.statusEvent === this.allEventStates.OPEN) {
+    //                     this.initRaffleNumbers();
+    //                 }
+    //                 // HACER ALGO SI NO ESTA ABIERTO EL EVENTO
 
+    //             }
+    //         );
+    //     }
+    // }
+
+    // by A.T
     ngOnInit() {
-        this.eventIdParam = Number(this.activatedRoute.snapshot.paramMap.get('eventId'));
-        if (this.eventIdParam != null) {
-            this.eventService.getEventById("" + this.eventIdParam).subscribe(
-                resp => {
-                    this.event = resp;
-                    if (this.event && this.event.statusEvent === this.allEventStates.OPEN) {
+        this.adminEventService.selectedEvent$.subscribe(
+            event => {
+                this.event = event;
+                if (this.event && this.event.statusEvent === this.allEventStates.OPEN) {
                         this.initRaffleNumbers();
                     }
                     // HACER ALGO SI NO ESTA ABIERTO EL EVENTO
-
-                }
-            );
-        }
+            }
+        )
     }
 
     // onModalClosed(): void {

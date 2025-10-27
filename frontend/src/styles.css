@@ -34,12 +34,13 @@
     .snackbar-success .mdc-snackbar__surface {
         background-color: #48b62fc3 !important;
         color: #fff !important;
-        
+        margin-top: 50px
     }
 
     .snackbar-error .mdc-snackbar__surface {
         background-color: #b62f2fd4 !important;
         color: #fff !important;
+        margin-top: 50px;
         border-radius: 15px
     }
 }

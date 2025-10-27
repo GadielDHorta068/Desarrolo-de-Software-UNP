@@ -111,6 +111,15 @@ export class EventsService {
     return this.http.get<any[]>(`${this.apiUrl}/winners/event/${eventId}`, { headers });
   }
 
+  // Obtiene la lista de ganadores del evento (independiente de auditoría y sin finalizar)
+  getWinnersListByEventId(eventId: number): Observable<import('../models/winner.model').WinnerDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.get<import('../models/winner.model').WinnerDTO[]>(`${this.apiUrl}/winners/event/${eventId}/list`, { headers });
+  }
+
   // Obtiene todos los participantes del evento (para suspense)
   getParticipantsByEventId(eventId: number): Observable<any[]> {
     const headers = new HttpHeaders({
@@ -147,6 +156,25 @@ export class EventsService {
  //Obtener eventos por tipo (endpoint público)
   getEventsByType(type: EventTypes): Observable<EventsTemp[]> {
     return this.http.get<EventsTemp[]>(`${this.apiUrl}/type/${type}`);
+  }
+
+  // Obtener eventos activos con filtros progresivos (endpoint público)
+  getActiveEvents(options: {
+    type?: EventTypes;
+    categorie?: string;
+    start?: string; // formato ISO: YYYY-MM-DD
+    end?: string;   // formato ISO: YYYY-MM-DD
+    winnerCount?: number;
+    status?: 'ALL' | StatusEvent; // estado: ALL, OPEN, CLOSED, FINALIZED
+  } = {}): Observable<EventsTemp[]> {
+    const params: any = {};
+    if (options.type) params['type'] = options.type;
+    if (options.categorie) params['categorie'] = options.categorie;
+    if (options.start) params['start'] = options.start;
+    if (options.end) params['end'] = options.end;
+    if (options.winnerCount !== undefined && options.winnerCount !== null) params['winnerCount'] = options.winnerCount;
+    if (options.status) params['status'] = options.status; // 'ALL' o uno de StatusEvent
+    return this.http.get<EventsTemp[]>(`${this.apiUrl}/active`, { params });
   }
 
 

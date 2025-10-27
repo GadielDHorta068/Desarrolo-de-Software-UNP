@@ -26,9 +26,160 @@
 
 .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 
-.filters { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; margin-bottom: 16px; }
-.filter-search input, .filters select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #3f3f46; background: #0b0b10; color: #e5e7eb; }
-.filter-clear .btn { padding: 8px 12px; }
+/* Barra de filtros compacta */
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+  background: #0d1117;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 12px;
+}
+.filters label {
+  display: block;
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+.filter-search input,
+.filters select,
+.filters input[type="text"],
+.filters input[type="date"],
+.filters input[type="number"] {
+  width: 100%;
+  height: 36px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #3f3f46;
+  background: #0b0b10;
+  color: #e5e7eb;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.filters input:focus,
+.filters select:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16,185,129,0.25);
+}
+.filter-clear .btn {
+  padding: 6px 10px;
+  height: 36px;
+  font-size: 0.85rem;
+}
+
+/* Ajustes de tamaño y tema para Angular Material Datepicker */
+.filters .mat-mdc-form-field {
+  width: 100%;
+  --mdc-outlined-text-field-container-height: 36px; /* compacto como inputs */
+  margin: 0; /* sin márgenes adicionales */
+}
+.filters .mat-mdc-form-field .mat-mdc-form-field-infix {
+  padding-top: 0;
+  padding-bottom: 0;
+  min-height: 36px; /* fuerza altura igual */
+}
+.filters .mat-mdc-form-field .mdc-text-field--outlined {
+  height: 36px; /* altura total del campo */
+}
+.filters .mat-mdc-form-field .mdc-text-field__input {
+  padding: 6px 10px; /* consistencia con inputs */
+  color: #e5e7eb; /* oscuro */
+  height: 24px; /* contenido más compacto */
+  line-height: 24px;
+}
+.filters .mat-mdc-form-field .mat-mdc-form-field-icon-suffix,
+.filters .mat-mdc-form-field .mat-mdc-form-field-icon-prefix {
+  color: #9ca3af; /* icono acorde al tema oscuro */
+}
+/* tamaño de icono del datepicker */
+.filters .mat-mdc-form-field .mat-datepicker-toggle-default-icon { width: 18px; height: 18px; }
+
+/* Fijar altura exacta con mayor especificidad para MDC (y quitar subscript) */
+:host ::ng-deep .filters .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  height: 36px !important;
+}
+:host ::ng-deep .filters .mat-mdc-form-field .mat-mdc-form-field-infix {
+  min-height: 36px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+:host ::ng-deep .filters .mat-mdc-form-field .mdc-text-field--outlined {
+  height: 36px !important;
+}
+:host ::ng-deep .filters .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+:host ::ng-deep .filters .mat-mdc-form-field .mat-mdc-form-field-icon-suffix,
+:host ::ng-deep .filters .mat-mdc-form-field .mat-mdc-form-field-icon-prefix {
+  height: 36px;
+  display: flex;
+  align-items: center;
+}
+/* Tema claro */
+.light .filters .mat-mdc-form-field .mdc-text-field__input,
+:root:not(.dark) .filters .mat-mdc-form-field .mdc-text-field__input {
+  color: #111827;
+}
+.light .filters .mat-mdc-form-field .mdc-text-field--outlined,
+:root:not(.dark) .filters .mat-mdc-form-field .mdc-text-field--outlined {
+  background: #ffffff;
+  border-color: #d1d5db;
+}
+
+/* Tema oscuro */
+.dark .filters .mat-mdc-form-field .mdc-text-field--outlined {
+  background: #0b0b10;
+  border-color: #3f3f46;
+}
+
+/* Controles en tema claro */
+.light .filter-search input,
+:root:not(.dark) .filter-search input,
+.light .filters select,
+:root:not(.dark) .filters select,
+.light .filters input[type="text"],
+:root:not(.dark) .filters input[type="text"],
+.light .filters input[type="date"],
+:root:not(.dark) .filters input[type="date"],
+.light .filters input[type="number"],
+:root:not(.dark) .filters input[type="number"] {
+  background: #ffffff;
+  border-color: #d1d5db;
+  color: #111827;
+}
+.light .filters { background: #ffffff; border-color: #e5e7eb; }
+.dark .filters { background: #0d1117; }
+
+/* Autocomplete panel estilos */
+.filters .mat-mdc-autocomplete-panel {
+  background: #0b0b10;
+  color: #e5e7eb;
+  border: 1px solid #3f3f46;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+}
+.filters .mat-mdc-option {
+  min-height: 36px;
+}
+.filters .mat-mdc-option.mdc-list-item--selected,
+.filters .mat-mdc-option:hover {
+  background: #111827;
+}
+
+/* Autocomplete tema claro */
+.light .filters .mat-mdc-autocomplete-panel,
+:root:not(.dark) .filters .mat-mdc-autocomplete-panel {
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db;
+}
+.light .filters .mat-mdc-option.mdc-list-item--selected,
+:root:not(.dark) .filters .mat-mdc-option.mdc-list-item--selected,
+.light .filters .mat-mdc-option:hover,
+:root:not(.dark) .filters .mat-mdc-option:hover {
+  background: #f3f4f6;
+}
 
 .results-meta { color: #9ca3af; margin-bottom: 8px; }
 

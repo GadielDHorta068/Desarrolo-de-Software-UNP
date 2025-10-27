@@ -21,6 +21,7 @@ import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.auditlog.AuditAction;
 import com.desarrollo.raffy.model.auditlog.AuditActionType;
 import com.desarrollo.raffy.model.auditlog.AuditEvent;
+import com.desarrollo.raffy.model.auditlog.AuditParticipant;
 
 @RestController
 @RequestMapping("/audit")
@@ -90,6 +91,22 @@ public class AuditLogsController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error interno al obtener las acciones de auditoría: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/event/winners/{relatedEventID}")
+    public ResponseEntity<?> getAuditWinnersByEventId(@PathVariable("relatedEventID") Long relatedEventID){
+        try {
+            List<AuditParticipant> winners = service.getAuditWinnersByEventId(relatedEventID);
+            if(winners.isEmpty()){
+                return new ResponseEntity<>("No hay ganadores para este evento auditado.", HttpStatus.BAD_REQUEST);
+            }
+
+            return new ResponseEntity<>(winners, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error interno al obtener los ganadores auditados: " + e.getMessage());
         }
     }
 }

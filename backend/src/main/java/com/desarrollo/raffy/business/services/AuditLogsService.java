@@ -2,6 +2,7 @@ package com.desarrollo.raffy.business.services;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,5 +138,20 @@ public class AuditLogsService {
         action.setDetails(details);
         action.setTimestamp(LocalDateTime.now());
         return action;
+    }
+
+    /**
+     * Filtrar los los ganadores por la posición que quedaron en el sorteo
+     * @param eventId
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public List<AuditParticipant> getAuditWinnersByEventId(Long eventId){
+        AuditEvent auditEvent = getAuditEventById(eventId);
+        List<AuditParticipant> winners = auditEvent.getParticipants().stream()
+            .filter(participant -> participant.getUserPosition() > 0)
+            .sorted(Comparator.comparingInt(AuditParticipant::getUserPosition))
+            .toList();
+        return winners;
     }
 }

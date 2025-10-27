@@ -70,10 +70,12 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         // Permitir handshake de WebSocket/SockJS
                         .requestMatchers("/ws", "/ws/**").permitAll()
+                        // Endpoint público para obtener ganadores por auditoría
                         .requestMatchers("/events/**").permitAll()
                         .requestMatchers("/categories/**").permitAll()
                         .requestMatchers("/api/images/**").permitAll()
                         // Endpoints de URL abiertos explícitamente
+                        .requestMatchers(HttpMethod.POST, "/url/save").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/url/save").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/url/**").permitAll()
                         .requestMatchers("/api/url/**").permitAll()

@@ -518,6 +518,114 @@ public class EventsController {
         }
     }
 
+    /**
+     * Retorna un ganador específico (WinnerDTO) por evento y posición.
+     * No ejecuta la finalización ni envía correos; solo consulta.
+     */
+    @GetMapping("/winner/event/{eventId}/position/{position}")
+    public ResponseEntity<?> getWinnerByEventAndPosition(
+            @PathVariable("eventId") Long eventId,
+            @PathVariable("position") short position) {
+        if (eventId == null || eventId <= 0) {
+            return new ResponseEntity<>("El ID del evento debe ser positivo", HttpStatus.BAD_REQUEST);
+        }
+        if (position <= 0) {
+            return new ResponseEntity<>("La posición debe ser mayor a 0", HttpStatus.BAD_REQUEST);
+        }
+        Events event = eventsService.getById(eventId);
+        if (event == null) {
+            return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
+        }
+        if (event.getStatusEvent() != StatusEvent.FINALIZED) {
+            return new ResponseEntity<>("El evento aún no está finalizado", HttpStatus.CONFLICT);
+        }
+
+        Object winnerObj = null;
+        try {
+            if (event instanceof Raffle) {
+                List<RaffleNumber> numbers = raffleNumberService.findRaffleNumbersById(eventId);
+                if (numbers != null) {
+                    for (RaffleNumber rn : numbers) {
+                        if (rn.getPosition() == position) {
+                            winnerObj = rn;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                List<Participant> participants = participantService.findParticipantsByEventId(eventId);
+                if (participants != null) {
+                    for (Participant p : participants) {
+                        if (p.getPosition() == position) {
+                            winnerObj = p;
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error al obtener ganador: {}", e.getMessage(), e);
+            return new ResponseEntity<>("Error interno al obtener el ganador", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if (winnerObj == null) {
+            return new ResponseEntity<>("No se encontró ganador para la posición indicada", HttpStatus.NOT_FOUND);
+        }
+
+        WinnerDTO dto = toWinnerDTO(winnerObj);
+        if (dto == null) {
+            return new ResponseEntity<>("No se pudo mapear el ganador", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    /**
+     * Retorna una lista de ganadores (WinnerDTO) de un evento ya finalizado.
+     * No ejecuta la finalización ni envía correos; solo consulta.
+     */
+    @GetMapping("/winners/event/{eventId}/list")
+    public ResponseEntity<?> getWinnersListByEventId(@PathVariable("eventId") Long eventId) {
+        if (eventId == null || eventId <= 0) {
+            return new ResponseEntity<>("El ID del evento debe ser positivo", HttpStatus.BAD_REQUEST);
+        }
+
+        Events event = eventsService.getById(eventId);
+        if (event == null) {
+            return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
+        }
+
+        if (event.getStatusEvent() != StatusEvent.FINALIZED) {
+            return new ResponseEntity<>("El evento aún no está finalizado", HttpStatus.CONFLICT);
+        }
+
+        try {
+            List<WinnerDTO> response;
+            if (event instanceof Raffle) {
+                List<RaffleNumber> numbers = raffleNumberService.findRaffleNumbersById(eventId);
+                response = numbers.stream()
+                    .filter(n -> n.getPosition() > 0)
+                    .map(this::toWinnerDTO)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            } else {
+                List<Participant> participants = participantService.findParticipantsByEventId(eventId);
+                response = participants.stream()
+                    .filter(p -> p.getPosition() > 0)
+                    .map(this::toWinnerDTO)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            }
+
+            if (response == null || response.isEmpty()) {
+                return new ResponseEntity<>("No se encontraron ganadores para el evento", HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error al obtener lista de ganadores: {}", e.getMessage(), e);
+            return new ResponseEntity<>("Error interno al obtener los ganadores", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     private WinnerDTO toWinnerDTO(Object winner) {
         WinnerDTO dto = new WinnerDTO();
         if(winner instanceof Participant participant){
@@ -620,15 +728,26 @@ public class EventsController {
             @RequestParam(required = false) String categorie,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
-            @RequestParam(required = false) Integer winnerCount) {
+            @RequestParam(required = false) Integer winnerCount,
+            @RequestParam(required = false, name = "status") String status) {
 
         
         if (start != null && end != null && !end.isAfter(start)) {
             return ResponseEntity.badRequest().body("La fecha de fin debe ser posterior a la fecha de inicio");
 
         }
+        // Parseo de estado: null => ALL (sin filtro). Valores válidos: OPEN/CLOSED/FINALIZED
+        StatusEvent statusEvent = null;
+        if (status != null && !status.isBlank() && !status.equalsIgnoreCase("ALL")) {
+            try {
+                statusEvent = StatusEvent.valueOf(status.trim().toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return ResponseEntity.badRequest().body("Estado inválido: " + status);
+            }
+        }
+
         List<EventSummaryDTO> events = eventsService.getActiveEventSummaries(
-                type, categorie, start, end, winnerCount
+                type, categorie, start, end, winnerCount, statusEvent
         );
 
         return ResponseEntity.ok(events);

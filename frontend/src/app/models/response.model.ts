@@ -12,3 +12,9 @@ export interface DataStatusEvent {
     status: string;
 }
 
+export interface ResponseInscript {
+    data: any;
+    message: string;
+    status: number;
+}
+

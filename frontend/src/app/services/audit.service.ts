@@ -34,9 +34,8 @@ export class AuditService {
   // recupera los ganadores de un evento segun su id
   getAuditWinners(idEvent: string): Observable<any[]> {
     const headers = this.getAuthHeaders();
-    return this.http.get<WinnersAudit[]>(`${this.apiUrl}/obtain/event/${idEvent}/winners`, { headers });
+    return this.http.get<WinnersAudit[]>(`${this.apiUrl}/event/winners/${idEvent}`, { headers });
   }
-
   private getAuthHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${this.authService.getToken()}`,
