@@ -73,6 +73,7 @@
 .filters .mat-mdc-form-field {
   width: 100%;
   --mdc-outlined-text-field-container-height: 36px; /* compacto como inputs */
+  margin: 0; /* sin márgenes adicionales */
 }
 .filters .mat-mdc-form-field .mat-mdc-form-field-infix {
   padding-top: 0;
@@ -95,6 +96,27 @@
 /* tamaño de icono del datepicker */
 .filters .mat-mdc-form-field .mat-datepicker-toggle-default-icon { width: 18px; height: 18px; }
 
+/* Fijar altura exacta con mayor especificidad para MDC (y quitar subscript) */
+:host ::ng-deep .filters .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  height: 36px !important;
+}
+:host ::ng-deep .filters .mat-mdc-form-field .mat-mdc-form-field-infix {
+  min-height: 36px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+:host ::ng-deep .filters .mat-mdc-form-field .mdc-text-field--outlined {
+  height: 36px !important;
+}
+:host ::ng-deep .filters .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+:host ::ng-deep .filters .mat-mdc-form-field .mat-mdc-form-field-icon-suffix,
+:host ::ng-deep .filters .mat-mdc-form-field .mat-mdc-form-field-icon-prefix {
+  height: 36px;
+  display: flex;
+  align-items: center;
+}
 /* Tema claro */
 .light .filters .mat-mdc-form-field .mdc-text-field__input,
 :root:not(.dark) .filters .mat-mdc-form-field .mdc-text-field__input {
