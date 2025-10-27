@@ -25,6 +25,10 @@
                 <p class="text-sm text-gray-200"><b>Estado</b></p>
                 <p class="text-sm text-gray-400 mb-1">{{event?.statusEvent | handleStatusPipe}}</p>
             </div>
+            <div class="block">
+                <p class="text-sm text-gray-200"><b>Categoría</b></p>
+                <p class="text-sm text-gray-400 mb-1">{{event?.categoryName || 'Sin categoría'}}</p>
+            </div>
         </div>
         <!-- columna de imagen -->
         <div class="basis-1/2 flex items-center">

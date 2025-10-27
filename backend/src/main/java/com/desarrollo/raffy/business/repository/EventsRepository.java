@@ -27,22 +27,22 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.category.id = :categoryId")
     List<Events> findByCategoryId(@Param("categoryId") Long categoryId);
     
-    // Buscar eventos activos (no finalizados ni bloqueados)
-    
+    // Buscar eventos con filtros progresivos y estado opcional
     @Query("""
         SELECT e FROM Events e
         JOIN FETCH e.category c
-        WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
-        AND (:type IS NULL OR e.eventType = :type)
-        AND (:catName IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :catName, '%')))
-        AND (:start IS NULL OR e.startDate >= :start)
-        AND (:end IS NULL OR e.endDate <= :end)
-        AND (:winnerCount IS NULL OR e.winnersCount = :winnerCount)
+        WHERE e.statusEvent = COALESCE(:status, e.statusEvent)
+        AND e.eventType = COALESCE(:type, e.eventType)
+        AND c.id = COALESCE(:catId, c.id)
+        AND e.startDate >= COALESCE(:start, e.startDate)
+        AND e.endDate <= COALESCE(:end, e.endDate)
+        AND e.winnersCount = COALESCE(:winnerCount, e.winnersCount)
         ORDER BY e.startDate DESC
     """)
     List<Events> findActiveEvents(
+        @Param("status") StatusEvent status,
         @Param("type") EventTypes type,
-        @Param("catName") String categorie,
+        @Param("catId") Long categoryId,
         @Param("start") LocalDate start,
         @Param("end") LocalDate end,
         @Param("winnerCount") Integer winnerCount);

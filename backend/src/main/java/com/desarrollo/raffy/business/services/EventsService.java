@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.desarrollo.raffy.business.repository.EventsRepository;
+import com.desarrollo.raffy.model.StatusEvent;
+import com.desarrollo.raffy.business.repository.CategoriesRepository;
 import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
 import com.desarrollo.raffy.business.repository.ParticipantRepository;
 import com.desarrollo.raffy.model.EventTypes;
@@ -46,6 +48,9 @@ public class EventsService {
 
     @Autowired
     private EventsRepository eventsRepository;
+
+    @Autowired
+    private CategoriesRepository categoriesRepository;
 
     @Autowired
     private RegisteredUserRepository registeredUserRepository;
@@ -320,13 +325,26 @@ public class EventsService {
         String categorie, 
         LocalDate start, 
         LocalDate end, 
-        Integer winnerCount){
-        
-            return eventsRepository.findActiveEvents(type, categorie, start, end, winnerCount)
+        Integer winnerCount,
+        StatusEvent statusEvent){
+        // Resolver opcionalmente el nombre de categoría a su ID para evitar problemas
+        // con funciones de texto sobre tipos binarios y asegurar consulta indexada.
+        Long categoryId = null;
+        if (categorie != null && !categorie.isBlank()) {
+            try {
+                // Intentar parsear como ID directo si viene numérico
+                categoryId = Long.parseLong(categorie.trim());
+            } catch (NumberFormatException nfe) {
+                // Si no es numérico, buscar por nombre
+                var cat = categoriesRepository.findByName(categorie.trim());
+                if (cat != null) categoryId = cat.getId();
+            }
+        }
+
+        return eventsRepository.findActiveEvents(statusEvent, type, categoryId, start, end, winnerCount)
             .stream()
             .map(this::toEventSummaryDTO)
-            .collect(Collectors
-            .toList());
+            .collect(Collectors.toList());
     }
 
     public List<EventSummaryDTO> getEventSummariesByDateRange(LocalDate startDate, LocalDate endDate){
