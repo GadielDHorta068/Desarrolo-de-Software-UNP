@@ -109,7 +109,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
     container_name: raffy-frontend
     working_dir: /app
     ports:
