@@ -149,5 +149,24 @@ export class EventsService {
     return this.http.get<EventsTemp[]>(`${this.apiUrl}/type/${type}`);
   }
 
+  // Obtener eventos activos con filtros progresivos (endpoint público)
+  getActiveEvents(options: {
+    type?: EventTypes;
+    categorie?: string;
+    start?: string; // formato ISO: YYYY-MM-DD
+    end?: string;   // formato ISO: YYYY-MM-DD
+    winnerCount?: number;
+    status?: 'ALL' | StatusEvent; // estado: ALL, OPEN, CLOSED, FINALIZED
+  } = {}): Observable<EventsTemp[]> {
+    const params: any = {};
+    if (options.type) params['type'] = options.type;
+    if (options.categorie) params['categorie'] = options.categorie;
+    if (options.start) params['start'] = options.start;
+    if (options.end) params['end'] = options.end;
+    if (options.winnerCount !== undefined && options.winnerCount !== null) params['winnerCount'] = options.winnerCount;
+    if (options.status) params['status'] = options.status; // 'ALL' o uno de StatusEvent
+    return this.http.get<EventsTemp[]>(`${this.apiUrl}/active`, { params });
+  }
+
 
 }
