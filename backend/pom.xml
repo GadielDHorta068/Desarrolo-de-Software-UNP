@@ -20,6 +20,14 @@
         <relativePath/>
     </parent>
 
+    <!-- requerido por mp -->
+    <!-- <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories> -->
+
     <dependencies>
         <!-- Web MVC -->
         <dependency>
@@ -58,6 +66,13 @@
             <version>1.18.34</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- sdk mercadopago -->
+        <!-- <dependency>
+            <groupId>com.mercadopago</groupId>
+            <artifactId>sdk-java</artifactId>
+            <version>1.5.9</version>
+        </dependency> -->
 
         <!-- Spring Security Crypto para BCrypt y manejo seguro de contraseñas -->
         <dependency>

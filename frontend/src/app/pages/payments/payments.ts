@@ -36,7 +36,7 @@ export class Payments {
       this.notificationService.notifySuccess("La compra fue realizada con éxito")
     }
     else{
-      this.notificationService.notifyError("No se ha podido realizar el apgo correctamente!");
+      this.notificationService.notifyError("No se ha podido realizar el pago correctamente");
     }
   }
 

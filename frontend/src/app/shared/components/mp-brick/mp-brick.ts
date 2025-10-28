@@ -91,7 +91,8 @@ export class MpBrick {
 
   payMp(formData: any){
     console.log("[pagoMP] => datos del form de pago: ", formData);
-    const urlPayment = "http://localhost:3000/process_payment";
+    // const urlPayment = "http://localhost:3000/process_payment";
+    const urlPayment = "http://localhost:808/mp/process_payment";
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Bearer TEST-911685102344613-102107-142a437bbcd8bb76c3281eae04eeffb9-501812522`
@@ -112,7 +113,7 @@ export class MpBrick {
         },
       },
     };
-
+    
     const bodyFormData = {
       formData: paymentData
     }
