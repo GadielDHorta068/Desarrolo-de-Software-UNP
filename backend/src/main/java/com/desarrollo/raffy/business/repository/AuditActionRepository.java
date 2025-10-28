@@ -17,9 +17,9 @@ public interface AuditActionRepository extends JpaRepository<AuditAction, Long>{
     @Query("""
         SELECT a FROM AuditAction a
         WHERE a.event.eventId = :eventId
-        AND (:action IS NULL OR a.action = :action)
-        AND (:from IS NULL OR a.timestamp >= :from)
-        AND (:to IS NULL OR a.timestamp <= :to)
+        AND a.action = COALESCE(:action, a.action)
+        AND a.timestamp >= COALESCE(:from, a.timestamp)
+        AND a.timestamp <= COALESCE(:to, a.timestamp)
         ORDER BY a.timestamp DESC
         """)
     List<AuditAction> getByFiltersAction(
