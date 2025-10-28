@@ -25,5 +25,7 @@ ENV CHOKIDAR_INTERVAL=1000
 ENV WATCHPACK_POLLING=true
 ENV NODE_ENV=development
 
+RUN npm install --legacy-peer-deps
+
 # Comando por defecto
 CMD ["npm", "start"]
