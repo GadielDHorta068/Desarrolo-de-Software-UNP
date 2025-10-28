@@ -111,6 +111,15 @@ export class EventsService {
     return this.http.get<any[]>(`${this.apiUrl}/winners/event/${eventId}`, { headers });
   }
 
+  // Obtiene la lista de ganadores del evento (independiente de auditoría y sin finalizar)
+  getWinnersListByEventId(eventId: number): Observable<import('../models/winner.model').WinnerDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.get<import('../models/winner.model').WinnerDTO[]>(`${this.apiUrl}/winners/event/${eventId}/list`, { headers });
+  }
+
   // Obtiene todos los participantes del evento (para suspense)
   getParticipantsByEventId(eventId: number): Observable<any[]> {
     const headers = new HttpHeaders({
