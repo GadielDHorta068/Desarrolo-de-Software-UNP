@@ -4,6 +4,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, A
 import { Router } from '@angular/router';
 import { AuthService, TwoFactorEnableResponse } from '../../services/auth.service';
 import { ImageCroppedEvent, LoadedImage, ImageCropperComponent } from 'ngx-image-cropper';
+import { PaymentService } from '../../services/payment.service';
+import { Payment, PaymentSortType, PaymentFilter, PaymentStatus } from '../../models/payment.model';
 
 @Component({
   selector: 'app-settings',
@@ -47,11 +49,26 @@ export class SettingsComponent implements OnInit {
   showRecoveryCodes = false;
   manualSetupKey = '';
 
+  // Payment History Properties
+  payments: Payment[] = [];
+  filteredPayments: Payment[] = [];
+  isPaymentsLoading = false;
+  paymentErrorMessage = '';
+  paymentErrorType: 'network' | 'auth' | 'notfound' | 'server' | null = null;
+  paymentFilter: PaymentFilter = {
+    sortBy: PaymentSortType.DATE,
+    sortOrder: 'desc'
+  };
+  expandedPaymentId: number | null = null;
+  paymentSortTypes = PaymentSortType;
+  paymentStatuses = PaymentStatus;
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    public router: Router,
+    private cdr: ChangeDetectorRef,
+    private paymentService: PaymentService
   ) {
     this.initializeForms();
   }
@@ -512,10 +529,33 @@ export class SettingsComponent implements OnInit {
     this.twoFAErrorMessage = '';
   }
 
+  private clearPaymentMessages(): void {
+    this.paymentErrorMessage = '';
+    this.paymentErrorType = null;
+  }
+
   setActiveTab(tab: string): void {
+    console.log('setActiveTab called with:', tab);
     this.activeTab = tab;
     this.clearMessages();
     this.clear2FAMessages();
+    this.clearPaymentMessages();
+    
+    // Cargar historial de pagos cuando se selecciona la pestaña de transacciones
+    if (tab === 'transacciones') {
+      console.log('Transacciones tab selected, current user:', this.currentUser);
+      if (!this.currentUser) {
+        console.log('No current user, loading user first');
+        this.loadCurrentUser();
+        // Esperar un poco y luego intentar cargar los pagos
+        setTimeout(() => {
+          console.log('After loading user, current user:', this.currentUser);
+          this.loadPaymentHistory();
+        }, 500);
+      } else {
+        this.loadPaymentHistory();
+      }
+    }
   }
 
   isActiveTab(tab: string): boolean {
@@ -668,5 +708,196 @@ export class SettingsComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const digits = (input.value || '').replace(/\D/g, '').slice(0, 10);
     this.profileForm.get('cellphone')?.setValue(digits, { emitEvent: false });
+  }
+
+  // Payment History Methods
+  loadPaymentHistory(): void {
+    console.log('loadPaymentHistory called');
+    console.log('currentUser:', this.currentUser);
+    
+    // Limpiar errores previos
+    this.clearPaymentMessages();
+    
+    if (!this.currentUser?.id) {
+      console.log('No current user or user ID, loading current user first');
+      this.loadCurrentUser();
+      // Intentar cargar pagos después de un breve delay para permitir que se cargue el usuario
+      setTimeout(() => {
+        if (this.currentUser?.id) {
+          this.loadPaymentHistory();
+        } else {
+          console.error('Unable to load current user for payment history');
+          this.paymentErrorMessage = 'No se pudo cargar la información del usuario.';
+          this.paymentErrorType = 'auth';
+        }
+      }, 1000);
+      return;
+    }
+    
+    // El AuthInterceptor maneja automáticamente la autenticación
+    
+    console.log('Loading payment history for user ID:', this.currentUser.id);
+    this.isPaymentsLoading = true;
+    
+    // Cargar pagos donde el usuario es el pagador
+    this.paymentService.getPaymentsByUser(this.currentUser.id).subscribe({
+      next: (userPayments) => {
+        console.log('User payments loaded:', userPayments);
+        // Cargar pagos donde el usuario es el receptor
+        this.paymentService.getPaymentsByReceiver(this.currentUser.id).subscribe({
+          next: (receiverPayments) => {
+            console.log('Receiver payments loaded:', receiverPayments);
+            // Combinar ambos arrays y eliminar duplicados
+            const allPayments = [...userPayments, ...receiverPayments];
+            const uniquePayments = allPayments.filter((payment, index, self) => 
+              index === self.findIndex(p => p.id === payment.id)
+            );
+            
+            console.log('Total unique payments:', uniquePayments.length);
+            this.payments = uniquePayments;
+            console.log('this.payments set to:', this.payments);
+            this.applyPaymentFilter();
+            console.log('After applyPaymentFilter, filteredPayments:', this.filteredPayments);
+            this.isPaymentsLoading = false;
+            this.cdr.detectChanges();
+          },
+          error: (error) => {
+            console.error('Error loading receiver payments:', error);
+            this.handlePaymentError(error);
+            // Si falla cargar los pagos del receptor, al menos mostrar los del usuario
+            this.payments = userPayments;
+            this.applyPaymentFilter();
+            this.isPaymentsLoading = false;
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error loading user payments:', error);
+        this.handlePaymentError(error);
+        this.isPaymentsLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private handlePaymentError(error: any): void {
+    console.error('Payment error details:', error);
+    
+    if (error.status === 403 || error.status === 401) {
+      this.paymentErrorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+      this.paymentErrorType = 'auth';
+      console.error('Authentication error - token may be expired');
+    } else if (error.status === 404) {
+      this.paymentErrorMessage = 'No se encontraron transacciones para tu cuenta.';
+      this.paymentErrorType = 'notfound';
+      console.log('No payments found for user');
+    } else if (error.status === 0) {
+      this.paymentErrorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+      this.paymentErrorType = 'network';
+      console.error('Network error - server may be down');
+    } else if (error.status >= 500) {
+      this.paymentErrorMessage = 'Error interno del servidor. Intenta nuevamente en unos minutos.';
+      this.paymentErrorType = 'server';
+      console.error('Server error:', error);
+    } else {
+      this.paymentErrorMessage = error.error?.message || error.message || 'Error desconocido al cargar las transacciones.';
+      this.paymentErrorType = 'server';
+      console.error('Unknown error loading payments:', error);
+    }
+  }
+
+  applyPaymentFilter(): void {
+    console.log('applyPaymentFilter called');
+    console.log('this.payments:', this.payments);
+    console.log('this.paymentFilter:', this.paymentFilter);
+    this.filteredPayments = this.paymentService.filterPayments(this.payments, this.paymentFilter);
+    console.log('this.filteredPayments after filter:', this.filteredPayments);
+    console.log('filteredPayments.length:', this.filteredPayments.length);
+  }
+
+  onSortChange(sortType: PaymentSortType): void {
+    this.paymentFilter.sortBy = sortType;
+    this.applyPaymentFilter();
+  }
+
+  togglePaymentExpansion(paymentId: number): void {
+    this.expandedPaymentId = this.expandedPaymentId === paymentId ? null : paymentId;
+  }
+
+  isPaymentExpanded(paymentId: number): boolean {
+    return this.expandedPaymentId === paymentId;
+  }
+
+  getStatusColor(status: PaymentStatus): string {
+    return this.paymentService.getStatusColor(status);
+  }
+
+  getStatusText(status: PaymentStatus): string {
+    return this.paymentService.getStatusText(status);
+  }
+
+ 
+
+  formatDate(date: string): string {
+    return this.paymentService.formatDate(date);
+  }
+
+  getSortTypeText(sortType: PaymentSortType): string {
+    switch (sortType) {
+      case PaymentSortType.DATE:
+        return 'Fecha de llegada';
+      case PaymentSortType.SENDER:
+        return 'Orden alfabético del remitente';
+      case PaymentSortType.EVENT:
+        return 'Orden alfabético del evento';
+      default:
+        return 'Fecha de llegada';
+    }
+  }
+
+  isUserSender(payment: Payment): boolean {
+    return payment.user.id === this.currentUser?.id;
+  }
+
+  isUserReceiver(payment: Payment): boolean {
+    return payment.receiver.id === this.currentUser?.id;
+  }
+
+  getApprovedPaymentsCount(): number {
+    return this.filteredPayments.filter(payment => payment.status === PaymentStatus.APPROVED).length;
+  }
+
+  getPendingPaymentsCount(): number {
+    return this.filteredPayments.filter(payment => payment.status === PaymentStatus.PENDING).length;
+  }
+
+  retryLoadPayments(): void {
+    this.loadPaymentHistory();
+  }
+
+  formatPaymentDate(dateArray: number[]): string {
+    if (!dateArray || dateArray.length < 3) {
+      return 'Fecha no disponible';
+    }
+    
+    // El backend devuelve [año, mes, día, hora, minuto, segundo, nanosegundo]
+    const [year, month, day, hour = 0, minute = 0, second = 0] = dateArray;
+    const date = new Date(year, month - 1, day, hour, minute, second);
+    
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  formatCurrency(amount: number, currency: string): string {
+    return new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: currency || 'USD'
+    }).format(amount);
   }
 }
