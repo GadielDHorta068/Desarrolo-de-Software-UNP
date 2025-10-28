@@ -53,10 +53,10 @@
         </div>
         <div *ngIf="event?.statusEvent == eventStatus.FINISHED " class="grid-row">
             <div class="text-base font-bold pt-2">Ganadores</div>
-            <div *ngFor="let winner of winners; let i = index" class="p-2">
-                <div class="flex gap-4" style="align-items: anchor-center;">
-                    <label>{{winner?.userName}} {{winner?.userLastName}}</label>
-                    <app-tag-prize [position]="i+1"></app-tag-prize>
+            <div class="p-2 flex flex-col gap-2">
+                <div *ngFor="let winner of winners; let i = index" class="flex items-center gap-3">
+                    <span>{{winner?.name}} {{winner?.surname}}</span>
+                    <app-tag-prize [position]="winner?.position || (i+1)"></app-tag-prize>
                 </div>
             </div>
         </div>

@@ -5,7 +5,18 @@
     "changeOrigin": true,
     "logLevel": "debug"
   },
-
+  "/payments": {
+    "target": "http://backend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/url": {
+    "target": "http://backend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
   "/ws": {
     "target": "ws://backend:8080",
     "secure": false,

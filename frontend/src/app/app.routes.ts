@@ -45,20 +45,22 @@ export const routes: Routes = [
     // data: { animation: 'register' }
   },
   {
-    // path: 'event-edit',
     path: 'event/management/edit/:eventId',
     loadComponent: () => import('./pages/edit-event/edit-event').then(m => m.EditEvent),
     // canActivate: [GuestGuard],
     title: 'Edita tu evento - Raffy',
-    // data: { animation: 'register' }
   },
   {
-    // path: 'event-admin',
     path: 'event/management/:eventId',
     loadComponent: () => import('./pages/management-event/management-event').then(m => m.ManagementEvent),
     // canActivate: [GuestGuard],
     title: 'Gestiona tu evento - Raffy',
-    // data: { animation: 'register' }
+  },
+  {
+    path: 'event/payment',
+    loadComponent: () => import('./pages/payments/payments').then(m => m.Payments),
+    // canActivate: [GuestGuard],
+    title: 'Pago de inscripción - Raffy',
   },
   {
     path: 'panel-list',

@@ -1,0 +1,9 @@
+.div-subtitle{
+    padding-top: 1%; padding-bottom: 1%;
+}
+.div-subtitle p{
+    font-size: 1rem;
+}
+.p-redirect{
+    color: lightseagreen; text-decoration: underline; cursor: pointer;
+}

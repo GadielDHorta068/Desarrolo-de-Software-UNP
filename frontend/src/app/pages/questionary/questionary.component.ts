@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, input, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -8,6 +8,7 @@ import { EventsTemp, EventTypes, StatusEvent } from '../../models/events.model';
 import { UserDTO } from '../../models/UserDTO';
 import { EventsService } from '../../services/events.service';
 import { ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-questionary',
@@ -19,6 +20,8 @@ import { ActivatedRoute } from '@angular/router';
 export class QuestionaryComponent {
 
   @Input() eventId!: number;
+
+  loggedUser?: UserDTO;
   @Output() onInscript = new EventEmitter<UserDTO>();
   @Output() close = new EventEmitter<void>();
 
@@ -30,11 +33,13 @@ export class QuestionaryComponent {
 
     constructor(
         private fb: FormBuilder,
+        private authService: AuthService,
         private eventService: EventsService,
         private activatedRoute: ActivatedRoute,
     ) {}
 
     ngOnInit() {
+        this.initializeUserLogged();
         // Inicializar form reactivo
         this.form = this.fb.group({
             name: ['', Validators.required],
@@ -43,19 +48,26 @@ export class QuestionaryComponent {
             cellphone: ['']
         });
 
-        // cargar evento si hace falta (opcional, mantiene lo que tenías)
-        // const eventIdParam = this.eventId ?? Number(this.activatedRoute.snapshot.paramMap.get('eventId'));
-        // if (eventIdParam != null) {
-        //     this.eventService.getEventById('' + eventIdParam).subscribe({
-        //         next: resp => {
-        //             this.event = resp;
-        //             // si necesitás precondiciones para habilitar el form, las podés controlar con this.event
-        //         },
-        //         error: err => {
-        //             console.error('Error al cargar evento:', err);
-        //         }
-        //     });
-        // }
+        if (this.loggedUser) {
+          this.form.patchValue(this.loggedUser);
+        }
+    }
+
+    private initializeUserLogged(): void {
+        const currentUser = this.authService.getCurrentUserValue();
+            if (currentUser) {
+                const userDto: UserDTO = {
+                    name: currentUser.name ?? '',
+                    surname: currentUser.surname ?? '',
+                    email: currentUser.email ?? '',
+                    cellphone: currentUser.cellphone ?? ''
+                };
+                this.loggedUser = userDto;
+                console.log("userLogged: ", this.loggedUser);
+            }
+            else {
+                console.error('error al obtener el userLogged');
+            }
     }
 
     validatePhoneInput(event: KeyboardEvent) {

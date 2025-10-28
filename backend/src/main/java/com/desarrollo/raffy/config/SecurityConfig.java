@@ -78,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/url/save").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/url/save").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/url/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/mp/process-payment").permitAll()
                         .requestMatchers("/api/url/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { RouterOutlet, ChildrenOutletContexts } from '@angular/router';
+import { RouterOutlet, ChildrenOutletContexts, Router } from '@angular/router';
 import { HeaderComponent } from './shared/components/header/header.component';
 import { slideInAnimation } from './animations/route-animations';
 import { QuestionaryComponent } from './pages/questionary/questionary.component';
@@ -7,6 +7,7 @@ import { RaffleNumbersComponent } from './pages/raffle-numbers.component/raffle-
 import { CommonModule } from '@angular/common';
 import { AdminInscriptService } from './services/admin/adminInscript';
 import { NotificationService } from './services/notification.service';
+import { UserDTO } from './models/UserDTO';
 
 @Component({
   selector: 'app-root',
@@ -117,7 +118,8 @@ export class AppComponent {
     private contexts: ChildrenOutletContexts,
     private cdr: ChangeDetectorRef,
     private adminInscriptService: AdminInscriptService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router: Router
   ) {
     // Removido initData() - ahora se llama solo en las páginas que lo necesitan
     this.adminInscriptService.openInscription$.subscribe(
@@ -149,17 +151,24 @@ export class AppComponent {
     this.adminInscriptService.setOpenModalInscript(false);
   }
 
-  async onQuestionarySubmit(data: any){
+  async onQuestionarySubmit(data: UserDTO){
+    console.log("[inscripcion] => resp del form de inscricpion: ", data);
     const respInscript: any = await this.adminInscriptService.onInscript(data);
-    // console.log("[inscripcion] => resp de la inscripcion: ", respInscript.message);
+    console.log("[inscripcion] => resp de la inscripcion: ", respInscript);
     if(respInscript.status == 200){
-      this.notificationService.notifySuccess(respInscript.message)
+      if(respInscript.redirectPay){
+        this.router.navigate(['/event/payment']);
+      }
+      else{
+        this.notificationService.notifySuccess(respInscript.message)
+      }
     }
     else{
       this.notificationService.notifyError("Ha ocurrido en la inscripcion al evento.");
     }
     this.cdr.detectChanges();
   }
+  
   onProceedToQuestionary(data: any){
     this.adminInscriptService.toBuyNumbersRaffle(data);
   }

@@ -15,7 +15,7 @@ import { ModalShareEvent } from '../../shared/components/modal-share-event/modal
 import { QuestionaryComponent } from '../questionary/questionary.component';
 import { EventsService } from '../../services/events.service';
 import { UserDTO } from '../../models/UserDTO';
-import { WinnersAudit } from '../../services/audit.service';
+import { WinnerDTO } from '../../models/winner.model';
 import { DataStatusEvent } from '../../models/response.model';
 import { TagPrize } from '../../shared/components/tag-prize/tag-prize';
 import { QuestionaryService } from '../../services/questionary.service';
@@ -53,6 +53,7 @@ export class ManagementEvent {
     // PRUEBA QUESTIONARY MODAL
     showModalIncript = false;
     showRaffleModal = false;
+    userLogged!: UserDTO;
     selectedEventId!: number;
 
     // TABS
@@ -65,7 +66,7 @@ export class ManagementEvent {
     typesOfEventes = EventTypes;
     participants: UserDTO[] = [];
     eventType!: EventTypes;
-    winnersAudit: WinnersAudit[] = [];
+    winners: WinnerDTO[] = [];
 
     constructor(
         private adminEventService: AdminEventService,
@@ -93,7 +94,7 @@ export class ManagementEvent {
 
         this.adminEventService.winnersEvent$.subscribe(
             winners => {
-                this.winnersAudit = winners;
+                this.winners = winners;
                 this.cdr.detectChanges();
             }
         )
@@ -214,71 +215,6 @@ export class ManagementEvent {
         }
     }
 
-    // onProceedToQuestionary(numbersToBuy: number[]): void {
-    //     console.log('Numeros como parametro: ' + numbersToBuy);
-    //     this.selectedRaffleNumbers = numbersToBuy;
-    //     console.log('Numeros ya asignados: ' + this.selectedRaffleNumbers);
-
-    //     this.showRaffleModal = false;
-    //     this.showModalIncript = true;
-    // }
-
-    // onRaffleClosed(): void {
-    //     this.showRaffleModal = false; // oculta el modal de rifa
-    // }
-
-    // onInscriptClosed(): void {
-    //     this.showModalIncript = false; // Oculta modal de inscripcion
-    // }
-
-    // onQuestionarySubmit(user: UserDTO): void {
-    //     if (!this.event) return;
-
-    //     if (this.event.eventType === this.typesOfEventes.RAFFLES) {
-    //         const buyNumRequest: BuyRaffleNumberDTO = {
-    //             aGuestUser: user,
-    //             someNumbersToBuy: this.selectedRaffleNumbers
-    //         }
-    //         this.questionaryService.saveRaffleNumber(
-    //             this.event.id,
-    //             buyNumRequest
-    //         ).subscribe({
-    //             next: (response) => {
-    //                 this.notificationService.notifySuccess(response.message);
-    //             },
-    //             error: (errorResponse) => {
-    //                 console.log('error 1');
-    //                 this.notificationService.notifyError(errorResponse.error.message);
-    //             }
-    //         });
-    //     }
-    //     else {
-    //         this.questionaryService.save(
-    //             user,
-    //             this.event.id
-    //         ).subscribe({
-    //             next: (response) => {
-    //                 this.notificationService.notifySuccess(response.message);
-    //             },
-    //             error: (errorResponse) => {
-    //                 console.log('LOG ERROR:', JSON.stringify(errorResponse)); // borrar
-    //                 this.notificationService.notifyError(errorResponse.error.message);
-    //             }
-    //         });
-    //     }
-
-    // }
-    
-    allEventStates = StatusEvent;
-    purchaseNumbers(): void {
-        if (this.event?.statusEvent === this.allEventStates.OPEN) {
-            const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
-            this.selectedRaffleNumbers = seleccionados.map(n => n.ticketNumber); // guardamos los números
-            
-            this.showModalIncript = true; // muestra el modal de Questionary
-        }
-    }
-
     loadParticipants(eventId: number, eventType: EventTypes): void {
         this.eventService.getParticipantUsersByEventId(eventId, eventType).subscribe({
             next: (data) => {
@@ -293,13 +229,11 @@ export class ManagementEvent {
 
     // devuelve el lugar en el podio
     getPlaceGoal(dataUser: UserDTO): any {
-        // voy a buscar el dato de la lista de ganadores
-        const dataPlace = this.winnersAudit.find(winner => winner.userEmail == dataUser.email);
-        // console.log("[podio] => datos del ganador: ", dataPlace);
+        // buscar el ganador por email en la lista WinnerDTO
+        const dataPlace = this.winners.find(winner => winner.email === dataUser.email);
         if (!dataPlace)
-            return { idUser: null, position: -1 }
-
-        return { idUser: dataPlace.id, position: dataPlace.userPosition as number }
+            return { idUser: null, position: -1 };
+        return { idUser: dataPlace.participantId, position: dataPlace.position };
     }
 
     setTab(tabName: string): void {
