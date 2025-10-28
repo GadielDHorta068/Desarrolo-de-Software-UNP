@@ -6,6 +6,10 @@ import { AuthService, TwoFactorEnableResponse } from '../../services/auth.servic
 import { ImageCroppedEvent, LoadedImage, ImageCropperComponent } from 'ngx-image-cropper';
 import { PaymentService } from '../../services/payment.service';
 import { Payment, PaymentSortType, PaymentFilter, PaymentStatus } from '../../models/payment.model';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-settings',
@@ -755,9 +759,7 @@ export class SettingsComponent implements OnInit {
             
             console.log('Total unique payments:', uniquePayments.length);
             this.payments = uniquePayments;
-            console.log('this.payments set to:', this.payments);
             this.applyPaymentFilter();
-            console.log('After applyPaymentFilter, filteredPayments:', this.filteredPayments);
             this.isPaymentsLoading = false;
             this.cdr.detectChanges();
           },
@@ -808,12 +810,7 @@ export class SettingsComponent implements OnInit {
   }
 
   applyPaymentFilter(): void {
-    console.log('applyPaymentFilter called');
-    console.log('this.payments:', this.payments);
-    console.log('this.paymentFilter:', this.paymentFilter);
     this.filteredPayments = this.paymentService.filterPayments(this.payments, this.paymentFilter);
-    console.log('this.filteredPayments after filter:', this.filteredPayments);
-    console.log('filteredPayments.length:', this.filteredPayments.length);
   }
 
   onSortChange(sortType: PaymentSortType): void {
@@ -831,10 +828,6 @@ export class SettingsComponent implements OnInit {
 
   getStatusColor(status: PaymentStatus): string {
     return this.paymentService.getStatusColor(status);
-  }
-
-  getStatusText(status: PaymentStatus): string {
-    return this.paymentService.getStatusText(status);
   }
 
  
@@ -899,5 +892,151 @@ export class SettingsComponent implements OnInit {
       style: 'currency',
       currency: currency || 'USD'
     }).format(amount);
+  }
+
+  exportToPDF(): void {
+    const doc = new jsPDF();
+    
+    // Función auxiliar para obtener el nombre del usuario
+    const getUserDisplayName = (user: any): string => {
+      if (!user) return 'N/A';
+      
+      if (user.username) return user.username;
+      if (user.name && user.surname) return `${user.name} ${user.surname}`;
+      if (user.name) return user.name;
+      if (user.nickname) return user.nickname;
+      return 'N/A';
+    };
+    
+    // Título del documento
+    doc.setFontSize(18);
+    doc.text('Historial de Transacciones', 14, 22);
+    
+    // Información del usuario
+    doc.setFontSize(12);
+    doc.text(`Usuario: ${getUserDisplayName(this.currentUser)}`, 14, 35);
+    doc.text(`Fecha de exportación: ${new Date().toLocaleDateString('es-ES')}`, 14, 45);
+    
+    // Preparar datos para la tabla
+    const tableData = this.filteredPayments.map(payment => [
+      this.formatPaymentDate(payment.createdAt),
+      payment.description || payment.event?.description || 'Sin descripción',
+      getUserDisplayName(payment.user),
+      getUserDisplayName(payment.receiver),
+      this.formatCurrency(payment.amount, payment.currency),
+      this.getStatusText(payment.status),
+      payment.event?.title || 'Sin evento'
+    ]);
+    
+    // Crear tabla
+    autoTable(doc, {
+      head: [['Fecha', 'Descripción', 'Pagador', 'Receptor', 'Monto', 'Estado', 'Evento']],
+      body: tableData,
+      startY: 55,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255
+      },
+      columnStyles: {
+        0: { cellWidth: 25 },
+        1: { cellWidth: 35 },
+        2: { cellWidth: 25 },
+        3: { cellWidth: 25 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 20 },
+        6: { cellWidth: 30 }
+      }
+    });
+    
+    // Guardar el archivo
+    doc.save(`transacciones_${new Date().toISOString().split('T')[0]}.pdf`);
+  }
+
+  exportToExcel(): void {
+    // Función auxiliar para obtener el nombre del usuario
+    const getUserDisplayName = (user: any): string => {
+      if (!user) return 'N/A';
+      
+      if (user.username) return user.username;
+      if (user.name && user.surname) return `${user.name} ${user.surname}`;
+      if (user.name) return user.name;
+      if (user.nickname) return user.nickname;
+      return 'N/A';
+    };
+
+    // Preparar datos para Excel con mejor formato
+    const excelData = this.filteredPayments.map(payment => ({
+      'Fecha': this.formatPaymentDate(payment.createdAt),
+      'Descripción': payment.description || payment.event?.description || 'Sin descripción',
+      'Pagador': getUserDisplayName(payment.user),
+      'Receptor': getUserDisplayName(payment.receiver),
+      'Monto': `${payment.amount} ${payment.currency}`,
+      'Estado': this.getStatusText(payment.status),
+      'Evento': payment.event?.title || 'Sin evento',
+      'ID Transacción': payment.id
+    }));
+    
+    // Crear libro de trabajo
+    const workbook = XLSX.utils.book_new();
+    
+    // Agregar información del encabezado
+    const headerInfo = [
+      ['Historial de Transacciones'],
+      [`Usuario: ${getUserDisplayName(this.currentUser)}`],
+      [`Fecha de exportación: ${new Date().toLocaleDateString('es-ES')}`],
+      [`Total de transacciones: ${this.filteredPayments.length}`],
+      []
+    ];
+    
+    // Crear hoja de trabajo con encabezado
+    const worksheet = XLSX.utils.aoa_to_sheet(headerInfo);
+    
+    // Agregar los datos de la tabla
+    XLSX.utils.sheet_add_json(worksheet, excelData, { 
+      origin: 'A6', // Comenzar después del encabezado
+      skipHeader: false 
+    });
+    
+    // Configurar el ancho de las columnas para evitar que se pierda texto
+    const columnWidths = [
+      { wch: 15 }, // Fecha
+      { wch: 25 }, // Descripción
+      { wch: 20 }, // Pagador
+      { wch: 20 }, // Receptor
+      { wch: 15 }, // Monto
+      { wch: 12 }, // Estado
+      { wch: 25 }, // Evento
+      { wch: 12 }  // ID Transacción
+    ];
+    worksheet['!cols'] = columnWidths;
+    
+    // Agregar hoja al libro
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transacciones');
+    
+    // Generar archivo y descargar
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `transacciones_${new Date().toISOString().split('T')[0]}.xlsx`);
+  }
+
+  getStatusText(status: PaymentStatus): string {
+    switch (status) {
+      case PaymentStatus.PENDING:
+        return 'Pendiente';
+      case PaymentStatus.APPROVED:
+        return 'Aprobado';
+      case PaymentStatus.REJECTED:
+        return 'Rechazado';
+      case PaymentStatus.CANCELLED:
+        return 'Cancelado';
+      case PaymentStatus.REFUNDED:
+        return 'Reembolsado';
+      default:
+        return 'Desconocido';
+    }
   }
 }
