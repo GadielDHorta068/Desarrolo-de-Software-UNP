@@ -11,6 +11,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import jakarta.persistence.Column;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.FetchType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "payments",
@@ -34,14 +38,20 @@ public class Payment {
     @Column(name = "external_reference")
     private String externalReference;   // ID interno de la orden
     
-    @Column(name = "user_id")
-    private String userId;              // ID del comprador en tu sistema
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User user;                  // Usuario que realiza el pago
 
-    @Column(name = "event_id")
-    private Long eventId;               // ID del evento en tu sistema
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Events event;               // Evento asociado al pago
 
-    @Column(name = "receiver_id")
-    private Long receiverId;              // ID del ticket en tu sistema
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User receiver;              // Usuario que recibe el pago
     
     @Column(name = "amount")
     private Double amount;              // Monto total

@@ -4,6 +4,8 @@ import com.desarrollo.raffy.business.repository.PaymentRepository;
 import com.desarrollo.raffy.exception.PaymentNotFoundException;
 import com.desarrollo.raffy.exception.PaymentValidationException;
 import com.desarrollo.raffy.model.Payment;
+import com.desarrollo.raffy.model.User;
+import com.desarrollo.raffy.model.Events;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +17,13 @@ import java.util.Optional;
 @Transactional
 public class PaymentService {
     private final PaymentRepository paymentRepository;
+    private final UserService userService;
+    private final EventsService eventsService;
 
-    public PaymentService(PaymentRepository paymentRepository) {
+    public PaymentService(PaymentRepository paymentRepository, UserService userService, EventsService eventsService) {
         this.paymentRepository = paymentRepository;
+        this.userService = userService;
+        this.eventsService = eventsService;
     }
 
     // ==================== CRUD BÁSICOS ====================
@@ -107,9 +113,9 @@ public class PaymentService {
      * Busca pago por usuario y evento.
      */
     @Transactional(readOnly = true)
-    public Payment findByUserIdAndEventId(String userId, Long eventId) {
-        if (userId == null || userId.trim().isEmpty()) {
-            throw new PaymentValidationException("ID de usuario no puede ser nulo o vacío");
+    public Payment findByUserIdAndEventId(Long userId, Long eventId) {
+        if (userId == null) {
+            throw new PaymentValidationException("ID de usuario no puede ser nulo");
         }
         if (eventId == null) {
             throw new PaymentValidationException("ID de evento no puede ser nulo");
@@ -143,9 +149,9 @@ public class PaymentService {
      * Busca pago por usuario.
      */
     @Transactional(readOnly = true)
-    public Payment findByUserId(String userId) {
-        if (userId == null || userId.trim().isEmpty()) {
-            throw new PaymentValidationException("ID de usuario no puede ser nulo o vacío");
+    public Payment findByUserId(Long userId) {
+        if (userId == null) {
+            throw new PaymentValidationException("ID de usuario no puede ser nulo");
         }
         return paymentRepository.findByUserId(userId);
     }
@@ -159,6 +165,80 @@ public class PaymentService {
             throw new PaymentValidationException("Estado no puede ser nulo o vacío");
         }
         return paymentRepository.findByStatus(status);
+    }
+
+    // ==================== MÉTODOS QUE DEVUELVEN MÚLTIPLES RESULTADOS ====================
+
+    /**
+     * Busca todos los pagos por usuario.
+     */
+    @Transactional(readOnly = true)
+    public List<Payment> findAllByUserId(Long userId) {
+        if (userId == null) {
+            throw new PaymentValidationException("ID de usuario no puede ser nulo");
+        }
+        return paymentRepository.findAllByUserId(userId);
+    }
+
+    /**
+     * Busca todos los pagos por receptor.
+     */
+    @Transactional(readOnly = true)
+    public List<Payment> findAllByReceiverId(Long receiverId) {
+        if (receiverId == null) {
+            throw new PaymentValidationException("ID de receptor no puede ser nulo");
+        }
+        return paymentRepository.findAllByReceiverId(receiverId);
+    }
+
+    /**
+     * Busca todos los pagos por evento.
+     */
+    @Transactional(readOnly = true)
+    public List<Payment> findAllByEventId(Long eventId) {
+        if (eventId == null) {
+            throw new PaymentValidationException("ID de evento no puede ser nulo");
+        }
+        return paymentRepository.findAllByEventId(eventId);
+    }
+
+    /**
+     * Busca todos los pagos por estado.
+     */
+    @Transactional(readOnly = true)
+    public List<Payment> findAllByStatus(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            throw new PaymentValidationException("Estado no puede ser nulo o vacío");
+        }
+        return paymentRepository.findAllByStatus(status);
+    }
+
+    /**
+     * Busca todos los pagos por usuario y evento.
+     */
+    @Transactional(readOnly = true)
+    public List<Payment> findAllByUserIdAndEventId(Long userId, Long eventId) {
+        if (userId == null) {
+            throw new PaymentValidationException("ID de usuario no puede ser nulo");
+        }
+        if (eventId == null) {
+            throw new PaymentValidationException("ID de evento no puede ser nulo");
+        }
+        return paymentRepository.findAllByUserIdAndEventId(userId, eventId);
+    }
+
+    /**
+     * Busca todos los pagos por evento y receptor.
+     */
+    @Transactional(readOnly = true)
+    public List<Payment> findAllByEventIdAndReceiverId(Long eventId, Long receiverId) {
+        if (eventId == null) {
+            throw new PaymentValidationException("ID de evento no puede ser nulo");
+        }
+        if (receiverId == null) {
+            throw new PaymentValidationException("ID de receptor no puede ser nulo");
+        }
+        return paymentRepository.findAllByEventIdAndReceiverId(eventId, receiverId);
     }
 
     // ==================== MÉTODOS DE NEGOCIO ====================
@@ -188,15 +268,31 @@ public class PaymentService {
     /**
      * Crea un nuevo pago
      */
-    public Payment createPayment(String paymentId, String externalReference, String userId, 
+    public Payment createPayment(String paymentId, String externalReference, Long userId, 
                                Long eventId, Long receiverId, Double amount, String currency,
                                String paymentMethodId, String paymentTypeId) {
+        // Buscar las entidades
+        User user = userService.findById(userId);
+        if (user == null) {
+            throw new PaymentValidationException("Usuario no encontrado con ID: " + userId);
+        }
+        
+        Events event = eventsService.getById(eventId);
+        if (event == null) {
+            throw new PaymentValidationException("Evento no encontrado con ID: " + eventId);
+        }
+        
+        User receiver = userService.findById(receiverId);
+        if (receiver == null) {
+            throw new PaymentValidationException("Receptor no encontrado con ID: " + receiverId);
+        }
+        
         Payment payment = new Payment();
         payment.setPaymentId(paymentId);
         payment.setExternalReference(externalReference);
-        payment.setUserId(userId);
-        payment.setEventId(eventId);
-        payment.setReceiverId(receiverId);
+        payment.setUser(user);
+        payment.setEvent(event);
+        payment.setReceiver(receiver);
         payment.setAmount(amount);
         payment.setCurrency(currency);
         payment.setPaymentMethodId(paymentMethodId);
@@ -235,12 +331,12 @@ public class PaymentService {
             throw new PaymentValidationException("Pago no puede ser nulo");
         }
         
-        if (payment.getUserId() == null) {
-            throw new PaymentValidationException("ID de usuario es requerido");
+        if (payment.getUser() == null) {
+            throw new PaymentValidationException("Usuario es requerido");
         }
         
-        if (payment.getEventId() == null) {
-            throw new PaymentValidationException("ID de evento es requerido");
+        if (payment.getEvent() == null) {
+            throw new PaymentValidationException("Evento es requerido");
         }
         
         if (payment.getAmount() == null || payment.getAmount() <= 0.0) {
@@ -266,9 +362,9 @@ public class PaymentService {
      * Verifica si un usuario ya tiene un pago para un evento específico.
      */
     @Transactional(readOnly = true)
-    public boolean hasUserPaidForEvent(String userId, Long eventId) {
-        if (userId == null || userId.trim().isEmpty()) {
-            throw new PaymentValidationException("User ID cannot be null or empty");
+    public boolean hasUserPaidForEvent(Long userId, Long eventId) {
+        if (userId == null) {
+            throw new PaymentValidationException("User ID cannot be null");
         }
         if (eventId == null) {
             throw new PaymentValidationException("Event ID cannot be null");

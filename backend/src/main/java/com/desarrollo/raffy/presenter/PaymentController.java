@@ -90,12 +90,51 @@ public class PaymentController {
     public ResponseEntity<?> createPayment(@Valid @RequestBody Payment payment) {
         try {
             log.info("Creando nuevo pago para usuario: {} y evento: {}", 
-                    payment.getUserId(), payment.getEventId());
+                    payment.getUser() != null ? payment.getUser().getId() : "null", 
+                    payment.getEvent() != null ? payment.getEvent().getId() : "null");
             
             Payment createdPayment = paymentService.createPayment(payment);
             return Response.ok(createdPayment, "Pago creado exitosamente");
         } catch (Exception e) {
             log.error("Error al crear pago: {}", e.getMessage());
+            return Response.error(null, "Error al crear el pago: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Crea un nuevo pago usando parámetros directos.
+     * 
+     * @param paymentId ID único del pago
+     * @param externalReference Referencia externa
+     * @param userId ID del usuario que paga
+     * @param eventId ID del evento
+     * @param receiverId ID del receptor del pago
+     * @param amount Monto del pago
+     * @param currency Moneda del pago
+     * @param paymentMethodId ID del método de pago
+     * @param paymentTypeId ID del tipo de pago
+     * @return ResponseEntity con el pago creado
+     */
+    @PostMapping("/create")
+    public ResponseEntity<?> createPaymentWithParams(
+            @RequestParam @NotBlank String paymentId,
+            @RequestParam @NotBlank String externalReference,
+            @RequestParam @NotNull @Positive Long userId,
+            @RequestParam @NotNull @Positive Long eventId,
+            @RequestParam @NotNull @Positive Long receiverId,
+            @RequestParam @NotNull @Positive Double amount,
+            @RequestParam @NotBlank String currency,
+            @RequestParam @NotBlank String paymentMethodId,
+            @RequestParam @NotBlank String paymentTypeId) {
+        try {
+            log.info("Creando nuevo pago con parámetros para usuario: {} y evento: {}", userId, eventId);
+            
+            Payment createdPayment = paymentService.createPayment(
+                paymentId, externalReference, userId, eventId, receiverId, 
+                amount, currency, paymentMethodId, paymentTypeId);
+            return Response.ok(createdPayment, "Pago creado exitosamente");
+        } catch (Exception e) {
+            log.error("Error al crear pago con parámetros: {}", e.getMessage());
             return Response.error(null, "Error al crear el pago: " + e.getMessage());
         }
     }
@@ -184,7 +223,7 @@ public class PaymentController {
      */
     @GetMapping("/user/{userId}/event/{eventId}")
     public ResponseEntity<?> getPaymentByUserAndEvent(
-            @PathVariable @NotNull String userId,
+            @PathVariable @NotNull @Positive Long userId,
             @PathVariable @NotNull @Positive Long eventId) {
         try {
             log.info("Obteniendo pago para usuario: {} y evento: {}", userId, eventId);
@@ -255,7 +294,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago encontrado
      */
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getPaymentByUser(@PathVariable @NotNull String userId) {
+    public ResponseEntity<?> getPaymentByUser(@PathVariable @NotNull @Positive Long userId) {
         try {
             log.info("Obteniendo pago para usuario: {}", userId);
             Payment payment = paymentService.findByUserId(userId);
@@ -294,6 +333,154 @@ public class PaymentController {
         }
     }
 
+    // ==================== ENDPOINTS QUE DEVUELVEN MÚLTIPLES RESULTADOS ====================
+
+    /**
+     * Obtiene todos los pagos por usuario.
+     * 
+     * @param userId ID del usuario
+     * @return ResponseEntity con la lista de pagos encontrados
+     */
+    @GetMapping("/user/{userId}/all")
+    public ResponseEntity<?> getAllPaymentsByUser(@PathVariable @NotNull @Positive Long userId) {
+        try {
+            log.info("Obteniendo todos los pagos para usuario: {}", userId);
+            List<Payment> payments = paymentService.findAllByUserId(userId);
+            
+            if (!payments.isEmpty()) {
+                return Response.ok(payments, "Pagos encontrados: " + payments.size());
+            } else {
+                return Response.notFound("No se encontraron pagos para el usuario especificado");
+            }
+        } catch (Exception e) {
+            log.error("Error al obtener pagos por usuario {}: {}", userId, e.getMessage());
+            return Response.error(null, "Error al obtener los pagos: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtiene todos los pagos por receptor.
+     * 
+     * @param receiverId ID del receptor
+     * @return ResponseEntity con la lista de pagos encontrados
+     */
+    @GetMapping("/receiver/{receiverId}/all")
+    public ResponseEntity<?> getAllPaymentsByReceiver(@PathVariable @NotNull @Positive Long receiverId) {
+        try {
+            log.info("Obteniendo todos los pagos para receptor: {}", receiverId);
+            List<Payment> payments = paymentService.findAllByReceiverId(receiverId);
+            
+            if (!payments.isEmpty()) {
+                return Response.ok(payments, "Pagos encontrados: " + payments.size());
+            } else {
+                return Response.notFound("No se encontraron pagos para el receptor especificado");
+            }
+        } catch (Exception e) {
+            log.error("Error al obtener pagos por receptor {}: {}", receiverId, e.getMessage());
+            return Response.error(null, "Error al obtener los pagos: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtiene todos los pagos por evento.
+     * 
+     * @param eventId ID del evento
+     * @return ResponseEntity con la lista de pagos encontrados
+     */
+    @GetMapping("/event/{eventId}/all")
+    public ResponseEntity<?> getAllPaymentsByEvent(@PathVariable @NotNull @Positive Long eventId) {
+        try {
+            log.info("Obteniendo todos los pagos para evento: {}", eventId);
+            List<Payment> payments = paymentService.findAllByEventId(eventId);
+            
+            if (!payments.isEmpty()) {
+                return Response.ok(payments, "Pagos encontrados: " + payments.size());
+            } else {
+                return Response.notFound("No se encontraron pagos para el evento especificado");
+            }
+        } catch (Exception e) {
+            log.error("Error al obtener pagos por evento {}: {}", eventId, e.getMessage());
+            return Response.error(null, "Error al obtener los pagos: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtiene todos los pagos por estado.
+     * 
+     * @param status Estado del pago
+     * @return ResponseEntity con la lista de pagos encontrados
+     */
+    @GetMapping("/status/{status}/all")
+    public ResponseEntity<?> getAllPaymentsByStatus(@PathVariable @NotNull String status) {
+        try {
+            log.info("Obteniendo todos los pagos con estado: {}", status);
+            List<Payment> payments = paymentService.findAllByStatus(status);
+            
+            if (!payments.isEmpty()) {
+                return Response.ok(payments, "Pagos encontrados: " + payments.size());
+            } else {
+                return Response.notFound("No se encontraron pagos con el estado especificado");
+            }
+        } catch (Exception e) {
+            log.error("Error al obtener pagos por estado {}: {}", status, e.getMessage());
+            return Response.error(null, "Error al obtener los pagos: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtiene todos los pagos por usuario y evento.
+     * 
+     * @param userId ID del usuario
+     * @param eventId ID del evento
+     * @return ResponseEntity con la lista de pagos encontrados
+     */
+    @GetMapping("/user/{userId}/event/{eventId}/all")
+    public ResponseEntity<?> getAllPaymentsByUserAndEvent(
+            @PathVariable @NotNull @Positive Long userId,
+            @PathVariable @NotNull @Positive Long eventId) {
+        try {
+            log.info("Obteniendo todos los pagos para usuario: {} y evento: {}", userId, eventId);
+            List<Payment> payments = paymentService.findAllByUserIdAndEventId(userId, eventId);
+            
+            if (!payments.isEmpty()) {
+                return Response.ok(payments, "Pagos encontrados: " + payments.size());
+            } else {
+                return Response.notFound("No se encontraron pagos para el usuario y evento especificados");
+            }
+        } catch (Exception e) {
+            log.error("Error al obtener pagos por usuario {} y evento {}: {}", 
+                    userId, eventId, e.getMessage());
+            return Response.error(null, "Error al obtener los pagos: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtiene todos los pagos por evento y receptor.
+     * 
+     * @param eventId ID del evento
+     * @param receiverId ID del receptor
+     * @return ResponseEntity con la lista de pagos encontrados
+     */
+    @GetMapping("/event/{eventId}/receiver/{receiverId}/all")
+    public ResponseEntity<?> getAllPaymentsByEventAndReceiver(
+            @PathVariable @NotNull @Positive Long eventId,
+            @PathVariable @NotNull @Positive Long receiverId) {
+        try {
+            log.info("Obteniendo todos los pagos para evento: {} y receptor: {}", eventId, receiverId);
+            List<Payment> payments = paymentService.findAllByEventIdAndReceiverId(eventId, receiverId);
+            
+            if (!payments.isEmpty()) {
+                return Response.ok(payments, "Pagos encontrados: " + payments.size());
+            } else {
+                return Response.notFound("No se encontraron pagos para el evento y receptor especificados");
+            }
+        } catch (Exception e) {
+            log.error("Error al obtener pagos por evento {} y receptor {}: {}", 
+                    eventId, receiverId, e.getMessage());
+            return Response.error(null, "Error al obtener los pagos: " + e.getMessage());
+        }
+    }
+
     // ==================== ENDPOINTS DE LÓGICA DE NEGOCIO ====================
 
     /**
@@ -328,7 +515,7 @@ public class PaymentController {
      */
     @GetMapping("/verify/user/{userId}/event/{eventId}")
     public ResponseEntity<?> hasUserPaidForEvent(
-            @PathVariable @NotNull String userId,
+            @PathVariable @NotNull @Positive Long userId,
             @PathVariable @NotNull @Positive Long eventId) {
         try {
             log.info("Verificando si usuario {} ha pagado por evento {}", userId, eventId);
