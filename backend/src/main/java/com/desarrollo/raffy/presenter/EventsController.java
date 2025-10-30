@@ -860,8 +860,8 @@ public class EventsController {
         @Valid @RequestBody BuyRaffleNumberRequestDTO aBuyRequest,
         @PathVariable("eventId") Long aEventId) {
 
-        System.out.println("aBuyRequest: " + aBuyRequest);
-        System.out.println("aBuyRequest.getAGuestUser(): " + aBuyRequest.getAGuestUser());
+        // System.out.println("aBuyRequest: " + aBuyRequest);
+        // System.out.println("aBuyRequest.getAGuestUser(): " + aBuyRequest.getAGuestUser());
         UserDTO aGuestUser = aBuyRequest.getAGuestUser();
         
         // Buscar el evento (Raffle)
