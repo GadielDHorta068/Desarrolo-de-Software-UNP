@@ -23,24 +23,38 @@ export class HandleTypePipe implements PipeTransform {
           return 'Desconocido';
       }
     }
-
     // Mapping para AuditActionType
-    const actionTypeMap: Record<string, string> = {
-      'EVENT_CREATED': 'Evento Creado',
-      'EVENT_UPDATED': 'Evento Actualizado',
-      'EVENT_EXECUTED': 'Evento Ejecutado',
-      'EVENT_CLOSED': 'Evento Cerrado',
-      'EVENT_FINALIZED': 'Evento Finalizado',
-      'USER_REGISTERED': 'Usuario Registrado',
-      'USER_REGISTERED_FAILED': 'Registro de Usuario Fallido',
-      'USER_UNREGISTERED': 'Usuario Dado de Baja',
-      'NUMBER_PURCHASED': 'Número Comprado',
-      'NUMBER_PURCHASED_FAILED': 'Compra de Número Fallida',
-      'ERROR_OCURRED': 'Error Ocurrido',
-      'SYSTEM_EVENT': 'Evento del Sistema'
-    };
-
-    return actionTypeMap[value as string] || 'Desconocido';
+    if(Object.values(AuditActionType).includes(value as AuditActionType)) {
+        switch(value as AuditActionType) {
+          case AuditActionType.EVENT_CREATED:
+            return 'Evento Creado';
+          case AuditActionType.EVENT_UPDATED:
+            return 'Evento Actualizado';
+          case AuditActionType.EVENT_EXECUTED:
+            return 'Evento Ejecutado';
+          case AuditActionType.EVENT_CLOSED:
+            return 'Evento Cerrado';
+          case AuditActionType.EVENT_FINALIZED:
+            return 'Evento Finalizado';
+          case AuditActionType.USER_REGISTERED:
+            return 'Usuario Registrado';
+          case AuditActionType.USER_REGISTERED_FAILED:
+            return 'Registro de Usuario Fallido';
+          case AuditActionType.USER_UNREGISTERED:
+            return 'Usuario Dado de Baja';
+          case AuditActionType.NUMBER_PURCHASED:
+            return 'Número Comprado';
+          case AuditActionType.NUMBER_PURCHASED_FAILED:
+            return 'Compra de Número Fallida';
+          case AuditActionType.ERROR_OCURRED:
+            return 'Error Ocurrido';
+          case AuditActionType.SYSTEM_EVENT:
+            return 'Evento del Sistema';
+          default:
+            return 'Desconocido'
+      }
+    } 
+    return 'Desconocido';    
   }
 
 }

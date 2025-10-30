@@ -17,15 +17,7 @@ import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
-import com.desarrollo.raffy.model.auditlog.AuditAction;
 import com.desarrollo.raffy.model.auditlog.AuditActionType;
-import com.desarrollo.raffy.model.auditlog.AuditEvent;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.desarrollo.raffy.model.Categories;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.business.services.AuditLogsService;
@@ -164,123 +156,6 @@ public class EventsController {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
         }
     }
-
-/* 
-    @PostMapping("/create/{userId}")
-    public ResponseEntity<?> createEvents(
-        @RequestBody Map<String, Object> requestData,
-        @PathVariable("userId") Long userId
-    ) {
-        try {
-            log.info("Datos recibidos: {}", requestData);
-            
-            String eventTypeStr = (String) requestData.get("eventType");
-            log.info("EventType del JSON: '{}'", eventTypeStr);
-            
-            if (eventTypeStr == null) {
-                return ResponseEntity.badRequest().body("Debe especificar el tipo de evento.");
-            }
-
-            EventTypes eventType;
-            try {
-                eventType = EventTypes.valueOf(eventTypeStr.toUpperCase().trim());
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body("Tipo de evento no válido: " + eventTypeStr);
-            }
-
-            // Configurar ObjectMapper más específicamente
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-
-            // Crear evento manualmente según el tipo
-            Events event;
-            switch (eventType) {
-                case GIVEAWAYS:
-                    event = createGiveaway(requestData, mapper);
-                    break;
-                case GUESSING_CONTEST:
-                    event = createGuessingContest(requestData, mapper);
-                    break;
-                case RAFFLES:
-                    event = createRaffle(requestData, mapper);
-                    break;
-                default:
-                    return ResponseEntity.badRequest().body("Tipo de evento no válido: " + eventTypeStr);
-            }
-
-            // Establecer manualmente el eventType
-            event.setEventType(eventType);
-
-            log.info("Evento creado - Tipo: {}", event.getEventType());
-            
-            // Validaciones
-            if (event.getEndDate() == null) {
-                return ResponseEntity.badRequest().body("Debe especificar la fecha de fin del evento.");
-            }
-
-            if (event.getEndDate().isBefore(LocalDate.now())) {
-                return ResponseEntity.badRequest().body("La fecha de fin debe ser posterior a la fecha actual.");
-            }
-
-            // Resto del código igual...
-            Events created = eventsService.create(event, userId);
-            auditLogsService.createAuditEvent(created);
-            EventSummaryDTO dto = eventsService.getEventSummaryById(created.getId());
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-
-        } catch (IllegalArgumentException e) {
-            log.error("Error de validación: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            log.error("Error interno: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().body("Error al crear el evento: " + e.getMessage());
-        }
-    }
-
-    private Giveaways createGiveaway(Map<String, Object> data, ObjectMapper mapper) {
-        return mapper.convertValue(data, Giveaways.class);
-    }
-
-    private GuessingContest createGuessingContest(Map<String, Object> data, ObjectMapper mapper) {
-        GuessingContest contest = mapper.convertValue(data, GuessingContest.class);
-        
-        // Establecer campos específicos manualmente si es necesario
-        if (data.containsKey("minValue")) {
-            contest.setMinValue(((Number) data.get("minValue")).intValue());
-        }
-        if (data.containsKey("maxValue")) {
-            contest.setMaxValue(((Number) data.get("maxValue")).intValue());
-        }
-        if (data.containsKey("maxAttempts")) {
-            contest.setMaxAttempts(((Number) data.get("maxAttempts")).intValue());
-        }
-        if (data.containsKey("targetNumber")) {
-            contest.setTargetNumber(((Number) data.get("targetNumber")).intValue());
-        }
-        
-        log.info("GuessingContest creado - Min: {}, Max: {}, Attempts: {}", 
-                contest.getMinValue(), contest.getMaxValue(), contest.getMaxAttempts());
-        
-        return contest;
-    }
-
-    private Raffle createRaffle(Map<String, Object> data, ObjectMapper mapper) {
-        Raffle raffle = mapper.convertValue(data, Raffle.class);
-        
-        // Establecer campos específicos manualmente si es necesario
-        if (data.containsKey("quantityOfNumbers")) {
-            raffle.setQuantityOfNumbers(((Number) data.get("quantityOfNumbers")).intValue());
-        }
-        if (data.containsKey("priceOfNumber")) {
-            raffle.setPriceOfNumber(((Number) data.get("priceOfNumber")).doubleValue());
-        }
-        
-        return raffle;
-    } */
-
 
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {

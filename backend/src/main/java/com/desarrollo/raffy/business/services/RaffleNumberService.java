@@ -14,6 +14,7 @@ import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
 import com.desarrollo.raffy.model.User;
+import com.desarrollo.raffy.model.auditlog.AuditActionType;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -33,6 +34,9 @@ public class RaffleNumberService {
 
     @Autowired
     private EvolutionService evolutionService;
+
+    @Autowired
+    private AuditLogsService auditLogsService;
 
     @Value("${evolution.defaultInstance:raffy}")
     private String defaultEvolutionInstance;
@@ -92,7 +96,13 @@ public class RaffleNumberService {
                 result.add(newNumber);
             }
             else {
-                // Remplazar por una excepcion mejor
+                
+                auditLogsService.logAction(
+                    aRaffle.getId(), 
+                    aUser.getName() + " " + aUser.getSurname(), 
+                    AuditActionType.NUMBER_PURCHASED_FAILED, 
+                    String.format("Falla al comprar número."));
+                
                 throw new IllegalArgumentException("Estas intentando comprar un numero que ya tiene dueño");
             }
         }
@@ -136,7 +146,18 @@ public class RaffleNumberService {
         } catch (Exception e) {
             System.err.println("⚠️ Error enviando WhatsApp de confirmación de compra: " + e.getMessage());
         }
-
+        //Auditoria
+        auditLogsService.logAction(
+                aRaffle.getId(), 
+                aUser.getName() + " " + aUser.getSurname(), 
+                AuditActionType.NUMBER_PURCHASED, 
+                String.format("Números comprados: %s", purchasedNumbers.toString()));
+        auditLogsService.logAction(
+                    aRaffle.getId(), 
+                    aUser.getName() + " " + aUser.getSurname(), 
+                    AuditActionType.USER_REGISTERED, 
+                    String.format("El usuario se registró al evento."));
+        //fin auditoria
         return result;
     }
 

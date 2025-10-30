@@ -51,18 +51,28 @@ export class AuditDetail {
       return;
     }
       this.loading = true;    
-    
+      // Convertir las fechas a formato ISO si están definidas
+      const fromDate = this.dateFrom ? new Date(this.dateFrom) : undefined;
+      const toDate = this.dateTo ? new Date(this.dateTo) : undefined;
+      if (toDate) {
+        toDate.setHours(23, 59, 59, 999);
+      }
       this.auditService.getActionByFilters(
         this.eventId,
         this.selectedAction,
-        this.dateFrom,
-        this.dateTo
+        fromDate,
+        toDate
       ).subscribe({
         next: (actions) => {
-          this.auditActions = actions;
+          this.auditActions = this.selectedAction 
+          ? actions.filter(a => a.action === this.selectedAction)
+          : actions;
           this.loading = false;
           this.cdr.detectChanges();
-          console.log('Acciones de auditoría recuperadas:', this.auditActions);
+          console.log("Acción seleccionada: ", this.selectedAction);
+          console.log('Acciones de auditoría recuperadas:', actions.filter(a => 
+          !this.selectedAction || a.action === this.selectedAction
+        ));
         },
         error: (err) => {
           console.error('Error al recuperar las acciones de auditoría:', err);
@@ -79,9 +89,14 @@ export class AuditDetail {
   }
 
   applyFilters() {
-    if (this.dateFrom && this.dateTo && new Date(this.dateFrom) > new Date(this.dateTo)) {
-      alert('La fecha "Desde" no puede ser posterior a la fecha "Hasta"');
-      return;
+    if (this.dateFrom && this.dateTo) {
+        const fromDate = new Date(this.dateFrom);
+        const toDate = new Date(this.dateTo);
+
+        if (fromDate > toDate) {
+          alert('La fecha "Desde" no puede ser posterior a la fecha "Hasta".');
+        return;
+      }
     }
     this.loadAuditDetails();
   }

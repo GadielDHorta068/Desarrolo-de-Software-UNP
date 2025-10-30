@@ -16,7 +16,7 @@ public interface AuditActionRepository extends JpaRepository<AuditAction, Long>{
     
     @Query("""
         SELECT a FROM AuditAction a
-        WHERE a.event.eventId = :eventId
+        WHERE a.event.relatedEventId = :eventId
         AND a.action = COALESCE(:action, a.action)
         AND a.timestamp >= COALESCE(:from, a.timestamp)
         AND a.timestamp <= COALESCE(:to, a.timestamp)

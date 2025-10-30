@@ -40,11 +40,16 @@ export class AuditList {
     this.authService.getCurrentUser().subscribe({
       next: (user) => {
         this.creator = user.nickname;
+        const fromDate = this.dateFrom ? new Date(this.dateFrom) : undefined;
+        const toDate = this.dateTo ? new Date(this.dateTo) : undefined;
+        if (toDate) {
+          toDate.setHours(23, 59, 59, 999);
+        }
         this.auditService.getFilterAuditEvent(
           this.creator,
           this.selectedType,
-          this.dateFrom,
-          this.dateTo
+          fromDate,
+          toDate
         ).subscribe({
           next: (data) => {
             this.auditEvents = data || [];
