@@ -26,6 +26,10 @@ public class UserService {
         return userRepository.findByEmail(aNemail).orElse(null);
     }
 
+    public User findById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
     @Transactional
     public User save(User aUser) {
         return userRepository.save(aUser);

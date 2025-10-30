@@ -50,50 +50,12 @@ export class AdminInscriptService {
   }
 
   // inscribe al usuario al evento seleccionado
-  // onInscript(user: UserDTO): void {
-  //   if (!this.event) return;
-
-  //   if (this.event.eventType === EventTypes.RAFFLES) {
-  //     const buyNumRequest: BuyRaffleNumberDTO = {
-  //       aGuestUser: user,
-  //       someNumbersToBuy: this.selectedRaffleNumbers
-  //     }
-  //     this.questionaryService.saveRaffleNumber(
-  //       this.event.id,
-  //       buyNumRequest
-  //     ).subscribe({
-  //       next: (response) => {
-  //         this.notificationService.notifySuccess(response.message);
-  //         this.cdr.detectChanges();
-  //       },
-  //       error: (errorResponse) => {
-  //         console.log('[adminInscript] => error al comprar los nros!');
-  //         this.notificationService.notifyError(errorResponse.error.message);
-  //         this.cdr.detectChanges();
-  //       }
-  //     });
-  //   }
-  //   else {
-  //     this.questionaryService.save(
-  //       user,
-  //       this.event.id
-  //     ).subscribe({
-  //       next: (response) => {
-  //         this.notificationService.notifySuccess(response.message);
-  //       },
-  //       error: (errorResponse) => {
-  //         console.log('[adminInscript] => Error al comprar los nueros:', JSON.stringify(errorResponse)); // borrar
-  //         this.notificationService.notifyError(errorResponse.error.message);
-  //       }
-  //     });
-  //   }
-  // }
-
   async onInscript(user: UserDTO): Promise<void> {
     if (!this.event) return;
 
     try {
       if (this.event.eventType === EventTypes.RAFFLES) {
+        // aca deberia primero simular el pago y de ahi realizar la compra
         const buyNumRequest: BuyRaffleNumberDTO = {
           aGuestUser: user,
           someNumbersToBuy: this.selectedRaffleNumbers
@@ -101,7 +63,9 @@ export class AdminInscriptService {
         const response = await firstValueFrom(
           this.questionaryService.saveRaffleNumber(this.event.id, buyNumRequest)
         )
-        return response;
+        let customResponse = {...response};
+        customResponse.redirectPay = true;
+        return customResponse;
       } else {
         const response = await firstValueFrom(
           this.questionaryService.save(user, this.event.id)
