@@ -164,7 +164,7 @@ export class AppComponent {
       }
     }
     else{
-      this.notificationService.notifyError("Ha ocurrido en la inscripcion al evento.");
+      this.notificationService.notifyError("Ha ocurrido un error en la inscripcion al evento.");
     }
     this.cdr.detectChanges();
   }

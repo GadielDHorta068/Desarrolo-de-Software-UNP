@@ -48,7 +48,7 @@ export class Payments {
       this.router.navigate(['/event/management/'+this.eventCurrent?.id]);
     }
     if(paramRedirect == "hub"){
-      this.router.navigate(['/draws/all']);
+      this.router.navigate(['/public-events']);
     }
   }
 

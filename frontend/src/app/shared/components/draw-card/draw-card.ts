@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, input, Input, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, input, Input, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { EventsTemp, EventTypes, StatusEvent } from '../../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { HandleStatusPipe } from '../../../pipes/handle-status.pipe';
@@ -23,6 +23,8 @@ import { AdminInscriptService } from '../../../services/admin/adminInscript';
   styleUrl: './draw-card.css'
 })
 export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
+
+  // private handleStatusPipe = inject(HandleStatusPipe);
 
   @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
   dataModal: InfoModal = {title: "Administración del evento", message: ""};
@@ -129,6 +131,7 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     }
     else {
       if (respStatus != StatusEvent.OPEN) {
+        // this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ",  this.handleStatusPipe.transform(respStatus));
         this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
         if (this.event) {
           this.event.statusEvent = respStatus as StatusEvent;
@@ -142,35 +145,11 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     this.reviewCreator();
   }
 
-  // public redirectEdit() {
-  //   // console.log("[edit] => datos del evento: ", this.event);
-  //   // controlamos q solo los de estado ABIERTO se puedan editar
-  //   if(this.event?.statusEvent != StatusEvent.OPEN){
-  //     this.dataModal.message = "No es posible editar el evento seleccionado. Solo se pueden editar los eventos en estaado ABIERTO";
-  //     this.modalInfoRef.open();
-  //     return;
-  //   }
-  //   // TODO: este control meterlo en el boton de edicion del card!!
-  //   if(this.event?.eventType !== EventTypes.GIVEAWAY){
-  //     this.dataModal.message = "Por el momento no es posible editar los datos de este tipo de eventos.";
-  //     this.modalInfoRef.open();
-  //     return;
-  //   }
-  //   this.adminEventService.setSelectedEvent(this.event);
-  //   this.router.navigate(['/event-edit']);
-  // }
-
   public redirectAdmin(){
     console.log("[onAdmin] => evento seleccionado: ", this.event);
     this.adminEventService.setSelectedEvent(this.event);
-    // this.router.navigate(['/event-admin']);
     this.router.navigate([`/event/management/${this.event?.id}`]);
   }
-
-  // public onIncript(){
-  //   console.log("Presiona incribirse!");
-  //   alert("Se apreto INCRIBIRME");
-  // }
 
   // Cerrar inscripciones (solo creador)
   public closeRegistrations(): void {

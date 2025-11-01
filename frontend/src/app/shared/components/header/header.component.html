@@ -18,8 +18,7 @@
           class="nav-link text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
           Inicio
         </a>
-
-        <a routerLink="/draws/all" routerLinkActive="active-link"
+        <a routerLink="/public-events" routerLinkActive="active-link"
           class="nav-link text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
           Explorar
         </a>
@@ -175,7 +174,7 @@
       </a>
 
       <ng-container *ngIf="isAuthenticated">
-        <a routerLink="/draws/all" (click)="closeMenus()"
+        <a routerLink="/public-events" (click)="closeMenus()"
           class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md text-base font-medium transition-colors">
           Explorar
         </a>
@@ -199,7 +198,7 @@
       </ng-container>
 
       <ng-container *ngIf="!isAuthenticated">
-        <a routerLink="/draws/all" (click)="closeMenus()"
+        <a routerLink="/public-events" (click)="closeMenus()"
           class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md text-base font-medium transition-colors">
           Explorar
         </a>

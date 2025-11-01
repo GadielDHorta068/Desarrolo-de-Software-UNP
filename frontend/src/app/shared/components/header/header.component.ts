@@ -178,7 +178,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   navigateToHome(): void { this.router.navigate(['/']); this.closeMenus(); }
   navigateToLogin(): void { this.router.navigate(['/login']); this.closeMenus(); }
   navigateToRegister(): void { this.router.navigate(['/register']); this.closeMenus(); }
-  public navigateToAllDraws(): void { this.router.navigate(['/draws/all']); this.closeMenus(); }
+
+  public navigateToAllDraws(): void { this.router.navigate(['/public-events']); this.closeMenus(); }
 
   // ------ Tema oscuro ------
   toggleTheme(): void {

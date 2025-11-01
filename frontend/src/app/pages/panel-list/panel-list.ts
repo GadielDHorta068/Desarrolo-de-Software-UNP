@@ -1,12 +1,11 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { Events, EventsTemp, EventTypes, StatusEvent } from '../../models/events.model';
+import { EventsTemp } from '../../models/events.model';
 import { DrawCard } from '../../shared/components/draw-card/draw-card';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EventsService } from '../../services/events.service';
 import { AuthService, UserResponse } from '../../services/auth.service';
 import { Router } from '@angular/router';
-// import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-panel-list',
