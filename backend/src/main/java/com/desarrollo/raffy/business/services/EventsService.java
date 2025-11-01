@@ -349,7 +349,7 @@ public class EventsService {
                 if (cat != null) categoryId = cat.getId();
             }
         }
-
+        
         return eventsRepository.findActiveEvents(statusEvent, type, categoryId, start, end, winnerCount)
             .stream()
             .map(this::toEventSummaryDTO)

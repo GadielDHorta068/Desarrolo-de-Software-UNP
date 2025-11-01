@@ -80,6 +80,16 @@ export class PublicEvents implements OnInit, AfterViewInit {
         console.warn('[PublicEvents] No se pudieron cargar categorías:', err);
       }
     });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    lastMonth.setHours(0,0,0,0);
+    
+    this.filterStart = this.formatDate(lastMonth);
+    
+    this.onFiltersChanged();
+
     this.setupSearch();
     // disparo inicial para traer por estado seleccionado (ALL por defecto)
     this.searchInput$.next('');
@@ -257,6 +267,14 @@ export class PublicEvents implements OnInit, AfterViewInit {
     this.filterStart = undefined;
     this.filterEnd = undefined;
     this.filterWinners = null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    lastMonth.setHours(0,0,0,0);
+    
+    this.filterStart = this.formatDate(lastMonth);
     // recargar sin búsqueda y sin filtros
     this.onFiltersChanged();
   }
@@ -338,16 +356,17 @@ export class PublicEvents implements OnInit, AfterViewInit {
 
   public toDateObj(iso?: string): Date | null {
     if (!iso) return null;
-    const [y, m, d] = iso.split('-').map(Number);
-    if (!y || !m || !d) return null;
-    // Crear Date en zona local
-    return new Date(y, m - 1, d);
+    const [year, month, day] = iso.split('-').map(Number);
+    if (!year || !month || !day) return null;
+    const date = new Date(year, month - 1, day);
+    date.setHours(0, 0, 0, 0);
+    return date;
   }
 
   private formatDate(date: Date): string {
-    const y = date.getFullYear();
-    const m = (date.getMonth() + 1).toString().padStart(2, '0');
-    const d = date.getDate().toString().padStart(2, '0');
-    return `${y}-${m}-${d}`;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

@@ -608,7 +608,7 @@ public class EventsController {
 
         
         if (start != null && end != null && !end.isAfter(start)) {
-            return ResponseEntity.badRequest().body("La fecha de fin debe ser posterior a la fecha de inicio");
+            return ResponseEntity.badRequest().body("La fecha de fin debe ser posterior a la fecha de inicio.");
 
         }
         // Parseo de estado: null => ALL (sin filtro). Valores válidos: OPEN/CLOSED/FINALIZED
