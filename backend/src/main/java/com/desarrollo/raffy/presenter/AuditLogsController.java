@@ -49,12 +49,14 @@ public class AuditLogsController {
         }
     }
 
-    @GetMapping("/filter/event/{creator}/{eventType}/{from}/{to}")
+    @GetMapping("/filter/event/{creator}")
     public ResponseEntity<?> getAuditsByCreator(
         @PathVariable("creator") String creatorEvent,
-        @RequestParam(required = false) EventTypes eventTypes,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate from,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate to
+        @RequestParam(name = "eventType", required = false) EventTypes eventTypes,
+        @RequestParam(name = "from", required = false) 
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+        @RequestParam(name = "to", required = false) 
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ){
         try {
             List<AuditEvent> auditEvents = service.getAuditEventByCreator(creatorEvent, eventTypes, from, to);
@@ -70,13 +72,13 @@ public class AuditLogsController {
         }
     }
 
-    @GetMapping("/filter/action/{eventId}/{action}/{from}/{to}")
+    @GetMapping("/filter/action/{eventId}")
     public ResponseEntity<?> getActionsByFilters(
         @PathVariable("eventId") Long eventId,
-        @RequestParam(required = false) AuditActionType action,
-        @RequestParam(required = false) 
+        @RequestParam(name = "action", required = false) AuditActionType action,
+        @RequestParam(name = "from", required = false) 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
-        @RequestParam(required = false) 
+        @RequestParam(name = "to", required = false) 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
         try {

@@ -1,73 +1,107 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { AuditLog } from '../../../models/auditlog.model';
+import { ChangeDetectorRef, Component } from '@angular/core';
+import { AuditAction, AuditActionType } from '../../../models/auditevent.model';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuditService } from '../../../services/audit.service';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../services/auth.service';
 import { HandleTypePipe } from '../../../pipes/handle-type.pipe';
+import { FormsModule } from '@angular/forms';
+
 
 @Component({
   selector: 'app-audit-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, HandleTypePipe],
+  imports: [CommonModule, RouterModule, HandleTypePipe, FormsModule],
   templateUrl: './audit-detail.html',
   styleUrls: ['./audit-detail.css']
 })
 export class AuditDetail {
 
- /*  auditlog?: AuditLog;
+  auditActions: AuditAction[] = [];
   loading = true;
+  selectedAction: AuditActionType | null = null;
+  dateFrom?: Date;
+  dateTo?: Date;
+  eventId: number | null = null;
+  actionTypes = Object.values(AuditActionType);
 
-  constructor (
-    
+  constructor(
     private route: ActivatedRoute,
     private router: Router,
     private auditService: AuditService,
-    private authService: AuthService,
     private cdr: ChangeDetectorRef
-    
-  ) {console.log('AuditDetailComponent inicializado');}
+  ){}
 
-  ngOnInit() :void {
-    this.authService.getCurrentUser().subscribe({
-      next: (user) => {
-        const nickname = user.nickname;
-        this.fetchAuditLog(nickname);
-        console.log("Estado del loading: ", this.loading)
-      },
-      error: (err) => {
-        console.error('Error al obtener usuario actual: ', err);
-        this.loading = false;
+  ngOnInit() {
+    this.route.params.subscribe(params => {
+      const eventId = params['eventId'];
+      if (eventId) {
+        console.log('Related Event ID received:', eventId);
+        this.eventId = Number(eventId);
+        this.loadAuditDetails();
+      } else {
+        console.error('No se proporcionó ID del evento relacionado');
+        this.router.navigate(['/audit']);
       }
     });
   }
+  
+  loadAuditDetails() {
+    if (!this.eventId) {
+      console.error('No se proporcionó ID del evento');
+      return;
+    }
+      this.loading = true;    
+      // Convertir las fechas a formato ISO si están definidas
+      const fromDate = this.dateFrom ? new Date(this.dateFrom) : undefined;
+      const toDate = this.dateTo ? new Date(this.dateTo) : undefined;
+      if (toDate) {
+        toDate.setHours(23, 59, 59, 999);
+      }
+      this.auditService.getActionByFilters(
+        this.eventId,
+        this.selectedAction,
+        fromDate,
+        toDate
+      ).subscribe({
+        next: (actions) => {
+          this.auditActions = this.selectedAction 
+          ? actions.filter(a => a.action === this.selectedAction)
+          : actions;
+          this.loading = false;
+          this.cdr.detectChanges();
+          console.log("Acción seleccionada: ", this.selectedAction);
+          console.log('Acciones de auditoría recuperadas:', actions.filter(a => 
+          !this.selectedAction || a.action === this.selectedAction
+        ));
+        },
+        error: (err) => {
+          console.error('Error al recuperar las acciones de auditoría:', err);
+          this.loading = false;
+        }
+      });
+  }
 
+  clearFilters() {
+    this.selectedAction = null;
+    this.dateFrom = undefined;
+    this.dateTo = undefined;
+    this.loadAuditDetails();
+  }
+
+  applyFilters() {
+    if (this.dateFrom && this.dateTo) {
+        const fromDate = new Date(this.dateFrom);
+        const toDate = new Date(this.dateTo);
+
+        if (fromDate > toDate) {
+          alert('La fecha "Desde" no puede ser posterior a la fecha "Hasta".');
+        return;
+      }
+    }
+    this.loadAuditDetails();
+  }
+ 
   goBack(){
     this.router.navigate(['/audit']);
   }
-
-  fetchAuditLog(nickname: string): void {
-    this.loading = true;
-    this.auditService.getAuditLogs(nickname).subscribe({
-      next: (data) => {
-        this.auditlog = data && data.length > 0 ? data[0] : undefined;
-        this.loading = false;
-        this.cdr.detectChanges();
-        console.log("Detalles de las auditorías: ",this.auditlog);
-      },
-      error: (err) => {
-        console.error('Error al recuperar el log de auditoría:', err);
-        this.loading = false;
-      }
-      
-    });
-  }
-
-  formatDate(dateArray: any): string {
-    if (!dateArray) return '-';
-    const [year, month, day, hours = 0, minutes = 0, seconds = 0] = dateArray;
-    const d = new Date(year, month - 1, day, hours, minutes, seconds);
-    console.log('Fecha formateada: ', d.toLocaleString());
-    return d.toLocaleString();
-  } */
 }

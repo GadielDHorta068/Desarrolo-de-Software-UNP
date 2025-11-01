@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.desarrollo.raffy.model.EventTypes;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -57,8 +58,10 @@ public class AuditEvent {
     private Long seed; // Semilla utilizada en la selección de ganadores
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<AuditAction> actions = new ArrayList<>();
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<AuditParticipant> participants = new ArrayList<>();
 }

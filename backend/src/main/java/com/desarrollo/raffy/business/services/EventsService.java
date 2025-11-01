@@ -67,6 +67,9 @@ public class EventsService {
     @Autowired 
     private EvolutionService evolutionService;
 
+    @Autowired
+    private AuditLogsService auditEventsService;
+
     @Value("${evolution.defaultInstance:raffy}")
     private String defaultEvolutionInstance;
 
@@ -272,7 +275,13 @@ public class EventsService {
         List<?> winners = participantService.runEvents(event);
         
         log.info("Ganadores seleccionados: " + winners.size());
+        auditEventsService.logAction(
+                event.getId(), 
+                event.getCreator().getNickname(), 
+                AuditActionType.EVENT_FINALIZED, 
+                String.format("El evento ha sido finalizado y se han seleccionado los ganadores."));
         
+         // Guarda los cambios en el evento
         eventsRepository.save(event);
         
         return winners;
@@ -325,8 +334,7 @@ public class EventsService {
         String categorie, 
         LocalDate start, 
         LocalDate end, 
-        Integer winnerCount,
-        StatusEvent statusEvent){
+        Integer winnerCount){
         // Resolver opcionalmente el nombre de categoría a su ID para evitar problemas
         // con funciones de texto sobre tipos binarios y asegurar consulta indexada.
         Long categoryId = null;
@@ -340,8 +348,8 @@ public class EventsService {
                 if (cat != null) categoryId = cat.getId();
             }
         }
-
-        return eventsRepository.findActiveEvents(statusEvent, type, categoryId, start, end, winnerCount)
+        
+        return eventsRepository.findActiveEvents(type, categoryId, start, end, winnerCount)
             .stream()
             .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());

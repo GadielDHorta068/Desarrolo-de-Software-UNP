@@ -50,7 +50,10 @@
       <div class="filter-start">
         <label for="start">Inicio</label>
         <mat-form-field appearance="outline" style="width: 100%;">
-          <input matInput [matDatepicker]="pickerStart" [value]="filterStart ? toDateObj(filterStart) : null" (dateChange)="onStartDateChange($event)" placeholder="Selecciona fecha de inicio" />
+          <input matInput [matDatepicker]="pickerStart" 
+            [value]="filterStart ? toDateObj(filterStart) : null" 
+            (dateChange)="onStartDateChange($event)" 
+            placeholder="Selecciona fecha de inicio" />
           <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
           <mat-datepicker #pickerStart></mat-datepicker>
         </mat-form-field>
@@ -58,7 +61,10 @@
       <div class="filter-end">
         <label for="end">Fin</label>
         <mat-form-field appearance="outline" style="width: 100%;">
-          <input matInput [matDatepicker]="pickerEnd" [value]="filterEnd ? toDateObj(filterEnd) : null" (dateChange)="onEndDateChange($event)" placeholder="Selecciona fecha de fin" />
+          <input matInput [matDatepicker]="pickerEnd" 
+            [value]="filterEnd ? toDateObj(filterEnd) : null" 
+            (dateChange)="onEndDateChange($event)" 
+            placeholder="Selecciona fecha de fin" />
           <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
           <mat-datepicker #pickerEnd></mat-datepicker>
         </mat-form-field>
@@ -67,7 +73,7 @@
         <label for="winners">Ganadores</label>
         <input id="winners" type="number" min="1" [(ngModel)]="filterWinners" (ngModelChange)="onFiltersChanged()" />
       </div>
-      <div class="filter-status">
+      <!-- <div class="filter-status">
         <label for="status">Estado</label>
         <select id="status" [ngModel]="selectedStatus" (ngModelChange)="applyFilter($event)">
           <option [ngValue]="'ALL'">Todos</option>
@@ -75,7 +81,7 @@
           <option [ngValue]="StatusEvent.CLOSED">Cerrados</option>
           <option [ngValue]="StatusEvent.FINISHED">Finalizados</option>
         </select>
-      </div>
+      </div> -->
       <div class="filter-clear">
         <button class="btn btn-outline" (click)="clearFilters()">Limpiar filtros</button>
       </div>
