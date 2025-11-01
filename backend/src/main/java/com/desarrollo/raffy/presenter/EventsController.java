@@ -603,26 +603,16 @@ public class EventsController {
             @RequestParam(required = false) String categorie,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
-            @RequestParam(required = false) Integer winnerCount,
-            @RequestParam(required = false, name = "status") String status) {
+            @RequestParam(required = false) Integer winnerCount) {
 
         
         if (start != null && end != null && !end.isAfter(start)) {
             return ResponseEntity.badRequest().body("La fecha de fin debe ser posterior a la fecha de inicio.");
 
         }
-        // Parseo de estado: null => ALL (sin filtro). Valores válidos: OPEN/CLOSED/FINALIZED
-        StatusEvent statusEvent = null;
-        if (status != null && !status.isBlank() && !status.equalsIgnoreCase("ALL")) {
-            try {
-                statusEvent = StatusEvent.valueOf(status.trim().toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                return ResponseEntity.badRequest().body("Estado inválido: " + status);
-            }
-        }
-
+        
         List<EventSummaryDTO> events = eventsService.getActiveEventSummaries(
-                type, categorie, start, end, winnerCount, statusEvent
+                type, categorie, start, end, winnerCount
         );
 
         return ResponseEntity.ok(events);

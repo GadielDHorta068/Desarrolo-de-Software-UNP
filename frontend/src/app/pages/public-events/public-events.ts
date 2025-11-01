@@ -83,7 +83,7 @@ export class PublicEvents implements OnInit, AfterViewInit {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 0);
     lastMonth.setHours(0,0,0,0);
     
     this.filterStart = this.formatDate(lastMonth);
@@ -145,7 +145,7 @@ export class PublicEvents implements OnInit, AfterViewInit {
       start: this.filterStart || undefined,
       end: this.filterEnd || undefined,
       winnerCount: this.filterWinners ?? undefined,
-      status: this.selectedStatus
+      /* status: StatusEvent.OPEN */
     };
     return this.eventsService.getActiveEvents(options);
   }
@@ -258,7 +258,7 @@ export class PublicEvents implements OnInit, AfterViewInit {
   }
 
   public clearFilters(): void {
-    this.selectedStatus = 'ALL';
+/*     this.selectedStatus = 'ALL';*/    
     this.selectedType = 'ALL';
     this.searchTerm = '';
     this.filterCategory = '';
@@ -303,7 +303,7 @@ export class PublicEvents implements OnInit, AfterViewInit {
     this.eventsService.getAllEvents().subscribe({
       next: (response) => {
         this.events = response || [];
-        this.applyFilter(this.selectedStatus);
+        this.applyFilter(this.selectedStatus); 
         this.loading = false;
         this.cdr.detectChanges();
       },

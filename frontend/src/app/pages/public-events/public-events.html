@@ -73,7 +73,7 @@
         <label for="winners">Ganadores</label>
         <input id="winners" type="number" min="1" [(ngModel)]="filterWinners" (ngModelChange)="onFiltersChanged()" />
       </div>
-      <div class="filter-status">
+      <!-- <div class="filter-status">
         <label for="status">Estado</label>
         <select id="status" [ngModel]="selectedStatus" (ngModelChange)="applyFilter($event)">
           <option [ngValue]="'ALL'">Todos</option>
@@ -81,7 +81,7 @@
           <option [ngValue]="StatusEvent.CLOSED">Cerrados</option>
           <option [ngValue]="StatusEvent.FINISHED">Finalizados</option>
         </select>
-      </div>
+      </div> -->
       <div class="filter-clear">
         <button class="btn btn-outline" (click)="clearFilters()">Limpiar filtros</button>
       </div>

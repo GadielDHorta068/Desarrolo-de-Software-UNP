@@ -334,8 +334,7 @@ public class EventsService {
         String categorie, 
         LocalDate start, 
         LocalDate end, 
-        Integer winnerCount,
-        StatusEvent statusEvent){
+        Integer winnerCount){
         // Resolver opcionalmente el nombre de categoría a su ID para evitar problemas
         // con funciones de texto sobre tipos binarios y asegurar consulta indexada.
         Long categoryId = null;
@@ -350,7 +349,7 @@ public class EventsService {
             }
         }
         
-        return eventsRepository.findActiveEvents(statusEvent, type, categoryId, start, end, winnerCount)
+        return eventsRepository.findActiveEvents(type, categoryId, start, end, winnerCount)
             .stream()
             .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
