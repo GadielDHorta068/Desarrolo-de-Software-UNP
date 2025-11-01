@@ -14,12 +14,13 @@ import com.desarrollo.raffy.model.auditlog.AuditEvent;
 
 @Repository
 public interface AuditEventRepository extends JpaRepository<AuditEvent, Long>{
+
     @Query("""
         SELECT a FROM AuditEvent a
-        WHERE LOWER(a.creatorEvent) LIKE LOWER(CONCAT('%', :creator, '%'))
-        AND (:type IS NULL OR a.type = :type)
-        AND (:start IS NULL OR a.startDate >= :start)
-        AND (:end IS NULL OR a.endDate <= :end)
+        WHERE a.creatorEvent = COALESCE(:creator, a.creatorEvent)
+        AND a.type = COALESCE(:type, a.type)
+        AND a.startDate >= COALESCE(:start, a.startDate)
+        AND a.endDate <= COALESCE(:end, a.endDate)
         ORDER BY eventId DESC
         """)
     List<AuditEvent> getEventsByCreator(

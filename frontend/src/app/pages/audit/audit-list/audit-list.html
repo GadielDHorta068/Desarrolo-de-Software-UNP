@@ -1,36 +1,127 @@
-<!-- <div *ngIf="loading" class="p-4">Cargando auditorias...</div>
+<div *ngIf="loading" class="p-4">Cargando auditorias...</div>
 
-<div *ngIf="!loading && audits.length > 0" class="p-6">
+<div *ngIf="!loading && auditEvents.length > 0" class="p-6">
     <h1 class="text-2xl font-bold mb-4">Auditorías</h1>
+    <div class="mb-6">
+        <h2><strong>Auditoría de:</strong> {{ creator }}</h2>
+    </div>
+    <!-- Filtros -->
+    <div class="mb-6 bg-gray-800 p-4 rounded-lg">
+        <h2 class="text-lg font-semibold mb-3 text-white">Filtros</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Filtro de Tipo de Evento -->
+            <div>
+                <label class="block text-sm font-medium text-white mb-2">Tipo de Evento</label>
+                <select 
+                    [(ngModel)]="selectedType" 
+                    class="w-full px-3 py-2 bg-gray-700 text-white rounded-md">
+                    <option [ngValue]="null">Todos los tipos</option>
+                    <option *ngFor="let type of eventTypes" [ngValue]="type">
+                        {{type | handleTypePipe}}
+                    </option>
+                </select>
+            </div>
+            
+            <!-- Filtro de Fecha Desde -->
+            <div>
+                <label class="block text-sm font-medium text-white mb-2">Desde</label>
+                <input 
+                    type="date" 
+                    [(ngModel)]="dateFrom"
+                    class="w-full px-3 py-2 bg-gray-700 text-white rounded-md">
+            </div>
+            
+            <!-- Filtro de Fecha Hasta -->
+            <div>
+                <label class="block text-sm font-medium text-white mb-2">Hasta</label>
+                <input 
+                    type="date" 
+                    [(ngModel)]="dateTo"
+                    class="w-full px-3 py-2 bg-gray-700 text-white rounded-md">
+            </div>
+        </div>
+        
+        <!-- Botones de Filtros -->
+        <div class="mt-4 flex gap-2">
+            <button 
+                (click)="applyFilters()" 
+                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-500">
+                Aplicar Filtros
+            </button>
+            <button 
+                (click)="clearFilters()" 
+                class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-500">
+                Limpiar Filtros
+            </button>
+        </div>
+    </div>
     <table class="min-w-full bg-black border border-gray-300 rounded-lg shadow-md">
         <thead class="bg-black-100">
             <tr>
-                <th class="py-2 px-4 border-b border-blue-300 text-left">Titulo del evento</th>
+                <th class="py-2 px-4 border-b border-blue-300 text-left">Título</th>
                 <th class="py-2 px-4 border-b border-blue-300 text-left">Tipo</th>
-                <th class="py-2 px-4 border-b border-blue-300 text-left">Fecha de ejecución</th>
-                <th class="py-2 px-4 border-b border-blue-300 text-left">Semilla</th>
-                <th class="py-2 px-4 border-b border-blue-300 text-left">Fecha de inicio</th>
-                <th class="py-2 px-4 border-b border-blue-300 text-left">Fecha de fin</th>
+                <th class="py-2 px-4 border-b border-blue-300 text-left">Inicia</th>
+                <th class="py-2 px-4 border-b border-blue-300 text-left">Cierra</th>
+                <th class="py-2 px-4 border-b border-blue-300 text-left">Acciones</th>
+                <th class="py-2 px-4 border-b border-blue-300 text-left">Participantes</th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let audit of audits" class="border-t hover:bg-black-50 transition">
-                <td class="py-2 px-4 border-b border-blue-300">{{ audit.eventTitle }}</td>
-                <td class="py-2 px-4 border-b border-blue-300">{{ audit.eventType | handleTypePipe }}</td>
-                <td class="py-2 px-4 border-b border-blue-300">{{ formatDate(audit.executeDate) }}</td>
-                <td class="py-2 px-4 border-b border-blue-300">{{ audit.seed }}</td>
-                <td class="py-2 px-4 border-b border-blue-300">{{ formatDate(audit.eventStartDate) }}</td>
-                <td class="py-2 px-4 border-b border-blue-300">{{ formatDate(audit.eventEndDate) }}</td>
-                <td class="px-4 py-2 text-center">
-                    <a [routerLink]="['/audit', audit.creatorNickname]" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+            <tr *ngFor="let audit of auditEvents" class="border-t hover:bg-black-50 transition">
+                <td class="py-2 px-4 border-b border-blue-300">{{audit.title || 'Sin título'}}</td>
+                <td class="py-2 px-4 border-b border-blue-300">{{audit.type | handleTypePipe}}</td>
+                <td class="py-2 px-4 border-b border-blue-300">{{audit.startDate | date:'dd/MM/yyyy'}}</td>
+                <td class="py-2 px-4 border-b border-blue-300">{{audit.endDate | date:'dd/MM/yyyy'}}</td>
+                <td class="py-2 px-4 border-b border-blue-300">
+                    <a [routerLink]="['/audit', audit.relatedEventId]" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
                         Ver detalles
                     </a>
+                </td>
+                <td class="py-2 px-4 border-b border-blue-300">
+                    <button (click)="showParticipants(audit)" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 mr-2">
+                        Ver Participantes ({{audit.participants?.length || 0}})
+                    </button>
                 </td>
             </tr>
         </tbody>
     </table>
 </div>
 
-<div *ngIf="!loading && audits.length === 0" class="p-4 text-gray-500">
+<!-- Modal de participantes -->
+<div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-black">Participantes del Evento</h2>
+            <p class="px-4 py-2 text-left text-black">Semilla utilizada: <strong>{{ seed }}</strong></p>
+            <button (click)="closeModal()" 
+                    class="w-8 h-8 flex items-center justify-center bg-red-500 hover:bg-red-600 bg-opacity-70 text-white rounded-full transition-colors">
+                <span class="text-xl"></span>
+            </button>
+        </div>
+        
+        <table class="min-w-full">
+            <thead>
+                <tr>
+                    <th class="px-4 py-2 text-left text-black">Posición</th>
+                    <th class="px-4 py-2 text-left text-black">Nombre</th>
+                    <th class="px-4 py-2 text-left text-black">Apellido</th>
+                    <th class="px-4 py-2 text-left text-black">Email</th>
+                    <th class="px-4 py-2 text-left text-black">Teléfono</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let participant of selectedEventParticipants">
+                    <td class="px-4 py-2 text-black">{{participant.userPosition}}</td>
+                    <td class="px-4 py-2 text-black">{{participant.userName}}</td>
+                    <td class="px-4 py-2 text-black">{{participant.userLastName}}</td>
+                    <td class="px-4 py-2 text-black">{{participant.userEmail}}</td>
+                    <td class="px-4 py-2 text-black">{{participant.userPhone}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div *ngIf="!loading && auditEvents.length === 0" class="p-4 text-gray-500">
     No se encontraron auditorías.
-</div> -->
+</div>

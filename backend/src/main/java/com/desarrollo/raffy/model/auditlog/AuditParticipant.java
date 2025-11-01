@@ -1,5 +1,7 @@
 package com.desarrollo.raffy.model.auditlog;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -42,5 +44,6 @@ public class AuditParticipant {
 
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
+    @JsonBackReference
     private AuditEvent event;
 }

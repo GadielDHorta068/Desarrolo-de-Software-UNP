@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.business.repository.AuditActionRepository;
@@ -100,7 +101,7 @@ public class AuditLogsService {
      * @param type
      * @param details
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void logAction(Long relatedEventId, String actor, AuditActionType type, String details){
         AuditEvent auditEvent = getAuditEventById(relatedEventId);
         

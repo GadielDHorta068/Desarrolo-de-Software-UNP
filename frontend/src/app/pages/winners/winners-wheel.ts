@@ -8,6 +8,7 @@ import { NotificationService } from '../../services/notification.service';
 import confetti from 'canvas-confetti';
 import { WinnerDTO } from '../../models/winner.model';
 import { ParticipantDTO } from '../../models/participant.model';
+import { EventsTemp, EventTypes } from '../../models/events.model';
 
 @Component({
   selector: 'app-winners-wheel',
@@ -23,6 +24,7 @@ export class WinnersWheel {
   loading = signal(true);
   errorMessage = signal<string | null>(null);
 
+  event = signal<EventsTemp | null>(null);
   participants = signal<ParticipantDTO[]>([]);
   winners = signal<WinnerDTO[]>([]);
   reels = signal<{ participants: ParticipantDTO[] }[]>([]);
@@ -30,6 +32,17 @@ export class WinnersWheel {
 
   // Fases: loading → jackpot
   phase = signal<'loading' | 'jackpot'>('loading');
+
+  // Computed para determinar si es un evento tipo RAFFLE
+  isRaffleEvent = computed(() => this.event()?.eventType === EventTypes.RAFFLES);
+
+  // Método para obtener el texto a mostrar (nombre o número de rifa + nombre)
+  getDisplayText = (item: WinnerDTO | ParticipantDTO): string => {
+    if (this.isRaffleEvent() && 'raffleNumber' in item && item.raffleNumber !== undefined) {
+      return `Número ${item.raffleNumber} - ${item.name} ${item.surname}`;
+    }
+    return `${item.name} ${item.surname}`;
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -51,10 +64,10 @@ export class WinnersWheel {
     this.loading.set(true);
     this.phase.set('loading');
 
-    const participants$ = this.eventsService.getParticipantsByEventId(this.eventId).pipe(
+    const event$ = this.eventsService.getEventById(this.eventId.toString()).pipe(
       catchError(err => {
-        this.handleError(err, 'Error al obtener participantes');
-        return of([]); // Devolver un array vacío en caso de error
+        this.handleError(err, 'Error al obtener información del evento');
+        return of(null);
       })
     );
 
@@ -65,23 +78,38 @@ export class WinnersWheel {
       })
     );
 
-    forkJoin({
-      participants: participants$,
-      winners: winners$
-    }).subscribe(({ participants, winners }) => {
-      this.participants.set(participants || []);
-      const sortedWinners = (winners || []).sort((a, b) => a.position - b.position);
-      this.winners.set(sortedWinners);
-      this.loading.set(false);
+    // Primero obtenemos el evento para determinar su tipo
+    event$.subscribe(event => {
+      this.event.set(event);
+      
+      // Solo obtener participantes si NO es un evento tipo raffle
+      const participants$ = event?.eventType === EventTypes.RAFFLES 
+        ? of([]) // Para rifas, no hay participantes, solo números
+        : this.eventsService.getParticipantsByEventId(this.eventId).pipe(
+            catchError(err => {
+              this.handleError(err, 'Error al obtener participantes');
+              return of([]);
+            })
+          );
 
-      if (this.winners().length > 0) {
-        this.buildReels();
-        this.phase.set('jackpot');
-        // Iniciar la animación automáticamente
-        setTimeout(() => this.startJackpot(), 100);
-      } else if (!this.errorMessage()) {
-        this.errorMessage.set('No se encontraron ganadores para este evento.');
-      }
+      forkJoin({
+        participants: participants$,
+        winners: winners$
+      }).subscribe(({ participants, winners }) => {
+        this.participants.set(participants || []);
+        const sortedWinners = (winners || []).sort((a, b) => a.position - b.position);
+        this.winners.set(sortedWinners);
+        this.loading.set(false);
+
+        if (this.winners().length > 0) {
+          this.buildReels();
+          this.phase.set('jackpot');
+          // Iniciar la animación automáticamente
+          setTimeout(() => this.startJackpot(), 100);
+        } else if (!this.errorMessage()) {
+          this.errorMessage.set('No se encontraron ganadores para este evento.');
+        }
+      });
     });
   }
 

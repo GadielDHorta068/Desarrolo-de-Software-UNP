@@ -2,7 +2,7 @@ package com.desarrollo.raffy.model.auditlog;
 
 import java.time.LocalDateTime;
 
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
@@ -52,5 +52,6 @@ public class AuditAction {
 
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
+    @JsonBackReference
     private AuditEvent event;
 }

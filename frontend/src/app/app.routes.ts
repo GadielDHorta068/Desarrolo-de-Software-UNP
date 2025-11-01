@@ -124,7 +124,7 @@ export const routes: Routes = [
     title: 'Auditorías - Raffy'
   },
   {
-    path: 'audit/:nickname',
+    path: 'audit/:eventId',
     loadComponent: () => import('./pages/audit/audit-detail/audit-detail').then(m => m.AuditDetail),
     canActivate: [AuthGuard],
     title: 'Detalle de Auditoría - Raffy'

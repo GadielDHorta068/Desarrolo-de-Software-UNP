@@ -165,7 +165,6 @@ export class EventsService {
     start?: string; // formato ISO: YYYY-MM-DD
     end?: string;   // formato ISO: YYYY-MM-DD
     winnerCount?: number;
-    status?: 'ALL' | StatusEvent; // estado: ALL, OPEN, CLOSED, FINALIZED
   } = {}): Observable<EventsTemp[]> {
     const params: any = {};
     if (options.type) params['type'] = options.type;
@@ -173,7 +172,7 @@ export class EventsService {
     if (options.start) params['start'] = options.start;
     if (options.end) params['end'] = options.end;
     if (options.winnerCount !== undefined && options.winnerCount !== null) params['winnerCount'] = options.winnerCount;
-    if (options.status) params['status'] = options.status; // 'ALL' o uno de StatusEvent
+    console.log('Fetching active events with params:', params);
     return this.http.get<EventsTemp[]>(`${this.apiUrl}/active`, { params });
   }
 

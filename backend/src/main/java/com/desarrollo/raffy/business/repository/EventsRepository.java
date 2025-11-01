@@ -31,7 +31,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     @Query("""
         SELECT e FROM Events e
         JOIN FETCH e.category c
-        WHERE e.statusEvent = COALESCE(:status, e.statusEvent)
+        WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
         AND e.eventType = COALESCE(:type, e.eventType)
         AND c.id = COALESCE(:catId, c.id)
         AND e.startDate >= COALESCE(:start, e.startDate)
@@ -40,7 +40,6 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
         ORDER BY e.startDate DESC
     """)
     List<Events> findActiveEvents(
-        @Param("status") StatusEvent status,
         @Param("type") EventTypes type,
         @Param("catId") Long categoryId,
         @Param("start") LocalDate start,
