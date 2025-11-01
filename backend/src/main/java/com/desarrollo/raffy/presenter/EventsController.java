@@ -521,6 +521,7 @@ public class EventsController {
             dto.setPosition(raffleNumber.getPosition());
             dto.setEventId(raffleNumber.getRaffle().getId());
             dto.setEventTitle(raffleNumber.getRaffle().getTitle());
+            dto.setRaffleNumber(raffleNumber.getNumber()); // Incluir el número de la rifa
         } 
         else {
             log.warn("Tipo de ganador desconocido: {}", winner.getClass().getSimpleName());
