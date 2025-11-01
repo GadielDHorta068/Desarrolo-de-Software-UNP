@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { MercadoPagoService } from '../../../services/mercado-pago.service';
 
 declare var MercadoPago: any;
 
@@ -20,7 +21,8 @@ export class MpBrick {
   @Output() resultPay = new EventEmitter<any>();
 
   constructor(
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private mercadopagoService: MercadoPagoService
   ){
 
   }
@@ -89,15 +91,40 @@ export class MpBrick {
     });
   }
 
+  // payMp(formData: any){
+  //   console.log("[pagoMP] => datos del form de pago: ", formData);
+  //   // const urlPayment = "http://localhost:3000/process_payment";
+  //   const urlPayment = "http://localhost:8080/api/mp/process-payment";
+  //   const headers = new HttpHeaders({
+  //     'Content-Type': 'application/json',
+  //     'Authorization': `Bearer TEST-911685102344613-102107-142a437bbcd8bb76c3281eae04eeffb9-501812522`
+  //   });
+
+  //   const paymentData = {
+  //     transaction_amount: formData.transaction_amount,
+  //     token: formData.token,
+  //     description: formData.description,
+  //     installments: formData.installments,
+  //     payment_method_id: formData.payment_method_id,
+  //     issuer_id: formData.issuer_id,
+  //     payer: {
+  //       email: formData.payer.email,
+  //       identification: {
+  //         type: formData.payer.identification.type,
+  //         number: formData.payer.identification.number,
+  //       },
+  //     },
+  //   };
+    
+  //   const bodyFormData = {
+  //     formData: paymentData
+  //   }
+
+  //   // return this.httpClient.post(urlPayment, paymentData, {headers})
+  //   return this.httpClient.post(urlPayment, JSON.stringify(bodyFormData), {headers})
+  // }
   payMp(formData: any){
     console.log("[pagoMP] => datos del form de pago: ", formData);
-    // const urlPayment = "http://localhost:3000/process_payment";
-    const urlPayment = "http://localhost:8080/api/mp/process_payment";
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer TEST-911685102344613-102107-142a437bbcd8bb76c3281eae04eeffb9-501812522`
-    });
-
     const paymentData = {
       transaction_amount: formData.transaction_amount,
       token: formData.token,
@@ -114,11 +141,14 @@ export class MpBrick {
       },
     };
     
-    const bodyFormData = {
-      formData: paymentData
-    }
-
+    // esto para el server de test en node!!
+    // const bodyFormData = {
+    //   formData: paymentData
+    // }
+    // console.log("[formPago] => datos como string: ", JSON.stringify(bodyFormData));
     // return this.httpClient.post(urlPayment, paymentData, {headers})
-    return this.httpClient.post(urlPayment, JSON.stringify(bodyFormData), {headers})
+
+    // return this.mercadopagoService.reportPayment(JSON.stringify(bodyFormData));
+    return this.mercadopagoService.reportPayment(paymentData);
   }
 }

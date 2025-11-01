@@ -31,7 +31,9 @@ export class Payments {
 
   // tratamos el resultado del pago
   onFinalizedPay(data: any){
-    if(data.success){
+    console.log("[dataPayServer] => datos: ", data);
+    
+    if(data.success || data.data.status == "approved"){
       this.successfulPayment = true;
       this.notificationService.notifySuccess("La compra fue realizada con éxito")
     }

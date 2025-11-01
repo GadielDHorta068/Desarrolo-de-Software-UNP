@@ -30,10 +30,16 @@ import com.desarrollo.raffy.model.PayerMP;
 @Getter
 public class PaymentsMP {
     
+    // private String token;
+    // private String issuerId;
+    // private String paymentMethodId;
+    // private float transactionAmount;
+    // private int installments;
+    // private PayerMP payer;
     private String token;
-    private String issuerId;
-    private String paymentMethodId;
-    private float transactionAmount;
+    private String issuer_id;
+    private String payment_method_id;
+    private float transaction_amount;
     private int installments;
     private PayerMP payer;
 

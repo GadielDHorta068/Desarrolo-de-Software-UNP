@@ -27,7 +27,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/mp")
 public class MercadoPagoController {
@@ -38,8 +40,10 @@ public class MercadoPagoController {
 
     @PostMapping("/process-payment")
     public ResponseEntity<?> processPayment(@RequestBody PaymentsMP paymentMP){
+        log.warn("Datos del pago recibido: " + paymentMP.toString());
         Map<String, Object> payload = mapper.convertValue(paymentMP, Map.class);
         Map<String, Object> response = mercadopagoService.createPayment(payload);
+        log.warn("Datos de la respuesta de crear pago: " + response.toString());
 
         // if (payment.status === 'approved') {
         // return res.status(200).json({ success: true, data: payment });
@@ -48,7 +52,7 @@ public class MercadoPagoController {
         // }
 
         // de test, a definir
-        return Response.ok(response, "Respuesta del pago creado en MP");
+        return Response.ok(response, "Resultado del proceso de pago");
     }
 
 }
