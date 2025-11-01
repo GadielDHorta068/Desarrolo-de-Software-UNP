@@ -38,7 +38,7 @@ export const routes: Routes = [
     title: 'Configuración - Raffy'
   },
   {
-    path: 'panel',
+    path: 'event/new',
     loadComponent: () => import('./pages/raffles-panel/raffles-panel').then(m => m.RafflesPanel),
     // canActivate: [GuestGuard],
     title: 'Creación de evento - Raffy',

@@ -8,21 +8,19 @@ import { configService } from '../../services/config.service';
 import { HandleDatePipe } from '../../pipes/handle-date.pipe';
 import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 import { EventsService } from '../../services/events.service';
-import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { ParseFileService } from '../../services/utils/parseFile.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-edit-event',
-  imports: [CommonModule, ReactiveFormsModule, LoaderImage, ModalInfo],
+  imports: [CommonModule, ReactiveFormsModule, LoaderImage],
   templateUrl: './edit-event.html',
   styleUrl: './edit-event.css',
   providers: [HandleDatePipe]
 })
 export class EditEvent implements OnInit{
-  @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
-  dataModal: InfoModal = {title: "Actualización de datos", message: ""};
 
   // evento en contexto (debe ser seteado desde donde se quiere interactuar con el dato, por ej el boton de EDITAR)
   // event!: Events|null;
@@ -47,9 +45,10 @@ export class EditEvent implements OnInit{
     private datePipe: HandleDatePipe,
     private eventService: EventsService,
     private parseFileService: ParseFileService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notificationService: NotificationService,
+    private router: Router
   ){
-    // this.formEvent = new FormGroup({});
     this.configService.initData();
     this.initDataLoadEvent();
 
@@ -62,7 +61,6 @@ export class EditEvent implements OnInit{
           this.initForm();
           this.cdr.detectChanges();
         }
-        // this.updateForm();
       }
     )
   }
@@ -94,18 +92,17 @@ export class EditEvent implements OnInit{
     const dataNewEvent = this.getNewEvent(this.formEvent.getRawValue());
     // console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
     this.eventService.updateGiveaways(dataNewEvent, ""+this.event?.id, this.event?.creator?.id, ).subscribe({
-      next: (response) => {
-          // console.log('[initConfig] => nuevo evento creado: ', response);
-        this.dataModal.message = "Evento editado correctamente: ", response;
-        this.modalInfoRef.open();
-        this.cleanForm();
+      next: (response: any) => {
+        // console.log('[initConfig] => nuevo evento creado: ', response);
+        this.notificationService.notifySuccess("Evento editado correctamente");
+        this.adminEventService.setSelectedEvent(response);
+        this.router.navigateByUrl("/event/management/"+response.id);
+        // this.cleanForm();
       },
       error: (error) => {
           console.warn('[Eventos]: error al editar el evento: ', error);
-          this.dataModal.message = "Error al editar el evento. ", error.error;
           // NOTA: cuando la fecha esta errada no es un json la respuesta, corregir
-          this.modalInfoRef.open();
-        // });
+          this.notificationService.notifyError("Ha ocurrido un error al realizar la operación");
       }
     });
   }

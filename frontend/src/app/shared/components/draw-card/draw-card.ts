@@ -120,14 +120,10 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     return this.isUserRegistered;
   }
 
-  // onInscript(){
-  //   this.adminEventService.setSelectedEvent(this.event);
-  //   this.adminInscriptService.checkStatusEventToInscript();
-  // }
   async onInscript() {
     this.adminEventService.setSelectedEvent(this.event);
     const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
-    console.log("[onInscript] => estado del evento: ", respStatus);
+    // console.log("[onInscript] => estado del evento: ", respStatus);
     if (!respStatus) {
       this.notificationService.notifyError("No fue posible realizar la operación");
     }

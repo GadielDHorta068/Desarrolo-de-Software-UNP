@@ -42,7 +42,7 @@ export class PanelList {
   }
 
   public onRedirectToCreate(){
-    this.router.navigate(['/panel']);
+    this.router.navigate(['/event/new']);
   }
 
   private getDraws(){

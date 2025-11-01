@@ -152,9 +152,9 @@ export class AppComponent {
   }
 
   async onQuestionarySubmit(data: UserDTO){
-    console.log("[inscripcion] => resp del form de inscricpion: ", data);
+    // console.log("[inscripcion] => resp del form de inscricpion: ", data);
     const respInscript: any = await this.adminInscriptService.onInscript(data);
-    console.log("[inscripcion] => resp de la inscripcion: ", respInscript);
+    // console.log("[inscripcion] => resp de la inscripcion: ", respInscript);
     if(respInscript.status == 200){
       if(respInscript.redirectPay){
         this.router.navigate(['/event/payment']);
