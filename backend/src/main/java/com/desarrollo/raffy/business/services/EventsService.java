@@ -144,6 +144,8 @@ public class EventsService {
             existingContest.setMinValue(newContest.getMinValue());
             existingContest.setMaxValue(newContest.getMaxValue());
             existingContest.setMaxAttempts(newContest.getMaxAttempts());
+        } else if(existing instanceof Raffle && event instanceof Raffle){
+           // Los campos de Raffle no se debe modificar
         }
 
         return (T) eventsRepository.save(existing);
