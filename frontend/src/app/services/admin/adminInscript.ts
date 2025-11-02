@@ -7,6 +7,9 @@ import { QuestionaryService } from '../questionary.service';
 import { AdminEventService } from './adminEvent.service';
 import { EventsService } from '../events.service';
 import { DataStatusEvent } from '../../models/response.model';
+import { AdminPaymentService, DataPayment } from './adminPayment.service';
+import { AuthService } from '../auth.service';
+
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +32,9 @@ export class AdminInscriptService {
   constructor(
     private questionaryService: QuestionaryService,
     private adminEventService: AdminEventService,
-    private eventService: EventsService
+    private eventService: EventsService,
+    private adminPaymentService: AdminPaymentService,
+    private authService: AuthService
   ) {
     this.adminEventService.selectedEvent$.subscribe(
       currentEvent => {
@@ -60,6 +65,10 @@ export class AdminInscriptService {
         const response = await firstValueFrom(
           this.questionaryService.saveRaffleNumber(this.event.id, buyNumRequest)
         )
+        // si es exitosa la inscripcion, guardamos los datos para la compra
+        if(response.status == 200){
+          this.adminPaymentService.setDataPayment(this.getDataPayment(user));
+        }
         let customResponse = {...response};
         customResponse.redirectPay = true;
         return customResponse;
@@ -112,5 +121,24 @@ export class AdminInscriptService {
     // console.log('[buyNumbers] => Numeros por comprar: ' + this.selectedRaffleNumbers);
     this.setOpenModalRaffle(false);
     this.setOpenModalInscript(true);
+  }
+
+  // recupera los datos necesarios para realizar la compra
+  getDataPayment(user: UserDTO){
+    const operator = this.authService.getCurrentUserValue();
+    if(this.event){
+      const ammount = this.selectedRaffleNumbers.length * this.event.priceOfNumber;
+      const data = {
+        fristName: user.name,
+        lastName: user.surname,
+        idUser: operator ? operator.id: null,
+        idEvent: ""+this.event.id,
+        email: user.email,
+        phone: user.cellphone ? user.cellphone: "",
+        ammount: ammount
+      }
+      return data as DataPayment;
+    }
+    return null;
   }
 }
