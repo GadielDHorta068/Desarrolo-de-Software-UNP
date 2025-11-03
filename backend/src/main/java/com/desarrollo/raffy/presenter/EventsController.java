@@ -36,6 +36,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.time.LocalDate;
@@ -46,6 +47,7 @@ import org.springframework.http.ResponseEntity;
 import com.desarrollo.raffy.dto.BuyRaffleNumberRequestDTO;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
 import com.desarrollo.raffy.dto.ParticipantDTO;
+import com.desarrollo.raffy.dto.RaffleParticipantDTO;
 import com.desarrollo.raffy.dto.UserDTO;
 import com.desarrollo.raffy.dto.WinnerDTO;
 
@@ -851,19 +853,20 @@ public class EventsController {
     // REFACTORIZAR LOS SIG DOS METODOS EN UNO
     // QUE OBTENGAN EL TIPO DE EVENTO DE LA URL Y DECIDA COMO OBTENER LOS PARTICIPANTES
     @GetMapping("/{eventId}/get-users-participants")
-    public ResponseEntity<Object> findUsersParticipantsByEventId(@PathVariable("eventId") Long anEventId) {
-        try {
-            List<User> participantUsers = eventsService.getUsersParticipantsByEventId(anEventId);
-            if (participantUsers == null || participantUsers.isEmpty()) {
-                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+    public ResponseEntity<Object> findUsersParticipantsByEventId(
+        @PathVariable("eventId") Long anEventId,
+        @RequestParam(required = false) String aUserEmail) {
+            try {
+                List<RaffleParticipantDTO> result = eventsService.getUsersParticipantsByEventId(anEventId, aUserEmail);
+                if (result == null || result.isEmpty()) {
+                    return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+                }
+                                
+                return new ResponseEntity<>(result, HttpStatus.OK);
             }
-
-            List<UserDTO> result = participantUsers.stream().map(UserMapper::toDTO).toList(); 
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        }
-        catch (Exception e) {
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+            catch (Exception e) {
+                return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
     }
 
     @GetMapping("/{eventId}/get-raffle-owners")
@@ -881,5 +884,21 @@ public class EventsController {
         catch (Exception e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }    
+    }
+
+    @GetMapping("/{eventId}/get-raffle-participants")
+    public ResponseEntity<Object> getRaffleNumbersByRaffleIdAndUser(
+        @PathVariable("eventId") Long aRaffleId, 
+        @RequestParam(required = false) String aUserEmail) {
+            try {
+                List<RaffleParticipantDTO> result = raffleNumberService.findRaffleNumbersById(aRaffleId, aUserEmail);
+                if (result == null || result.isEmpty()) {
+                    return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+                }
+                    return new ResponseEntity<>(result, HttpStatus.OK);
+            }
+            catch (Exception e) {
+                return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
     }
 }

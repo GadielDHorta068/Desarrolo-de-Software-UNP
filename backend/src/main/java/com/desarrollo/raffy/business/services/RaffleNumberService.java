@@ -1,6 +1,7 @@
 package com.desarrollo.raffy.business.services;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.desarrollo.raffy.business.repository.RaffleNumberRepository;
+import com.desarrollo.raffy.dto.RaffleParticipantDTO;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
@@ -63,6 +65,45 @@ public class RaffleNumberService {
         List<RaffleNumber> result = raffleNumRepository.findNumbersById(aRaffleId);
 
         return result;
+    }
+
+    public List<RaffleParticipantDTO> findRaffleNumbersById(Long aRaffleId, String aRequesterEmail) {
+        Events selectedRaffle = eventsService.getById(aRaffleId);
+        if (!(selectedRaffle instanceof Raffle)) {
+            throw new IllegalArgumentException("Este metodo es solo eventos de tipo rifa");
+        }
+        List<RaffleNumber> raffleNumbers = raffleNumRepository.findNumbersById(aRaffleId)
+            .stream()
+            .sorted(Comparator.comparing(rn -> rn.getNumberOwner().getEmail()))
+            .toList();
+        List<RaffleParticipantDTO> result = new ArrayList<>();
+        System.out.println("CREATOR EMAIL: [" + selectedRaffle.getCreator().getEmail() + "]");
+        System.out.println("REQUESTER EMAIL: [" + aRequesterEmail + "]");
+        System.out.println("IGUALES? " + selectedRaffle.getCreator().getEmail().equals(aRequesterEmail));
+
+        for (RaffleNumber rn : raffleNumbers) {
+            RaffleParticipantDTO participant = new RaffleParticipantDTO();
+            participant.setName(rn.getNumberOwner().getName());
+            participant.setSurname(rn.getNumberOwner().getSurname());
+            if (selectedRaffle.getCreator().getEmail().equals(aRequesterEmail)) {
+                participant.setEmail(rn.getNumberOwner().getEmail());
+            }
+            else {
+                participant.setEmail(censorEmail(rn.getNumberOwner().getEmail()));
+            }
+            participant.setNumber(rn.getNumber());
+            participant.setPosition(rn.getPosition());
+            result.add(participant);
+        }
+        return result;    
+    }
+
+    private String censorEmail(String anEmail) {
+        int atIndex = anEmail.indexOf('@');
+        if (atIndex <= 3) {
+            return anEmail.substring(0, atIndex) + "****" + anEmail.substring(atIndex);
+        }
+        return anEmail.substring(0, atIndex) + "****" + anEmail.substring(atIndex);
     }
 
     public List<Integer> findSoldNumbersById(Long aRaffleId) {
