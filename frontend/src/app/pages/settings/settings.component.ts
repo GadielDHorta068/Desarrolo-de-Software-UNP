@@ -143,7 +143,7 @@ export class SettingsComponent implements OnInit {
           surname: user.surname,
           email: user.email,
           nickname: user.nickname,
-          cellphone: (user.cellphone ? user.cellphone.replace(/\D/g, '').slice(0, 10) : ''),
+          cellphone: (user.cellphone ? this.normalizePhoneNumber(user.cellphone) : ''),
           imagen: user.imagen || ''
         });
         // Mostrar imagen actual si existe
@@ -703,6 +703,19 @@ export class SettingsComponent implements OnInit {
     });
   }
 
+  // Método privado para normalizar números de teléfono
+  private normalizePhoneNumber(phoneNumber: string): string {
+    const digits = (phoneNumber || '').replace(/\D/g, ''); // solo dígitos
+    
+    // Si el número tiene 12 dígitos y empieza con "54", recortar los primeros 2 dígitos
+    if (digits.length === 12 && digits.startsWith('54')) {
+      return digits.substring(2); // Remover los primeros 2 dígitos (54)
+    }
+    
+    // Si tiene más de 10 dígitos, tomar solo los primeros 10
+    return digits.slice(0, 10);
+  }
+
   private formatArgPhone(input: string): string {
     const digits = (input || '').replace(/\D/g, '');
     if (!digits) return '';
@@ -710,8 +723,8 @@ export class SettingsComponent implements OnInit {
   }
   onCellphoneInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const digits = (input.value || '').replace(/\D/g, '').slice(0, 10);
-    this.profileForm.get('cellphone')?.setValue(digits, { emitEvent: false });
+    const normalizedDigits = this.normalizePhoneNumber(input.value || '');
+    this.profileForm.get('cellphone')?.setValue(normalizedDigits, { emitEvent: false });
   }
 
   // Payment History Methods
