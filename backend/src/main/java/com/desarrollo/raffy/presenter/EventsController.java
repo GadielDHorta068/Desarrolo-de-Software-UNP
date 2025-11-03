@@ -598,13 +598,15 @@ public class EventsController {
 
     //Mejorar para los filtros
     //-------------------------- GADIEL, ESTOS SON LOS FILTROS --------------------------
+    
     @GetMapping("/active")
     public ResponseEntity<?> getActiveEvents(
             @RequestParam(required = false) EventTypes type,
             @RequestParam(required = false) String categorie,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
-            @RequestParam(required = false) Integer winnerCount) {
+            @RequestParam(required = false) Integer winnerCount,
+            @RequestParam(required = false) String emailUserRegister) {
 
         
         if (start != null && end != null && !end.isAfter(start)) {
@@ -613,7 +615,7 @@ public class EventsController {
         }
         
         List<EventSummaryDTO> events = eventsService.getActiveEventSummaries(
-                type, categorie, start, end, winnerCount
+                type, categorie, start, end, winnerCount, emailUserRegister
         );
 
         return ResponseEntity.ok(events);
