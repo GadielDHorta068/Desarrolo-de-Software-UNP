@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EventsTemp, EventType, EventTypes, RaffleCreate, RaffleNumber, StatusEvent } from '../../models/events.model';
+import { EventsTemp, EventType, EventTypes, RaffleCreate, RaffleNumber, RaffleParticipantDTO, StatusEvent } from '../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 import { Category } from '../../services/category.service';
@@ -10,7 +10,7 @@ import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-i
 import { InfoEvent } from '../../shared/components/info-event/info-event';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EventShareCardComponent } from '../../shared/event-share-card/event-share-card.component';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, UserResponse } from '../../services/auth.service';
 import { ModalShareEvent } from '../../shared/components/modal-share-event/modal-share-event';
 import { QuestionaryComponent } from '../questionary/questionary.component';
 import { EventsService } from '../../services/events.service';
@@ -64,7 +64,7 @@ export class ManagementEvent {
     numeros: RaffleNumber[] = [];
     selectedRaffleNumbers: number[] = [];
     typesOfEventes = EventTypes;
-    participants: UserDTO[] = [];
+    participants: RaffleParticipantDTO[] = [];
     eventType!: EventTypes;
     winners: WinnerDTO[] = [];
 
@@ -86,6 +86,7 @@ export class ManagementEvent {
                 this.event = currentEvent;
                 // console.log("[admin-event] => evento seleccionado: ", this.event);
                 if (this.event) {
+                    this.eventType = this.event.eventType;
                     this.initForm();
                     this.cdr.detectChanges();
                 }
@@ -163,41 +164,6 @@ export class ManagementEvent {
             this.event?.statusEvent === StatusEvent.OPEN;
     }
 
-    // onInscript() {
-    //     // controlamos que el evento este abierto
-    //     this.eventService.getStatusEventById(""+this.event?.id).subscribe({
-    //         next: (data) => {
-    //             console.log('[estadoEvento] => estado del evento: ', data);
-    //             const dataStatus: DataStatusEvent = data.data as DataStatusEvent;
-    //             // this.dataModal.message = "Estado del evento: ", dataStatus.status;
-    //             if(dataStatus.status === StatusEvent.OPEN){
-    //                 // TODO: aca permitimos la inscripcion    
-    //                 if (this.event?.id && this.event?.eventType === EventTypes.GIVEAWAY) {
-    //                     // mostramos el form de inscripcion al sorteo
-    //                     this.showModalIncript = true;
-    //                 }
-    //                 if (this.event?.id && this.event?.eventType === EventTypes.RAFFLES) {
-    //                     try {
-    //                         this.showRaffleModal = true;
-    //                         // this.cdr.detectChanges();
-    //                     } catch (err) {
-    //                         console.error('ERROR dentro de onInscript (bloque RAFFLE):', err);
-    //                     }
-    //                 }
-    //             }
-    //             else{
-    //                 if(this.event){
-    //                     this.event.statusEvent = dataStatus.status as StatusEvent
-    //                 }
-    //             }
-    //             // this.modalInfoRef.open();       // no muestra el estado, ver
-    //             this.cdr.detectChanges();
-    //         },
-    //         error: (err) => {
-    //             console.error('Error al obtener el estado del evento:', err);
-    //         }
-    //     })
-    // }
     async onInscript(){
         const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
         console.log("[onInscript] => estado del evento: ", respStatus);
@@ -216,7 +182,7 @@ export class ManagementEvent {
     }
 
     loadParticipants(eventId: number, eventType: EventTypes): void {
-        this.eventService.getParticipantUsersByEventId(eventId, eventType).subscribe({
+        this.eventService.getParticipantUsersByEventId(eventId, eventType, this.authService.getCurrentUserValue()?.email || "null").subscribe({
             next: (data) => {
                 this.participants = data;
                 this.cdr.detectChanges();
@@ -228,7 +194,7 @@ export class ManagementEvent {
     }
 
     // devuelve el lugar en el podio
-    getPlaceGoal(dataUser: UserDTO): any {
+    getPlaceGoal(dataUser: RaffleParticipantDTO): any { // antes usaba userDTO
         // buscar el ganador por email en la lista WinnerDTO
         const dataPlace = this.winners.find(winner => winner.email === dataUser.email);
         if (!dataPlace)

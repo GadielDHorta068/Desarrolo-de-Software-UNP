@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ import com.desarrollo.raffy.dto.EventSummaryDTO;
 import com.desarrollo.raffy.dto.GiveawaysDTO;
 import com.desarrollo.raffy.dto.GuessingContestDTO;
 import com.desarrollo.raffy.dto.RaffleDTO;
+import com.desarrollo.raffy.dto.RaffleParticipantDTO;
 
 
 @Service
@@ -504,12 +506,35 @@ public class EventsService {
         }
     }
 
-    public List<User> getUsersParticipantsByEventId(Long aEventId) {
+    public List<RaffleParticipantDTO> getUsersParticipantsByEventId(Long aEventId, String aRequesterEmail) {
         try {
-            return eventsRepository.findParticipantsByEventId(aEventId);
+            List<User> participantUsers = eventsRepository.findParticipantsByEventId(aEventId); 
+            List<RaffleParticipantDTO> result = new ArrayList<>();
+            for (User u : participantUsers) {
+                RaffleParticipantDTO participant = new RaffleParticipantDTO();
+                participant.setName(u.getName());
+                participant.setSurname(u.getSurname());
+                if (this.getById(aEventId).getCreator().getEmail().equals(aRequesterEmail)) {
+                    participant.setEmail(u.getEmail());
+                }
+                else {
+                    participant.setEmail(censorEmail(u.getEmail()));
+                }
+                result.add(participant);
+            }
+            return result;
+            // return eventsRepository.findParticipantsByEventId(aEventId);
         }
         catch (Exception e) {
             throw new RuntimeException("Error al obtener los participantes del evento " + aEventId, e);
         }
+    }
+
+    private String censorEmail(String anEmail) {
+        int atIndex = anEmail.indexOf('@');
+        if (atIndex <= 3) {
+            return anEmail.substring(0, atIndex) + "****" + anEmail.substring(atIndex);
+        }
+        return anEmail.substring(0, atIndex) + "****" + anEmail.substring(atIndex);
     }
 }

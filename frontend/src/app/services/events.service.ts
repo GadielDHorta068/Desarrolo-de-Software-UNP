@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { Events, EventsCreate, EventsTemp, EventTypes, RaffleCreate, StatusEvent } from '../models/events.model';
+import { Events, EventsCreate, EventsTemp, EventTypes, RaffleCreate, RaffleParticipantDTO, StatusEvent } from '../models/events.model';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { UserDTO } from '../models/UserDTO';
@@ -133,16 +133,22 @@ export class EventsService {
         return this.http.get<number[]>(`${this.apiUrl}/raffle/${aRaffleId}/sold-numbers`);
     }
 
-    getParticipantUsersByEventId(anEventId: number, anEventType: EventTypes): Observable<UserDTO[]> {
+    getParticipantUsersByEventId(anEventId: number, anEventType: EventTypes, aUserEmail: string): Observable<RaffleParticipantDTO[]> {
         const headers = new HttpHeaders({
             'Authorization': `Bearer ${this.authService.getToken()}`,
             'Content-Type': 'application/json'
         });
         if (anEventType != EventTypes.RAFFLES) {
-            return this.http.get<UserDTO[]>(`${this.apiUrl}/${anEventId}/get-users-participants`, { headers });
+            return this.http.get<RaffleParticipantDTO[]>(`${this.apiUrl}/${anEventId}/get-users-participants`, { headers, 
+                params: { aUserEmail }
+            });
         }
-        return this.http.get<UserDTO[]>(`${this.apiUrl}/${anEventId}/get-raffle-owners`, { headers });
+        // return this.http.get<UserDTO[]>(`${this.apiUrl}/${anEventId}/get-raffle-owners`, { headers });
+        return this.http.get<RaffleParticipantDTO[]>(`${this.apiUrl}/${anEventId}/get-raffle-participants`, { headers,
+            params: { aUserEmail }
+        });
     }
+    // USAR RAFFLE PARTICIPANT PARA AMBOS CASOS.
 
   // Buscar eventos por título (endpoint público)
   searchEvents(title: string): Observable<EventsTemp[]> {

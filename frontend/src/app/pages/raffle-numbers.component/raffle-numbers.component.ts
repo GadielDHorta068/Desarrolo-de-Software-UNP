@@ -6,11 +6,13 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
+import { PaginationComponent } from '../pagination.component/pagination.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-raffle-numbers',
   standalone: true,
-  imports: [CommonModule, QuestionaryComponent],
+  imports: [CommonModule, FormsModule, QuestionaryComponent, PaginationComponent],
   templateUrl: './raffle-numbers.component.html',
   styleUrl: './raffle-numbers.component.css'
 })
@@ -28,6 +30,13 @@ export class RaffleNumbersComponent {
     numeros: RaffleNumber[] = [];
     selectedNumbers: number[] = [];
 
+    // paginacion
+    pageSize = 60;
+    currentPage = 1;
+
+    // search
+    searchTerm: string = '';
+
     // Variables de los modales
     allEventStates = StatusEvent;
     showModalIncript = false;
@@ -43,23 +52,6 @@ export class RaffleNumbersComponent {
 
     }
 
-    // lo de Seba
-    // ngOnInit() {
-    //     this.eventIdParam = Number(this.activatedRoute.snapshot.paramMap.get('eventId'));
-    //     if (this.eventIdParam != null) {
-    //         this.eventService.getEventById("" + this.eventIdParam).subscribe(
-    //             resp => {
-    //                 this.event = resp;
-    //                 if (this.event && this.event.statusEvent === this.allEventStates.OPEN) {
-    //                     this.initRaffleNumbers();
-    //                 }
-    //                 // HACER ALGO SI NO ESTA ABIERTO EL EVENTO
-
-    //             }
-    //         );
-    //     }
-    // }
-
     // by A.T
     ngOnInit() {
         this.adminEventService.selectedEvent$.subscribe(
@@ -72,12 +64,6 @@ export class RaffleNumbersComponent {
             }
         )
     }
-
-    // onModalClosed(): void {
-    //     this.showModalIncript = false; // oculta el modal
-    //     this.subscription?.unsubscribe(); // Elimina todas las subscripciones????
-    //     setTimeout(() => this.initRaffleNumbers(), 500); // refresca los números
-    // }
     
     onConfirmSelection(): void {
         this.proceedToInscript.emit(this.selectedNumbers);
@@ -88,12 +74,6 @@ export class RaffleNumbersComponent {
         this.subscription?.unsubscribe(); // Elimina todas las subscripciones????
         this.closeRaffleNumberModal.emit();
     }
-
-    // selectNumber(aRaffleNumber: RaffleNumber): void {
-    //     if (!aRaffleNumber.buyStatus) {
-    //         aRaffleNumber.selectStatus = !aRaffleNumber.selectStatus;
-    //     }
-    // }
 
     selectNumber(aRaffleNumber: RaffleNumber): void {
         if (!aRaffleNumber.buyStatus) {
@@ -155,15 +135,36 @@ export class RaffleNumbersComponent {
         });
     }
 
-    // purchaseNumbers(): void {
-    //     if (this.event?.statusEvent === this.allEventStates.OPEN) {
-    //         const seleccionados = this.numeros.filter(n => n.selectStatus && !n.buyStatus);
-    //         this.selectedNumbers = seleccionados.map(n => n.ticketNumber); // guardamos los números
-            
-    //         this.showModalIncript = true; // muestra el modal de Questionary
+    // ---------------------------
+    // METODOS PARA LA BUSQUEDA
+    // ---------------------------
+    get filteredNumbers(): RaffleNumber[] {
+        const term = this.searchTerm.trim();
+        if(!term) {
+            return this.numeros;
+        }
+        let filtered = this.numeros.filter(n => !n.buyStatus);
 
-    //         // this.selectedEventId = this.event.id;
-    //         // this.actualEventType = this.event.eventType;
-    //     }
-    // }
+        return this.numeros.filter(n => !n.buyStatus && n.ticketNumber.toString().endsWith(term));
+    }
+
+    // ---------------------------
+    // METODOS PARA LA PAGINACION
+    // ---------------------------
+    get totalPages(): number {
+        return Math.ceil(this.filteredNumbers.length / this.pageSize);
+    }
+
+    // este metodo recorta el array original para obtener los indicies
+    // de el primer y ultimo numero  q se mostraran en la pagina
+    // esto incluye los q se encuentran en el medio
+    get paginatedNumbers(): RaffleNumber[] {
+        const start = (this.currentPage - 1) * this.pageSize;
+        return this.filteredNumbers.slice(start, start + this.pageSize);
+    }
+
+    onPageChange(aPageNumber: number): void {
+        this.currentPage = aPageNumber;
+    }
+
 }

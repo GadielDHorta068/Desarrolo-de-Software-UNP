@@ -1,0 +1,41 @@
+<div class="flex justify-center items-center gap-2 mt-4">
+
+    <!-- Ir al inicio -->
+    <button
+        class="px-2 py-1 border rounded"
+        (click) = "goToPage(1)"
+        [disabled] = "currentPage === 1"
+    >
+        &lt;&lt;
+    </button>
+
+    <!-- anterior -->
+    <button
+        class="px-2 py-1 border rounded"
+        (click) = "previousPage()"
+        [disabled] = "currentPage === 1"
+    >
+        &lt;
+    </button>
+
+    <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
+    
+    <!-- siguiente -->
+    <button
+        class="px-2 py-1 border rounded"
+        (click) = "nextPage()"
+        [disabled] = "currentPage === totalPages"
+    >
+        &gt;
+    </button>
+
+    <!-- Ir al final -->
+    <button
+        class="px-2 py-1 border rounded"
+        (click) = "goToPage(totalPages)"
+        [disabled] = "currentPage === totalPages"
+    >
+        &gt;&gt;
+    </button>
+
+</div>
