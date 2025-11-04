@@ -39,6 +39,10 @@ public class RegisteredUser extends User implements UserDetails {
     @Column(name = "imagen", columnDefinition = "bytea")
     private byte[] imagen;
 
+    // Cover image for profile banner
+    @Column(name = "cover_image", columnDefinition = "bytea")
+    private byte[] coverImage;
+
     @Column(name = "description", length = 500, nullable = true)
     private String description;
 

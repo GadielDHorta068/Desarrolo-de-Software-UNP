@@ -29,6 +29,8 @@ public class UpdateProfileRequest {
     
     private String imagen; // Base64 encoded image
 
+    private String coverImage; // Base64 encoded cover image
+
     @Size(max = 500, message = "La descripción no puede exceder 500 caracteres")
     private String description; // Optional user description
 

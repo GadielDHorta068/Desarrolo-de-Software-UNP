@@ -35,12 +35,21 @@ export class SettingsComponent implements OnInit {
   selectedImage: File | null = null;
   imagePreview: string | null = null;
   currentImagePreview: string | null = null;
+  // Cover image properties
+  selectedCoverImage: File | null = null;
+  coverImagePreview: string | null = null;
+  currentCoverImagePreview: string | null = null;
   
   // Image cropper properties
   showImageCropper = false;
   imageChangedEvent: any = '';
   croppedImage: any = '';
   isCropperReady = false;
+  // Cover cropper properties
+  showCoverCropper = false;
+  coverImageChangedEvent: any = '';
+  croppedCoverImage: any = '';
+  isCoverCropperReady = false;
   
   // 2FA Properties
   is2FAEnabled = false;
@@ -94,6 +103,7 @@ export class SettingsComponent implements OnInit {
       cellphone: ['', [this.onlyNumbersValidator, Validators.maxLength(10)]],
       description: ['', [Validators.maxLength(500)]],
       imagen: [''],
+      coverImage: [''],
       twitter: ['', [Validators.maxLength(255)]],
       facebook: ['', [Validators.maxLength(255)]],
       instagram: ['', [Validators.maxLength(255)]],
@@ -151,6 +161,7 @@ export class SettingsComponent implements OnInit {
           cellphone: (user.cellphone ? this.normalizePhoneNumber(user.cellphone) : ''),
           description: user.description || '',
           imagen: user.imagen || '',
+          coverImage: user.coverImage || '',
           twitter: user.twitter || '',
           facebook: user.facebook || '',
           instagram: user.instagram || '',
@@ -159,6 +170,13 @@ export class SettingsComponent implements OnInit {
         // Mostrar imagen actual si existe
         if (user.imagen) {
           this.currentImagePreview = 'data:image/jpeg;base64,' + user.imagen;
+        }
+        // Mostrar portada actual si existe
+        if (user.coverImage) {
+          // Acepta tanto base64 puro como data URL
+          this.currentCoverImagePreview = user.coverImage.startsWith('data:')
+            ? user.coverImage
+            : 'data:image/jpeg;base64,' + user.coverImage;
         }
         // Forzar detección de cambios después de cargar datos
         this.cdr.detectChanges();
@@ -189,24 +207,31 @@ export class SettingsComponent implements OnInit {
       if (profileData.cellphone) {
         profileData.cellphone = this.formatArgPhone(profileData.cellphone);
       }
-      
-      // Agregar imagen en base64 si existe una nueva seleccionada
+      // Resolver imágenes a enviar (perfil y portada)
+      const conversions: Promise<void>[] = [];
       if (this.selectedImage) {
-        this.convertImageToBase64(this.selectedImage).then(base64 => {
-          profileData.imagen = base64;
-          this.submitProfileUpdate(profileData);
-        }).catch(error => {
-          this.isLoading = false;
-          this.errorMessage = 'Error al procesar la imagen.';
-          console.error('Image conversion error:', error);
-        });
-      } else {
-        // Si no hay nueva imagen, mantener la actual o enviar vacío si se eliminó
-        if (!this.currentImagePreview) {
-          profileData.imagen = '';
-        }
-        this.submitProfileUpdate(profileData);
+        conversions.push(
+          this.convertImageToBase64(this.selectedImage).then(base64 => { profileData.imagen = base64; })
+        );
+      } else if (!this.currentImagePreview) {
+        profileData.imagen = '';
       }
+
+      if (this.selectedCoverImage) {
+        conversions.push(
+          this.convertImageToBase64(this.selectedCoverImage).then(base64 => { profileData.coverImage = base64; })
+        );
+      } else if (!this.currentCoverImagePreview) {
+        profileData.coverImage = '';
+      }
+
+      Promise.all(conversions).then(() => {
+        this.submitProfileUpdate(profileData);
+      }).catch(error => {
+        this.isLoading = false;
+        this.errorMessage = 'Error al procesar imágenes.';
+        console.error('Image conversion error:', error);
+      });
     } else {
       this.markFormGroupTouched(this.profileForm);
     }
@@ -214,6 +239,7 @@ export class SettingsComponent implements OnInit {
 
   private submitProfileUpdate(profileData: any): void {
     const imageWasUpdated = this.selectedImage !== null || (!this.currentImagePreview && profileData.imagen === '');
+    const coverWasUpdated = this.selectedCoverImage !== null || (!this.currentCoverImagePreview && profileData.coverImage === '');
     
     this.authService.updateProfile(profileData).subscribe({
       next: (response) => {
@@ -231,13 +257,22 @@ export class SettingsComponent implements OnInit {
         } else {
           this.currentImagePreview = null;
         }
+        // Actualizar preview de portada
+        if (response.coverImage) {
+          this.currentCoverImagePreview = 'data:image/jpeg;base64,' + response.coverImage;
+        } else {
+          this.currentCoverImagePreview = null;
+        }
         
         // Limpiar imagen seleccionada
         this.selectedImage = null;
         this.imagePreview = null;
+        // Limpiar portada seleccionada
+        this.selectedCoverImage = null;
+        this.coverImagePreview = null;
         
         // Si se actualizó la imagen, forzar actualización del AuthService y recargar página
-        if (imageWasUpdated) {
+        if (imageWasUpdated || coverWasUpdated) {
           this.authService.initializeUserData();
           this.successMessage = 'Perfil actualizado correctamente. Refrescando página...';
           this.cdr.detectChanges();
@@ -603,6 +638,26 @@ export class SettingsComponent implements OnInit {
     }
   }
 
+  // Métodos para manejo de imagen de portada
+  onCoverSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        this.errorMessage = 'Por favor selecciona un archivo de imagen válido.';
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        this.errorMessage = 'La imagen no puede ser mayor a 5MB.';
+        return;
+      }
+      this.errorMessage = '';
+      this.coverImageChangedEvent = event;
+      this.showCoverCropper = true;
+      this.isCoverCropperReady = false;
+      this.cdr.detectChanges();
+    }
+  }
+
   removeCurrentImage(): void {
     this.currentImagePreview = null;
     this.selectedImage = null;
@@ -610,11 +665,27 @@ export class SettingsComponent implements OnInit {
     this.profileForm.patchValue({ imagen: '' });
   }
 
+  removeCurrentCoverImage(): void {
+    this.currentCoverImagePreview = null;
+    this.selectedCoverImage = null;
+    this.coverImagePreview = null;
+    this.profileForm.patchValue({ coverImage: '' });
+  }
+
   removeSelectedImage(): void {
     this.selectedImage = null;
     this.imagePreview = null;
     // Resetear el input file
     const fileInput = document.getElementById('imageInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
+  removeSelectedCoverImage(): void {
+    this.selectedCoverImage = null;
+    this.coverImagePreview = null;
+    const fileInput = document.getElementById('coverImage') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
     }
@@ -696,6 +767,56 @@ export class SettingsComponent implements OnInit {
       fileInput.value = '';
     }
     
+    this.cdr.detectChanges();
+  }
+
+  // Métodos para el recorte de portada
+  coverImageCropped(event: ImageCroppedEvent): void {
+    if (event.base64) {
+      this.croppedCoverImage = event.base64;
+    } else if (event.blob) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.croppedCoverImage = reader.result as string;
+        this.cdr.detectChanges();
+      };
+      reader.readAsDataURL(event.blob);
+    }
+  }
+
+  coverImageLoaded(): void {
+    this.isCoverCropperReady = true;
+    this.cdr.detectChanges();
+  }
+
+  coverCropperReady(): void {}
+
+  coverLoadImageFailed(): void {
+    this.errorMessage = 'Error al cargar la imagen de portada para recortar.';
+    this.showCoverCropper = false;
+    this.cdr.detectChanges();
+  }
+
+  confirmCoverCrop(): void {
+    if (this.croppedCoverImage) {
+      this.dataURLtoFile(this.croppedCoverImage, 'cropped-cover.jpg').then(file => {
+        this.selectedCoverImage = file;
+        this.coverImagePreview = this.croppedCoverImage;
+        this.showCoverCropper = false;
+        this.cdr.detectChanges();
+      });
+    }
+  }
+
+  cancelCoverCrop(): void {
+    this.showCoverCropper = false;
+    this.coverImageChangedEvent = '';
+    this.croppedCoverImage = '';
+    this.isCoverCropperReady = false;
+    const fileInput = document.getElementById('coverImage') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
     this.cdr.detectChanges();
   }
 

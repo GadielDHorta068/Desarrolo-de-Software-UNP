@@ -36,6 +36,7 @@ export interface UserResponse {
   nickname: string;
   userType: string;
   imagen?: string;
+  coverImage?: string;
   description?: string;
   twitter?: string;
   facebook?: string;
@@ -70,6 +71,7 @@ export interface TwoFactorVerifyResponse {
 })
 export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/auth`;
+  private readonly USERS_URL = `${environment.apiUrl}/users`;
   private readonly TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   
@@ -415,6 +417,31 @@ export class AuthService {
     }).pipe(
       catchError(this.handleError)
     );
+  }
+
+  /** Seguidores (persistencia en backend) */
+  getFollowersCount(userId: number): Observable<number> {
+    return this.http.get<number>(`${this.USERS_URL}/${userId}/followers/count`, {
+      headers: this.getAuthHeaders()
+    }).pipe(catchError(this.handleError));
+  }
+
+  isFollowing(userId: number): Observable<boolean> {
+    return this.http.get<boolean>(`${this.USERS_URL}/${userId}/followers/is-following`, {
+      headers: this.getAuthHeaders()
+    }).pipe(catchError(this.handleError));
+  }
+
+  followUser(userId: number): Observable<number> {
+    return this.http.post<number>(`${this.USERS_URL}/${userId}/followers`, {}, {
+      headers: this.getAuthHeaders()
+    }).pipe(catchError(this.handleError));
+  }
+
+  unfollowUser(userId: number): Observable<number> {
+    return this.http.delete<number>(`${this.USERS_URL}/${userId}/followers`, {
+      headers: this.getAuthHeaders()
+    }).pipe(catchError(this.handleError));
   }
 
   /**
