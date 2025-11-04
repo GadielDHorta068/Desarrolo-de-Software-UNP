@@ -273,9 +273,10 @@ public class PaymentService {
                                String paymentMethodId, String paymentTypeId) {
         // Buscar las entidades
         User user = userService.findById(userId);
-        if (user == null) {
-            throw new PaymentValidationException("Usuario no encontrado con ID: " + userId);
-        }
+        // esto no deberia limitar el pago, dado que pueden pagar los usuarios visitantes
+        // if (user == null) {
+        //     throw new PaymentValidationException("Usuario no encontrado con ID: " + userId);
+        // }
         
         Events event = eventsService.getById(eventId);
         if (event == null) {
@@ -290,6 +291,9 @@ public class PaymentService {
         Payment payment = new Payment();
         payment.setPaymentId(paymentId);
         payment.setExternalReference(externalReference);
+        // if (user != null) {    
+        //     payment.setUser(user);
+        // }
         payment.setUser(user);
         payment.setEvent(event);
         payment.setReceiver(receiver);

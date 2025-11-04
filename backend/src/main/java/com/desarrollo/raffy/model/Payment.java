@@ -39,7 +39,8 @@ public class Payment {
     private String externalReference;   // ID interno de la orden
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    // @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User user;                  // Usuario que realiza el pago
 

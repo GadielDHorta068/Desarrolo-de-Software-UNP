@@ -37,6 +37,7 @@ export class Payments {
       this.notificationService.notifySuccess("La compra fue realizada con éxito")
     }
     else{
+      // TODO: aca deberia de liberar los nros seleccionados
       this.notificationService.notifyError("No se ha podido realizar el pago correctamente");
     }
   }
