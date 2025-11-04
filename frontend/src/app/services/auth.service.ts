@@ -36,6 +36,7 @@ export interface UserResponse {
   nickname: string;
   userType: string;
   imagen?: string;
+  description?: string;
 }
 
 export interface RefreshTokenRequest {

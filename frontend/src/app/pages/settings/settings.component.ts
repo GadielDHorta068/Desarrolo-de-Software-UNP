@@ -92,6 +92,7 @@ export class SettingsComponent implements OnInit {
       email: [{value: '', disabled: true}],
       nickname: ['', [Validators.required, Validators.minLength(3)]],
       cellphone: ['', [this.onlyNumbersValidator, Validators.maxLength(10)]],
+      description: ['', [Validators.maxLength(500)]],
       imagen: ['']
     });
 
@@ -144,6 +145,7 @@ export class SettingsComponent implements OnInit {
           email: user.email,
           nickname: user.nickname,
           cellphone: (user.cellphone ? this.normalizePhoneNumber(user.cellphone) : ''),
+          description: user.description || '',
           imagen: user.imagen || ''
         });
         // Mostrar imagen actual si existe
