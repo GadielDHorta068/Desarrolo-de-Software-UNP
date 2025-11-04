@@ -37,6 +37,10 @@ export interface UserResponse {
   userType: string;
   imagen?: string;
   description?: string;
+  twitter?: string;
+  facebook?: string;
+  instagram?: string;
+  linkedin?: string;
 }
 
 export interface RefreshTokenRequest {

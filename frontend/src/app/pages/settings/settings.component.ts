@@ -93,7 +93,11 @@ export class SettingsComponent implements OnInit {
       nickname: ['', [Validators.required, Validators.minLength(3)]],
       cellphone: ['', [this.onlyNumbersValidator, Validators.maxLength(10)]],
       description: ['', [Validators.maxLength(500)]],
-      imagen: ['']
+      imagen: [''],
+      twitter: ['', [Validators.maxLength(255)]],
+      facebook: ['', [Validators.maxLength(255)]],
+      instagram: ['', [Validators.maxLength(255)]],
+      linkedin: ['', [Validators.maxLength(255)]]
     });
 
     this.passwordForm = this.fb.group({
@@ -146,7 +150,11 @@ export class SettingsComponent implements OnInit {
           nickname: user.nickname,
           cellphone: (user.cellphone ? this.normalizePhoneNumber(user.cellphone) : ''),
           description: user.description || '',
-          imagen: user.imagen || ''
+          imagen: user.imagen || '',
+          twitter: user.twitter || '',
+          facebook: user.facebook || '',
+          instagram: user.instagram || '',
+          linkedin: user.linkedin || ''
         });
         // Mostrar imagen actual si existe
         if (user.imagen) {

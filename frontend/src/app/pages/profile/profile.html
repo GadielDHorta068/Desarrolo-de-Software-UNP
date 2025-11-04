@@ -117,20 +117,29 @@
                     </ng-template>
                   </div>
 
-                  <!-- Redes sociales (placeholder) -->
+                  <!-- Redes sociales -->
                   <div class="pt-3">
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Redes</p>
                     <div class="flex items-center gap-3">
-                      <button type="button" class="social-btn" aria-disabled="true" title="Próximamente">
+                      <!-- Twitter -->
+                      <a *ngIf="userProfile?.twitter" [href]="userProfile.twitter" target="_blank" rel="noopener" class="social-btn" title="Twitter">
                         <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 01-3.14 1.53A4.48 4.48 0 0016 3c-2.5 0-4.5 2.25-4.5 5 0 .39.04.77.12 1.13A12.94 12.94 0 013 4s-4 9 5 13a13.37 13.37 0 01-8 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>
-                      </button>
-                      <button type="button" class="social-btn" aria-disabled="true" title="Próximamente">
+                      </a>
+                      <!-- Facebook -->
+                      <a *ngIf="userProfile?.facebook" [href]="userProfile.facebook" target="_blank" rel="noopener" class="social-btn" title="Facebook">
                         <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.04c-5.5 0-9.96 4.46-9.96 9.96 0 4.4 3.58 8.05 8.24 8.75v-6.18h-2.48V12h2.48V9.76c0-2.44 1.46-3.8 3.7-3.8 1.07 0 2.18.19 2.18.19v2.4h-1.23c-1.21 0-1.58.75-1.58 1.52V12h2.69l-.43 2.57h-2.26v6.18c4.66-.7 8.24-4.35 8.24-8.75 0-5.5-4.46-9.96-9.96-9.96z"/></svg>
-                      </button>
-                      <button type="button" class="social-btn" aria-disabled="true" title="Próximamente">
+                      </a>
+                      <!-- Instagram -->
+                      <a *ngIf="userProfile?.instagram" [href]="userProfile.instagram" target="_blank" rel="noopener" class="social-btn" title="Instagram">
+                        <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 4a5 5 0 100 10 5 5 0 000-10zm6-3a1 1 0 110 2 1 1 0 010-2z"/></svg>
+                      </a>
+                      <!-- LinkedIn -->
+                      <a *ngIf="userProfile?.linkedin" [href]="userProfile.linkedin" target="_blank" rel="noopener" class="social-btn" title="LinkedIn">
                         <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14a5 5 0 00-5 5v14a5 5 0 005 5h14a5 5 0 005-5v-14a5 5 0 00-5-5zm-10 19h-3v-9h3v9zm-1.5-10.29a1.74 1.74 0 110-3.48 1.74 1.74 0 010 3.48zm12.5 10.29h-3v-4.79c0-1.14-.02-2.6-1.58-2.6-1.58 0-1.82 1.23-1.82 2.52v4.87h-3v-9h2.88v1.23h.04c.4-.75 1.38-1.53 2.84-1.53 3.04 0 3.6 2 3.6 4.6v4.7z"/></svg>
-                      </button>
-                      <span class="text-xs text-gray-500 dark:text-gray-400">Próximamente</span>
+                      </a>
+
+                      <!-- Placeholder cuando no hay enlaces -->
+                      <span *ngIf="!userProfile?.twitter && !userProfile?.facebook && !userProfile?.instagram && !userProfile?.linkedin" class="text-xs text-gray-500 dark:text-gray-400">Próximamente</span>
                     </div>
                   </div>
                 </div>
