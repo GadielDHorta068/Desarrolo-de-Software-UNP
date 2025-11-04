@@ -181,6 +181,20 @@ public class AuthService {
         user.setCellphone(request.getCellphone());
         user.setNickname(request.getNickname());
         user.setImagen(ImageUtils.base64ToBytes(request.getImagen()));
+        // Imagen de portada opcional
+        user.setCoverImage(ImageUtils.base64ToBytes(request.getCoverImage()));
+        // Descripción opcional: si viene vacía o null, guardar como null
+        if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
+            user.setDescription(null);
+        } else {
+            user.setDescription(request.getDescription().trim());
+        }
+
+        // Redes sociales opcionales: guardar null si vienen vacías
+        user.setTwitter(request.getTwitter() != null && !request.getTwitter().trim().isEmpty() ? request.getTwitter().trim() : null);
+        user.setFacebook(request.getFacebook() != null && !request.getFacebook().trim().isEmpty() ? request.getFacebook().trim() : null);
+        user.setInstagram(request.getInstagram() != null && !request.getInstagram().trim().isEmpty() ? request.getInstagram().trim() : null);
+        user.setLinkedin(request.getLinkedin() != null && !request.getLinkedin().trim().isEmpty() ? request.getLinkedin().trim() : null);
 
         RegisteredUser updatedUser = userRepository.save(user);
         return mapToUserResponse(updatedUser);
@@ -213,15 +227,20 @@ public class AuthService {
 
     private UserResponse mapToUserResponse(RegisteredUser user) {
         String imagenBase64 = null;
+        String coverBase64 = null;
         try {
             // Manejar el campo LOB de manera segura
             if (user.getImagen() != null) {
                 imagenBase64 = ImageUtils.bytesToBase64(user.getImagen());
             }
+            if (user.getCoverImage() != null) {
+                coverBase64 = ImageUtils.bytesToBase64(user.getCoverImage());
+            }
         } catch (Exception e) {
             // Log del error pero continuar sin la imagen
             System.err.println("Error al procesar imagen del usuario " + user.getId() + ": " + e.getMessage());
             imagenBase64 = null;
+            coverBase64 = null;
         }
 
         return UserResponse.builder()
@@ -233,6 +252,12 @@ public class AuthService {
                 .nickname(user.getNickname())
                 .userType(user.getUserType())
                 .imagen(imagenBase64)
+                .coverImage(coverBase64)
+                .description(user.getDescription())
+                .twitter(user.getTwitter())
+                .facebook(user.getFacebook())
+                .instagram(user.getInstagram())
+                .linkedin(user.getLinkedin())
                 .build();
     }
 }

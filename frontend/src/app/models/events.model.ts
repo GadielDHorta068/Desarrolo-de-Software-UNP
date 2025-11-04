@@ -92,4 +92,12 @@ export interface RaffleNumber {
     ticketNumber: number;
     buyStatus: boolean;
     selectStatus: boolean;
-}   
+}
+
+export interface RaffleParticipantDTO {
+    name: string;
+    surname: string;
+    email: string;
+    number: number;
+    position:number;
+}

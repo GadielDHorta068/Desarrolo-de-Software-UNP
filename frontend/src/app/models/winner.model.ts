@@ -7,4 +7,5 @@ export interface WinnerDTO {
   phone: string;
   eventId: number;
   eventTitle: string;
+  raffleNumber?: number; // Número de la rifa (solo para eventos tipo raffle)
 }

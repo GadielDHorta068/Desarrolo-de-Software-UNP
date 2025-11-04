@@ -91,7 +91,8 @@ export class EditEvent implements OnInit{
     // console.log("[crearSorteo] => datos del sorteo completos: ", this.formEvent.getRawValue());
     const dataNewEvent = this.getNewEvent(this.formEvent.getRawValue());
     // console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
-    this.eventService.updateGiveaways(dataNewEvent, ""+this.event?.id, this.event?.creator?.id, ).subscribe({
+    // this.eventService.updateGiveaways(dataNewEvent, ""+this.event?.id, this.event?.creator?.id, ).subscribe({
+    this.eventService.updateEvents(dataNewEvent, ""+this.event?.id, this.event?.creator?.id, ).subscribe({
       next: (response: any) => {
         // console.log('[initConfig] => nuevo evento creado: ', response);
         this.notificationService.notifySuccess("Evento editado correctamente");

@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ import com.desarrollo.raffy.dto.EventSummaryDTO;
 import com.desarrollo.raffy.dto.GiveawaysDTO;
 import com.desarrollo.raffy.dto.GuessingContestDTO;
 import com.desarrollo.raffy.dto.RaffleDTO;
+import com.desarrollo.raffy.dto.RaffleParticipantDTO;
 
 
 @Service
@@ -144,6 +146,8 @@ public class EventsService {
             existingContest.setMinValue(newContest.getMinValue());
             existingContest.setMaxValue(newContest.getMaxValue());
             existingContest.setMaxAttempts(newContest.getMaxAttempts());
+        } else if(existing instanceof Raffle && event instanceof Raffle){
+           // Los campos de Raffle no se debe modificar
         }
 
         return (T) eventsRepository.save(existing);
@@ -334,7 +338,8 @@ public class EventsService {
         String categorie, 
         LocalDate start, 
         LocalDate end, 
-        Integer winnerCount){
+        Integer winnerCount,
+        String emailUserRegister){
         // Resolver opcionalmente el nombre de categoría a su ID para evitar problemas
         // con funciones de texto sobre tipos binarios y asegurar consulta indexada.
         Long categoryId = null;
@@ -349,7 +354,7 @@ public class EventsService {
             }
         }
         
-        return eventsRepository.findActiveEvents(type, categoryId, start, end, winnerCount)
+        return eventsRepository.findActiveEvents(type, categoryId, start, end, winnerCount, emailUserRegister)
             .stream()
             .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
@@ -502,12 +507,35 @@ public class EventsService {
         }
     }
 
-    public List<User> getUsersParticipantsByEventId(Long aEventId) {
+    public List<RaffleParticipantDTO> getUsersParticipantsByEventId(Long aEventId, String aRequesterEmail) {
         try {
-            return eventsRepository.findParticipantsByEventId(aEventId);
+            List<User> participantUsers = eventsRepository.findParticipantsByEventId(aEventId); 
+            List<RaffleParticipantDTO> result = new ArrayList<>();
+            for (User u : participantUsers) {
+                RaffleParticipantDTO participant = new RaffleParticipantDTO();
+                participant.setName(u.getName());
+                participant.setSurname(u.getSurname());
+                if (this.getById(aEventId).getCreator().getEmail().equals(aRequesterEmail)) {
+                    participant.setEmail(u.getEmail());
+                }
+                else {
+                    participant.setEmail(censorEmail(u.getEmail()));
+                }
+                result.add(participant);
+            }
+            return result;
+            // return eventsRepository.findParticipantsByEventId(aEventId);
         }
         catch (Exception e) {
             throw new RuntimeException("Error al obtener los participantes del evento " + aEventId, e);
         }
+    }
+
+    private String censorEmail(String anEmail) {
+        int atIndex = anEmail.indexOf('@');
+        if (atIndex <= 3) {
+            return anEmail.substring(0, atIndex) + "****" + anEmail.substring(atIndex);
+        }
+        return anEmail.substring(0, atIndex) + "****" + anEmail.substring(atIndex);
     }
 }

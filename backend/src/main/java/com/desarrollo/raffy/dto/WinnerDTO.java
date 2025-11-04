@@ -16,4 +16,5 @@ public class WinnerDTO {
     private String phone;
     private Long eventId;
     private String eventTitle;
+    private Integer raffleNumber; // Número de la rifa (solo para eventos tipo raffle)
 }

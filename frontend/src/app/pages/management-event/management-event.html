@@ -16,7 +16,7 @@
 
 
       <!-- Tab: Registrados -->
-      <span *ngIf="isUserCreator" class="pb-2 cursor-pointer font-semibold" [ngClass]="{
+      <span class="pb-2 cursor-pointer font-semibold" [ngClass]="{
             'text-blue-600 border-b-2 border-blue-600': isRegisteredTab(),
             'text-gray-600 dark:text-gray-300': !isRegisteredTab()
           }" (click)="setTab(TAB_REGISTERED)">Registrados</span>
@@ -58,6 +58,11 @@
             <th class="p-2 text-left">Nombre</th>
             <th class="p-2 text-left">Apellido</th>
             <th class="p-2 text-left">Email</th>
+            <th class="p-2 text-left"
+                *ngIf = "eventType === typesOfEventes.RAFFLES"
+            >
+                Nº de rifa
+            </th>
             <th class="p-2 text-left">Podio</th>
           </tr>
         </thead>
@@ -66,6 +71,11 @@
             <td class="p-2">{{ p.name }}</td>
             <td class="p-2">{{ p.surname }}</td>
             <td class="p-2">{{ p.email }}</td>
+            <td class="p-2"
+                *ngIf = "eventType === typesOfEventes.RAFFLES"
+            >
+                {{ p.number }}
+            </td>
             <td class="p-2">
               <div *ngIf="getPlaceGoal(p) as dataGoal" class="flex items-center gap-[5px]">
                 <app-tag-prize [position]="dataGoal.position"></app-tag-prize>

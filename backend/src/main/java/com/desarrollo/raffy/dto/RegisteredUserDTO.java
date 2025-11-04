@@ -41,4 +41,6 @@ public class RegisteredUserDTO extends UserDTO {
 
     private UserType userType;
 
+    private String description; // Optional user description
+
 }

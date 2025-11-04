@@ -16,7 +16,7 @@
       <div class="jackpot-reels">
         <div *ngFor="let reel of reels(); let i = index" class="jackpot-reel-container">
           <div class="jackpot-reel" #reelElements>
-            <div *ngFor="let p of reel.participants" class="jackpot-item">{{ p.name }} {{ p.surname }}</div>
+            <div *ngFor="let p of reel.participants" class="jackpot-item">{{ getDisplayText(p) }}</div>
           </div>
         </div>
       </div>

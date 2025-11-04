@@ -17,6 +17,7 @@ public class UserMapper {
             result.setEmail(registeredUser.getEmail());
             result.setCellphone(registeredUser.getCellphone());
             result.setImagen(ImageUtils.bytesToBase64(registeredUser.getImagen()));
+            result.setDescription(registeredUser.getDescription());
 
             return result;
         }

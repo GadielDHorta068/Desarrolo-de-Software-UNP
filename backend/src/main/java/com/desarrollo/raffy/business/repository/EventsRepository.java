@@ -28,15 +28,18 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     List<Events> findByCategoryId(@Param("categoryId") Long categoryId);
     
     // Buscar eventos con filtros progresivos y estado opcional
+    // que no sean creados por el usuario cuyo email se pasa como parámetro
     @Query("""
         SELECT e FROM Events e
         JOIN FETCH e.category c
+        JOIN FETCH e.creator cr
         WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
         AND e.eventType = COALESCE(:type, e.eventType)
         AND c.id = COALESCE(:catId, c.id)
         AND e.startDate >= COALESCE(:start, e.startDate)
         AND e.endDate <= COALESCE(:end, e.endDate)
         AND e.winnersCount = COALESCE(:winnerCount, e.winnersCount)
+        AND (:email IS NULL OR cr.email <> :email)       
         ORDER BY e.startDate DESC
     """)
     List<Events> findActiveEvents(
@@ -44,7 +47,8 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
         @Param("catId") Long categoryId,
         @Param("start") LocalDate start,
         @Param("end") LocalDate end,
-        @Param("winnerCount") Integer winnerCount);
+        @Param("winnerCount") Integer winnerCount,
+        @Param("email") String email);
     
     // Buscar eventos por rango de fechas
     @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.startDate >= :startDate AND e.endDate <= :endDate")

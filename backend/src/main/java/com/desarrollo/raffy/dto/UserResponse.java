@@ -21,4 +21,10 @@ public class UserResponse {
     private String nickname;
     private UserType userType;
     private String imagen; // Base64 encoded image
+    private String coverImage; // Base64 encoded cover image
+    private String description; // Optional user description
+    private String twitter;
+    private String facebook;
+    private String instagram;
+    private String linkedin;
 }

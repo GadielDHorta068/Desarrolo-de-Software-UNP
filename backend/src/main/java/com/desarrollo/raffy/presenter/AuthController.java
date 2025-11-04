@@ -1,6 +1,7 @@
 package com.desarrollo.raffy.presenter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,8 @@ import com.desarrollo.raffy.dto.RegisteredUserDTO;
 import com.desarrollo.raffy.dto.UpdateProfileRequest;
 import com.desarrollo.raffy.dto.UserResponse;
 import com.desarrollo.raffy.business.services.AuthService;
+import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
+import com.desarrollo.raffy.model.RegisteredUser;
 
 import jakarta.validation.Valid;
 
@@ -26,6 +29,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private RegisteredUserRepository registeredUserRepository;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisteredUserDTO request) {
@@ -105,5 +111,33 @@ public class AuthController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    /**
+     * Sirve la imagen de avatar del usuario por nickname para usar en Open Graph/Twitter.
+     * Devuelve 404 si no hay imagen.
+     */
+    @GetMapping(value = "/users/{nickname}/avatar", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getAvatarByNickname(@PathVariable String nickname) {
+        RegisteredUser user = registeredUserRepository.findByNickname(nickname)
+                .orElse(null);
+        if (user == null || user.getImagen() == null || user.getImagen().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(user.getImagen());
+    }
+
+    /**
+     * Sirve la imagen de portada del usuario por nickname para usar en Open Graph/Twitter.
+     * Devuelve 404 si no hay imagen.
+     */
+    @GetMapping(value = "/users/{nickname}/cover", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getCoverByNickname(@PathVariable String nickname) {
+        RegisteredUser user = registeredUserRepository.findByNickname(nickname)
+                .orElse(null);
+        if (user == null || user.getCoverImage() == null || user.getCoverImage().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(user.getCoverImage());
     }
 }
