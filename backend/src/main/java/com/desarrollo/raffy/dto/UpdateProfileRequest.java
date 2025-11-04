@@ -28,4 +28,20 @@ public class UpdateProfileRequest {
     private String nickname;
     
     private String imagen; // Base64 encoded image
+
+    @Size(max = 500, message = "La descripción no puede exceder 500 caracteres")
+    private String description; // Optional user description
+
+    // Social media links (optional)
+    @Size(max = 255, message = "El enlace de Twitter no puede exceder 255 caracteres")
+    private String twitter;
+
+    @Size(max = 255, message = "El enlace de Facebook no puede exceder 255 caracteres")
+    private String facebook;
+
+    @Size(max = 255, message = "El enlace de Instagram no puede exceder 255 caracteres")
+    private String instagram;
+
+    @Size(max = 255, message = "El enlace de LinkedIn no puede exceder 255 caracteres")
+    private String linkedin;
 }
