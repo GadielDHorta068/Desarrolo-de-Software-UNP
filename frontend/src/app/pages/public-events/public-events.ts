@@ -145,6 +145,10 @@ export class PublicEvents implements OnInit, AfterViewInit {
       start: this.filterStart || undefined,
       end: this.filterEnd || undefined,
       winnerCount: this.filterWinners ?? undefined,
+      //Solo enviar email si el usuario está autentificado
+      ...(this.userLogged && this.authService.getCurrentUserValue()?.email ? {
+        emailUserRegister: this.authService.getCurrentUserValue()?.email
+      } : {})
       /* status: StatusEvent.OPEN */
     };
     return this.eventsService.getActiveEvents(options);

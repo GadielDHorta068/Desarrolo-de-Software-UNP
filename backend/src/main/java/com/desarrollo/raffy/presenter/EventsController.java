@@ -18,6 +18,7 @@ import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
 import com.desarrollo.raffy.model.auditlog.AuditActionType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.business.services.AuditLogsService;
@@ -199,44 +200,6 @@ public class EventsController {
         }
     }
 
-    @PutMapping("/update/{idEvent}/user/{idUser}")
-    public ResponseEntity<?> update(
-                    @PathVariable("idEvent") @NotNull @Positive Long id, 
-                    @RequestBody Events events, 
-                    @PathVariable("idUser") Long idUser) {
-        if (id <= 0) {
-            return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
-        }
-        
-        // Verificar que el evento existe
-        Events existingEvent = eventsService.getById(id);
-        if (existingEvent == null) {
-            return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
-        }
-        
-        // Validar que no exista otro evento con el mismo título (excepto el actual)
-        if (!existingEvent.getTitle().equals(events.getTitle()) && eventsService.existsByTitle(events.getTitle())) {
-            return new ResponseEntity<>("Ya existe otro evento con este título", HttpStatus.CONFLICT);
-        }
-        
-        // Validaciones de fechas (la fecha de inicio es la del evento existente)
-        if (events.getEndDate() == null) {
-            return new ResponseEntity<>("Debe especificar la fecha de fin del evento", HttpStatus.BAD_REQUEST);
-        }
-        if (!events.getEndDate().isAfter(existingEvent.getStartDate())) {
-            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio del evento", HttpStatus.BAD_REQUEST);
-        }
-        
-        events.setId(id);
-        Events updatedEvent = eventsService.update(id, events, idUser);
-        if (updatedEvent != null) {
-            EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
-            return new ResponseEntity<>(dto, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Error al actualizar el evento", HttpStatus.BAD_REQUEST);
-        }
-    }
-
     @PutMapping("/update/giveaway/{idEvent}/user/{idUser}")
     public ResponseEntity<?> updateGiveaway(
             @PathVariable Long idEvent,
@@ -252,8 +215,8 @@ public class EventsController {
             String.format("El evento: '%s' se actualizó.", updatedEvent.getTitle())
         );
         //Fin auditoría
-        EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
-        return ResponseEntity.ok(dto);
+        eventsService.getEventSummaryById(updatedEvent.getId());
+        return ResponseEntity.ok("Evento actualizado correctamente.");
     }
 
     @PutMapping("/update/guessing-contest/{idEvent}/user/{idUser}")
@@ -271,8 +234,27 @@ public class EventsController {
             String.format("El evento: '%s' se actualizó.", updatedEvent.getTitle())
         );
         //Fin auditoría
-        EventSummaryDTO dto = eventsService.getEventSummaryById(updatedEvent.getId());
-        return ResponseEntity.ok(dto);
+        eventsService.getEventSummaryById(updatedEvent.getId());
+        return ResponseEntity.ok("Evento actualizado correctamente.");
+    }
+
+    @PutMapping("/update/raffle/{idEvent}/user/{idUser}")
+    public ResponseEntity<?> updateRaffle(
+        @PathVariable Long idEvent,
+        @PathVariable Long idUser,
+        @RequestBody Raffle event
+    ){
+        Raffle updatedEvent = eventsService.update(idEvent, event, idUser);
+        //Auditoría
+        auditLogsService.logAction(
+            idEvent,
+            updatedEvent.getCreator().getNickname(),
+            AuditActionType.EVENT_UPDATED,
+            String.format("El evento: '%s' se actualizó.", updatedEvent.getTitle())
+        );
+        //Fin auditoría
+        eventsService.getEventSummaryById(updatedEvent.getId());
+        return ResponseEntity.ok("Evento actualizado correctamente.");
     }
 
 
@@ -600,13 +582,15 @@ public class EventsController {
 
     //Mejorar para los filtros
     //-------------------------- GADIEL, ESTOS SON LOS FILTROS --------------------------
+    
     @GetMapping("/active")
     public ResponseEntity<?> getActiveEvents(
             @RequestParam(required = false) EventTypes type,
             @RequestParam(required = false) String categorie,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
-            @RequestParam(required = false) Integer winnerCount) {
+            @RequestParam(required = false) Integer winnerCount,
+            @RequestParam(required = false) String emailUserRegister) {
 
         
         if (start != null && end != null && !end.isAfter(start)) {
@@ -615,7 +599,7 @@ public class EventsController {
         }
         
         List<EventSummaryDTO> events = eventsService.getActiveEventSummaries(
-                type, categorie, start, end, winnerCount
+                type, categorie, start, end, winnerCount, emailUserRegister
         );
 
         return ResponseEntity.ok(events);
