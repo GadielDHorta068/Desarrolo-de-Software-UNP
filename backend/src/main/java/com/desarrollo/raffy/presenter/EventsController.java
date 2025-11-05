@@ -651,10 +651,14 @@ public class EventsController {
     
     @GetMapping("/participant/{userId}")
     public ResponseEntity<?> getEventsByParticipantId(@PathVariable @NotNull @Positive Long userId) {
-        List<EventSummaryDTO> events = eventsService.getEventSummariesByParticipantId(userId);
-        if (events.isEmpty()) {
-            return new ResponseEntity<>("No se encontraron eventos para el participante con ID: " + userId, HttpStatus.NOT_FOUND);
+        // Validar existencia del usuario
+        User user = userService.findById(userId);
+        if (user == null) {
+            return new ResponseEntity<>("Usuario no encontrado con ID: " + userId, HttpStatus.NOT_FOUND);
         }
+
+        // Devolver siempre 200 con lista (vacía o con datos)
+        List<EventSummaryDTO> events = eventsService.getEventSummariesByParticipantId(userId);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 

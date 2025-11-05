@@ -69,8 +69,8 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE LOWER(e.title) LIKE LOWER(CONCAT('%', :title, '%'))")
     List<Events> findByTitleContainingIgnoreCase(@Param("title") String title);
     
-    // Buscar eventos por participante
-    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category JOIN e.participants p WHERE p.id = :userId")
+    // Buscar eventos por participante (usando entidad Participant)
+    @Query("SELECT e FROM Participant p JOIN p.event e JOIN FETCH e.creator JOIN FETCH e.category WHERE p.participant.id = :userId")
     List<Events> findByParticipantId(@Param("userId") Long userId);
 
     // Buscar por fecha que pase a traves del dia de hoy

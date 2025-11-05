@@ -75,6 +75,11 @@ export class Profile implements OnInit, OnDestroy {
     return 'assets/default-profile.jpg';
   }
 
+  // Mostrar controles solo si el usuario actual es propietario del perfil
+  get isOwner(): boolean {
+    return this.viewerId != null && this.userProfile?.id === this.viewerId;
+  }
+
   constructor(
     private authService: AuthService,
     private eventsService: EventsService,

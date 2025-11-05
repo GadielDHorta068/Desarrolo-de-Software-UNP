@@ -7,7 +7,8 @@
     </div>
 
     <!-- Estado de Error -->
-    <div *ngIf="error" class="bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded relative mb-6">
+    <div *ngIf="error"
+      class="bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded relative mb-6">
       <span class="block sm:inline">{{ error }}</span>
     </div>
 
@@ -21,22 +22,31 @@
             <!-- Tabs -->
             <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
               <nav class="flex space-x-1">
-                <button (click)="selectTab('informacion')" 
-                        class="tab-button px-4 py-2 rounded-t-md flex items-center gap-2"
-                        [ngClass]="activeTab === 'informacion' ? 'bg-emerald-600 text-white tab-active' : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600'">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"/></svg>
+                <button (click)="selectTab('informacion')"
+                  class="tab-button px-4 py-2 rounded-t-md flex items-center gap-2"
+                  [ngClass]="activeTab === 'informacion' ? 'bg-emerald-600 text-white tab-active' : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600'">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                  </svg>
                   Información
                 </button>
-                <button (click)="selectTab('mis-eventos')" 
-                        class="tab-button px-4 py-2 rounded-t-md flex items-center gap-2"
-                        [ngClass]="activeTab === 'mis-eventos' ? 'bg-emerald-600 text-white tab-active' : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600'">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 002-2v-6H3v6a2 2 0 002 2z"/></svg>
+                <button (click)="selectTab('mis-eventos')"
+                  class="tab-button px-4 py-2 rounded-t-md flex items-center gap-2"
+                  [ngClass]="activeTab === 'mis-eventos' ? 'bg-emerald-600 text-white tab-active' : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600'">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 002-2v-6H3v6a2 2 0 002 2z" />
+                  </svg>
                   Eventos
                 </button>
-                <button (click)="selectTab('historial')" 
-                        class="tab-button px-4 py-2 rounded-t-md flex items-center gap-2"
-                        [ngClass]="activeTab === 'historial' ? 'bg-emerald-600 text-white tab-active' : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600'">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-7a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <button (click)="selectTab('historial')"
+                  class="tab-button px-4 py-2 rounded-t-md flex items-center gap-2"
+                  [ngClass]="activeTab === 'historial' ? 'bg-emerald-600 text-white tab-active' : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600'">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-7a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                   Historial
                 </button>
               </nav>
@@ -46,84 +56,93 @@
             <!-- Información -->
             <div *ngIf="activeTab === 'informacion'" [@tabTransition] class="space-y-6">
               <!-- Banner de portada / color de acento -->
-              <div class="h-32 md:h-40 rounded-2xl shadow-inner border border-gray-200 dark:border-gray-700 bg-cover bg-center"
-                   [style.background]="bannerBackground"
-                   style="background-size: cover; background-position: center;">
+              <div
+                class="h-32 md:h-40 rounded-2xl shadow-inner border border-gray-200 dark:border-gray-700 bg-cover bg-center"
+                [style.background]="bannerBackground" style="background-size: cover; background-position: center;">
               </div>
               <!-- Encabezado del perfil con imagen y acciones -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                 <div class="md:col-span-1">
                   <div class="relative mb-2">
                     <div class="aspect-[2/3] w-full max-w-xs mx-auto relative overflow-hidden rounded-2xl">
-                      <img 
-                        [src]="profileImageSrc" 
-                        [alt]="'Foto de perfil de ' + userProfile.name + ' ' + userProfile.surname" 
-                        class="w-full h-full object-cover"
-                        (error)="$event.target.src = 'assets/default-profile.jpg'"
-                      >
-                      <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 pointer-events-none"></div>
+                      <img [src]="profileImageSrc"
+                        [alt]="'Foto de perfil de ' + userProfile.name + ' ' + userProfile.surname"
+                        class="w-full h-full object-cover" (error)="$event.target.src = 'assets/default-profile.jpg'">
+                      <div
+                        class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 pointer-events-none">
+                      </div>
                       <div class="absolute bottom-4 left-0 right-0 text-center text-white">
-                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{{ userProfile.name }} {{ userProfile.surname }}</h1>
+                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{{ userProfile.name }} {{
+                          userProfile.surname }}</h1>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="md:col-span-2 space-y-4">
                   <div class="flex items-center gap-2 flex-wrap">
-                    <button class="text-gray-700 dark:text-gray-200 hover:text-emerald-500 transition-colors text-base font-semibold" (click)="copyNickname()" title="Copiar nickname">
+                    <button
+                      class="text-gray-700 dark:text-gray-200 hover:text-emerald-500 transition-colors text-base font-semibold"
+                      (click)="copyNickname()" title="Copiar nickname">
                       @{{ userProfile.nickname }}
                     </button>
-                    <button 
-                      class="text-gray-500 hover:text-emerald-500 dark:text-gray-400 transition-colors"
-                      (click)="copyProfileUrl()"
-                      title="Copiar URL del perfil">
+                    <button class="text-gray-500 hover:text-emerald-500 dark:text-gray-400 transition-colors"
+                      (click)="copyProfileUrl()" title="Copiar URL del perfil">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                       </svg>
                     </button>
-                    <button 
-                      class="text-gray-500 hover:text-emerald-500 dark:text-gray-400 transition-colors"
-                      (click)="shareProfile()"
-                      title="Compartir perfil">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4m0 0L8 6m4-4v14"/></svg>
+                    <button class="text-gray-500 hover:text-emerald-500 dark:text-gray-400 transition-colors"
+                      (click)="shareProfile()" title="Compartir perfil">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4m0 0L8 6m4-4v14" />
+                      </svg>
                     </button>
-                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-3 py-1 rounded-full">
+                    <span
+                      class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-3 py-1 rounded-full">
                       {{ createdEventsCount }} eventos creados
                     </span>
-                    <span class="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-medium px-3 py-1 rounded-full">
-                      {{ participatedEventsCount }} participaciones
-                    </span>
-                    <span class="bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 text-xs font-medium px-3 py-1 rounded-full">
+                    <span
+                      class="bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 text-xs font-medium px-3 py-1 rounded-full">
                       {{ winnersTotalCount }} ganadores
                     </span>
-                    <span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-xs font-medium px-3 py-1 rounded-full">
+                    <span
+                      class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-xs font-medium px-3 py-1 rounded-full">
                       {{ followersCount }} seguidores
                     </span>
                     <button *ngIf="viewerId != null && viewerId !== userProfile?.id"
-                            class="ml-1 action-chip bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
-                            (click)="toggleFollow()">
+                      class="ml-1 action-chip bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                      (click)="toggleFollow()">
                       {{ isFollowing ? 'Dejar de seguir' : 'Seguir' }}
                     </button>
                   </div>
-                  <div *ngIf="showCopiedMessage" class="bg-green-100 dark:bg-green-900 border border-green-400 text-green-700 dark:text-green-200 px-3 py-2 rounded-lg text-sm">
+                  <div *ngIf="showCopiedMessage"
+                    class="bg-green-100 dark:bg-green-900 border border-green-400 text-green-700 dark:text-green-200 px-3 py-2 rounded-lg text-sm">
                     <div class="flex items-center gap-2">
                       <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clip-rule="evenodd" />
                       </svg>
                       <span>Link de perfil copiado</span>
                     </div>
                   </div>
-                  <div *ngIf="showCopiedFieldMessage" class="pulse-copy text-xs text-emerald-400">Copiado al portapapeles</div>
+                  <div *ngIf="showCopiedFieldMessage" class="pulse-copy text-xs text-emerald-400">Copiado al
+                    portapapeles</div>
 
                   <!-- Acciones de contacto -->
                   <div class="flex flex-wrap gap-3">
-                    <a [href]="'mailto:' + userProfile.email" class="action-chip bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-emerald-600 hover:text-white transition-colors">
+                    <a [href]="'mailto:' + userProfile.email"
+                      class="action-chip bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-emerald-600 hover:text-white transition-colors">
                       {{ userProfile.email }}
                     </a>
-                    <a *ngIf="userProfile.cellphone" [href]="getWhatsAppLink()" target="_blank" class="action-chip bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-emerald-600 hover:text-white transition-colors">
+                    <a *ngIf="userProfile.cellphone" [href]="getWhatsAppLink()" target="_blank"
+                      class="action-chip bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-emerald-600 hover:text-white transition-colors">
                       WhatsApp: {{ userProfile.cellphone }}
                     </a>
-                    <a [routerLink]="['/chat', userProfile.id]" class="action-chip bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
+                    <a [routerLink]="['/chat', userProfile.id]"
+                      class="action-chip bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
                       Mensaje
                     </a>
                   </div>
@@ -147,24 +166,42 @@
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Redes</p>
                     <div class="flex items-center gap-3">
                       <!-- Twitter -->
-                      <a *ngIf="userProfile?.twitter" [href]="userProfile.twitter" target="_blank" rel="noopener" class="social-btn" title="Twitter">
-                        <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 01-3.14 1.53A4.48 4.48 0 0016 3c-2.5 0-4.5 2.25-4.5 5 0 .39.04.77.12 1.13A12.94 12.94 0 013 4s-4 9 5 13a13.37 13.37 0 01-8 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>
+                      <a *ngIf="userProfile?.twitter" [href]="userProfile.twitter" target="_blank" rel="noopener"
+                        class="social-btn" title="Twitter">
+                        <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+                          <path
+                            d="M23 3a10.9 10.9 0 01-3.14 1.53A4.48 4.48 0 0016 3c-2.5 0-4.5 2.25-4.5 5 0 .39.04.77.12 1.13A12.94 12.94 0 013 4s-4 9 5 13a13.37 13.37 0 01-8 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
+                        </svg>
                       </a>
                       <!-- Facebook -->
-                      <a *ngIf="userProfile?.facebook" [href]="userProfile.facebook" target="_blank" rel="noopener" class="social-btn" title="Facebook">
-                        <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.04c-5.5 0-9.96 4.46-9.96 9.96 0 4.4 3.58 8.05 8.24 8.75v-6.18h-2.48V12h2.48V9.76c0-2.44 1.46-3.8 3.7-3.8 1.07 0 2.18.19 2.18.19v2.4h-1.23c-1.21 0-1.58.75-1.58 1.52V12h2.69l-.43 2.57h-2.26v6.18c4.66-.7 8.24-4.35 8.24-8.75 0-5.5-4.46-9.96-9.96-9.96z"/></svg>
+                      <a *ngIf="userProfile?.facebook" [href]="userProfile.facebook" target="_blank" rel="noopener"
+                        class="social-btn" title="Facebook">
+                        <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+                          <path
+                            d="M12 2.04c-5.5 0-9.96 4.46-9.96 9.96 0 4.4 3.58 8.05 8.24 8.75v-6.18h-2.48V12h2.48V9.76c0-2.44 1.46-3.8 3.7-3.8 1.07 0 2.18.19 2.18.19v2.4h-1.23c-1.21 0-1.58.75-1.58 1.52V12h2.69l-.43 2.57h-2.26v6.18c4.66-.7 8.24-4.35 8.24-8.75 0-5.5-4.46-9.96-9.96-9.96z" />
+                        </svg>
                       </a>
                       <!-- Instagram -->
-                      <a *ngIf="userProfile?.instagram" [href]="userProfile.instagram" target="_blank" rel="noopener" class="social-btn" title="Instagram">
-                        <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 4a5 5 0 100 10 5 5 0 000-10zm6-3a1 1 0 110 2 1 1 0 010-2z"/></svg>
+                      <a *ngIf="userProfile?.instagram" [href]="userProfile.instagram" target="_blank" rel="noopener"
+                        class="social-btn" title="Instagram">
+                        <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+                          <path
+                            d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 4a5 5 0 100 10 5 5 0 000-10zm6-3a1 1 0 110 2 1 1 0 010-2z" />
+                        </svg>
                       </a>
                       <!-- LinkedIn -->
-                      <a *ngIf="userProfile?.linkedin" [href]="userProfile.linkedin" target="_blank" rel="noopener" class="social-btn" title="LinkedIn">
-                        <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14a5 5 0 00-5 5v14a5 5 0 005 5h14a5 5 0 005-5v-14a5 5 0 00-5-5zm-10 19h-3v-9h3v9zm-1.5-10.29a1.74 1.74 0 110-3.48 1.74 1.74 0 010 3.48zm12.5 10.29h-3v-4.79c0-1.14-.02-2.6-1.58-2.6-1.58 0-1.82 1.23-1.82 2.52v4.87h-3v-9h2.88v1.23h.04c.4-.75 1.38-1.53 2.84-1.53 3.04 0 3.6 2 3.6 4.6v4.7z"/></svg>
+                      <a *ngIf="userProfile?.linkedin" [href]="userProfile.linkedin" target="_blank" rel="noopener"
+                        class="social-btn" title="LinkedIn">
+                        <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+                          <path
+                            d="M19 0h-14a5 5 0 00-5 5v14a5 5 0 005 5h14a5 5 0 005-5v-14a5 5 0 00-5-5zm-10 19h-3v-9h3v9zm-1.5-10.29a1.74 1.74 0 110-3.48 1.74 1.74 0 010 3.48zm12.5 10.29h-3v-4.79c0-1.14-.02-2.6-1.58-2.6-1.58 0-1.82 1.23-1.82 2.52v4.87h-3v-9h2.88v1.23h.04c.4-.75 1.38-1.53 2.84-1.53 3.04 0 3.6 2 3.6 4.6v4.7z" />
+                        </svg>
                       </a>
 
                       <!-- Placeholder cuando no hay enlaces -->
-                      <span *ngIf="!userProfile?.twitter && !userProfile?.facebook && !userProfile?.instagram && !userProfile?.linkedin" class="text-xs text-gray-500 dark:text-gray-400">Próximamente</span>
+                      <span
+                        *ngIf="!userProfile?.twitter && !userProfile?.facebook && !userProfile?.instagram && !userProfile?.linkedin"
+                        class="text-xs text-gray-500 dark:text-gray-400">Próximamente</span>
                     </div>
                   </div>
                 </div>
@@ -178,37 +215,41 @@
                 <div class="flex items-center w-1/2 gap-2">
                   <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Sorteos Creados</h2>
                   <div class="items-center justify-between space-x-2">
-                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded-full">
+                    <span
+                      class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded-full">
                       {{ userEvents?.length || 0 }} eventos
                     </span>
                   </div>
                 </div>
                 <div class="flex justify-end w-1/2">
-                  <div class="flex items-center space-x-2">
-                    <a routerLink="/audit" class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700" style="cursor: pointer;">Auditorías</a>
-                    <a routerLink="/panel" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700" style="cursor: pointer;">Nuevo evento</a>
+                  <div class="flex items-center space-x-2" *ngIf="isOwner">
+                    <a routerLink="/audit" class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700"
+                      style="cursor: pointer;">Auditorías</a>
+                    <a routerLink="/panel" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700"
+                      style="cursor: pointer;">Nuevo evento</a>
                   </div>
                 </div>
               </div>
 
               <!-- Lista de Eventos -->
               <div *ngIf="userEvents && userEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <app-draw-card 
-                  *ngFor="let event of userEvents" 
-                  [event]="event"
-                  [customBackground]="'bg-gray-50 dark:bg-gray-700'"
-                ></app-draw-card>
+                <app-draw-card *ngFor="let event of userEvents" [event]="event"
+                  [customBackground]="'bg-gray-50 dark:bg-gray-700'"></app-draw-card>
               </div>
 
               <!-- Estado Vacío -->
               <div *ngIf="!userEvents || userEvents.length === 0" class="text-center py-12">
-                <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                  <svg class="w-12 h-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                <div
+                  class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                  <svg class="w-12 h-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No hay sorteos creados</h3>
-                <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">Este usuario aún no ha creado ningún sorteo. ¡Vuelve más tarde para ver sus próximos eventos!</p>
+                <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">Este usuario aún no ha creado ningún
+                  sorteo. ¡Vuelve más tarde para ver sus próximos eventos!</p>
               </div>
             </div>
 
@@ -216,7 +257,8 @@
             <div *ngIf="activeTab === 'historial'" [@tabTransition] class="space-y-6">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Eventos inscritos</h2>
-                <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded-full">
+                <span
+                  class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded-full">
                   {{ joinedEvents?.length || 0 }} eventos
                 </span>
               </div>
@@ -226,32 +268,42 @@
                 <div class="animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent"></div>
                 <p class="ml-3 text-gray-600 dark:text-gray-300">Cargando historial...</p>
               </div>
-              <div *ngIf="joinedError" class="bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded relative mb-6">
+              <div *ngIf="joinedError"
+                class="bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded relative mb-6">
                 <span class="block sm:inline">{{ joinedError }}</span>
               </div>
 
               <!-- Lista simple de historial -->
               <div *ngIf="!joinedLoading && (!joinedEvents || joinedEvents.length === 0)" class="text-center py-12">
-                <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                  <svg class="w-12 h-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                <div
+                  class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                  <svg class="w-12 h-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Sin inscripciones</h3>
-                <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">No hay eventos en los que este usuario esté inscrito.</p>
+                <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">No hay eventos en los que este usuario esté
+                  inscrito.</p>
               </div>
 
-              <div *ngIf="!joinedLoading && joinedEvents && joinedEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div *ngFor="let event of joinedEvents" class="shadow-md rounded-lg p-4 bg-gray-50 dark:bg-gray-700 border border-zinc-700">
+              <div *ngIf="!joinedLoading && joinedEvents && joinedEvents.length > 0"
+                class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div *ngFor="let event of joinedEvents"
+                  class="shadow-md rounded-lg p-4 bg-gray-50 dark:bg-gray-700 border border-zinc-700">
                   <div class="flex gap-2 items-center">
                     <h3 class="text-lg font-semibold text-emerald-500">{{ event.title }}</h3>
-                    <span class="text-xs px-2 py-1 rounded bg-zinc-200 dark:bg-zinc-600 text-zinc-800 dark:text-zinc-200">{{ event.eventType }}</span>
+                    <span
+                      class="text-xs px-2 py-1 rounded bg-zinc-200 dark:bg-zinc-600 text-zinc-800 dark:text-zinc-200">{{
+                      event.eventType }}</span>
                   </div>
                   <p class="text-sm text-gray-400 mb-1">{{ event.description }}</p>
                   <p class="text-sm text-gray-400 mb-1"><b>Fecha fin</b>: {{ event.endDate }}</p>
                   <p class="text-sm text-gray-400 mb-1"><b>Estado</b>: {{ event.statusEvent | handleStatusPipe }}</p>
                   <div class="mt-2">
-                    <a [routerLink]="['/event/management', event.id]" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded text-sm">Ver detalles</a>
+                    <a [routerLink]="['/event/management', event.id]"
+                      class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded text-sm">Ver detalles</a>
                   </div>
                 </div>
               </div>
@@ -260,7 +312,7 @@
           </div>
         </div>
       </div>
-      
+
     </div>
   </div>
 </div>
