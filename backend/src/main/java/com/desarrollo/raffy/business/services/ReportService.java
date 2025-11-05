@@ -53,6 +53,13 @@ public class ReportService {
         return save(report);
     }
 
+    @Transactional(readOnly = true)
+    public List<Report> getReportEventId(Long eventId){
+        List<Report> reports = repository
+        .findbyeventId(eventId).orElseThrow(() -> new IllegalArgumentException("No se encontraron reportes para este evento."));
+        return reports;
+    }
+
     /**
      * Filtrar los reportes por estado y fecha y hora
      * @return

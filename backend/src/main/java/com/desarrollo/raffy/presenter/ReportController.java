@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,6 +56,19 @@ public class ReportController {
             return new ResponseEntity<>("No se encontraron reportes.", HttpStatus.BAD_REQUEST);
         }   
     }
+
+    @GetMapping("/review/event/{eventId}")
+    public ResponseEntity<?> getReportsEventId(@PathVariable("eventId") Long eventId) {
+        try {
+            List<Report> reports = service.getReportEventId(eventId);
+            return new ResponseEntity<>(reports, HttpStatus.OK);
+        } catch (IllegalArgumentException e){
+            return new ResponseEntity<>("No se encontraron reportes.", HttpStatus.BAD_REQUEST);
+        }catch (Exception e){
+            return new ResponseEntity<>("Error al obtener los reportes.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     @PutMapping("/review")
     public ResponseEntity<?> reviewReport(
