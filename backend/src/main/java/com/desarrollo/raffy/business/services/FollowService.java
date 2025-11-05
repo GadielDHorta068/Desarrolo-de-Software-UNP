@@ -1,5 +1,6 @@
 package com.desarrollo.raffy.business.services;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.security.core.Authentication;
@@ -72,5 +73,34 @@ public class FollowService {
     public boolean isFollowing(Long targetUserId) {
         RegisteredUser follower = getCurrentUser();
         return userFollowerRepository.existsByFollower_IdAndFollowed_Id(follower.getId(), targetUserId);
+    }
+
+    @Transactional(readOnly = true)
+    public long getFollowingCount(Long userId) {
+        return userFollowerRepository.countByFollower_Id(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getFollowersNicknames(Long userId) {
+        return userFollowerRepository.findByFollowed_Id(userId).stream()
+                .map(uf -> {
+                    RegisteredUser u = uf.getFollower();
+                    return u != null ? u.getNickname() : null;
+                })
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getFollowingNicknames(Long userId) {
+        return userFollowerRepository.findByFollower_Id(userId).stream()
+                .map(uf -> {
+                    RegisteredUser u = uf.getFollowed();
+                    return u != null ? u.getNickname() : null;
+                })
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
     }
 }

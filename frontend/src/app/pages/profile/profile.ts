@@ -58,8 +58,16 @@ export class Profile implements OnInit, OnDestroy {
   participatedEventsCount = 0;
   winnersTotalCount = 0;
   followersCount = 0;
+  followingCount = 0;
   isFollowing = false;
   viewerId: number | null = null;
+  // Listas y modales
+  followersNicknames: string[] = [];
+  followingNicknames: string[] = [];
+  showFollowersModal = false;
+  showFollowingModal = false;
+  listLoading = false;
+  listError = '';
   
   // Getter para manejar la imagen del perfil
   get profileImageSrc(): string {
@@ -394,6 +402,16 @@ export class Profile implements OnInit, OnDestroy {
         this.followersCount = 0;
       }
     });
+    // Cargar conteo de seguidos
+    this.authService.getFollowingCount(targetId).subscribe({
+      next: (count) => {
+        this.followingCount = count || 0;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.followingCount = 0;
+      }
+    });
     // Estado de seguimiento del usuario actual
     if (this.viewerId != null) {
       this.authService.isFollowing(targetId).subscribe({
@@ -408,6 +426,60 @@ export class Profile implements OnInit, OnDestroy {
     } else {
       this.isFollowing = false;
     }
+  }
+
+  openFollowersModal() {
+    if (!this.userProfile) return;
+    this.listLoading = true;
+    this.listError = '';
+    this.showFollowersModal = true;
+    this.authService.getFollowersNicknames(this.userProfile.id).subscribe({
+      next: (list) => {
+        this.followersNicknames = list || [];
+        this.listLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.followersNicknames = [];
+        this.listError = 'No se pudo cargar la lista de seguidores';
+        this.listLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  openFollowingModal() {
+    if (!this.userProfile) return;
+    this.listLoading = true;
+    this.listError = '';
+    this.showFollowingModal = true;
+    this.authService.getFollowingNicknames(this.userProfile.id).subscribe({
+      next: (list) => {
+        this.followingNicknames = list || [];
+        this.listLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.followingNicknames = [];
+        this.listError = 'No se pudo cargar la lista de seguidos';
+        this.listLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  closeModal() {
+    this.showFollowersModal = false;
+    this.showFollowingModal = false;
+    this.listLoading = false;
+    this.listError = '';
+  }
+
+  goToProfile(nickname: string) {
+    if (!nickname) return;
+    this.closeModal();
+    this.cdr.detectChanges();
+    this.router.navigate(['/profile', nickname]);
   }
 
   toggleFollow() {

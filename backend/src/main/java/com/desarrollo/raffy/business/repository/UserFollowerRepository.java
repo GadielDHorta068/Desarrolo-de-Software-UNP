@@ -10,6 +10,7 @@ import com.desarrollo.raffy.model.UserFollower;
 @Repository
 public interface UserFollowerRepository extends JpaRepository<UserFollower, Long> {
     long countByFollowed_Id(Long followedId);
+    long countByFollower_Id(Long followerId);
     boolean existsByFollower_IdAndFollowed_Id(Long followerId, Long followedId);
     void deleteByFollower_IdAndFollowed_Id(Long followerId, Long followedId);
 

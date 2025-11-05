@@ -1,5 +1,7 @@
 package com.desarrollo.raffy.presenter;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,5 +43,23 @@ public class UserFollowController {
     public ResponseEntity<Boolean> isFollowing(@PathVariable Long userId) {
         boolean following = followService.isFollowing(userId);
         return ResponseEntity.ok(following);
+    }
+
+    @GetMapping("/{userId}/following/count")
+    public ResponseEntity<Long> getFollowingCount(@PathVariable Long userId) {
+        long count = followService.getFollowingCount(userId);
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/{userId}/followers")
+    public ResponseEntity<List<String>> getFollowersNicknames(@PathVariable Long userId) {
+        List<String> users = followService.getFollowersNicknames(userId);
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/{userId}/following")
+    public ResponseEntity<List<String>> getFollowingNicknames(@PathVariable Long userId) {
+        List<String> users = followService.getFollowingNicknames(userId);
+        return ResponseEntity.ok(users);
     }
 }

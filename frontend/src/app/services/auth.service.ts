@@ -444,6 +444,26 @@ export class AuthService {
     }).pipe(catchError(this.handleError));
   }
 
+  /** Seguidos (conteo) */
+  getFollowingCount(userId: number): Observable<number> {
+    return this.http.get<number>(`${this.USERS_URL}/${userId}/following/count`, {
+      headers: this.getAuthHeaders()
+    }).pipe(catchError(this.handleError));
+  }
+
+  /** Listados de usuarios por nickname */
+  getFollowersNicknames(userId: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.USERS_URL}/${userId}/followers`, {
+      headers: this.getAuthHeaders()
+    }).pipe(catchError(this.handleError));
+  }
+
+  getFollowingNicknames(userId: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.USERS_URL}/${userId}/following`, {
+      headers: this.getAuthHeaders()
+    }).pipe(catchError(this.handleError));
+  }
+
   /**
    * Maneja errores de HTTP
    */
