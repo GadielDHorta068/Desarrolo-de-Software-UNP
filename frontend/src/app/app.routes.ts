@@ -93,29 +93,15 @@ export const routes: Routes = [
     title: 'Eventos - Raffy',
     data: {animation: 'event'}
   },
-  // {
-  //   path: 'draws',
-  //   children: [
-  //     {
-  //       path: 'all',
-  //       loadComponent: () => import('./pages/public-events/public-events').then(m => m.PublicEvents),
-  //       title: 'HUB de eventos - Raffy'
-  //     },
-  //     { path: 'edit',
-  //       loadComponent: () => import('./pages/edit-event/edit-event').then(m => m.EditEvent),
-  //       // canActivate: [GuestGuard],
-  //       title: 'Editar sorteo - Raffy'
-  //     },
-  //     {
-  //       path: '**',
-  //       redirectTo: '/all'
-  //     }
-  //   ]
-  // },
   {
     path: 'public-events',
     loadComponent: () => import('./pages/public-events/public-events').then(m => m.PublicEvents),
     title: 'HUB de eventos - Raffy'
+  },
+  {
+    path: 'events/reported',
+    loadComponent: () => import('./pages/reported-events/reported-events').then(m => m.ReportedEvents),
+    title: 'Lista de reportados - Raffy'
   },
   {
     path: 'winners/:eventId',

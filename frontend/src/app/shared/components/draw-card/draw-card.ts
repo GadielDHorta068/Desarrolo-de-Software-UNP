@@ -40,6 +40,7 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   private authSubscription?: Subscription;
   isCreator: boolean = false;
   public StatusEvent = StatusEvent;
+  isAdmin: boolean = true;
 
   // modal de inscripcion a sorteo
   showFormGiveaway = false; // el modal empieza desactivado
@@ -149,6 +150,10 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     console.log("[onAdmin] => evento seleccionado: ", this.event);
     this.adminEventService.setSelectedEvent(this.event);
     this.router.navigate([`/event/management/${this.event?.id}`]);
+  }
+
+  public onRedirectReports(){
+    console.log("[onAdmin] => redirigimos a ver los reportados: ");
   }
 
   // Cerrar inscripciones (solo creador)

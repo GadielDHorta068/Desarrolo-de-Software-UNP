@@ -23,11 +23,14 @@ import { NotificationService } from '../../services/notification.service';
 import { BuyRaffleNumberDTO } from '../../models/buyRaffleNumberDTO';
 import { RaffleNumbersComponent } from '../raffle-numbers.component/raffle-numbers.component';
 import { AdminInscriptService } from '../../services/admin/adminInscript';
+import { InviteLoginComponent } from '../../shared/components/invite-login/invite-login.component';
+import { ReportsFormComponent } from '../../shared/components/reports-form/reports-form.component';
 
 @Component({
     selector: 'app-management-event',
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent, HandleDatePipe,
-        EventShareCardComponent, ModalShareEvent, RaffleNumbersComponent, QuestionaryComponent, TagPrize],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent,
+        HandleDatePipe, EventShareCardComponent, ModalShareEvent, RaffleNumbersComponent,
+        QuestionaryComponent, TagPrize, InviteLoginComponent, ReportsFormComponent],
     templateUrl: './management-event.html',
     styleUrl: './management-event.css',
     providers: [HandleDatePipe]
@@ -36,6 +39,8 @@ export class ManagementEvent {
     @ViewChild('modalShareEvent') modalShareEvent!: ModalShareEvent;
     // @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
     // dataModal: InfoModal = { title: "Actualización de datos", message: "" };
+    showInviteLogin: boolean = false;
+    showFormReport: boolean = false;
 
     // evento en contexto (debe ser seteado desde donde se quiere interactuar con el dato, por ej el boton de EDITAR)
     event!: EventsTemp | null;
@@ -220,6 +225,32 @@ export class ManagementEvent {
 
     isInfoTab(): boolean {
         return this.tab === this.TAB_INFO;
+    }
+
+    // le brinda al usuario la posibilidad de reportar un evento
+    onReport(){
+        // invitar al usuario a que se loguee para crear el reporte
+        if(!this.authService.isAuthenticated()){
+            this.showInviteLogin = true;
+            this.cdr.detectChanges();
+        }
+        else{
+            // mostramos el modal de reportes
+            this.showFormReport = true;
+            this.cdr.detectChanges();
+        }
+    }
+
+    onReportClosed(){
+        this.showFormReport = false;
+    }
+
+    onInviteClosed(data: any){
+        this.showInviteLogin = false;
+        this.cdr.detectChanges();
+        if(data?.redirect){
+            this.router.navigateByUrl("/login");
+        }
     }
 
 }
