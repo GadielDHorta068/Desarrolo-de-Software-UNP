@@ -1,15 +1,19 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy, HostListener, ElementRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, HostListener, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { ChatService } from '../../../services/chat.service';
-import { interval, Subscription, switchMap, startWith } from 'rxjs';
+import { interval, Subscription, switchMap, startWith, Subject, debounceTime, distinctUntilChanged, of, forkJoin, catchError, finalize } from 'rxjs';
 import { UnreadChatSummary } from '../../../models/message.model';
+import { FormsModule } from '@angular/forms';
+import { EventsService } from '../../../services/events.service';
+import { EventsTemp } from '../../../models/events.model';
+import { UserResponse } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
@@ -29,10 +33,21 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private unreadSub?: Subscription;
   private unreadPeersSub?: Subscription;
+  private searchSub?: Subscription;
+
+  // Búsqueda en header
+  isSearchOpen = false;
+  searchTerm = '';
+  searching = false;
+  searchUsers: UserResponse[] = [];
+  searchEvents: EventsTemp[] = [];
+  private searchInput$ = new Subject<string>();
+  @ViewChild('searchInputRef') searchInputRef?: ElementRef<HTMLInputElement>;
 
   constructor(
     private authService: AuthService,
     private chatService: ChatService,
+    private eventsService: EventsService,
     private router: Router,
     private cdr: ChangeDetectorRef,
     private elRef: ElementRef<HTMLElement>
@@ -61,11 +76,47 @@ export class HeaderComponent implements OnInit, OnDestroy {
       // Forzar detección de cambios
       this.cdr.detectChanges();
     });
+
+    // Configurar búsqueda con debounce y consulta paralela a eventos + perfiles
+    this.searchSub = this.searchInput$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(term => {
+          const q = (term || '').trim();
+          if (!q) {
+            this.searchUsers = [];
+            this.searchEvents = [];
+            this.searching = false;
+            this.cdr.detectChanges();
+            return of({ users: [], events: [] });
+          }
+          this.searching = true;
+          return forkJoin({
+            users: this.authService.searchUsers(q).pipe(catchError(() => of([]))),
+            events: this.eventsService.searchEvents(q).pipe(catchError(() => of([])))
+          }).pipe(finalize(() => {
+            this.searching = false;
+          }));
+        })
+      )
+      .subscribe(({ users, events }) => {
+        this.searchUsers = users || [];
+        const q = (this.searchTerm || '').trim().toLowerCase();
+        const base = events || [];
+        this.searchEvents = base.filter(evt => {
+          const t = (evt.title || '').toLowerCase();
+          const d = (evt.description || '').toLowerCase();
+          return t.includes(q) || d.includes(q);
+        });
+        this.cdr.detectChanges();
+      });
   }
 
   ngOnDestroy(): void {
     this.stopUnreadPolling();
     this.unreadPeersSub?.unsubscribe();
+    this.searchSub?.unsubscribe();
   }
 
   // Cerrar menús al hacer clic fuera
@@ -75,6 +126,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (!target) return;
     if (!this.elRef.nativeElement.contains(target)) {
       this.closeMenus();
+      this.closeSearch();
       this.cdr.detectChanges();
     }
   }
@@ -153,6 +205,41 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isMenuOpen = false;
     this.isUserMenuOpen = false;
     this.isUnreadOpen = false;
+  }
+
+  // ---- Búsqueda ----
+  toggleSearch(): void {
+    this.isSearchOpen = !this.isSearchOpen;
+    if (this.isSearchOpen) {
+      setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 0);
+    } else {
+      this.closeSearch();
+    }
+  }
+
+  onSearchInput(): void {
+    this.searchInput$.next(this.searchTerm);
+  }
+
+  closeSearch(): void {
+    this.isSearchOpen = false;
+    this.searchTerm = '';
+    this.searchUsers = [];
+    this.searchEvents = [];
+  }
+
+  goToProfile(nickname: string): void {
+    if (!nickname) return;
+    this.router.navigate(['/profile', nickname]);
+    this.closeSearch();
+    this.closeMenus();
+  }
+
+  goToEvent(eventId: number): void {
+    if (!eventId) return;
+    this.router.navigate(['/event/management', eventId]);
+    this.closeSearch();
+    this.closeMenus();
   }
 
   openChat(peerId: number): void {

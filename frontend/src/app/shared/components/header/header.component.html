@@ -27,6 +27,63 @@
 
       <!-- User Controls -->
       <div class="flex items-center space-x-4">
+        <!-- Search (Desktop) -->
+        <div class="relative hidden md:flex items-center">
+          <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
+               [style.width.px]="isSearchOpen ? 320 : 40" aria-label="Buscar perfiles o eventos">
+            <button (click)="toggleSearch()" class="p-2 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors" aria-label="Abrir búsqueda">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" />
+              </svg>
+            </button>
+            <input #searchInputRef type="text" [attr.aria-expanded]="isSearchOpen" [attr.tabindex]="isSearchOpen ? 0 : -1"
+                   class="bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 px-2 py-1 flex-1 placeholder-gray-400 dark:placeholder-gray-500"
+                   placeholder="Buscar perfiles o eventos..." [(ngModel)]="searchTerm" (input)="onSearchInput()"
+                   [style.opacity]="isSearchOpen ? 1 : 0" />
+            <div *ngIf="searching" class="mr-2 h-4 w-4 border-2 border-gray-400 dark:border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+
+          <!-- Resultados -->
+          <div *ngIf="isSearchOpen && (searchUsers.length || searchEvents.length)"
+               class="absolute left-0 top-full mt-2 w-[28rem] max-w-[28rem] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 dropdown-enter-active">
+            <div class="max-h-80 overflow-auto py-2">
+              <!-- Perfiles -->
+              <div *ngIf="searchUsers.length" class="px-3 pb-2">
+                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Perfiles</div>
+                <a *ngFor="let u of searchUsers" (click)="goToProfile(u.nickname)"
+                   class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                  <div class="h-8 w-8 rounded-full overflow-hidden bg-emerald-600 text-white text-sm flex items-center justify-center font-semibold">
+                    <img *ngIf="u.imagen" [src]="u.imagen?.startsWith('data:') ? u.imagen : ('data:image/jpeg;base64,' + u.imagen)"
+                         alt="Avatar" class="w-full h-full object-cover" />
+                    <span *ngIf="!u.imagen">{{ u.name?.charAt(0)?.toUpperCase() || u.nickname?.charAt(0)?.toUpperCase() || 'U' }}</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ u.name }} {{ u.surname }}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">@{{ u.nickname }}</span>
+                  </div>
+                </a>
+              </div>
+
+              <!-- Eventos -->
+              <div *ngIf="searchEvents.length" class="px-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Eventos</div>
+                <a *ngFor="let evt of searchEvents" (click)="goToEvent(evt.id)"
+                   class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                  <div class="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
+                    <img *ngIf="evt.imageUrl" [src]="evt.imageUrl" alt="Imagen" class="w-full h-full object-cover" />
+                    <svg *ngIf="!evt.imageUrl" class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8" />
+                    </svg>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ evt.title }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ evt.description }}</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
         <!-- Dark Mode Toggle -->
         <button (click)="toggleTheme()" aria-label="Cambiar tema de color"
           class="hidden md:flex text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
@@ -169,6 +226,58 @@
   <div *ngIf="isMenuOpen" id="mobile-menu"
     class="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 animate-slide-down">
     <div class="px-2 pt-2 pb-3 space-y-1">
+      <!-- Mobile Search -->
+      <div class="px-1 py-2">
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Buscar</div>
+        <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-2">
+          <svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" />
+          </svg>
+          <input type="text" class="bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 px-2 py-2 flex-1 placeholder-gray-400 dark:placeholder-gray-500"
+                 placeholder="Perfiles o eventos..." [(ngModel)]="searchTerm" (input)="onSearchInput()" />
+          <div *ngIf="searching" class="ml-2 h-4 w-4 border-2 border-gray-400 dark:border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
+        <div *ngIf="(searchUsers.length || searchEvents.length) && (searchTerm || '').trim().length"
+             class="mt-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+          <div class="max-h-64 overflow-auto py-2">
+            <!-- Perfiles -->
+            <div *ngIf="searchUsers.length" class="px-3 pb-2">
+              <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Perfiles</div>
+              <a *ngFor="let u of searchUsers" (click)="goToProfile(u.nickname)"
+                 class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                <div class="h-8 w-8 rounded-full overflow-hidden bg-emerald-600 text-white text-sm flex items-center justify-center font-semibold">
+                  <img *ngIf="u.imagen" [src]="u.imagen?.startsWith('data:') ? u.imagen : ('data:image/jpeg;base64,' + u.imagen)"
+                       alt="Avatar" class="w-full h-full object-cover" />
+                  <span *ngIf="!u.imagen">{{ u.name?.charAt(0)?.toUpperCase() || u.nickname?.charAt(0)?.toUpperCase() || 'U' }}</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ u.name }} {{ u.surname }}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400">@{{ u.nickname }}</span>
+                </div>
+              </a>
+            </div>
+
+            <!-- Eventos -->
+            <div *ngIf="searchEvents.length" class="px-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Eventos</div>
+              <a *ngFor="let evt of searchEvents" (click)="goToEvent(evt.id)"
+                 class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                <div class="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
+                  <img *ngIf="evt.imageUrl" [src]="evt.imageUrl" alt="Imagen" class="w-full h-full object-cover" />
+                  <svg *ngIf="!evt.imageUrl" class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8" />
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <div class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ evt.title }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ evt.description }}</div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
       <a routerLink="/" (click)="closeMenus()"
         class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md text-base font-medium transition-colors">
         Inicio

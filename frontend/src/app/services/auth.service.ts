@@ -465,6 +465,15 @@ export class AuthService {
   }
 
   /**
+   * Busca usuarios por nickname (parcial, case-insensitive)
+   */
+  searchUsers(query: string): Observable<UserResponse[]> {
+    return this.http.get<UserResponse[]>(`${this.API_URL}/users/search`, {
+      params: { query }
+    }).pipe(catchError(this.handleError));
+  }
+
+  /**
    * Maneja errores de HTTP
    */
   private handleError = (error: any): Observable<never> => {
