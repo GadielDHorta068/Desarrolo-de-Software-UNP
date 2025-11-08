@@ -24,7 +24,7 @@ public class ReportService {
     private EventsRepository eventsRepository;
 
     @Autowired
-    private AuditLogsService auditLogsService;
+    private EmailService emailService;
 
     @Transactional
     public Report save(Report report){
@@ -81,18 +81,33 @@ public class ReportService {
         Events events = eventsRepository.findById(eventId)
         .orElseThrow(() -> new IllegalArgumentException("No se encontro el evento"));
 
+        String reason;
         if (status == StatusReport.APPROVED) {
             report.setStatusReport(StatusReport.APPROVED);
             events.setStatusEvent(StatusEvent.BLOCKED); // Bloqueamos el eventos
+            reason = "El reporte ha sido verificado y el evento ha sido bloqueado por incumplir nuestras políticas.";
         } else if(status == StatusReport.REJECTED) {
             report.setStatusReport(StatusReport.REJECTED);
+            reason = "El reporte ha sido verificado y el evento no incumple nuestras políticas.";
         } else{
             throw new IllegalArgumentException("Estado inválido para revisión del reporte.");
         }
 
         eventsRepository.save(events);
+        Report saveReport = repository.save(report);
 
-        return repository.save(report);
+        try {
+            emailService.sendEmailToReporter(
+                report.getMailUserReport(),
+                events.getTitle(),
+                status,
+                reason
+            );
+        } catch (Exception e){
+            // Manejo de excepción si el envío de correo falla
+            System.err.println("Error al enviar el correo electrónico: " + e.getMessage());
+        }
+        return saveReport;
     }
 
     /**

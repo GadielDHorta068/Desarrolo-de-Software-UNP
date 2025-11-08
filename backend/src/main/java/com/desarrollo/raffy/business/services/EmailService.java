@@ -1,6 +1,8 @@
 package com.desarrollo.raffy.business.services;
 
 import com.desarrollo.raffy.dto.WinnerDTO;
+import com.desarrollo.raffy.model.StatusReport;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.core.io.ByteArrayResource;
@@ -595,6 +597,86 @@ public class EmailService {
             // Fallback a HTML simple si falla inline resources
             sendHtmlEmail(to, "Confirmación de compra - Rafify", htmlContent);
         }
+    }
+    /**
+     * Notifica al usuario el estado de su reporte de evento.
+     * @param emailReport
+     * @param eventTitle
+     * @param status
+     * @param reason
+     */
+    public void sendEmailToReporter(
+                                    String emailReport,
+                                    String eventTitle,
+                                    StatusReport status,
+                                    String reason) {
+        if (emailReport == null || emailReport.isBlank()) return;
+        String subject = "Actualización de tu reporte - Raffify";
+        String statusText = status == StatusReport.APPROVED ? "aprobado" : "rechazado";
+        String htmlContent = generateReportStatusTemplate(
+            eventTitle, 
+            statusText, 
+            reason
+        );
+
+        String textBody = String.format(
+            """
+            Hola,
+            Te informamos que el estado de tu reporte sobre el evento "%s" ha sido %s.
+            
+            %s
+
+            Si tienes alguna pregunta, no dudes en contactarnos.
+
+            Saludos,
+            Equipo de Raffify
+            """, 
+            eventTitle, statusText, reason
+        );
+
+        try {
+            sendEmailWithInlineResources(
+                emailReport, 
+                subject, 
+                htmlContent, 
+                emailTemplateService.getDefaultInlineResources()
+            );
+        } catch (Exception e) {
+            // Fallback a correo simple si falla el HTML
+           sendEmail(emailReport, subject, textBody);
+        }
+
+    }
+
+    /**
+     * Genera la plantilla HTML para el estado del reporte.
+     * @param eventTitle
+     * @param status
+     * @param reason
+     * @return
+     */
+    public String generateReportStatusTemplate(String eventTitle, String status, String reason) {
+        return String.format(
+            """
+            <!DOCTYPE html>
+            <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Estado de su reporte - Raffify</title>
+                </head>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                        <h2 style="color: #2c3e50;">Estado de su reporte</h2>
+                        <p>Estimado usuario,</p>
+                        <p>Le informamos que el estado de su reporte sobre el evento "<strong>%s</strong>" ha sido <strong>%s</strong>.</p>
+                        <p>%s</p>
+                        <p style="margin-top: 30px;">Gracias por ayudarnos a mantener la comunidad segura y confiable.</p>
+                        <p>Atentamente,<br/>El equipo de Raffify</p>
+                        <p style="font-size: 0.9em; color: #888;">Este es un correo automático, por favor no responda.</p>
+                    </div>
+                </body>
+            </html>
+            """,eventTitle, status, reason);
     }
 
     /**
