@@ -24,7 +24,7 @@ import { BuyRaffleNumberDTO } from '../../models/buyRaffleNumberDTO';
 import { RaffleNumbersComponent } from '../raffle-numbers.component/raffle-numbers.component';
 import { AdminInscriptService } from '../../services/admin/adminInscript';
 import { InviteLoginComponent } from '../../shared/components/invite-login/invite-login.component';
-import { ReportsFormComponent } from '../../shared/components/reports-form/reports-form.component';
+import { ReportsFormComponent, ResumeService } from '../../shared/components/reports-form/reports-form.component';
 
 @Component({
     selector: 'app-management-event',
@@ -251,6 +251,10 @@ export class ManagementEvent {
         if(data?.redirect){
             this.router.navigateByUrl("/login");
         }
+    }
+
+    resultReport(data: ResumeService){
+        data.status == "OK" ? this.notificationService.notifySuccess(data.msg): this.notificationService.notifyError(data.msg);
     }
 
 }

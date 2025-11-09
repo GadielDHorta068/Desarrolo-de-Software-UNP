@@ -101,7 +101,12 @@ export const routes: Routes = [
   {
     path: 'events/reported',
     loadComponent: () => import('./pages/reported-events/reported-events').then(m => m.ReportedEvents),
-    title: 'Lista de reportados - Raffy'
+    title: 'Eventos reportados - Raffy'
+  },
+  {
+    path: 'event/:eventId/reports',
+    loadComponent: () => import('./pages/reports/reports').then(m => m.Reports),
+    title: 'Lista de reportes - Raffy'
   },
   {
     path: 'winners/:eventId',

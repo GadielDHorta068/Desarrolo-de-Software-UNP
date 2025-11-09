@@ -1,0 +1,36 @@
+<div class="rounded-[6px] p-[10px] border-2 border-[darkslategray]">
+    <div class="flex items-center gap-2 pb-2">
+        <div>
+            <label class="text-[1rem] text-[lightyellow]">Usuario: </label>
+            <label class="text-[1rem] text-[yellow]">{{report?.mailUserReport}}</label>
+        </div>
+        <!-- <div class="text-orange-400 pl-[6%] font-sans"> -->
+        <div class="pl-[6%] font-sans" [style.color]="(report?.statusReport == 'EARRING') ? 'orange' : (report?.statusReport == 'APPROVED') ? 'green': 'red'">
+            <strong>{{report?.statusReport | handleReportStatusPipe}}</strong>
+        </div>
+    </div>
+    <div class="grid-resolution">
+        <div>
+            <p>{{report?.reason}}</p>
+            <div class="pt-2">
+                <strong class="text-gray-400 font-roboto">Fecha: {{report?.timestamp}}</strong>
+            </div>
+        </div>
+        <!-- probando un texto largo -->
+        <!-- <p>asdasda dasd asd as d sf sdg s g s gs d fs d fs dfsdfsdfs df sdf sdfsdf sdf sdfs f sd fs 
+            sdfsdfsdfsdfs asda sda sda sda sd asdasdasd asdas dasdasd</p> -->
+        <!-- la botonera de resolucion -->
+        <div class="text-center">
+            <button *ngIf="isPending"
+                class="bg-green-500 dark:bg-green-500 hover:bg-green-500 dark:hover:bg-green-400 text-white px-4 py-1 m-1 rounded-lg text-sm font-medium transition-colors"
+                (click)="onResolve('APPROVED')">
+                Aprobar
+            </button>
+            <button *ngIf="isPending"
+                class="bg-red-500 dark:bg-red-500 hover:bg-red-500 dark:hover:bg-red-400 text-white px-4 py-1 m-1 rounded-lg text-sm font-medium transition-colors"
+                (click)="onResolve('REJECTED')">
+                Rechazar
+            </button>
+        </div>
+    </div>
+</div>
