@@ -40,7 +40,7 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   private authSubscription?: Subscription;
   isCreator: boolean = false;
   public StatusEvent = StatusEvent;
-  isAdmin: boolean = true;
+  isAdmin: boolean = false;
 
   // modal de inscripcion a sorteo
   showFormGiveaway = false; // el modal empieza desactivado
