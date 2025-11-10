@@ -65,6 +65,12 @@ export class ReportService {
     return this.http.put<Report>(`${this.apiUrl}/review?reportId=${reportId}&eventId=${eventId}&status=${status}`, { headers });
   }
 
+  // determina si el usuario ya ha reportado el evento
+  hasReportedEvent(eventId: string, mailUser: string): Observable<boolean> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<boolean>(`${this.apiUrl}/has-reported?eventId=${eventId}&userMail=${mailUser}`, { headers });
+  }
+
   private getAuthHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${this.authService.getToken()}`,

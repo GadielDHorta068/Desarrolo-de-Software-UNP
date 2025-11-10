@@ -82,6 +82,7 @@ export class AuthService {
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   
   private isLoggingOut = false;
+  isOperatorAdmin: boolean = false;
 
   constructor(
     private http: HttpClient,
@@ -297,6 +298,13 @@ export class AuthService {
    */
   isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  /**
+   * Determina si el operador es un usuario admin
+   */
+  isAdminUser(): boolean {
+    return this.currentUserSubject.value?.userType == "ADMIN";
   }
 
   /**

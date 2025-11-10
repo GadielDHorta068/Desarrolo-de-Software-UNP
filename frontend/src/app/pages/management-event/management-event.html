@@ -94,8 +94,7 @@
     </ng-template>
   </div>
 
-  <!-- <div class="flex gap-2"> -->
-  <div *ngIf="!isUserCreator" class="flex gap-4 border-4 border-orange-500 p-2.5 rounded-md">
+  <div *ngIf="!isUserCreator && !hasReport" class="flex gap-4 border-4 border-orange-500 p-2.5 rounded-md">
     <img src="assets/warning.png" class="w-6">
     <strong class="text-[1rem]">¿Has encontrado algún inconveniente o quieres realizar una observación sobre el evento?</strong>
     <button class="bg-orange-500 text-white py-[1px] px-2 rounded" title="Reportar" (click)="onReport()">Reportar</button>

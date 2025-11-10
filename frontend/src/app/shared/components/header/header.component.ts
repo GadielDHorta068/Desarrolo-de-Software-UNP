@@ -19,6 +19,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isMenuOpen = false;
   isUserMenuOpen = false;
   unreadCount = 0;
+  isAdmin: boolean = false;
 
   // Dropdown de chats no leídos
   isUnreadOpen = false;
@@ -48,6 +49,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // Suscribirse al estado de autenticación
     this.authService.isAuthenticated$.subscribe(isAuth => {
       this.isAuthenticated = isAuth;
+      this.isAdmin = (this.authService.getCurrentUserValue()?.userType == "ADMIN");
       if (isAuth) {
         this.loadCurrentUser();
         this.startUnreadPolling();

@@ -178,7 +178,7 @@
   <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ event?.title }}</h1>
   <hr class="border-gray-300 dark:border-gray-700" />
 
-  <h2>Total de reportes: {{reports.length}} ({{countAproved}} aprobado/s, {{countEarring}} pendiente/s, {{countRejected}} rechazado/s)</h2>
+  <h2 *ngIf="reports.length > 0">Total de reportes: {{reports.length}} ({{countAproved}} aprobado/s, {{countEarring}} pendiente/s, {{countRejected}} rechazado/s)</h2>
 
   <!-- lista de reportes del evento -->
   <div *ngFor="let report of reports">

@@ -69,9 +69,11 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
           this.authService.getCurrentUser().subscribe({
             next: (user) => {
               this.currentUser = user;
+              this.isAdmin = (this.currentUser.userType == "ADMIN");
+              // console.log('[userActual] => es admin: ', this.isAdmin);
             },
             error: (error) => {
-              console.error('Error obteniendo usuario actual:', error);
+              console.error('[userActual] => Error obteniendo usuario actual:', error);
               this.currentUser = null;
             }
           });

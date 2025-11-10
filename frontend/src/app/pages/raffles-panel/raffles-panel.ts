@@ -10,6 +10,7 @@ import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 import { ParseFileService } from '../../services/utils/parseFile.service';
 import { NotificationService } from '../../services/notification.service';
 import { Router } from '@angular/router';
+import { AdminEventService } from '../../services/admin/adminEvent.service';
 
 @Component({
   selector: 'app-raffles-panel',
@@ -39,7 +40,8 @@ export class RafflesPanel {
     private parseFileService: ParseFileService,
     private cdr: ChangeDetectorRef,
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private adminEventService: AdminEventService
   ){
     this.initDateMin();
     this.userCurrent = this.authService.getCurrentUserValue();
@@ -93,6 +95,7 @@ export class RafflesPanel {
         this.formPanel.disable();
         this.eventCreated = true;
         this.notificationService.notifySuccess("Evento creado correctamente");
+        this.adminEventService.setSelectedEvent(response);
         this.router.navigateByUrl("/event/management/"+response.id);
       },
       error: (error) => {

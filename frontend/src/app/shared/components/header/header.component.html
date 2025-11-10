@@ -22,7 +22,7 @@
           class="nav-link text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
           Explorar
         </a>
-        <a routerLink="/events/reported" routerLinkActive="active-link"
+        <a *ngIf="isAdmin" routerLink="/events/reported" routerLinkActive="active-link"
           class="nav-link text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
           Eventos reportados
         </a>
