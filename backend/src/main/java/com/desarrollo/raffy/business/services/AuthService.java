@@ -1,5 +1,7 @@
 package com.desarrollo.raffy.business.services;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -223,6 +225,13 @@ public class AuthService {
         RegisteredUser user = userRepository.findByNickname(nickname)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con nickname: " + nickname));
         return mapToUserResponse(user);
+    }
+
+    public List<UserResponse> searchUsersByNickname(String query) {
+        List<RegisteredUser> users = userRepository.findByNicknameContainingIgnoreCase(query);
+        return users.stream()
+                .map(this::mapToUserResponse)
+                .collect(Collectors.toList());
     }
 
     private UserResponse mapToUserResponse(RegisteredUser user) {
