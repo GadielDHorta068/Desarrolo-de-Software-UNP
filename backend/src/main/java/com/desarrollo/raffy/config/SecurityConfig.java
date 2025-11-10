@@ -81,6 +81,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/mp/process-payment").permitAll()
                         .requestMatchers("/api/url/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        // Auditoria
+                        .requestMatchers("/audit/**").permitAll()
+                        // Reportes
+                        .requestMatchers("/reports/**").permitAll()
+                        // Reviews
+                        .requestMatchers("/reviews/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -1,0 +1,66 @@
+package com.desarrollo.raffy.presenter;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.desarrollo.raffy.Response;
+import com.desarrollo.raffy.business.services.ReviewService;
+import com.desarrollo.raffy.dto.ReviewFromBackToFrontDTO;
+import com.desarrollo.raffy.dto.ReviewFromFrontToBackDTO;
+import com.desarrollo.raffy.model.Review;
+
+import lombok.extern.slf4j.Slf4j;
+
+@RestController
+@RequestMapping("/reviews")
+
+@Slf4j
+
+public class ReviewController {
+
+    @Autowired
+    private ReviewService reviewService;
+
+    @GetMapping("/user/{userEmail}")
+    public ResponseEntity<?> getReviewsByUserEmail(
+        @PathVariable("userEmail") String aUserEmail
+    ) {
+        try {
+            List<ReviewFromBackToFrontDTO> reviews = reviewService.findReviewsByEventCreatorEmail(aUserEmail);
+            if (reviews.isEmpty() || reviews == null) {
+                return new ResponseEntity<>("no se encontraron reviews para el usuario con email: " + aUserEmail, null);
+            }
+            return new ResponseEntity<>(reviews, HttpStatus.OK);
+        }
+        catch (Exception e) {
+            return new ResponseEntity<>("error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @PostMapping("/event/{eventId}/create-review")
+    public ResponseEntity<?> createReview(
+        @PathVariable("eventId") Long aEventId,
+        @RequestBody ReviewFromFrontToBackDTO aReviewFromFrontToBack
+    ) {
+        try {
+            Review savedReview = reviewService.save(aReviewFromFrontToBack, aEventId);
+            return Response.ok(savedReview, "Review creada con éxito");
+        } catch (IllegalArgumentException e) {
+            return Response.error(e, e.getMessage()); // error controlado (400)
+        } catch (Exception e) {
+            return Response.error(e, "Ocurrió un error al crear la review");
+        }
+    }
+
+}
