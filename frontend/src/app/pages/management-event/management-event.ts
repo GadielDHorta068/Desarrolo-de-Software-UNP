@@ -1,41 +1,43 @@
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EventsTemp, EventType, EventTypes, RaffleCreate, RaffleNumber, RaffleParticipantDTO, StatusEvent } from '../../models/events.model';
+import { EventsTemp, EventType, EventTypes, RaffleNumber, RaffleParticipantDTO, StatusEvent } from '../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 import { Category } from '../../services/category.service';
 import { HandleDatePipe } from '../../pipes/handle-date.pipe';
 import { LoaderImage } from '../../shared/components/loader-image/loader-image';
-import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
+import { ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { InfoEvent } from '../../shared/components/info-event/info-event';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EventShareCardComponent } from '../../shared/event-share-card/event-share-card.component';
-import { AuthService, UserResponse } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 import { ModalShareEvent } from '../../shared/components/modal-share-event/modal-share-event';
 import { QuestionaryComponent } from '../questionary/questionary.component';
 import { EventsService } from '../../services/events.service';
 import { UserDTO } from '../../models/UserDTO';
 import { WinnerDTO } from '../../models/winner.model';
-import { DataStatusEvent } from '../../models/response.model';
 import { TagPrize } from '../../shared/components/tag-prize/tag-prize';
-import { QuestionaryService } from '../../services/questionary.service';
 import { NotificationService } from '../../services/notification.service';
-import { BuyRaffleNumberDTO } from '../../models/buyRaffleNumberDTO';
 import { RaffleNumbersComponent } from '../raffle-numbers.component/raffle-numbers.component';
 import { AdminInscriptService } from '../../services/admin/adminInscript';
+import { InviteLoginComponent } from '../../shared/components/invite-login/invite-login.component';
+import { ReportsFormComponent, ResumeService } from '../../shared/components/reports-form/reports-form.component';
+import { ReportService } from '../../services/report.service';
 
 @Component({
     selector: 'app-management-event',
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent, HandleDatePipe,
-        EventShareCardComponent, ModalShareEvent, RaffleNumbersComponent, QuestionaryComponent, TagPrize],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent,
+        HandleDatePipe, EventShareCardComponent, ModalShareEvent, RaffleNumbersComponent,
+        QuestionaryComponent, TagPrize, InviteLoginComponent, ReportsFormComponent],
     templateUrl: './management-event.html',
     styleUrl: './management-event.css',
     providers: [HandleDatePipe]
 })
 export class ManagementEvent {
     @ViewChild('modalShareEvent') modalShareEvent!: ModalShareEvent;
-    // @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
-    // dataModal: InfoModal = { title: "Actualización de datos", message: "" };
+
+    showInviteLogin: boolean = false;
+    showFormReport: boolean = false;
 
     // evento en contexto (debe ser seteado desde donde se quiere interactuar con el dato, por ej el boton de EDITAR)
     event!: EventsTemp | null;
@@ -55,6 +57,7 @@ export class ManagementEvent {
     showRaffleModal = false;
     userLogged!: UserDTO;
     selectedEventId!: number;
+    hasReport: boolean = false;         // flag para determinar si el usuario ya ha reportado el evento
 
     // TABS
     readonly TAB_INFO = 'info';
@@ -76,23 +79,10 @@ export class ManagementEvent {
         private authService: AuthService,
         private eventService: EventsService,
         private cdr: ChangeDetectorRef,
-        private questionaryService: QuestionaryService,
         private notificationService: NotificationService,
-        private adminInscriptService: AdminInscriptService
+        private adminInscriptService: AdminInscriptService,
+        private reportsService: ReportService
     ) {
-        this.adminEventService.selectedEvent$.subscribe(
-            currentEvent => {
-                this.eventAux = currentEvent ? { ...currentEvent } : null;
-                this.event = currentEvent;
-                // console.log("[admin-event] => evento seleccionado: ", this.event);
-                if (this.event) {
-                    this.eventType = this.event.eventType;
-                    this.initForm();
-                    this.cdr.detectChanges();
-                }
-            }
-        )
-
         this.adminEventService.winnersEvent$.subscribe(
             winners => {
                 this.winners = winners;
@@ -113,6 +103,32 @@ export class ManagementEvent {
                 }
             )
         }
+        // si hay un usuario logueado revisamos si ya ha reportado el evento
+        this.adminEventService.selectedEvent$.subscribe(
+            currentEvent => {
+                this.eventAux = currentEvent ? { ...currentEvent } : null;
+                this.event = currentEvent;
+                if (this.event) {
+                    this.eventType = this.event.eventType;
+                    this.initForm();
+                    this.cdr.detectChanges();
+
+                    if(this.authService.isAuthenticated()){
+                        this.reportsService.hasReportedEvent(""+this.event?.id, ""+this.authService.getCurrentUserValue()?.email).subscribe(
+                            data => {
+                                this.hasReport = data;
+                                this.cdr.detectChanges();
+                            },
+                            error => {
+                                console.log("[control-report] => Ha ocurrido un error al consultar los reportes del usuario");
+                                this.hasReport = false;
+                                this.cdr.detectChanges();
+                            }
+                        )
+                    }
+                }
+            }
+        )
     }
 
 
@@ -166,7 +182,7 @@ export class ManagementEvent {
 
     async onInscript(){
         const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
-        console.log("[onInscript] => estado del evento: ", respStatus);
+        // console.log("[onInscript] => estado del evento: ", respStatus);
         if(!respStatus){
             this.notificationService.notifyError("No fue posible realizar la operación");
         }
@@ -220,6 +236,44 @@ export class ManagementEvent {
 
     isInfoTab(): boolean {
         return this.tab === this.TAB_INFO;
+    }
+
+    // le brinda al usuario la posibilidad de reportar un evento
+    onReport(){
+        // invitar al usuario a que se loguee para crear el reporte
+        if(!this.authService.isAuthenticated()){
+            this.showInviteLogin = true;
+            this.cdr.detectChanges();
+        }
+        else{
+            // mostramos el modal de reportes
+            this.showFormReport = true;
+            this.cdr.detectChanges();
+        }
+    }
+
+    onReportClosed(){
+        this.showFormReport = false;
+    }
+
+    onInviteClosed(data: any){
+        this.showInviteLogin = false;
+        this.cdr.detectChanges();
+        if(data?.redirect){
+            this.router.navigateByUrl("/login");
+        }
+    }
+
+    // muestra el resultado del reporte del evento
+    resultReport(data: ResumeService){
+        // data.status == "OK" ? this.notificationService.notifySuccess(data.msg): this.notificationService.notifyError(data.msg);
+        if(data.status == "OK"){
+            this.notificationService.notifySuccess(data.msg);
+            this.hasReport = true;
+        }
+        else{
+            this.notificationService.notifyError(data.msg);
+        }
     }
 
 }

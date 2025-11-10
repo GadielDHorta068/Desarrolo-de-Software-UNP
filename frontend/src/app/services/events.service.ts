@@ -92,6 +92,20 @@ export class EventsService {
     return this.http.put<EventsTemp[]>(`${this.apiUrl}/update/giveaway/${eventId}/user/${userId}`, dataEvent, { headers });
   }
 
+  // actualiza los datos del evento, sean sorteos o rifas
+  updateEvents(dataEvent: EventsCreate, eventId: string, userId: number|undefined): Observable<any> {
+    if(!userId){
+      console.warn("Error al actualizar el evento. Se espera el id de un usuario.");
+      return throwError(() => new Error("Se espera el id de un usuario."));
+    }
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    let pathEventType = (dataEvent.eventType == EventTypes.GIVEAWAY) ? "giveaway" : "raffle";
+    return this.http.put<any>(`${this.apiUrl}/update/${pathEventType}/${eventId}/user/${userId}`, dataEvent, { headers });
+  }
+
 // Actualiza el estado de un evento (ABIERTO/CERRADO/FINALIZADO/BLOQUEADO)
   updateEventStatus(eventId: number, userId: number, status: StatusEvent): Observable<EventsTemp> {
     const payload = { statusEvent: status };

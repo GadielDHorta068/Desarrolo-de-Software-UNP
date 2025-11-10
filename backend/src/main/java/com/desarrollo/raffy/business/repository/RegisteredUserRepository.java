@@ -1,5 +1,6 @@
 package com.desarrollo.raffy.business.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,6 +23,9 @@ public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, 
     Optional<RegisteredUser> findByEmail(String email);
     
     Optional<RegisteredUser> findByNickname(String nickname);
+
+    // Búsqueda parcial por nickname (case-insensitive)
+    List<RegisteredUser> findByNicknameContainingIgnoreCase(String nickname);
 
     // Métodos para update: verifica existencia excluyendo un id dado
     @Query("SELECT COUNT(r) > 0 FROM RegisteredUser r WHERE r.email = :email AND r.id != :id")

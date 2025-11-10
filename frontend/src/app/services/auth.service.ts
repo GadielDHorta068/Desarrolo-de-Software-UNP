@@ -82,6 +82,7 @@ export class AuthService {
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   
   private isLoggingOut = false;
+  isOperatorAdmin: boolean = false;
 
   constructor(
     private http: HttpClient,
@@ -300,6 +301,13 @@ export class AuthService {
   }
 
   /**
+   * Determina si el operador es un usuario admin
+   */
+  isAdminUser(): boolean {
+    return this.currentUserSubject.value?.userType == "ADMIN";
+  }
+
+  /**
    * Obtiene el usuario actual
    */
   getCurrentUserValue(): UserResponse | null {
@@ -461,6 +469,15 @@ export class AuthService {
   getFollowingNicknames(userId: number): Observable<string[]> {
     return this.http.get<string[]>(`${this.USERS_URL}/${userId}/following`, {
       headers: this.getAuthHeaders()
+    }).pipe(catchError(this.handleError));
+  }
+
+  /**
+   * Busca usuarios por nickname (parcial, case-insensitive)
+   */
+  searchUsers(query: string): Observable<UserResponse[]> {
+    return this.http.get<UserResponse[]>(`${this.API_URL}/users/search`, {
+      params: { query }
     }).pipe(catchError(this.handleError));
   }
 

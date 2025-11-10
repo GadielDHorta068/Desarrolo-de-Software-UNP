@@ -3,7 +3,7 @@
     <h2 class="text-2xl font-bold text-emerald-600">HUB de eventos</h2>
     <!-- CTA: si está autenticado muestra Nuevo evento; si no, botón trampa -->
     <ng-container>
-      <a *ngIf="userLogged" routerLink="/panel" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">Nuevo evento</a>
+      <a *ngIf="userLogged" routerLink="/event/new" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">Nuevo evento</a>
       <button *ngIf="!userLogged" (click)="openLoginModal()" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">
         Crear Evento
       </button>
@@ -98,7 +98,7 @@
 
   <!-- Empty state -->
   <div *ngIf="!loading && !error && visibleEvents.length === 0" class="text-gray-400">
-    No hay eventos disponibles por ahora.
+    No hay eventos disponibles por el momento.
   </div>
 
   <!-- Indicador de resultados -->

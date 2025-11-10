@@ -89,12 +89,19 @@
 
     <ng-template #noParticipants>
       <p class="text-gray-700 dark:text-gray-300 text-center italic">
-        No hay usuarios registrados todavía.
+        Aun no existen usuarios registrados.
       </p>
     </ng-template>
   </div>
 
+  <div *ngIf="!isUserCreator && !hasReport" class="flex gap-4 border-4 border-orange-500 p-2.5 rounded-md">
+    <img src="assets/warning.png" class="w-6">
+    <strong class="text-[1rem]">¿Has encontrado algún inconveniente o quieres realizar una observación sobre el evento?</strong>
+    <button class="bg-orange-500 text-white py-[1px] px-2 rounded" title="Reportar" (click)="onReport()">Reportar</button>
+  </div>
 </div>
 
 <!-- <app-modal-info [dataModal]="dataModal" #modalInfo></app-modal-info> -->
 <app-modal-share-event #modalShareEvent></app-modal-share-event>
+<app-invite-login *ngIf="showInviteLogin" (close)="onInviteClosed($event)"></app-invite-login>
+<app-reports-form *ngIf="showFormReport" (informReport)="resultReport($event)" (close)="onReportClosed()"></app-reports-form>

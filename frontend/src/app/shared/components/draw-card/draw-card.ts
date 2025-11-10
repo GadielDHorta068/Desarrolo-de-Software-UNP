@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, input, Input, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, input, Input, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { EventsTemp, EventTypes, StatusEvent } from '../../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { HandleStatusPipe } from '../../../pipes/handle-status.pipe';
@@ -24,6 +24,8 @@ import { AdminInscriptService } from '../../../services/admin/adminInscript';
 })
 export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
 
+  // private handleStatusPipe = inject(HandleStatusPipe);
+
   @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
   dataModal: InfoModal = {title: "Administración del evento", message: ""};
 
@@ -38,6 +40,7 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   private authSubscription?: Subscription;
   isCreator: boolean = false;
   public StatusEvent = StatusEvent;
+  isAdmin: boolean = false;
 
   // modal de inscripcion a sorteo
   showFormGiveaway = false; // el modal empieza desactivado
@@ -66,9 +69,11 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
           this.authService.getCurrentUser().subscribe({
             next: (user) => {
               this.currentUser = user;
+              this.isAdmin = (this.currentUser.userType == "ADMIN");
+              // console.log('[userActual] => es admin: ', this.isAdmin);
             },
             error: (error) => {
-              console.error('Error obteniendo usuario actual:', error);
+              console.error('[userActual] => Error obteniendo usuario actual:', error);
               this.currentUser = null;
             }
           });
@@ -120,19 +125,16 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     return this.isUserRegistered;
   }
 
-  // onInscript(){
-  //   this.adminEventService.setSelectedEvent(this.event);
-  //   this.adminInscriptService.checkStatusEventToInscript();
-  // }
   async onInscript() {
     this.adminEventService.setSelectedEvent(this.event);
     const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
-    console.log("[onInscript] => estado del evento: ", respStatus);
+    // console.log("[onInscript] => estado del evento: ", respStatus);
     if (!respStatus) {
       this.notificationService.notifyError("No fue posible realizar la operación");
     }
     else {
       if (respStatus != StatusEvent.OPEN) {
+        // this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ",  this.handleStatusPipe.transform(respStatus));
         this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
         if (this.event) {
           this.event.statusEvent = respStatus as StatusEvent;
@@ -146,35 +148,15 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     this.reviewCreator();
   }
 
-  // public redirectEdit() {
-  //   // console.log("[edit] => datos del evento: ", this.event);
-  //   // controlamos q solo los de estado ABIERTO se puedan editar
-  //   if(this.event?.statusEvent != StatusEvent.OPEN){
-  //     this.dataModal.message = "No es posible editar el evento seleccionado. Solo se pueden editar los eventos en estaado ABIERTO";
-  //     this.modalInfoRef.open();
-  //     return;
-  //   }
-  //   // TODO: este control meterlo en el boton de edicion del card!!
-  //   if(this.event?.eventType !== EventTypes.GIVEAWAY){
-  //     this.dataModal.message = "Por el momento no es posible editar los datos de este tipo de eventos.";
-  //     this.modalInfoRef.open();
-  //     return;
-  //   }
-  //   this.adminEventService.setSelectedEvent(this.event);
-  //   this.router.navigate(['/event-edit']);
-  // }
-
   public redirectAdmin(){
-    console.log("[onAdmin] => evento seleccionado: ", this.event);
     this.adminEventService.setSelectedEvent(this.event);
-    // this.router.navigate(['/event-admin']);
     this.router.navigate([`/event/management/${this.event?.id}`]);
   }
 
-  // public onIncript(){
-  //   console.log("Presiona incribirse!");
-  //   alert("Se apreto INCRIBIRME");
-  // }
+  public onRedirectReports(){
+    this.adminEventService.setSelectedEvent(this.event);
+    this.router.navigate([`/event/${this.event?.id}/reports`]);
+  }
 
   // Cerrar inscripciones (solo creador)
   public closeRegistrations(): void {

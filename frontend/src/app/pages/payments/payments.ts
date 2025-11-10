@@ -31,11 +31,13 @@ export class Payments {
 
   // tratamos el resultado del pago
   onFinalizedPay(data: any){
-    if(data.success){
+    // console.log("[dataPayServer] => datos: ", data);
+    if(data.success || data.data.status == "approved"){
       this.successfulPayment = true;
       this.notificationService.notifySuccess("La compra fue realizada con éxito")
     }
     else{
+      // TODO: aca deberia de liberar los nros seleccionados
       this.notificationService.notifyError("No se ha podido realizar el pago correctamente");
     }
   }
@@ -46,7 +48,7 @@ export class Payments {
       this.router.navigate(['/event/management/'+this.eventCurrent?.id]);
     }
     if(paramRedirect == "hub"){
-      this.router.navigate(['/draws/all']);
+      this.router.navigate(['/public-events']);
     }
   }
 

@@ -216,7 +216,7 @@ public class EventsController {
         );
         //Fin auditoría
         eventsService.getEventSummaryById(updatedEvent.getId());
-        return ResponseEntity.ok("Evento actualizado correctamente.");
+        return ResponseEntity.ok(updatedEvent);
     }
 
     @PutMapping("/update/guessing-contest/{idEvent}/user/{idUser}")
@@ -235,7 +235,7 @@ public class EventsController {
         );
         //Fin auditoría
         eventsService.getEventSummaryById(updatedEvent.getId());
-        return ResponseEntity.ok("Evento actualizado correctamente.");
+        return ResponseEntity.ok(updatedEvent);
     }
 
     @PutMapping("/update/raffle/{idEvent}/user/{idUser}")
@@ -254,7 +254,7 @@ public class EventsController {
         );
         //Fin auditoría
         eventsService.getEventSummaryById(updatedEvent.getId());
-        return ResponseEntity.ok("Evento actualizado correctamente.");
+        return ResponseEntity.ok(updatedEvent);
     }
 
 
@@ -674,8 +674,6 @@ public class EventsController {
             }
             // controlamos que el evento no haya cerrado
             if(eventToParticipate.getStatusEvent() != StatusEvent.OPEN){
-                // return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                //     .body("El evento con id " + aEventId + " se encuentra cerrado. No es posible inscribirse. TESTTTT");
                 throw new NoInscriptEventExeption("No es posible inscribirse a este evento");
             }
 
@@ -725,6 +723,10 @@ public class EventsController {
         if (eventToParticipate == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body("El evento con id " + aEventId + " no existe");
+        }
+        // controlamos que el evento no haya cerrado
+        if(eventToParticipate.getStatusEvent() != StatusEvent.OPEN){
+            throw new NoInscriptEventExeption("No es posible inscribirse a este evento");
         }
     
         // Buscar usuario existente o crear uno nuevo

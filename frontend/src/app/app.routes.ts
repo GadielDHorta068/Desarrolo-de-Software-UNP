@@ -38,7 +38,7 @@ export const routes: Routes = [
     title: 'Configuración - Raffy'
   },
   {
-    path: 'panel',
+    path: 'event/new',
     loadComponent: () => import('./pages/raffles-panel/raffles-panel').then(m => m.RafflesPanel),
     // canActivate: [GuestGuard],
     title: 'Creación de evento - Raffy',
@@ -94,23 +94,19 @@ export const routes: Routes = [
     data: {animation: 'event'}
   },
   {
-    path: 'draws',
-    children: [
-      {
-        path: 'all',
-        loadComponent: () => import('./pages/public-events/public-events').then(m => m.PublicEvents),
-        title: 'HUB de eventos - Raffy'
-      },
-      { path: 'edit',
-        loadComponent: () => import('./pages/edit-event/edit-event').then(m => m.EditEvent),
-        // canActivate: [GuestGuard],
-        title: 'Editar sorteo - Raffy'
-      },
-      {
-        path: '**',
-        redirectTo: '/all'
-      }
-    ]
+    path: 'public-events',
+    loadComponent: () => import('./pages/public-events/public-events').then(m => m.PublicEvents),
+    title: 'HUB de eventos - Raffy'
+  },
+  {
+    path: 'events/reported',
+    loadComponent: () => import('./pages/reported-events/reported-events').then(m => m.ReportedEvents),
+    title: 'Eventos reportados - Raffy'
+  },
+  {
+    path: 'event/:eventId/reports',
+    loadComponent: () => import('./pages/reports/reports').then(m => m.Reports),
+    title: 'Lista de reportes - Raffy'
   },
   {
     path: 'winners/:eventId',

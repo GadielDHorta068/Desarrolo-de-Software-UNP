@@ -1,5 +1,6 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { MercadoPagoService } from '../../../services/mercado-pago.service';
+import { AdminPaymentService, DataPayment } from '../../../services/admin/adminPayment.service';
 
 declare var MercadoPago: any;
 
@@ -13,16 +14,20 @@ export class MpBrick {
   // la pkey del venderor
   // private publicKey = 'TEST-3978631b-9a9f-4071-a497-792d8d0cad9d';
   private publicKey = 'TEST-fc380a7a-2c59-4119-b31e-00e8eac0ff9d';
-  private amount = signal(1000); // Reactive amount
-  // private excludedTypes = signal<string[]>(['debit_card']); // Reactive exclusion
-  private excludedTypes = signal<string[]>([]); // Reactive exclusion
+  dataPayment!: DataPayment|null;
 
   @Output() resultPay = new EventEmitter<any>();
 
   constructor(
-    private httpClient: HttpClient
+    private mercadopagoService: MercadoPagoService,
+    private adminPaymentService: AdminPaymentService
   ){
-
+    this.adminPaymentService.dataPayment$.subscribe(
+      data => {
+        this.dataPayment = data;
+        // console.log("[mpBrick] => datos del pago: ", this.dataPayment);
+      }
+    )
   }
 
   ngOnInit(): void {
@@ -31,13 +36,14 @@ export class MpBrick {
 
     bricksBuilder.create('payment', 'card-payment-container', {
       initialization: {
-        amount: 100,
+        amount: this.dataPayment?.ammount,
         // preferenceId: "501812522-16cfb9bd-6830-41ef-a166-033a6fd7e9df",
         preferenceId: "",
         payer: {
-          firstName: "",
-          lastName: "",
-          email: "jhon@doe.com",
+          firstName: this.dataPayment?.fristName,
+          lastName: this.dataPayment?.lastName,
+          // email: "jhon@doe.com",
+          email: this.dataPayment?.email,
         },
       },
       customization: {
@@ -91,13 +97,6 @@ export class MpBrick {
 
   payMp(formData: any){
     console.log("[pagoMP] => datos del form de pago: ", formData);
-    // const urlPayment = "http://localhost:3000/process_payment";
-    const urlPayment = "http://localhost:8080/api/mp/process_payment";
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer TEST-911685102344613-102107-142a437bbcd8bb76c3281eae04eeffb9-501812522`
-    });
-
     const paymentData = {
       transaction_amount: formData.transaction_amount,
       token: formData.token,
@@ -113,12 +112,17 @@ export class MpBrick {
         },
       },
     };
-    
-    const bodyFormData = {
-      formData: paymentData
-    }
 
-    // return this.httpClient.post(urlPayment, paymentData, {headers})
-    return this.httpClient.post(urlPayment, JSON.stringify(bodyFormData), {headers})
+    const bodyPayment = {
+      // en el caso de no estar logueado se debe poder asociar el 
+      paymentData: {
+        idUser: this.dataPayment?.idUser,
+        mailUser: this.dataPayment?.email,
+        idEvent: this.dataPayment?.idEvent
+      },
+      paymentMp: paymentData
+    }
+    // return this.mercadopagoService.reportPayment(paymentData);
+    return this.mercadopagoService.reportPayment(bodyPayment);
   }
 }

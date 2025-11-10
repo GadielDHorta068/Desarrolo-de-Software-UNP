@@ -23,11 +23,10 @@ export class AdminEventService {
     private eventService: EventsService
   ) {}
 
-  // public setSelectedEvent(event: EventsTemp|null){
-  //   this.selectedEventSubject.next(event);
-  // }
-
-  // nueva verion
+  public getSelectedEvent(): EventsTemp|null{
+    return this.selectedEventSubject.getValue();
+  }
+  
   public setSelectedEvent(event: EventsTemp|null){
     this.selectedEventSubject.next(event);
     if(event?.statusEvent == StatusEvent.FINISHED){

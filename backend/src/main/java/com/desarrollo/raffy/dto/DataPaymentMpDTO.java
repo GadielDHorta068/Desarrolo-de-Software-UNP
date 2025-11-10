@@ -1,0 +1,17 @@
+package com.desarrollo.raffy.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+public class DataPaymentMpDTO {
+    private String idUser;
+    private String idEvent;
+    private String mailUser;
+    // ver si meter el id de los numeros?
+}
