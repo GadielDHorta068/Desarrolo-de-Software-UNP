@@ -93,7 +93,7 @@ public class EmailService {
         System.out.println("Enviando correos a " + winners.size() + " ganadores del evento: " + eventTitle);
         
         // Construir la URL del evento en el frontend
-        String eventUrl = frontendUrl + "/event/" + eventId;
+        String eventUrl = frontendUrl + "/event/management/" + eventId;
         
         // Enviar correo a cada ganador
         winners.forEach(winner -> {
@@ -170,7 +170,7 @@ public class EmailService {
             System.err.println("⚠️ La lista de ganadores es nula. Enviaré el correo indicando que no hay ganadores.");
         }
 
-        String eventUrl = frontendUrl + "/event/" + eventId;
+        String eventUrl = frontendUrl + "/event/management/" + eventId;
 
         String htmlContent = emailTemplateService.generateCreatorWinnersSummaryTemplate(
                 creatorName,
@@ -579,7 +579,7 @@ public class EmailService {
                                                 double priceOfNumber,
                                                 Collection<Integer> purchasedNumbers) {
         if (to == null || to.isBlank()) return;
-        String eventUrl = frontendUrl + "/event/" + eventId;
+        String eventUrl = frontendUrl + "/event/management/" + eventId;
         String htmlContent = emailTemplateService.generateRaffleNumbersPurchasedTemplate(
                 buyerName, eventTitle, priceOfNumber, purchasedNumbers, eventUrl);
 

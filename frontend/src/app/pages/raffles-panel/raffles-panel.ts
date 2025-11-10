@@ -1,28 +1,30 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EventsCreate, EventsTemp, EventType, EventTypes, RaffleCreate } from '../../models/events.model';
 import { Category } from '../../services/category.service';
 import { configService } from '../../services/config.service';
 import { EventsService } from '../../services/events.service';
 import { AuthService, UserResponse } from '../../services/auth.service';
+import { InfoModal, ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 import { ParseFileService } from '../../services/utils/parseFile.service';
-import { NotificationService } from '../../services/notification.service';
-import { Router } from '@angular/router';
-import { AdminEventService } from '../../services/admin/adminEvent.service';
 
 @Component({
   selector: 'app-raffles-panel',
-  imports: [CommonModule, ReactiveFormsModule, LoaderImage],
+  imports: [CommonModule, ReactiveFormsModule, ModalInfo, LoaderImage],
   templateUrl: './raffles-panel.html',
   styleUrl: './raffles-panel.css',
   standalone: true
 })
 export class RafflesPanel {
 
+  @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
+
   formPanel: FormGroup;
   userCurrent: UserResponse|null = null;
+  dataModal: InfoModal = {title: "Creación de eventos", message: ""};
 
   categories: Category[] = [];
   types: EventType[] = [];
@@ -39,9 +41,7 @@ export class RafflesPanel {
     private authService: AuthService,
     private parseFileService: ParseFileService,
     private cdr: ChangeDetectorRef,
-    private notificationService: NotificationService,
-    private router: Router,
-    private adminEventService: AdminEventService
+    private router: Router
   ){
     this.initDateMin();
     this.userCurrent = this.authService.getCurrentUserValue();
@@ -61,6 +61,18 @@ export class RafflesPanel {
       this.cdr.detectChanges();
     });
     
+    // inicializacion del form de creacion de eventos
+    // this.formPanel = new FormGroup({
+    //   title: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+    //   drawType: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+    //   category: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+    //   executionDate: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+    //   winners: new FormControl({value: 1, disabled: false}, {validators:[ Validators.required ]}),
+    //   description: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
+    //   image: new FormControl({value: null, disabled: false}),
+    //   priceRaffle: new FormControl({value: '', disabled: false}),
+    //   quantityNumbersRaffle: new FormControl({value: '', disabled: false})
+    // });
     this.formPanel = this.initForm();
 
     this.formPanel.get('drawType')?.valueChanges.subscribe(valor => {
@@ -90,18 +102,19 @@ export class RafflesPanel {
 
     // console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
     this.eventService.createEvent(""+this.userCurrent?.id, dataNewEvent, this.getEventTypeForCreate()).subscribe({
-      next: (response: any) => {
+      next: (response) => {
         // console.log('[initConfig] => nuevo evento creado: ', response);
         this.formPanel.disable();
         this.eventCreated = true;
-        this.notificationService.notifySuccess("Evento creado correctamente");
-        this.adminEventService.setSelectedEvent(response);
-        this.router.navigateByUrl("/event/management/"+response.id);
+        this.dataModal.message = "Evento creado correctamente";
+        this.modalInfoRef.open();
       },
       error: (error) => {
           console.warn('[Eventos]: error al crear el evento: ', error);
-          // // NOTA: cuando la fecha esta errada no es un json la respuesta, corregir
-          this.notificationService.notifyError("Error al crear el evento. ", error.error);
+          this.dataModal.message = "Error al crear el evento. ", error.error;
+          // NOTA: cuando la fecha esta errada no es un json la respuesta, corregir
+          this.modalInfoRef.open();
+        // });
       }
     });
   }
@@ -202,11 +215,17 @@ export class RafflesPanel {
     this.formPanel.reset({
       winners: 1
     });
+    // this.formPanel.reset();
     this.cdr.detectChanges();
   }
 
   get eventTypeSelected(){
     return this.formPanel.get('drawType')?.value;
+  }
+
+  // Navegar al listado de sorteos al confirmar el modal
+  onCreationConfirmed(){
+    this.router.navigate(['/draws/all']);
   }
 
 }
