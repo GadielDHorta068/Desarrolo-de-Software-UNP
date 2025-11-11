@@ -30,6 +30,17 @@ public class ReportController {
     @Autowired
     private ReportService service;
 
+    @GetMapping
+    public ResponseEntity<?> getAllReports() {
+        try {
+            List<Report> reports = service.getAllReportFilter(null, null, null);
+            return new ResponseEntity<>(reports, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error al obtener los reportes: {}", e.getMessage());
+            return new ResponseEntity<>("Error al obtener los reportes.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/create")
     public ResponseEntity<?> createReport(
         @RequestBody Report report){
