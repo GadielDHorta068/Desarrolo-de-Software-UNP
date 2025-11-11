@@ -12,20 +12,20 @@ import { Observable, Subscription, take } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-  <div class="max-w-4xl mx-auto h-[80vh] flex flex-col bg-white/80 backdrop-blur rounded-xl shadow border border-gray-200">
-    <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+  <div class="max-w-4xl mx-auto h-[80vh] flex flex-col bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-xl shadow border border-gray-200 dark:border-gray-700">
+    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
       <div>
-        <h2 class="text-lg font-semibold">{{ peerUser ? (peerUser.name + ' ' + peerUser.surname) : 'Cargando usuario...' }}</h2>
-        <p class="text-sm text-gray-500">{{ peerUser?.email || '' }}</p>
+        <h2 class="text-lg font-semibold dark:text-gray-100">{{ peerUser ? (peerUser.name + ' ' + peerUser.surname) : 'Cargando usuario...' }}</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ peerUser?.email || '' }}</p>
       </div>
     </div>
 
     <div class="flex-1 overflow-y-auto p-4 space-y-3" id="messages" #messagesContainer>
       <ng-container *ngFor="let msg of messages | async; trackBy: trackByMessage">
         <div [ngClass]="msg.remitenteId === myUserId ? 'flex justify-end' : 'flex justify-start'">
-          <div class="max-w-[70%] px-4 py-2 rounded-2xl" [ngClass]="msg.remitenteId === myUserId ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-gray-100 text-gray-800 rounded-bl-sm'">
+          <div class="max-w-[70%] px-4 py-2 rounded-2xl" [ngClass]="msg.remitenteId === myUserId ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-bl-sm'">
             <p class="whitespace-pre-line">{{ msg.contenido }}</p>
-            <div class="text-xs opacity-75 mt-1">
+            <div class="text-xs opacity-75 mt-1 text-gray-500 dark:text-gray-400">
               {{ msg.fechaEnvio ? (msg.fechaEnvio | date:'short') : '' }}
             </div>
           </div>
@@ -33,8 +33,8 @@ import { Observable, Subscription, take } from 'rxjs';
       </ng-container>
     </div>
 
-    <form (ngSubmit)="send()" class="border-t border-gray-200 p-3 flex items-center gap-3">
-      <input [(ngModel)]="newMessage" name="message" type="text" placeholder="Escribe un mensaje..." class="flex-1 px-4 py-2 rounded-full border focus:outline-none focus:ring-2 focus:ring-blue-500" />
+    <form (ngSubmit)="send()" class="border-t border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
+      <input [(ngModel)]="newMessage" name="message" type="text" placeholder="Escribe un mensaje..." class="flex-1 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
       <button type="submit" class="px-5 py-2 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-700">Enviar</button>
     </form>
   </div>
