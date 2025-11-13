@@ -142,6 +142,31 @@ services:
       - raffy-network
     restart: unless-stopped
   
+  twofa:
+    build:
+      context: ./2fa
+      dockerfile: Dockerfile
+    container_name: raffy-2fa
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/raffy_db?currentSchema=twofa
+      SPRING_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: raffy_user
+      SPRING_DATASOURCE_PASSWORD: raffy_password
+      SPRING_H2_CONSOLE_ENABLED: "false"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: twofa
+      SPRING_FLYWAY_SCHEMAS: twofa
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      SERVER_PORT: "8080"
+    ports:
+      - "8082:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - raffy-network
+    restart: unless-stopped
+  
 volumes:
   postgres_data:
   db_data:
