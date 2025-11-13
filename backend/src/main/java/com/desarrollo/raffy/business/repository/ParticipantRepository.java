@@ -21,5 +21,6 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     public boolean existsByParticipantAndEvent(User aUser, Events aGiveaway);
 
-    
+    @Query("SELECT p.participant.email FROM Participant p WHERE p.event.id = :eventId AND p.position != 0")
+    public List<String> findWinnerEmailsByEventId(@Param("eventId") Long eventId);    
 }
