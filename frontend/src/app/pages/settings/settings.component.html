@@ -653,7 +653,7 @@
                 </div>
 
                 <!-- QR Code Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" [formGroup]="twoFAForm">
                   <!-- QR Code Display -->
                   <div
                     class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6 text-center">
@@ -698,14 +698,14 @@
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Código TOTP (6 dígitos)
                       </label>
-                      <input id="verificationCodeActive" type="text" [(ngModel)]="verificationCode" placeholder="123456"
+                      <input id="verificationCodeActive" type="text" formControlName="totp" placeholder="123456"
                         maxlength="6"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 text-center text-lg font-mono" />
 
                       <label for="recoveryCodeInputActive" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4 mb-2">
                         Código de respaldo (alternativo)
                       </label>
-                      <input id="recoveryCodeInputActive" type="text" [(ngModel)]="recoveryCodeInput" placeholder="xxxx-xxxx-xxxx-xxxx"
+                      <input id="recoveryCodeInputActive" type="text" formControlName="recoveryCode" placeholder="xxxx-xxxx-xxxx-xxxx"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400" />
                       <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         Ingresa TOTP o un código de respaldo antes de "Regenerar" o "Deshabilitar".
@@ -741,12 +741,12 @@
                     </div>
 
                     <!-- Verification Code Input -->
-                    <div *ngIf="qrCodeData">
+                    <div *ngIf="qrCodeData" [formGroup]="twoFAForm">
                       <label for="verificationCode"
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Código de Verificación
                       </label>
-                      <input id="verificationCode" type="text" [(ngModel)]="verificationCode" placeholder="123456"
+                      <input id="verificationCode" type="text" formControlName="totp" placeholder="123456"
                         maxlength="6"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 text-center text-lg font-mono" />
                       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -757,7 +757,7 @@
                     <!-- Enable 2FA Button -->
                     <div *ngIf="qrCodeData && !is2FAEnabled" class="pt-4">
                       <button type="button" (click)="verify2FA()"
-                        [disabled]="is2FALoading || !verificationCode || verificationCode.length !== 6"
+                        [disabled]="is2FALoading || (twoFAForm.get('totp')?.value?.length !== 6)"
                         class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition-colors">
                         <span *ngIf="is2FALoading" class="mr-2">
                           <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -768,7 +768,7 @@
                             </path>
                           </svg>
                         </span>
-                        <svg *ngIf="!is2FALoading" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                        <svg *ngIf="!is2FALoading && (twoFAForm.get('totp')?.value?.length === 6)" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
                           stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

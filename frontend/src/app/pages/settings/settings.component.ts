@@ -58,6 +58,7 @@ export class SettingsComponent implements OnInit {
   recoveryCodes: string[] = [];
   verificationCode = '';
   recoveryCodeInput = '';
+  twoFAForm!: FormGroup;
   twoFASuccessMessage = '';
   twoFAErrorMessage = '';
   showRecoveryCodes = false;
@@ -93,6 +94,10 @@ export class SettingsComponent implements OnInit {
     
     this.loadCurrentUser();
     this.check2FAStatus();
+    this.twoFAForm = this.fb.group({
+      totp: ['', [Validators.minLength(6), Validators.maxLength(6), Validators.pattern(/^\d{6}$/)]],
+      recoveryCode: ['']
+    });
   }
 
   private initializeForms(): void {
@@ -469,12 +474,13 @@ export class SettingsComponent implements OnInit {
   }
 
   verify2FA(): void {
-    if (!this.currentUser || !this.verificationCode) {
+    const totp = this.twoFAForm.get('totp')?.value || '';
+    if (!this.currentUser || !totp) {
       this.twoFAErrorMessage = 'Por favor ingresa el código de verificación';
       return;
     }
 
-    if (this.verificationCode.length !== 6) {
+    if (totp.length !== 6) {
       this.twoFAErrorMessage = 'El código debe tener 6 dígitos';
       return;
     }
@@ -482,7 +488,7 @@ export class SettingsComponent implements OnInit {
     this.is2FALoading = true;
     this.twoFAErrorMessage = '';
 
-    this.authService.verify2FA(this.currentUser.nickname, this.verificationCode).subscribe({
+    this.authService.verify2FA(this.currentUser.nickname, totp).subscribe({
       next: (response) => {
         this.is2FALoading = false;
         if (response.verified) {
@@ -490,7 +496,7 @@ export class SettingsComponent implements OnInit {
           this.showRecoveryCodes = true;
           this.cdr.detectChanges();
           this.twoFASuccessMessage = '¡2FA habilitado exitosamente! Guarda tus códigos de respaldo.';
-          this.verificationCode = '';
+          this.twoFAForm.reset({ totp: '', recoveryCode: '' });
         } else {
           this.twoFAErrorMessage = 'Código de verificación incorrecto';
         }
@@ -517,11 +523,13 @@ export class SettingsComponent implements OnInit {
     this.is2FALoading = true;
     this.twoFAErrorMessage = '';
 
+    const totp = this.twoFAForm.get('totp')?.value || '';
+    const recovery = this.twoFAForm.get('recoveryCode')?.value || '';
     const payload: any = {};
-    if (this.verificationCode && this.verificationCode.length === 6) {
-      payload.code = this.verificationCode;
-    } else if (this.recoveryCodeInput) {
-      payload.recoveryCode = this.recoveryCodeInput.trim();
+    if (totp && totp.length === 6) {
+      payload.code = totp;
+    } else if (recovery) {
+      payload.recoveryCode = recovery.trim();
     } else {
       this.is2FALoading = false;
       this.twoFAErrorMessage = 'Ingresa el TOTP de 6 dígitos o un código de respaldo';
@@ -538,8 +546,7 @@ export class SettingsComponent implements OnInit {
         this.showRecoveryCodes = false;
         this.manualSetupKey = '';
         this.twoFASuccessMessage = '2FA deshabilitado exitosamente';
-        this.verificationCode = '';
-        this.recoveryCodeInput = '';
+        this.twoFAForm.reset({ totp: '', recoveryCode: '' });
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -560,11 +567,13 @@ export class SettingsComponent implements OnInit {
       return;
     }
 
+    const totp = this.twoFAForm.get('totp')?.value || '';
+    const recovery = this.twoFAForm.get('recoveryCode')?.value || '';
     const payload: any = {};
-    if (this.verificationCode && this.verificationCode.length === 6) {
-      payload.code = this.verificationCode;
-    } else if (this.recoveryCodeInput) {
-      payload.recoveryCode = this.recoveryCodeInput.trim();
+    if (totp && totp.length === 6) {
+      payload.code = totp;
+    } else if (recovery) {
+      payload.recoveryCode = recovery.trim();
     } else {
       this.twoFAErrorMessage = 'Ingresa el TOTP de 6 dígitos o un código de respaldo';
       this.cdr.detectChanges();
@@ -582,8 +591,7 @@ export class SettingsComponent implements OnInit {
         this.extractManualSetupKey(response.qrCode);
         this.showRecoveryCodes = true;
         this.twoFASuccessMessage = 'Código QR y códigos de respaldo regenerados exitosamente';
-        this.verificationCode = '';
-        this.recoveryCodeInput = '';
+        this.twoFAForm.reset({ totp: '', recoveryCode: '' });
         this.cdr.detectChanges();
       },
       error: (error) => {
