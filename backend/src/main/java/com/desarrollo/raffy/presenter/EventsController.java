@@ -27,6 +27,7 @@ import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
 import com.desarrollo.raffy.Response;
 import com.desarrollo.raffy.business.services.EventsService;
+import com.desarrollo.raffy.business.services.FeaturedEventsService;
 import com.desarrollo.raffy.business.services.ParticipantService;
 import com.desarrollo.raffy.business.services.RaffleNumberService;
 import com.desarrollo.raffy.business.services.UserMapper;
@@ -86,6 +87,9 @@ public class EventsController {
 
     @Autowired
     private AuditLogsService auditLogsService;
+
+    @Autowired
+    private FeaturedEventsService featuredEventsService;
 
 
     @PostMapping("/create/giveaway/{idUser}")
@@ -890,5 +894,15 @@ public class EventsController {
             catch (Exception e) {
                 return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
             }
+    }
+
+    @GetMapping("/featured")
+    public ResponseEntity<?> getFeaturedEvents(
+            @RequestParam EventTypes type) {
+        List<Events> featuredEvents = featuredEventsService.getFeaturedEvents(type);
+        List<EventSummaryDTO> dtoList = featuredEvents.stream()
+                .map(eventsService::toEventSummaryDTO)
+                .toList();
+        return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
 }

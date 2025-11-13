@@ -1,5 +1,6 @@
 package com.desarrollo.raffy.business.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -93,4 +94,47 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     // Buscar todos los eventos con detalles necesarios
     @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category")
     List<Events> findAllWithDetails();
+
+    // --------- Métodos para el destacada de cada tipo ---------
+    @Query("""
+        SELECT g, COUNT(p)
+        FROM Giveaways g
+        LEFT JOIN Participant p ON p.event = g
+        WHERE g.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
+        GROUP BY g
+        ORDER BY COUNT(p) DESC        
+    """)
+    List<Object[]> findTopGiveawaysByParticipants(Pageable pageable);
+
+    @Query("""
+        SELECT gc, COUNT(a)
+        FROM GuessingContest gc
+        LEFT JOIN GuessAttempt a ON a.contest = gc
+        WHERE gc.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
+        GROUP BY gc
+        ORDER BY COUNT(a) DESC
+        """)
+    List<Object[]> findTopGuessingByParticipants(Pageable pageable);
+
+    @Query("""
+        SELECT r, COUNT(n)
+        FROM Raffle r
+        LEFT JOIN RaffleNumber n ON n.raffle = r
+        WHERE r.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
+        GROUP BY r
+        ORDER BY COUNT(n) DESC
+        """)
+    List<Object[]> findTopRafflesByParticipants(Pageable pageable);
+
+    @Query("""
+        SELECT e
+        FROM Events e
+        WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
+          AND e.eventType = :eventType
+        ORDER BY e.startDate DESC
+        """)
+    List<Events> findRecentByType(@Param("eventType") EventTypes eventType, Pageable pageable);
+
+        // --------- Fin de Métodos para el destacada de cada tipo ---------
+
 }
