@@ -57,6 +57,7 @@ export class SettingsComponent implements OnInit {
   qrCodeData: string | null = null;
   recoveryCodes: string[] = [];
   verificationCode = '';
+  recoveryCodeInput = '';
   twoFASuccessMessage = '';
   twoFAErrorMessage = '';
   showRecoveryCodes = false;
@@ -406,14 +407,42 @@ export class SettingsComponent implements OnInit {
 
   // 2FA Methods
   private check2FAStatus(): void {
-    // Aquí podrías agregar una llamada al backend para verificar si 2FA está habilitado
-    // Por ahora, asumimos que está deshabilitado por defecto
-    this.is2FAEnabled = false;
+    if (!this.currentUser) {
+      this.authService.getCurrentUser().subscribe({
+        next: (user) => {
+          this.currentUser = user;
+          this.fetch2FAStatus(user.nickname);
+        },
+        error: () => {
+          this.is2FAEnabled = false;
+        }
+      });
+      return;
+    }
+    this.fetch2FAStatus(this.currentUser.nickname);
+  }
+
+  private fetch2FAStatus(nickname: string): void {
+    this.authService.get2FAStatus(nickname).subscribe({
+      next: (status) => {
+        this.is2FAEnabled = !!status.twoFactorEnabled;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.is2FAEnabled = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   enable2FA(): void {
     if (!this.currentUser) {
       this.twoFAErrorMessage = 'Usuario no encontrado';
+      return;
+    }
+
+    if (this.is2FAEnabled) {
+      this.twoFAErrorMessage = '2FA ya está habilitado. Usa "Regenerar Código QR" o "Deshabilitar 2FA".';
       return;
     }
 
@@ -459,12 +488,12 @@ export class SettingsComponent implements OnInit {
         if (response.verified) {
           this.is2FAEnabled = true;
           this.showRecoveryCodes = true;
+          this.cdr.detectChanges();
           this.twoFASuccessMessage = '¡2FA habilitado exitosamente! Guarda tus códigos de respaldo.';
           this.verificationCode = '';
         } else {
           this.twoFAErrorMessage = 'Código de verificación incorrecto';
         }
-        this.cdr.detectChanges();
       },
       error: (error) => {
         this.is2FALoading = false;
@@ -481,14 +510,26 @@ export class SettingsComponent implements OnInit {
       return;
     }
 
-    if (!confirm('¿Estás seguro de que quieres deshabilitar la autenticación de dos factores?')) {
+    if (!confirm('Para deshabilitar 2FA se requiere un código de verificación (TOTP) o un código de respaldo. ¿Deseas continuar?')) {
       return;
     }
 
     this.is2FALoading = true;
     this.twoFAErrorMessage = '';
 
-    this.authService.disable2FA(this.currentUser.nickname).subscribe({
+    const payload: any = {};
+    if (this.verificationCode && this.verificationCode.length === 6) {
+      payload.code = this.verificationCode;
+    } else if (this.recoveryCodeInput) {
+      payload.recoveryCode = this.recoveryCodeInput.trim();
+    } else {
+      this.is2FALoading = false;
+      this.twoFAErrorMessage = 'Ingresa el TOTP de 6 dígitos o un código de respaldo';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.authService.disable2FA(this.currentUser.nickname, payload).subscribe({
       next: () => {
         this.is2FALoading = false;
         this.is2FAEnabled = false;
@@ -497,6 +538,8 @@ export class SettingsComponent implements OnInit {
         this.showRecoveryCodes = false;
         this.manualSetupKey = '';
         this.twoFASuccessMessage = '2FA deshabilitado exitosamente';
+        this.verificationCode = '';
+        this.recoveryCodeInput = '';
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -513,15 +556,25 @@ export class SettingsComponent implements OnInit {
       this.twoFAErrorMessage = 'Usuario no encontrado';
       return;
     }
+    if (!confirm('Para regenerar el QR se requiere verificación (TOTP) o un código de respaldo. ¿Deseas continuar?')) {
+      return;
+    }
 
-    if (!confirm('¿Quieres regenerar tu código QR y códigos de respaldo? Los códigos actuales dejarán de funcionar.')) {
+    const payload: any = {};
+    if (this.verificationCode && this.verificationCode.length === 6) {
+      payload.code = this.verificationCode;
+    } else if (this.recoveryCodeInput) {
+      payload.recoveryCode = this.recoveryCodeInput.trim();
+    } else {
+      this.twoFAErrorMessage = 'Ingresa el TOTP de 6 dígitos o un código de respaldo';
+      this.cdr.detectChanges();
       return;
     }
 
     this.is2FALoading = true;
     this.twoFAErrorMessage = '';
 
-    this.authService.rotate2FA(this.currentUser.nickname).subscribe({
+    this.authService.rotate2FA(this.currentUser.nickname, payload).subscribe({
       next: (response: TwoFactorEnableResponse) => {
         this.is2FALoading = false;
         this.qrCodeData = response.qrCode;
@@ -529,6 +582,8 @@ export class SettingsComponent implements OnInit {
         this.extractManualSetupKey(response.qrCode);
         this.showRecoveryCodes = true;
         this.twoFASuccessMessage = 'Código QR y códigos de respaldo regenerados exitosamente';
+        this.verificationCode = '';
+        this.recoveryCodeInput = '';
         this.cdr.detectChanges();
       },
       error: (error) => {
