@@ -64,6 +64,11 @@ public class ReviewService {
         return result;
     }
 
+    public Double getAverageScoreByUserEmail(String aUserEmail) {
+        Double avgScore = reviewRepository.getReputationOfUserByUserEmail(aUserEmail);
+        return (avgScore != null) ? avgScore : 0.0;
+    }
+
     @Transactional
     public Review save(ReviewFromFrontToBackDTO aReviewFromFrontToBackDTO, Long aEventId) {
         Optional<User> optionalUser = userRepository.findByEmail(aReviewFromFrontToBackDTO.getEmail());

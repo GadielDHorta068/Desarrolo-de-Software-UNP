@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.desarrollo.raffy.Response;
@@ -46,6 +47,18 @@ public class ReviewController {
             return new ResponseEntity<>("error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
+    }
+
+    @GetMapping("/avg-score")
+    public ResponseEntity<?> getAvgScoreByUserEmail(
+        @RequestParam("email") String aUserEmail) {
+        try {
+            Double avgScore = reviewService.getAverageScoreByUserEmail(aUserEmail);
+            return new ResponseEntity<>(avgScore, HttpStatus.OK);    
+        }
+        catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
     @PostMapping("/event/{eventId}/create-review")
