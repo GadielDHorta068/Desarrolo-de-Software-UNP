@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
 
 export interface InfoModal{
   title: string;
@@ -15,6 +15,7 @@ export interface InfoModal{
 export class ModalInfo {
 
   @Input() dataModal?: InfoModal;
+  @Output() confirmed = new EventEmitter<void>();
   show: boolean = false;
 
   constructor(
@@ -30,6 +31,11 @@ export class ModalInfo {
   close() {
     this.show = false;
     this.cdr.detectChanges();
+  }
+
+  confirm() {
+    this.confirmed.emit();
+    this.close();
   }
 
 }

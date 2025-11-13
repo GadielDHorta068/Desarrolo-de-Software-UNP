@@ -49,6 +49,7 @@ export class Profile implements OnInit, OnDestroy {
   private subscription: Subscription | null = null;
   private eventsSubscription: Subscription | null = null;
   private joinedSubscription: Subscription | null = null;
+  private viewerSubscription: Subscription | null = null;
   
   // Personalización visual y métricas
   accentColor: string = '#10b981'; // emerald por defecto
@@ -104,6 +105,16 @@ export class Profile implements OnInit, OnDestroy {
     this.authService.initializeUserData();
     const viewer = this.authService.getCurrentUserValue();
     this.viewerId = viewer?.id ?? null;
+    // Mantener sincronizado el viewerId cuando el usuario actual se cargue/asigne
+    this.viewerSubscription = this.authService.currentUser$.subscribe((u) => {
+      const previousViewerId = this.viewerId;
+      this.viewerId = u?.id ?? null;
+      // Si cambia el viewer y hay perfil cargado, refrescar estado de seguimiento
+      if (this.userProfile && this.viewerId !== previousViewerId) {
+        this.loadFollowState();
+      }
+      this.cdr.detectChanges();
+    });
     
     this.route.params.subscribe(params => {
       const nickname = params['nickname'];
@@ -543,6 +554,9 @@ export class Profile implements OnInit, OnDestroy {
     }
     if (this.joinedSubscription) {
       this.joinedSubscription.unsubscribe();
+    }
+    if (this.viewerSubscription) {
+      this.viewerSubscription.unsubscribe();
     }
   }
 }

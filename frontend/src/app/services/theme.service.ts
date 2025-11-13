@@ -75,18 +75,21 @@ export class ThemeService {
     if (typeof document === 'undefined') return;
 
     const root = document.documentElement;
-    
-    // Remove existing theme classes
-    root.classList.remove('light', 'dark');
-    
+    // Siempre controlar la clase 'dark' para Tailwind
+    // Eliminamos cualquier clase previa que no sea necesaria
+    root.classList.remove('light');
+
     if (theme === 'system') {
-      // Let CSS media queries handle system theme
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.classList.toggle('dark', prefersDark);
       this.updateDarkMode(prefersDark);
+    } else if (theme === 'dark') {
+      root.classList.add('dark');
+      this.updateDarkMode(true);
     } else {
-      // Apply specific theme
-      root.classList.add(theme);
-      this.updateDarkMode(theme === 'dark');
+      // light
+      root.classList.remove('dark');
+      this.updateDarkMode(false);
     }
   }
 

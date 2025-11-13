@@ -24,6 +24,8 @@ import com.desarrollo.raffy.business.repository.RegisteredUserRepository;
 import com.desarrollo.raffy.business.repository.ParticipantRepository;
 import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
+import com.desarrollo.raffy.model.Participant;
+import com.desarrollo.raffy.model.RaffleNumber;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.Raffle;
@@ -287,6 +289,48 @@ public class EventsService {
         
          // Guarda los cambios en el evento
         eventsRepository.save(event);
+        
+        // Enviar mensajes a los ganadores
+        for (Object winner : winners) {
+            String winnerPhone = null;
+            String winnerName = null;
+
+            if (winner instanceof Participant) {
+                Participant p = (Participant) winner;
+                winnerPhone = p.getParticipant().getCellphone();
+                winnerName = p.getParticipant().getName();
+            } else if (winner instanceof RaffleNumber) {
+                RaffleNumber rn = (RaffleNumber) winner;
+                winnerPhone = rn.getNumberOwner().getCellphone();
+                winnerName = rn.getNumberOwner().getName();
+            }
+
+            if (winnerPhone != null && !winnerPhone.isBlank()) {
+                String msg = "¡Felicidades " + winnerName + "! Has ganado en el evento " + event.getTitle() + ".";
+                sendWhatsAppText(winnerPhone, msg);
+            }
+        }
+        
+        // Enviar resumen al creador del evento
+        String creatorPhone = event.getCreator().getCellphone();
+        if (creatorPhone != null && !creatorPhone.isBlank()) {
+            StringBuilder summary = new StringBuilder();
+            summary.append("Resumen del evento '").append(event.getTitle()).append("':\n");
+            summary.append("Se han seleccionado ").append(winners.size()).append(" ganadores.\n\n");
+            
+            for (int i = 0; i < winners.size(); i++) {
+                Object winner = winners.get(i);
+                String winnerName = null;
+                if (winner instanceof Participant) {
+                    winnerName = ((Participant) winner).getParticipant().getName();
+                } else if (winner instanceof RaffleNumber) {
+                    winnerName = ((RaffleNumber) winner).getNumberOwner().getName();
+                }
+                summary.append(i + 1).append(". ").append(winnerName).append("\n");
+            }
+            
+            sendWhatsAppText(creatorPhone, summary.toString());
+        }
         
         return winners;
     }

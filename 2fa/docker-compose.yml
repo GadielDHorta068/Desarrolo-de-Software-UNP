@@ -1,0 +1,54 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/twofactorauth
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      JWT_SECRET: ${JWT_SECRET:-change_me}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=twofactorauth
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d twofactorauth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Servicio de pruebas automatizadas
+  tests:
+    build: .
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      API_URL: http://app:8080
+    volumes:
+      - ./test-api.sh:/app/test-api.sh:ro
+    command: |
+      sh -c '
+        echo "⏳ Esperando a que la aplicación esté lista..."
+        sleep 30
+        echo "🧪 Ejecutando pruebas automatizadas..."
+        chmod +x /app/test-api.sh
+        /app/test-api.sh
+        echo "✅ Pruebas completadas!"
+      '
+    profiles:
+      - testing

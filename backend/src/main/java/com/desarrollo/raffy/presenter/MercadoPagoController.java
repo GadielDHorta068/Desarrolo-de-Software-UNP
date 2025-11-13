@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -57,66 +58,52 @@ public class MercadoPagoController {
     @PostMapping("/process-payment")
     public ResponseEntity<?> processPayment(@RequestBody PaymentMpDTO payment){
         log.warn("[PayMP] => Datos MP del pago recibido: " + payment.getPaymentMp().toString());
-        // agregamos el mail del comprador de prueba para poder realizar pago de manera exitosa
-        payment.getPaymentMp().getPayer().setEmail(emailPayerMP);
-        Map<String, Object> payload = mapper.convertValue(payment.getPaymentMp(), Map.class);
-        Map<String, Object> responseMp = mercadopagoService.createPayment(payload);
-        log.warn("[PayMP] => Datos de la respuesta de crear pago: " + responseMp.toString());
+        try {
+            // agregamos el mail del comprador de prueba para poder realizar pago de manera exitosa
+            payment.getPaymentMp().getPayer().setEmail(emailPayerMP);
 
-        // creamos el dato del pago y lo persistimos, ej de uso de API
-        // Payment paymentCreated = paymentService.createPayment(
-        //     "1",
-        //     "VER_QUE_VA",
-        //     1L,
-        //     1L,
-        //     1L,
-        //     2000.00,
-        //     "ARS",
-        //     "debvisa",
-        //     "tipo_pago"
-        // );
+            Map<String, Object> payload = mapper.convertValue(payment.getPaymentMp(), Map.class);
+            Map<String, Object> responseMp = mercadopagoService.createPayment(payload);
+            log.warn("[PayMP] => Datos de la respuesta de crear pago: " + responseMp.toString());
 
-        Map<String, Object> paymentMethod = (Map<String, Object>) responseMp.get("payment_method");
-        String idUser = payment.getPaymentData().getIdUser();
-        String mailUser = payment.getPaymentData().getMailUser();
-        // log.warn("[PayMP] => IdUser: " + idUser);
-        Long idEvent = Long.parseLong(payment.getPaymentData().getIdEvent());
-        // buscamos al usuario que intenta realizar el pago
-        User payer = (User) userService.findByEmail(mailUser);
-        // buscamos al organizador del evento
-        Events event = (Events) eventService.getById(idEvent);
-        User creator = event.getCreator();
+            // Datos auxiliares para persistir el pago
+            Map<String, Object> paymentMethod = (Map<String, Object>) responseMp.get("payment_method");
+            String paymentMethodType = paymentMethod != null ? (String) paymentMethod.get("type") : null;
+            String mailUser = payment.getPaymentData().getMailUser();
+            Long idEvent = Long.parseLong(payment.getPaymentData().getIdEvent());
 
-        Payment paymentCreated;
-        paymentCreated = paymentService.createPayment(
-            String.valueOf(responseMp.get("id")),
-            String.valueOf(responseMp.get("id")),
-            payer.getId(),
-            idEvent,
-            creator.getId(),         // aca deberia ir el id del organizador (consultar como recuperarlo)
-            payment.getPaymentMp().getTransaction_amount(),
-            (String) responseMp.get("currency_id"),
-            "MP",
-            (String) paymentMethod.get("type")
-        );
+            // buscamos al usuario que intenta realizar el pago; puede ser visitante
+            User payer = (User) userService.findByEmail(mailUser);
+            Long payerId = (payer != null) ? payer.getId() : null;
 
+            // buscamos al organizador del evento
+            Events event = (Events) eventService.getById(idEvent);
+            User creator = event.getCreator();
 
-        // if (payment.status === 'approved') {
-        // return res.status(200).json({ success: true, data: payment });
-        // } else {
-        // return res.status(400).json({ success: false, data: payment });
-        // }
+            Payment paymentCreated = paymentService.createPayment(
+                String.valueOf(responseMp.get("id")),
+                String.valueOf(responseMp.get("id")),
+                payerId,
+                idEvent,
+                creator.getId(), // id del organizador
+                payment.getPaymentMp().getTransaction_amount(),
+                (String) responseMp.get("currency_id"),
+                "MP",
+                paymentMethodType
+            );
 
-        if (paymentCreated != null) {
-            // faltaria esto
-            // auditLogsService.createAuditEvent(created);
-            return Response.ok(responseMp, "Resultado del proceso de pago");
-        } else {
-            return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
+            if (paymentCreated != null) {
+                return Response.ok(responseMp, "Resultado del proceso de pago");
+            } else {
+                return Response.error(null, "Error al crear el pago");
+            }
+        } catch (RestClientResponseException e) {
+            log.error("[PayMP] Error al crear pago en MP: status={}, body={}", e.getRawStatusCode(), e.getResponseBodyAsString());
+            return Response.response(HttpStatus.valueOf(e.getRawStatusCode()), "Error en la solicitud a MercadoPago", e.getResponseBodyAsString());
+        } catch (Exception e) {
+            log.error("[PayMP] Error inesperado en processPayment: {}", e.getMessage(), e);
+            return Response.response(HttpStatus.INTERNAL_SERVER_ERROR, "internal_error", null);
         }
-
-        // de test, a definir
-        // return Response.ok(response, "Resultado del proceso de pago");
     }
 
 }
