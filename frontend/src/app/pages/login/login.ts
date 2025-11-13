@@ -20,6 +20,7 @@ export class Login implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   showPassword = false;
+  twoFARequired = false;
   
   // Propiedades para la mascota
   mascotX = 50;
@@ -52,7 +53,9 @@ export class Login implements OnInit, OnDestroy {
   private initForm(): void {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      otp: [''],
+      recoveryCode: ['']
     });
   }
 
@@ -63,6 +66,18 @@ export class Login implements OnInit, OnDestroy {
 
       const loginRequest: LoginRequest = this.loginForm.value;
 
+      if (this.twoFARequired) {
+        const otp = this.loginForm.get('otp')?.value as string;
+        const recovery = this.loginForm.get('recoveryCode')?.value as string;
+        if ((!otp || otp.length !== 6) && (!recovery || recovery.length === 0)) {
+          this.isLoading = false;
+          this.errorMessage = 'Ingresa el código 2FA de 6 dígitos o un código de respaldo';
+          return;
+        }
+        loginRequest.otp = otp && otp.length === 6 ? otp : undefined;
+        loginRequest.recoveryCode = recovery && recovery.length > 0 ? recovery.trim() : undefined;
+      }
+
       this.authService.login(loginRequest).subscribe({
         next: (response) => {
           this.isLoading = false;
@@ -70,7 +85,12 @@ export class Login implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = 'Credenciales inválidas. Por favor, intenta de nuevo.';
+          if (error?.status === 401 && error?.error?.requires2FA) {
+            this.twoFARequired = true;
+            this.errorMessage = 'Tu cuenta tiene 2FA habilitado. Ingresa el código 2FA o un código de respaldo.';
+          } else {
+            this.errorMessage = 'Credenciales inválidas. Por favor, intenta de nuevo.';
+          }
           console.error('Login error:', error);
         }
       });

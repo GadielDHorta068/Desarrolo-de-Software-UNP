@@ -7,6 +7,8 @@ import { environment } from '../../environments/environment';
 export interface LoginRequest {
   email: string;
   password: string;
+  otp?: string;
+  recoveryCode?: string;
 }
 
 export interface RegisterRequest {
@@ -155,7 +157,7 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, request)
       .pipe(
         tap(response => this.handleAuthSuccess(response)),
-        catchError(this.handleError)
+        catchError(err => throwError(() => err))
       );
   }
 

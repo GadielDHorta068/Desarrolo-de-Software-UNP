@@ -46,6 +46,9 @@ public class AuthService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private TwoFactorService twoFactorService;
+
     public AuthResponse register(RegisteredUserDTO request) {
         try {
             // Verificar si el email ya existe
@@ -105,13 +108,44 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        // Autenticar usuario
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()));
 
         RegisteredUser user = (RegisteredUser) authentication.getPrincipal();
+
+        String nickname = user.getNickname();
+        java.util.Map<String, Object> status = null;
+        try {
+            status = twoFactorService.status(nickname);
+        } catch (Exception ignored) {}
+        boolean twofaEnabled = false;
+        if (status != null && status.get("twoFactorEnabled") instanceof Boolean) {
+            twofaEnabled = (Boolean) status.get("twoFactorEnabled");
+        }
+
+        if (twofaEnabled) {
+            boolean verified = false;
+            String otp = request.getOtp();
+            String recoveryCode = request.getRecoveryCode();
+            if (otp != null && !otp.isBlank()) {
+                java.util.Map<String, Object> payload = java.util.Map.of("username", nickname, "code", otp.trim());
+                java.util.Map<String, Object> res = twoFactorService.verify(payload);
+                Object v = res != null ? res.get("verified") : null;
+                verified = (v instanceof Boolean) && (Boolean) v;
+            } else if (recoveryCode != null && !recoveryCode.isBlank()) {
+                java.util.Map<String, Object> res = twoFactorService.verifyRecovery(nickname, recoveryCode.trim());
+                Object v = res != null ? res.get("verified") : null;
+                verified = (v instanceof Boolean) && (Boolean) v;
+            } else {
+                throw new com.desarrollo.raffy.exception.TwoFARequiredException();
+            }
+
+            if (!verified) {
+                throw new RuntimeException("Código 2FA inválido");
+            }
+        }
 
         // Generar tokens
         String accessToken = jwtService.generateToken(user);
