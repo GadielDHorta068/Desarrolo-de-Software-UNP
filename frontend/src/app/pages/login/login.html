@@ -106,6 +106,34 @@
             {{ getFieldError('password') }}
           </div>
         </div>
+
+        <!-- 2FA Fields -->
+        <div *ngIf="twoFARequired" class="mt-2 space-y-3">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Código 2FA (TOTP)
+          </label>
+          <input
+            id="otp"
+            type="text"
+            formControlName="otp"
+            maxlength="6"
+            placeholder="123456"
+            class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+          />
+          <div class="text-xs text-gray-500 dark:text-gray-400">
+            Si no tienes acceso a tu app autenticadora, usa un código de respaldo.
+          </div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Código de respaldo
+          </label>
+          <input
+            id="recoveryCode"
+            type="text"
+            formControlName="recoveryCode"
+            placeholder="xxxx-xxxx-xxxx-xxxx"
+            class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+          />
+        </div>
       </div>
 
       <!-- Error Message -->
@@ -133,7 +161,7 @@
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           </span>
-          {{ isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+          {{ isLoading ? 'Iniciando sesión...' : (twoFARequired ? 'Verificar 2FA e iniciar sesión' : 'Iniciar Sesión') }}
         </button>
       </div>
 

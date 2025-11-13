@@ -1,0 +1,20 @@
+/**
+ * Respuesta con información del usuario.
+ */
+package com.argy.twofactorauth.dto;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserResponse {
+    private Long id;
+    private String username;
+    private boolean twoFactorEnabled;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
