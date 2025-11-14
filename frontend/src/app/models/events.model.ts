@@ -42,7 +42,8 @@ export interface Creator {
     id: number,
     name: string,
     surname: string,
-    nickname: string
+    nickname: string,
+    email: string
 }
 
 // A.T: es lo que actualmente devuelve el servicio (modelo temporal?)

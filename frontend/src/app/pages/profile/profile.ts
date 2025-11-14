@@ -11,11 +11,13 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { DrawCard } from '../../shared/components/draw-card/draw-card';
 import { HandleStatusPipe } from '../../pipes/handle-status.pipe';
 import { Meta, Title } from '@angular/platform-browser';
+import { ReviewService } from '../../services/review.service';
+import { StarRatingComponent } from '../star-rating.component/star-rating.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, ClipboardModule, DrawCard, RouterModule, HandleStatusPipe],
+  imports: [CommonModule, HttpClientModule, ClipboardModule, DrawCard, RouterModule, HandleStatusPipe, StarRatingComponent],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
   animations: [
@@ -62,6 +64,7 @@ export class Profile implements OnInit, OnDestroy {
   followingCount = 0;
   isFollowing = false;
   viewerId: number | null = null;
+  avgScore: number = 0;
   // Listas y modales
   followersNicknames: string[] = [];
   followingNicknames: string[] = [];
@@ -97,7 +100,8 @@ export class Profile implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private meta: Meta,
     private title: Title,
-    @Inject(DOCUMENT) private document: Document
+    @Inject(DOCUMENT) private document: Document,
+    private reviewService: ReviewService
   ) {}
 
   ngOnInit() {
@@ -105,6 +109,17 @@ export class Profile implements OnInit, OnDestroy {
     this.authService.initializeUserData();
     const viewer = this.authService.getCurrentUserValue();
     this.viewerId = viewer?.id ?? null;
+    if (this.userProfile) {
+        this.reviewService.getAvgScoreByUserEmail(this.userProfile.email).subscribe({
+            next: (response) => {
+                this.avgScore = response;
+            },
+            error: (error) => {
+                console.error('Error al obtener promedio de reviews:', error);
+                this.avgScore = 0; // por si falla, mostrar nada o 0
+            }
+        });
+    }
     // Mantener sincronizado el viewerId cuando el usuario actual se cargue/asigne
     this.viewerSubscription = this.authService.currentUser$.subscribe((u) => {
       const previousViewerId = this.viewerId;

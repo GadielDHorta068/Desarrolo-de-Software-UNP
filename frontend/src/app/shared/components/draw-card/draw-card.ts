@@ -15,10 +15,12 @@ import { EventsService } from '../../../services/events.service';
 import { NotificationService } from '../../../services/notification.service';
 import { DataStatusEvent } from '../../../models/response.model';
 import { AdminInscriptService } from '../../../services/admin/adminInscript';
+import { ReviewService } from '../../../services/review.service';
+import { StarRatingComponent } from '../../../pages/star-rating.component/star-rating.component';
 
 @Component({
   selector: 'app-draw-card',
-  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, HandleDatePipe, ModalDrawInfo, QuestionaryComponent, ModalInfo],
+  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, HandleDatePipe, ModalDrawInfo, QuestionaryComponent, ModalInfo, StarRatingComponent],
   templateUrl: './draw-card.html',
   styleUrl: './draw-card.css'
 })
@@ -30,6 +32,7 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   dataModal: InfoModal = {title: "Administración del evento", message: ""};
 
   userCurrent: UserResponse|null = null;
+    avgScore: number = 0;
   // @Input() event!: Events|null;
   @Input() event!: EventsTemp|null;
   customBackground = input<string>('bg-white');
@@ -54,7 +57,8 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     private eventsService: EventsService,
     private notificationService: NotificationService,
     private eventService: EventsService,
-    private adminInscriptService: AdminInscriptService
+    private adminInscriptService: AdminInscriptService,
+    private reviewService: ReviewService
   ){
     this.userCurrent = this.authService.getCurrentUserValue();
     // console.log("[card-event] => usuario actual: ", this.userCurrent);
@@ -68,7 +72,16 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
         if (isAuth) {
           this.authService.getCurrentUser().subscribe({
             next: (user) => {
-              this.currentUser = user;
+                this.currentUser = user;
+                this.reviewService.getAvgScoreByUserEmail(this.currentUser.email).subscribe({
+                    next: (response) => {
+                        this.avgScore = response;
+                    },
+                    error: (error) => {
+                        console.error('Error al obtener promedio de reviews:', error);
+                        this.avgScore = 0; // por si falla, mostrar nada o 0
+                    }
+                });
               this.isAdmin = (this.currentUser.userType == "ADMIN");
               // console.log('[userActual] => es admin: ', this.isAdmin);
             },

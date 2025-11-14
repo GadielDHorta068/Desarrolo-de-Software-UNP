@@ -60,6 +60,12 @@
                 </div>
             </div>
         </div>
+        <div class="grid-row">
+            <div class="text-base font-bold pt-2">Reputacion del creador</div>
+            <app-star-rating
+                [rating] = "avgUserScore"
+            ></app-star-rating>
+        </div>
     </div>
     <div *ngIf="event?.imageUrl">
         <div class="grid-row" style="align-items: start;">

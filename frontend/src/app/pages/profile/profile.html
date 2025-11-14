@@ -77,6 +77,13 @@
                       </div>
                     </div>
                   </div>
+
+                  <!-- Reputacion del usuario -->
+                  <div class="flex justify-center mt-2">
+                    <app-star-rating
+                        [rating] = "avgScore"
+                    ></app-star-rating>
+                  </div>
                 </div>
                 <div class="md:col-span-2 space-y-4">
                   <div class="flex items-center gap-2 flex-wrap">
