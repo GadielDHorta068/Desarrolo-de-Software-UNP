@@ -26,6 +26,17 @@ export class ReviewService {
         return this.http.get<reviewFromBacktoFrontDTO[]>(`${this.apiUrl}/user/${aUserEmail}`, { headers });
     }
 
+    getAvgScoreByUserEmail(aUserEmail: string): Observable<any> {
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.authService.getToken()}`,
+            'Content-Type': 'application/json'
+        });
+        return this.http.get<number>(`${this.apiUrl}/avg-score`, {
+            headers,
+            params: { email: aUserEmail }
+        })
+    }
+
     createReview(aReview: reviewFromFrontToBackDTO, eventId: string): Observable<any> {
         const headers = new HttpHeaders({
             'Authorization': `Bearer ${this.authService.getToken()}`,

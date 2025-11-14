@@ -5,7 +5,7 @@
 .skeleton-card {
   height: 180px;
   border-radius: 8px;
-  background-color: #27272a;
+  background-color: #f3f4f6; /* light default */
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -32,15 +32,15 @@
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 10px;
   margin-bottom: 16px;
-  background: #0d1117;
-  border: 1px solid #1f2937;
+  background: #ffffff; /* light default */
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 12px;
 }
 .filters label {
   display: block;
   font-size: 0.78rem;
-  color: #9ca3af;
+  color: #6b7280; /* gray-500 in light */
   margin-bottom: 4px;
 }
 .filter-search input,
@@ -52,9 +52,9 @@
   height: 36px;
   padding: 6px 10px;
   border-radius: 8px;
-  border: 1px solid #3f3f46;
-  background: #0b0b10;
-  color: #e5e7eb;
+  border: 1px solid #d1d5db; /* light border */
+  background: #ffffff; /* light background */
+  color: #111827; /* gray-900 */
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 .filters input:focus,
@@ -85,13 +85,13 @@
 }
 .filters .mat-mdc-form-field .mdc-text-field__input {
   padding: 6px 10px; /* consistencia con inputs */
-  color: #e5e7eb; /* oscuro */
+  color: #111827; /* light */
   height: 24px; /* contenido más compacto */
   line-height: 24px;
 }
 .filters .mat-mdc-form-field .mat-mdc-form-field-icon-suffix,
 .filters .mat-mdc-form-field .mat-mdc-form-field-icon-prefix {
-  color: #9ca3af; /* icono acorde al tema oscuro */
+  color: #9ca3af; /* icon color neutral */
 }
 /* tamaño de icono del datepicker */
 .filters .mat-mdc-form-field .mat-datepicker-toggle-default-icon { width: 18px; height: 18px; }
@@ -117,68 +117,50 @@
   display: flex;
   align-items: center;
 }
-/* Tema claro */
-.light .filters .mat-mdc-form-field .mdc-text-field__input,
-:root:not(.dark) .filters .mat-mdc-form-field .mdc-text-field__input {
-  color: #111827;
+/* Tema oscuro (aplicado cuando <html> tiene .dark) */
+:host-context(.dark) .filters { background: #0d1117; border-color: #1f2937; }
+:host-context(.dark) .filters label { color: #9ca3af; }
+:host-context(.dark) .filter-search input,
+:host-context(.dark) .filters select,
+:host-context(.dark) .filters input[type="text"],
+:host-context(.dark) .filters input[type="date"],
+:host-context(.dark) .filters input[type="number"] {
+  background: #0b0b10;
+  border-color: #3f3f46;
+  color: #e5e7eb;
 }
-.light .filters .mat-mdc-form-field .mdc-text-field--outlined,
-:root:not(.dark) .filters .mat-mdc-form-field .mdc-text-field--outlined {
-  background: #ffffff;
-  border-color: #d1d5db;
+:host-context(.dark) .filters .mat-mdc-form-field .mdc-text-field__input {
+  color: #e5e7eb;
 }
-
-/* Tema oscuro */
-.dark .filters .mat-mdc-form-field .mdc-text-field--outlined {
+:host-context(.dark) .filters .mat-mdc-form-field .mdc-text-field--outlined {
   background: #0b0b10;
   border-color: #3f3f46;
 }
 
-/* Controles en tema claro */
-.light .filter-search input,
-:root:not(.dark) .filter-search input,
-.light .filters select,
-:root:not(.dark) .filters select,
-.light .filters input[type="text"],
-:root:not(.dark) .filters input[type="text"],
-.light .filters input[type="date"],
-:root:not(.dark) .filters input[type="date"],
-.light .filters input[type="number"],
-:root:not(.dark) .filters input[type="number"] {
-  background: #ffffff;
-  border-color: #d1d5db;
-  color: #111827;
-}
-.light .filters { background: #ffffff; border-color: #e5e7eb; }
-.dark .filters { background: #0d1117; }
-
 /* Autocomplete panel estilos */
 .filters .mat-mdc-autocomplete-panel {
-  background: #0b0b10;
-  color: #e5e7eb;
-  border: 1px solid #3f3f46;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
 }
 .filters .mat-mdc-option {
   min-height: 36px;
 }
 .filters .mat-mdc-option.mdc-list-item--selected,
 .filters .mat-mdc-option:hover {
-  background: #111827;
+  background: #f3f4f6;
 }
 
-/* Autocomplete tema claro */
-.light .filters .mat-mdc-autocomplete-panel,
-:root:not(.dark) .filters .mat-mdc-autocomplete-panel {
-  background: #ffffff;
-  color: #111827;
-  border: 1px solid #d1d5db;
+/* Autocomplete tema oscuro */
+:host-context(.dark) .filters .mat-mdc-autocomplete-panel {
+  background: #0b0b10;
+  color: #e5e7eb;
+  border: 1px solid #3f3f46;
 }
-.light .filters .mat-mdc-option.mdc-list-item--selected,
-:root:not(.dark) .filters .mat-mdc-option.mdc-list-item--selected,
-.light .filters .mat-mdc-option:hover,
-:root:not(.dark) .filters .mat-mdc-option:hover {
-  background: #f3f4f6;
+:host-context(.dark) .filters .mat-mdc-option.mdc-list-item--selected,
+:host-context(.dark) .filters .mat-mdc-option:hover {
+  background: #111827;
 }
 
 .results-meta { color: #9ca3af; margin-bottom: 8px; }
@@ -191,12 +173,20 @@
 
 /* Modal */
 .modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); z-index: 50; }
-.modal-content { width: 100%; max-width: 420px; background: #0f172a; border: 1px solid #374151; color: #e5e7eb; padding: 16px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+.modal-content { width: 100%; max-width: 420px; background: #ffffff; border: 1px solid #e5e7eb; color: #111827; padding: 16px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); }
+.modal-actions { display: flex; gap: 12px; margin-top: 16px; }
+
+/* Modal dark */
+:host-context(.dark) .modal-content { background: #0f172a; border: 1px solid #374151; color: #e5e7eb; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
 .modal-actions { display: flex; gap: 12px; margin-top: 16px; }
 
 .btn { border-radius: 8px; border: 1px solid transparent; cursor: pointer; }
 .btn-primary { background: #10b981; color: #0b0b10; padding: 8px 12px; }
 .btn-secondary { background: #1f2937; color: #e5e7eb; padding: 8px 12px; }
 .btn-link { background: transparent; color: #9ca3af; }
-.btn-outline { background: transparent; color: #e5e7eb; border-color: #374151; }
+.btn-outline { background: transparent; color: #111827; border-color: #d1d5db; }
+:host-context(.dark) .btn-outline { color: #e5e7eb; border-color: #374151; }
+
+/* Dark variants for skeleton */
+:host-context(.dark) .skeleton-card { background-color: #27272a; }
 

@@ -132,3 +132,6 @@ evolution:
 mercadopago:
   url: ${MP_API_URL:https://api.mercadopago.com}
   acces_token: ${MP_ACCES_TOKEN:TEST-5661274554438572-102416-924ed3e9f367098b2d776c8933db61ac-501812522}
+
+server:
+  max-http-header-size: 64KB

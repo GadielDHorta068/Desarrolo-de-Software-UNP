@@ -7,6 +7,8 @@ import { environment } from '../../environments/environment';
 export interface LoginRequest {
   email: string;
   password: string;
+  otp?: string;
+  recoveryCode?: string;
 }
 
 export interface RegisterRequest {
@@ -155,7 +157,7 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, request)
       .pipe(
         tap(response => this.handleAuthSuccess(response)),
-        catchError(this.handleError)
+        catchError(err => throwError(() => err))
       );
   }
 
@@ -388,8 +390,8 @@ export class AuthService {
   /**
    * Rota el secreto 2FA (regenera QR y códigos)
    */
-  rotate2FA(username: string): Observable<TwoFactorEnableResponse> {
-    return this.http.post<TwoFactorEnableResponse>(`${environment.apiUrl}/2fa/rotate/${username}`, {}, {
+  rotate2FA(username: string, payload?: { code?: string; recoveryCode?: string }): Observable<TwoFactorEnableResponse> {
+    return this.http.post<TwoFactorEnableResponse>(`${environment.apiUrl}/2fa/rotate/${username}`, payload || {}, {
       headers: this.getAuthHeaders()
     }).pipe(
       catchError(this.handleError)
@@ -399,8 +401,20 @@ export class AuthService {
   /**
    * Deshabilita 2FA para el usuario
    */
-  disable2FA(username: string): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/2fa/disable/${username}`, {}, {
+  disable2FA(username: string, payload?: { code?: string; recoveryCode?: string }): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/2fa/disable/${username}`, payload || {}, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Obtiene el estado de 2FA de un usuario
+   */
+  get2FAStatus(username: string): Observable<{ username: string; twoFactorEnabled: boolean; createdAt?: string }>
+  {
+    return this.http.get<{ username: string; twoFactorEnabled: boolean; createdAt?: string }>(`${environment.apiUrl}/2fa/status/${username}`, {
       headers: this.getAuthHeaders()
     }).pipe(
       catchError(this.handleError)

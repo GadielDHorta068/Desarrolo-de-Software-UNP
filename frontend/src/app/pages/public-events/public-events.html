@@ -106,7 +106,7 @@
 
   <!-- Events list -->
   <div *ngIf="!loading && !error && visibleEvents.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-    <app-draw-card *ngFor="let evt of visibleEvents" [event]="evt" [customBackground]="'bg-zinc-800'"></app-draw-card>
+    <app-draw-card *ngFor="let evt of visibleEvents" [event]="evt" [customBackground]="'bg-white dark:bg-zinc-800'"></app-draw-card>
   </div>
 
   <!-- Sentinel para lazy loading -->

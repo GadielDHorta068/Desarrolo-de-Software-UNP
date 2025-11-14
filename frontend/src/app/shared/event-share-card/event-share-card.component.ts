@@ -67,17 +67,17 @@ import { UrlService } from '../../services/url.service';
       border: 1px solid var(--card-border);
       border-radius: 8px;
       padding: 16px;
-      max-width: 480px;
+      max-width: 100%;
       background: var(--card-bg);
       transition: background-color 150ms ease, border-color 150ms ease;
     }
     .share-card__header { margin-bottom: 12px; }
     .share-card__title { font-size: 18px; font-weight: 600; }
     .share-card__subtitle { font-size: 14px; color: var(--text-secondary); }
-    .share-card__content { display: flex; gap: 16px; align-items: center; }
+    .share-card__content { display: flex; gap: 16px; align-items: flex-start; }
     .share-card__qr img {
-      width: 160px;
-      height: 160px;
+      width: 240px;
+      height: 240px;
       object-fit: contain;
       border: 1px solid var(--card-border);
       border-radius: 4px;
@@ -99,6 +99,12 @@ import { UrlService } from '../../services/url.service';
     }
     .share-card__actions button:hover { background: var(--btn-bg-hover); }
     .share-card__actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Responsivo: en pantallas pequeñas apilar y ajustar tamaño */
+    @media (max-width: 640px) {
+      .share-card__content { flex-direction: column; align-items: center; text-align: center; }
+      .share-card__qr img { width: 200px; height: 200px; }
+    }
   `]
 })
 export class EventShareCardComponent implements OnInit {

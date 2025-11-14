@@ -46,10 +46,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             AuthResponse response = authService.login(request);
             return ResponseEntity.ok(response);
+        } catch (com.desarrollo.raffy.exception.TwoFARequiredException e) {
+            return ResponseEntity.status(401).body(java.util.Map.of("requires2FA", true));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

@@ -1,4 +1,4 @@
-<div class="shadow-md rounded-lg p-4 hover:shadow-lg transition border border-zinc-700 hover:border-emerald-600" [ngClass]="customBackground()">
+<div class="shadow-md rounded-lg p-4 hover:shadow-lg transition border border-gray-200 dark:border-zinc-700 hover:border-emerald-600" [ngClass]="customBackground()">
     <div class="flex gap-4">
         <img style="width: 30px; height: 30px;" [src]="event?.eventType | handleIconTypePipe" alt="">
         <h2 class="text-lg font-semibold text-emerald-500 mb-2 pl-1">{{event?.title}}</h2>
@@ -14,20 +14,26 @@
                 ESTAS INSCRITO
             </div>
             <div class="block" style="padding-top: 8px;">
-                <p class="text-sm text-gray-200"><b>Descripción</b></p>
-                <p class="text-sm text-gray-400 mb-1">{{event?.description}}</p>
+                <p class="text-sm text-gray-800 dark:text-gray-200"><b>Descripción</b></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{event?.description}}</p>
             </div>
             <div class="block">
-                <p class="text-sm text-gray-200"><b>Fecha fin</b></p>
-                <p class="text-sm text-gray-400 mb-1">{{event?.endDate | handleDatePipe}}</p>
+                <p class="text-sm text-gray-800 dark:text-gray-200"><b>Fecha fin</b></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{event?.endDate | handleDatePipe}}</p>
             </div>
             <div class="block">
-                <p class="text-sm text-gray-200"><b>Estado</b></p>
-                <p class="text-sm text-gray-400 mb-1">{{event?.statusEvent | handleStatusPipe}}</p>
+                <p class="text-sm text-gray-800 dark:text-gray-200"><b>Estado</b></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{event?.statusEvent | handleStatusPipe}}</p>
             </div>
             <div class="block">
-                <p class="text-sm text-gray-200"><b>Categoría</b></p>
-                <p class="text-sm text-gray-400 mb-1">{{event?.categoryName || 'Sin categoría'}}</p>
+                <p class="text-sm text-gray-800 dark:text-gray-200"><b>Categoría</b></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{event?.categoryName || 'Sin categoría'}}</p>
+            </div>
+            <div class="block">
+                <p class="text-sm text-gray-800 dark:text-gray-200"><b>Reputacion del creador</b></p>
+                <app-star-rating
+                    [rating] = "avgScore"
+                ></app-star-rating>
             </div>
         </div>
         <!-- columna de imagen -->
