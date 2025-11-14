@@ -1,0 +1,28 @@
+<div class="rounded-[6px] p-[10px] border-2 border-[darkslategray]">
+    <div class="flex items-center gap-2 pb-2">
+        <div>
+            <label class="text-[1rem] text-[lightyellow]">Usuario: </label>
+            <label class="text-[1rem] text-green-400">{{review?.name}} {{review?.surname}}</label>
+        </div>
+        <!-- <div class="pl-[6%] font-sans" [style.color]="(report?.statusReport == 'EARRING') ? 'orange' : (report?.statusReport == 'APPROVED') ? 'green': 'red'"> -->
+        <div class="pl-[6%] font-sans d-flex">
+            <strong class="text-gray-400"> Entrega de premio: </strong>
+            <strong class="text-yellow-400">{{review?.delivery}}</strong>
+        </div>
+    </div>
+    <div class="grid-resolution">
+        <div>
+            <p>{{review?.comment}}</p>
+            <div class="pt-2">
+                <strong class="text-gray-400 font-roboto">Evento: {{review?.eventTitle}}</strong>
+            </div>
+        </div>
+        <!-- probando un texto largo -->
+        <!-- <p>asdasda dasd asd as d sf sdg s g s gs d fs d fs dfsdfsdfs df sdf sdfsdf sdf sdfs f sd fs 
+            sdfsdfsdfsdfs asda sda sda sda sd asdasdasd asdas dasdasd</p> -->
+        <div class="d-flex" style="align-content: end;">
+            <label>Puntuación: </label>
+            <strong>{{review?.score}} estrellas</strong>
+        </div>
+    </div>
+</div>

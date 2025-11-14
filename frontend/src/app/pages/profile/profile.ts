@@ -11,11 +11,12 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { DrawCard } from '../../shared/components/draw-card/draw-card';
 import { HandleStatusPipe } from '../../pipes/handle-status.pipe';
 import { Meta, Title } from '@angular/platform-browser';
+import { Reviews } from '../reviews/reviews';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, ClipboardModule, DrawCard, RouterModule, HandleStatusPipe],
+  imports: [CommonModule, HttpClientModule, ClipboardModule, DrawCard, RouterModule, HandleStatusPipe, Reviews],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
   animations: [
@@ -40,7 +41,7 @@ export class Profile implements OnInit, OnDestroy {
   joinedError = '';
 
   // tabs
-  activeTab: 'informacion' | 'mis-eventos' | 'historial' = 'informacion';
+  activeTab: 'informacion' | 'mis-eventos' | 'historial' | 'reviews' = 'informacion';
 
   loading = true;
   error = '';
@@ -355,7 +356,7 @@ export class Profile implements OnInit, OnDestroy {
     });
   }
 
-  selectTab(tab: 'informacion' | 'mis-eventos' | 'historial') {
+  selectTab(tab: 'informacion' | 'mis-eventos' | 'historial' | 'reviews') {
     this.activeTab = tab;
     // Lazy-load historial si aún no está cargado
     if (tab === 'historial' && this.joinedEvents.length === 0 && this.userProfile?.id) {
