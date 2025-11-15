@@ -21,9 +21,6 @@ import { NotificationService } from '../../services/notification.service';
 })
 export class RafflesPanel {
 
-  // @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
-  // dataModal: InfoModal = {title: "Creación de eventos", message: ""};
-
   formPanel: FormGroup;
   userCurrent: UserResponse|null = null;
 
@@ -64,17 +61,6 @@ export class RafflesPanel {
     });
     
     // inicializacion del form de creacion de eventos
-    // this.formPanel = new FormGroup({
-    //   title: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-    //   drawType: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-    //   category: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-    //   executionDate: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-    //   winners: new FormControl({value: 1, disabled: false}, {validators:[ Validators.required ]}),
-    //   description: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-    //   image: new FormControl({value: null, disabled: false}),
-    //   priceRaffle: new FormControl({value: '', disabled: false}),
-    //   quantityNumbersRaffle: new FormControl({value: '', disabled: false})
-    // });
     this.formPanel = this.initForm();
 
     this.formPanel.get('drawType')?.valueChanges.subscribe(valor => {
@@ -109,12 +95,10 @@ export class RafflesPanel {
         this.formPanel.disable();
         this.eventCreated = true;
         this.notificationService.notifySuccess("Evento creado correctamente");
-        // this.router.navigate(['/draws/all']);
         this.router.navigateByUrl("/event/management/"+response.id);
       },
       error: (error) => {
           console.warn('[Eventos]: error al crear el evento: ', error);
-          // this.dataModal.message = "Error al crear el evento. ", error.error;
           // // NOTA: cuando la fecha esta errada no es un json la respuesta, corregir
           this.notificationService.notifyError("Error al crear el evento. ", error.error);
         // });
@@ -225,10 +209,5 @@ export class RafflesPanel {
   get eventTypeSelected(){
     return this.formPanel.get('drawType')?.value;
   }
-
-  // Navegar al listado de sorteos al confirmar el modal
-  // onCreationConfirmed(){
-  //   this.router.navigate(['/draws/all']);
-  // }
 
 }

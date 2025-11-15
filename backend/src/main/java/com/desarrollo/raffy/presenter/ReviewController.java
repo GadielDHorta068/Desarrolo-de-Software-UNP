@@ -70,7 +70,8 @@ public class ReviewController {
     ) {
         try {
             Review savedReview = reviewService.save(aReviewFromFrontToBack, aEventId);
-            return Response.ok(savedReview, "Review creada con éxito");
+            // return Response.ok(savedReview, "Review creada con éxito");
+            return Response.ok(null, "Review creada con éxito");
         } catch (IllegalArgumentException e) {
             return Response.error(e, e.getMessage()); // error controlado (400)
         } catch (Exception e) {

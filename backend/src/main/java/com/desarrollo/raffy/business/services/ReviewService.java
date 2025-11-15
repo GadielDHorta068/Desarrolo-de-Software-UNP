@@ -55,6 +55,7 @@ public class ReviewService {
             ReviewFromBackToFrontDTO reviewToFront = new ReviewFromBackToFrontDTO();
             reviewToFront.setName(r.getUser().getName());
             reviewToFront.setSurname(r.getUser().getSurname());
+            reviewToFront.setEventId(r.getEvent().getId());
             reviewToFront.setEventTitle(r.getEvent().getTitle());
             reviewToFront.setScore(r.getScore());
             reviewToFront.setDelivery(r.getDelivery());
