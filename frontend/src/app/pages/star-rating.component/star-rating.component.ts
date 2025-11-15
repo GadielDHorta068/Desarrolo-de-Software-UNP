@@ -9,7 +9,7 @@ import { Component, Input } from '@angular/core';
   styleUrl: './star-rating.component.css'
 })
 export class StarRatingComponent {
-    @Input() rating: number = 3.5;
+    @Input() rating!: number;
     stars = [1, 2, 3, 4, 5];
 
     getStarType(index: number): 'full' | 'half' | 'empty' {

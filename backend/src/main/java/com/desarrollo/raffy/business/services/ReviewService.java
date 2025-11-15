@@ -2,18 +2,24 @@ package com.desarrollo.raffy.business.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.desarrollo.raffy.model.Events;
+import com.desarrollo.raffy.model.Giveaways;
+import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.Review;
 import com.desarrollo.raffy.business.repository.EventsRepository;
+import com.desarrollo.raffy.business.repository.ParticipantRepository;
+import com.desarrollo.raffy.business.repository.RaffleNumberRepository;
 import com.desarrollo.raffy.business.repository.ReviewRepository;
 import com.desarrollo.raffy.business.repository.UserRepository;
 import com.desarrollo.raffy.dto.ReviewFromBackToFrontDTO;
 import com.desarrollo.raffy.dto.ReviewFromFrontToBackDTO;
+import com.desarrollo.raffy.exception.NotAllowedToReviewException;
 import com.desarrollo.raffy.model.User;
 
 
@@ -33,6 +39,12 @@ public class ReviewService {
     private EventsRepository eventsRepository;
 
     @Autowired
+    private ParticipantRepository participantRepository;
+
+    @Autowired
+    private RaffleNumberRepository raffleNumberRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     public List<ReviewFromBackToFrontDTO> findReviewsByEventCreatorEmail(String creatorEmail) {
@@ -43,6 +55,7 @@ public class ReviewService {
             ReviewFromBackToFrontDTO reviewToFront = new ReviewFromBackToFrontDTO();
             reviewToFront.setName(r.getUser().getName());
             reviewToFront.setSurname(r.getUser().getSurname());
+            reviewToFront.setEventId(r.getEvent().getId());
             reviewToFront.setEventTitle(r.getEvent().getTitle());
             reviewToFront.setScore(r.getScore());
             reviewToFront.setDelivery(r.getDelivery());
@@ -50,6 +63,11 @@ public class ReviewService {
             result.add(reviewToFront);
         }
         return result;
+    }
+
+    public Double getAverageScoreByUserEmail(String aUserEmail) {
+        Double avgScore = reviewRepository.getReputationOfUserByUserEmail(aUserEmail);
+        return (avgScore != null) ? avgScore : 0.0;
     }
 
     @Transactional
@@ -61,8 +79,19 @@ public class ReviewService {
             throw new IllegalArgumentException("Usuario o evento no encontrados");
         }
 
-        // agregar checkeo de q user sea participante del evento y sea ganador (poss disitnta de cero)
-        // hay q modificar los repositorys participante y raffle number para poderbuscar por evento y usuario
+        List<String> winnersEmails;
+        if (optionalEvent.get() instanceof Giveaways) {
+            winnersEmails = participantRepository.findWinnerEmailsByEventId(aEventId);
+            if (!winnersEmails.contains(optionalUser.get().getEmail())) {
+                throw new NotAllowedToReviewException("El usuario que escribe la reseña no es un ganador del evento");
+            }
+        }
+        if (optionalEvent.get() instanceof Raffle) {
+            winnersEmails = raffleNumberRepository.findWinnerEmailsByEventId(aEventId);
+            if (!winnersEmails.contains(optionalUser.get().getEmail())) {
+                throw new NotAllowedToReviewException("El usuario que escribe la reseña no es un ganador de el evento");
+            }
+        }
         
         Review newReview = new Review();
         newReview.setUser(optionalUser.get());

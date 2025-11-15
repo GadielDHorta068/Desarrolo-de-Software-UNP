@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.desarrollo.raffy.Response;
@@ -37,15 +38,29 @@ public class ReviewController {
     ) {
         try {
             List<ReviewFromBackToFrontDTO> reviews = reviewService.findReviewsByEventCreatorEmail(aUserEmail);
+            // log.warn("[reviews] => reviews obtenidos: " + reviews);
             if (reviews.isEmpty() || reviews == null) {
-                return new ResponseEntity<>("no se encontraron reviews para el usuario con email: " + aUserEmail, null);
+                // return new ResponseEntity<>("no se encontraron reviews para el usuario con email: " + aUserEmail, null);
+                return Response.ok(reviews, "No se encontraron reviews para el usuario con email"+aUserEmail);
             }
-            return new ResponseEntity<>(reviews, HttpStatus.OK);
+            return Response.ok(reviews, "Se econtraron "+reviews.size()+" reviews");
         }
         catch (Exception e) {
-            return new ResponseEntity<>("error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            return Response.error(null, e.getMessage());
         }
 
+    }
+
+    @GetMapping("/avg-score")
+    public ResponseEntity<?> getAvgScoreByUserEmail(
+        @RequestParam("email") String aUserEmail) {
+        try {
+            Double avgScore = reviewService.getAverageScoreByUserEmail(aUserEmail);
+            return new ResponseEntity<>(avgScore, HttpStatus.OK);    
+        }
+        catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
     @PostMapping("/event/{eventId}/create-review")
@@ -55,11 +70,16 @@ public class ReviewController {
     ) {
         try {
             Review savedReview = reviewService.save(aReviewFromFrontToBack, aEventId);
-            return Response.ok(savedReview, "Review creada con éxito");
+            // return Response.ok(savedReview, "Review creada con éxito");
+            return Response.ok(null, "Review creada con éxito");
         } catch (IllegalArgumentException e) {
             return Response.error(e, e.getMessage()); // error controlado (400)
         } catch (Exception e) {
-            return Response.error(e, "Ocurrió un error al crear la review");
+            String msgError = "Ocurrió un error inesperado al crear la review";
+            if(e.getMessage() != null){
+                msgError = e.getMessage();
+            }
+            return Response.error(null, msgError);
         }
     }
 

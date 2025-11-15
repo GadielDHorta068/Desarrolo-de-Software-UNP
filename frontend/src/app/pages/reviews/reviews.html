@@ -1,0 +1,19 @@
+<!-- Card: encabezado con título y tabs -->
+<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow flex flex-col gap-4 m-1">
+  <!-- Título -->
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Mis reseñas</h1>
+  <hr class="border-gray-300 dark:border-gray-700" />
+
+  <h2 *ngIf="reviews && (reviews.length > 0)">Total de reseñas: {{reviews.length}}</h2>
+
+  <!-- lista de reportes del evento -->
+  <div *ngFor="let review of reviews">
+    <app-info-review [review]="review"></app-info-review>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="reviews && (reviews.length === 0)" class="text-gray-400">
+    No hay eventos reportados por el momento.
+  </div>
+
+</div>

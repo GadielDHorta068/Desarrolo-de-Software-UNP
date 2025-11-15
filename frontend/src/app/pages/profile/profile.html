@@ -49,6 +49,15 @@
                   </svg>
                   Historial
                 </button>
+                <button (click)="selectTab('reviews')"
+                  class="tab-button px-4 py-2 rounded-t-md flex items-center gap-2"
+                  [ngClass]="activeTab === 'reviews' ? 'bg-emerald-600 text-white tab-active' : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600'">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 8l9 6 9-6M21 8v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8m0 0l9 6 9-6" />
+                  </svg>
+                  Reseñas
+                </button>
               </nav>
             </div>
 
@@ -76,6 +85,13 @@
                           userProfile.surname }}</h1>
                       </div>
                     </div>
+                  </div>
+
+                  <!-- Reputacion del usuario -->
+                  <div class="flex justify-center mt-2">
+                    <app-star-rating
+                        [rating] = "avgScore"
+                    ></app-star-rating>
                   </div>
                 </div>
                 <div class="md:col-span-2 space-y-4">
@@ -231,8 +247,6 @@
                   <div class="flex items-center space-x-2" *ngIf="isOwner">
                     <a routerLink="/audit" class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700"
                       style="cursor: pointer;">Auditorías</a>
-                    <a routerLink="/panel" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700"
-                      style="cursor: pointer;">Nuevo evento</a>
                   </div>
                 </div>
               </div>
@@ -315,6 +329,11 @@
               </div>
             </div>
 
+            <!-- Reseñas -->
+            <div *ngIf="activeTab === 'reviews'" [@tabTransition] class="space-y-6">
+              <app-reviews></app-reviews>
+            </div>
+
           </div>
         </div>
       </div>
@@ -328,7 +347,8 @@
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                 {{ showFollowersModal ? 'Seguidores' : 'Seguidos' }}
               </h3>
-              <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" (click)="closeModal()" aria-label="Cerrar">
+              <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                (click)="closeModal()" aria-label="Cerrar">
                 ✕
               </button>
             </div>
@@ -341,13 +361,16 @@
                 {{ listError }}
               </div>
               <ul *ngIf="!listLoading && !listError" class="space-y-2">
-                <li *ngFor="let nick of (showFollowersModal ? followersNicknames : followingNicknames)" class="flex items-center justify-between">
-                  <button class="text-left w-full px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                          (click)="goToProfile(nick)">
+                <li *ngFor="let nick of (showFollowersModal ? followersNicknames : followingNicknames)"
+                  class="flex items-center justify-between">
+                  <button
+                    class="text-left w-full px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    (click)="goToProfile(nick)">
                     @{{ nick }}
                   </button>
                 </li>
-                <li *ngIf="(showFollowersModal ? followersNicknames : followingNicknames).length === 0 && !listLoading" class="text-gray-500 dark:text-gray-400 text-sm px-3 py-2">
+                <li *ngIf="(showFollowersModal ? followersNicknames : followingNicknames).length === 0 && !listLoading"
+                  class="text-gray-500 dark:text-gray-400 text-sm px-3 py-2">
                   No hay usuarios para mostrar.
                 </li>
               </ul>
@@ -355,7 +378,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </div>

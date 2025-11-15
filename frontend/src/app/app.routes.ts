@@ -76,6 +76,12 @@ export const routes: Routes = [
     title: 'Perfil - Raffy'
   },
   {
+    path: 'profile/reviews',
+    loadComponent: () => import('./pages/reviews/reviews').then(m => m.Reviews),
+    canActivate: [AuthGuard],
+    title: 'Mis reseñas - Raffy'
+  },
+  {
     path: 'profile/:nickname',
     loadComponent: () => import('./pages/profile/profile').then(m => m.Profile),
     title: 'Perfil - Raffy'
