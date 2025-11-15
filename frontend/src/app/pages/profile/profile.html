@@ -49,6 +49,15 @@
                   </svg>
                   Historial
                 </button>
+                <button (click)="selectTab('reviews')"
+                  class="tab-button px-4 py-2 rounded-t-md flex items-center gap-2"
+                  [ngClass]="activeTab === 'reviews' ? 'bg-emerald-600 text-white tab-active' : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600'">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 8l9 6 9-6M21 8v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8m0 0l9 6 9-6" />
+                  </svg>
+                  Reseñas
+                </button>
               </nav>
             </div>
 
@@ -320,6 +329,11 @@
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Reseñas -->
+            <div *ngIf="activeTab === 'reviews'" [@tabTransition] class="space-y-6">
+              <app-reviews></app-reviews>
             </div>
 
           </div>

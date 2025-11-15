@@ -55,6 +55,7 @@ public class ReviewService {
             ReviewFromBackToFrontDTO reviewToFront = new ReviewFromBackToFrontDTO();
             reviewToFront.setName(r.getUser().getName());
             reviewToFront.setSurname(r.getUser().getSurname());
+            reviewToFront.setEventId(r.getEvent().getId());
             reviewToFront.setEventTitle(r.getEvent().getTitle());
             reviewToFront.setScore(r.getScore());
             reviewToFront.setDelivery(r.getDelivery());
@@ -82,7 +83,7 @@ public class ReviewService {
         if (optionalEvent.get() instanceof Giveaways) {
             winnersEmails = participantRepository.findWinnerEmailsByEventId(aEventId);
             if (!winnersEmails.contains(optionalUser.get().getEmail())) {
-                throw new NotAllowedToReviewException("El usuario que escribe la reseña no es un ganador de el evento");
+                throw new NotAllowedToReviewException("El usuario que escribe la reseña no es un ganador del evento");
             }
         }
         if (optionalEvent.get() instanceof Raffle) {

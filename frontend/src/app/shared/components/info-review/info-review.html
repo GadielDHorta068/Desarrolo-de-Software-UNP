@@ -1,0 +1,37 @@
+<div class="rounded-[6px] p-[10px] border-2 border-[darkslategray]">
+    <div class="flex items-center gap-2 pb-2">
+        <div>
+            <!-- <label class="text-[1rem] text-[lightyellow]">Usuario: </label>
+            <label class="text-[1rem] text-green-400">{{review?.name}} {{review?.surname}}</label> -->
+            <label class="text-xl font-semibold text-[lightyellow]">Usuario: </label>
+            <label class="text-xl font-semibold text-yellow-400">{{review?.name}} {{review?.surname}}</label>
+        </div>
+        <!-- <div class="pl-[6%] font-sans" [style.color]="(report?.statusReport == 'EARRING') ? 'orange' : (report?.statusReport == 'APPROVED') ? 'green': 'red'"> -->
+        <div class="pl-[6%] font-sans d-flex">
+            <strong class="text-gray-400"> Entrega de premio: </strong>
+            <!-- <strong class="text-yellow-400">{{review?.delivery}}</strong> -->
+            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">{{review?.delivery | handleDeliveryPipe}}</span>
+        </div>
+    </div>
+    <div class="grid-resolution">
+        <div>
+            <div class="bg-gray-500 dark:bg-gray-700 rounded-md p-[1%]">
+                <!-- <p>{{review?.comment}}</p> -->
+                <blockquote class="italic text-gray-600 dark:text-gray-300">{{review?.comment}}</blockquote>
+            </div>
+            <div class="pt-2">
+                <strong class="text-sm text-gray-800 dark:text-gray-200"><b>Evento: </b></strong>
+                <strong class="text-sm text-gray-800 dark:text-gray-200 uppercase hover:text-blue-400 dark:hover:text-blue-400 hover:underline cursor-pointer" title="Ir al evento" (click)="redirectDetailsEvent(review?.eventId)">{{review?.eventTitle}}</strong>
+                <!-- <p class="text-sm text-gray-800 dark:text-gray-200 uppercase"><b>Evento: </b>{{review?.eventTitle}}</p> -->
+            </div>
+        </div>
+        <!-- probando un texto largo -->
+        <!-- <p>asdasda dasd asd as d sf sdg s g s gs d fs d fs dfsdfsdfs df sdf sdfsdf sdf sdfs f sd fs 
+            sdfsdfsdfsdfs asda sda sda sda sd asdasdasd asdas dasdasd</p> -->
+        <div class="d-flex" style="align-content: end;">
+            <label>Puntuación: </label>
+            <!-- <strong>{{review?.score}} estrellas</strong> -->
+             <app-star-rating [rating]="(review && review.score !== null) ? +review.score : 0"></app-star-rating>
+        </div>
+    </div>
+</div>
