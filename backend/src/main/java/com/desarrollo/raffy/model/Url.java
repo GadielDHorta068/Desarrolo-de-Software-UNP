@@ -40,4 +40,7 @@ public class Url {
 
     @Column(name = "is_used")
     private Boolean isUsed;
+
+    @Column(name = "event_id")
+    private Long eventId;
 }

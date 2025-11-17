@@ -341,7 +341,8 @@ export class Profile implements OnInit, OnDestroy {
     }
     this.eventsSubscription = this.eventsService.getAllByCreator(userId.toString()).subscribe({
       next: (events) => {
-        this.userEvents = events;
+        const viewingOwnProfile = this.isOwner;
+        this.userEvents = (events || []).filter(e => viewingOwnProfile ? true : !e.isPrivate);
         this.createdEventsCount = events?.length || 0;
         this.winnersTotalCount = (events || []).reduce((sum, e) => sum + (e.winnersCount || 0), 0);
         this.cdr.detectChanges();

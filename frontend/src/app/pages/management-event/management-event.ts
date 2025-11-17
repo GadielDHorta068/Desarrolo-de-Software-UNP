@@ -70,6 +70,17 @@ export class ManagementEvent {
     participants: RaffleParticipantDTO[] = [];
     eventType!: EventTypes;
     winners: WinnerDTO[] = [];
+    accessRestricted: boolean = false;
+
+    get canUserInscript(): boolean {
+        if (!this.event) return false;
+        const isCreator = this.authService.isAuthenticated() && (this.authService.getCurrentUserValue()?.id === this.event.creator?.id);
+        const invite = this.route.snapshot.queryParamMap.get('invite');
+        if (this.event.isPrivate && !isCreator && (!invite || invite.trim().length === 0)) {
+            return false;
+        }
+        return !isCreator && !this.event?.isUserRegistered && this.event?.statusEvent === StatusEvent.OPEN;
+    }
 
     constructor(
         private adminEventService: AdminEventService,
@@ -82,13 +93,12 @@ export class ManagementEvent {
         private notificationService: NotificationService,
         private adminInscriptService: AdminInscriptService,
         private reportsService: ReportService
-    ) {
-        this.adminEventService.winnersEvent$.subscribe(
-            winners => {
-                this.winners = winners;
-                this.cdr.detectChanges();
-            }
-        )
+    ) {}
+
+    ngAfterViewInit(){
+        this.adminEventService.winnersEvent$.subscribe(winners => {
+            this.winners = winners;
+        });
     }
 
     ngOnInit() {
@@ -96,12 +106,16 @@ export class ManagementEvent {
         // console.log("[admin-event] => ide del evento recibido por param: ", this.eventIdParam);
         // revisamos si los datos del evento ya fueron seteados desde la lista de eventos
         if (!this.event) {
-            this.eventService.getEventById("" + this.eventIdParam).subscribe(
-                resp => {
-                    // console.log("[admin-event] => evento recuperado por id de param: ", resp);
+            const invite = this.route.snapshot.queryParamMap.get('invite') || undefined;
+            this.eventService.getEventById("" + this.eventIdParam, invite || undefined).subscribe({
+                next: (resp) => {
                     this.adminEventService.setSelectedEvent(resp);
+                },
+                error: () => {
+                    this.accessRestricted = true;
+                    this.cdr.markForCheck();
                 }
-            )
+            })
         }
         // si hay un usuario logueado revisamos si ya ha reportado el evento
         this.adminEventService.selectedEvent$.subscribe(
@@ -111,18 +125,18 @@ export class ManagementEvent {
                 if (this.event) {
                     this.eventType = this.event.eventType;
                     this.initForm();
-                    this.cdr.detectChanges();
+                    this.cdr.markForCheck();
 
                     if(this.authService.isAuthenticated()){
                         this.reportsService.hasReportedEvent(""+this.event?.id, ""+this.authService.getCurrentUserValue()?.email).subscribe(
                             data => {
                                 this.hasReport = data;
-                                this.cdr.detectChanges();
+                                this.cdr.markForCheck();
                             },
                             error => {
                                 console.log("[control-report] => Ha ocurrido un error al consultar los reportes del usuario");
                                 this.hasReport = false;
-                                this.cdr.detectChanges();
+                                this.cdr.markForCheck();
                             }
                         )
                     }
@@ -166,21 +180,11 @@ export class ManagementEvent {
         return this.authService.getCurrentUserValue()?.id === this.event?.creator?.id;
     }
 
-    get canUserInscript(): boolean {
-        // El usuario puede inscribirse si:
-        // 1. Está autenticado
-        // 2. No es el creador del evento
-        // 3. No está ya registrado
-        // return this.authService.isAuthenticated() && 
-        //         !this.isUserCreator && 
-        //         !this.event?.isUserRegistered &&
-        //         this.event?.statusEvent === StatusEvent.OPEN;
-        return !this.isUserCreator &&
-            !this.event?.isUserRegistered &&
-            this.event?.statusEvent === StatusEvent.OPEN;
-    }
 
     async onInscript(){
+        if (this.accessRestricted) {
+            return;
+        }
         const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
         // console.log("[onInscript] => estado del evento: ", respStatus);
         if(!respStatus){
@@ -195,6 +199,10 @@ export class ManagementEvent {
                 }
             }
         }
+    }
+
+    goHome(){
+        this.router.navigate(['/home']);
     }
 
     loadParticipants(eventId: number, eventType: EventTypes): void {

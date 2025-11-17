@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UrlService } from '../../services/url.service';
+import { Input } from '@angular/core';
 
 @Component({
   selector: 'app-event-share-card',
@@ -116,6 +117,7 @@ export class EventShareCardComponent implements OnInit {
   // originalUrl?: string;
   originalUrl?: string = "www.google.com";
 
+  @Input() eventId?: number;
   constructor(private urlService: UrlService, private cdr: ChangeDetectorRef) {}
 
   get shortLink(): string {
@@ -194,6 +196,9 @@ export class EventShareCardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.eventId) {
+      return;
+    }
     // Derivar la URL actual completa (ej: http://localhost:4200/evento/id/123)
     const href = (typeof window !== 'undefined' && window.location && window.location.href)
       ? window.location.href
@@ -208,7 +213,7 @@ export class EventShareCardComponent implements OnInit {
     this.originalUrl = href;
 
     // Enviar al backend para acortar y generar QR
-    this.urlService.saveUrl(href).subscribe({
+    this.urlService.saveUrlForEvent(this.eventId ?? 0, href).subscribe({
       next: (resp) => {
         this.qrBase64 = resp.qr;
         this.shortcode = resp.url.shortcode;

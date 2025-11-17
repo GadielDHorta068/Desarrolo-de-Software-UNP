@@ -132,6 +132,11 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
 
   get showRegisterButton(): boolean {
     // Mostrar botón de registro si el usuario puede registrarse
+    const isCreator = this.isUserCreator;
+    const invite = (typeof window !== 'undefined') ? new URLSearchParams(window.location.search).get('invite') : null;
+    if (this.event?.isPrivate && !isCreator && (!invite || invite.trim().length === 0)) {
+      return false;
+    }
     return this.canUserRegister;
   }
 

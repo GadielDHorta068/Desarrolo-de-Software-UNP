@@ -48,6 +48,12 @@
         </div>
     </div>
 
+    <div *ngIf="event?.isPrivate" class="mt-2">
+        <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+            🔒 Privado
+        </span>
+    </div>
+
     <!-- botones de accion -->
     <div class="flex mt-2 justify-center gap-[4%] pt-1">
         <!-- Botón Ver detalles - siempre visible -->

@@ -128,19 +128,15 @@ export class AppComponent {
     private router: Router
   ) {
     // Removido initData() - ahora se llama solo en las páginas que lo necesitan
-    this.adminInscriptService.openInscription$.subscribe(
-      resp => {
-        this.showModalInscript = resp;
-        this.cdr.detectChanges();
-      }
-    )
+    this.adminInscriptService.openInscription$.subscribe(resp => {
+      this.showModalInscript = resp;
+      this.cdr.markForCheck();
+    })
 
-    this.adminInscriptService.openRaffleNUmbers$.subscribe(
-      resp => {
-        this.showRaffleModal = resp;
-        this.cdr.detectChanges();
-      }
-    )
+    this.adminInscriptService.openRaffleNUmbers$.subscribe(resp => {
+      this.showRaffleModal = resp;
+      this.cdr.markForCheck();
+    })
   }
   
   openModalRaffle(){
@@ -174,7 +170,7 @@ export class AppComponent {
       }
     } finally {
       this.redirectingToPayment = false;
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     }
   }
   

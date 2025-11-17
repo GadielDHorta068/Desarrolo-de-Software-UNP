@@ -33,6 +33,14 @@ public class UrlController {
         return map;
     }
 
+    @PostMapping("/event/{eventId}/save")
+    public Map<String, Object> saveUrlForEvent(@PathVariable Long eventId, @RequestBody String url) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("url", urlService.saveUrlForEvent(eventId, url));
+        map.put("qr", urlService.convertLinkToQr(url));
+        return map;
+    }
+
     /**
      * Obtener una URL por su shortcode
      * @param shortcode Shortcode de la URL

@@ -41,8 +41,8 @@
         </div>
 
         <div class="grid-main pt-4 gap-4">
-            <div class="flex gap-2">
-                <div class="w-1/2">
+          <div class="flex gap-2">
+            <div class="w-1/2">
                     <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo (*)</label>
                     <select formControlName="drawType" id="draw" class="bg-gray-800 text-white rounded-md px-4 py-2 w-full border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     [ngClass]="formEvent.get('drawType')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' ">
@@ -53,8 +53,14 @@
                     </select>
                     <div *ngIf="formEvent.get('drawType')?.invalid && formEvent.get('drawType')?.touched">
                     <small>Debés seleccionar un tipo.</small>
-                    </div>
-                </div>
+            </div>
+            <div class="w-1/2 flex items-end">
+              <label class="flex items-center gap-2 mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <input type="checkbox" formControlName="isPrivate" class="h-4 w-4 rounded border-gray-300 dark:border-gray-600">
+                Evento privado
+              </label>
+            </div>
+          </div>
                 <div class="w-1/2">
                     <label for="executionDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Fecha de realización (*)

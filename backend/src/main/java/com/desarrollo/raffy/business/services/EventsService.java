@@ -132,6 +132,7 @@ public class EventsService {
         existing.setCategory(event.getCategory());
         existing.setEndDate(event.getEndDate());
         existing.setWinnersCount(event.getWinnersCount());
+        existing.setPrivate(event.isPrivate());
 
         if(event.getImageBase64() != null && !event.getImageBase64().isEmpty()){
         existing.setImagen(ImageUtils.base64ToBytes(event.getImageBase64()));

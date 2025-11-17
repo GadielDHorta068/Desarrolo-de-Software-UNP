@@ -45,6 +45,8 @@ import java.time.LocalDate;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.desarrollo.raffy.dto.BuyRaffleNumberRequestDTO;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
@@ -90,6 +92,9 @@ public class EventsController {
 
     @Autowired
     private FeaturedEventsService featuredEventsService;
+
+    @Autowired
+    private com.desarrollo.raffy.business.services.UrlService urlService;
 
 
     @PostMapping("/create/giveaway/{idUser}")
@@ -171,17 +176,35 @@ public class EventsController {
 
 
     @GetMapping("/id/{id}")
-    public ResponseEntity<?> getById(@PathVariable @NotNull @Positive Long id) {
+    public ResponseEntity<?> getById(@PathVariable @NotNull @Positive Long id, @RequestParam(required = false) String invite) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
         }
-        
-        EventSummaryDTO event = eventsService.getEventSummaryById(id);
-        if (event != null) {
-            return new ResponseEntity<>(event, HttpStatus.OK);
-        } else {
+        Events eventEntity = eventsService.getById(id);
+        if (eventEntity == null) {
             return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
         }
+
+        if (eventEntity.isPrivate()) {
+            boolean isCreator = false;
+            try {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
+                    isCreator = eventEntity.getCreator() != null && eventEntity.getCreator().getId().equals(u.getId());
+                }
+            } catch (Exception e) {
+                isCreator = false;
+            }
+
+            if (!isCreator) {
+                if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, id) == null) {
+                    return new ResponseEntity<>("Acceso restringido: Evento privado", HttpStatus.FORBIDDEN);
+                }
+            }
+        }
+
+        EventSummaryDTO dto = eventsService.getEventSummaryById(id);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @GetMapping("/status/id/{id}")
@@ -669,7 +692,8 @@ public class EventsController {
     @PostMapping("/{eventId}/participants")
     public ResponseEntity<Object> registerParticipantToGiveaway(
         @Valid @RequestBody UserDTO aGuestUser,
-        @PathVariable("eventId") Long aEventId) {
+        @PathVariable("eventId") Long aEventId,
+        @RequestParam(required = false) String invite) {
 
             Events eventToParticipate = eventsService.getById(aEventId);
             if (eventToParticipate == null) {
@@ -679,6 +703,20 @@ public class EventsController {
             // controlamos que el evento no haya cerrado
             if(eventToParticipate.getStatusEvent() != StatusEvent.OPEN){
                 throw new NoInscriptEventExeption("No es posible inscribirse a este evento");
+            }
+
+            // Privacidad: si es privado y el solicitante no es el creador, exigir invite válido
+            boolean isCreator = false;
+            try {
+                org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
+                    isCreator = eventToParticipate.getCreator() != null && eventToParticipate.getCreator().getId().equals(u.getId());
+                }
+            } catch (Exception e) { isCreator = false; }
+            if (eventToParticipate.isPrivate() && !isCreator) {
+                if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, aEventId) == null) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso restringido: Evento privado");
+                }
             }
 
             User savedGuestUser = createOrUpdateUser(aGuestUser);
@@ -694,8 +732,22 @@ public class EventsController {
     }
 
     @GetMapping("/raffle/{eventId}/sold-numbers")
-        public ResponseEntity<Object> getSoldNumbersById(@PathVariable("eventId") Long aRaffleId) {
+        public ResponseEntity<Object> getSoldNumbersById(@PathVariable("eventId") Long aRaffleId,
+            @RequestParam(required = false) String invite) {
             try {
+                Events ev = eventsService.getById(aRaffleId);
+                boolean isCreator = false;
+                try {
+                    org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                    if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
+                        isCreator = ev != null && ev.getCreator() != null && ev.getCreator().getId().equals(u.getId());
+                    }
+                } catch (Exception e) { isCreator = false; }
+                if (ev != null && ev.isPrivate() && !isCreator) {
+                    if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, aRaffleId) == null) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso restringido: Evento privado");
+                    }
+                }
                 List<Integer> someSoldNumbers = raffleNumberService.findSoldNumbersById(aRaffleId);
                 if (someSoldNumbers == null) {
                     someSoldNumbers = Collections.emptyList();
@@ -716,7 +768,8 @@ public class EventsController {
     @PostMapping("/{eventId}/buy-raffle-number")
     public ResponseEntity<Object> buyRaffleNumber(
         @Valid @RequestBody BuyRaffleNumberRequestDTO aBuyRequest,
-        @PathVariable("eventId") Long aEventId) {
+        @PathVariable("eventId") Long aEventId,
+        @RequestParam(required = false) String invite) {
 
         // System.out.println("aBuyRequest: " + aBuyRequest);
         // System.out.println("aBuyRequest.getAGuestUser(): " + aBuyRequest.getAGuestUser());
@@ -731,6 +784,20 @@ public class EventsController {
         // controlamos que el evento no haya cerrado
         if(eventToParticipate.getStatusEvent() != StatusEvent.OPEN){
             throw new NoInscriptEventExeption("No es posible inscribirse a este evento");
+        }
+
+        // Privacidad: si es privado y el solicitante no es el creador, exigir invite válido
+        boolean isCreator = false;
+        try {
+            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
+                isCreator = eventToParticipate.getCreator() != null && eventToParticipate.getCreator().getId().equals(u.getId());
+            }
+        } catch (Exception e) { isCreator = false; }
+        if (eventToParticipate.isPrivate() && !isCreator) {
+            if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, aEventId) == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso restringido: Evento privado");
+            }
         }
     
         // Buscar usuario existente o crear uno nuevo
@@ -883,8 +950,22 @@ public class EventsController {
     @GetMapping("/{eventId}/get-raffle-participants")
     public ResponseEntity<Object> getRaffleNumbersByRaffleIdAndUser(
         @PathVariable("eventId") Long aRaffleId, 
-        @RequestParam(required = false) String aUserEmail) {
+        @RequestParam(required = false) String aUserEmail,
+        @RequestParam(required = false) String invite) {
             try {
+                Events ev = eventsService.getById(aRaffleId);
+                boolean isCreator = false;
+                try {
+                    org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                    if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
+                        isCreator = ev != null && ev.getCreator() != null && ev.getCreator().getId().equals(u.getId());
+                    }
+                } catch (Exception e) { isCreator = false; }
+                if (ev != null && ev.isPrivate() && !isCreator) {
+                    if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, aRaffleId) == null) {
+                        return new ResponseEntity<>("Acceso restringido: Evento privado", HttpStatus.FORBIDDEN);
+                    }
+                }
                 List<RaffleParticipantDTO> result = raffleNumberService.findRaffleNumbersById(aRaffleId, aUserEmail);
                 if (result == null || result.isEmpty()) {
                     return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
@@ -894,7 +975,7 @@ public class EventsController {
             catch (Exception e) {
                 return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
             }
-    }
+        }
 
     @GetMapping("/featured")
     public ResponseEntity<?> getFeaturedEvents(
