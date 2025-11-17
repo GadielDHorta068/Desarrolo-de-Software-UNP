@@ -45,6 +45,9 @@
         
       </div>
 
+      <!-- Tarjeta para compartir (creador) -->
+      <app-event-share-card *ngIf="isUserCreator && event?.id" [eventId]="event?.id"></app-event-share-card>
+
       <app-info-event [event]="event" [winners]="winners"></app-info-event>
     </div>
   </div>
