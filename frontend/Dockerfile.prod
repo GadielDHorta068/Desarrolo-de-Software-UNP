@@ -13,7 +13,7 @@ COPY tsconfig*.json ./
 COPY src ./src
 COPY public ./public
 
-RUN npm install --legacy-peer-deps
+RUN npm ci
 
 # Genera artefactos de producción en dist/temp-angular
 RUN npm run build

@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { RouterOutlet, ChildrenOutletContexts, Router } from '@angular/router';
 import { HeaderComponent } from './shared/components/header/header.component';
+import { LoadingIndicator } from './shared/components/loading-indicator/loading-indicator';
 import { slideInAnimation } from './animations/route-animations';
 import { QuestionaryComponent } from './pages/questionary/questionary.component';
 import { RaffleNumbersComponent } from './pages/raffle-numbers.component/raffle-numbers.component';
@@ -12,7 +13,7 @@ import { UserDTO } from './models/UserDTO';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, HeaderComponent, QuestionaryComponent, RaffleNumbersComponent],
+  imports: [CommonModule, RouterOutlet, HeaderComponent, QuestionaryComponent, RaffleNumbersComponent, LoadingIndicator],
   template: `
     <main class="min-h-screen flex flex-col font-sans bg-gray-50 dark:bg-gray-900">
       <header class="bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 text-white shadow-lg">
@@ -91,6 +92,10 @@ import { UserDTO } from './models/UserDTO';
     </footer>
     </main>
 
+    <div class="fixed inset-0 z-50" *ngIf="redirectingToPayment">
+      <app-loading-indicator [active]="true" [type]="'overlay'" [message]="'Redirigiendo al pago...'" [size]="'md'"></app-loading-indicator>
+    </div>
+
     <app-questionary
         *ngIf="showModalInscript"
         (close)="onInscriptClosed()"
@@ -113,6 +118,7 @@ export class AppComponent {
 
   showModalInscript: boolean = false;
   showRaffleModal: boolean = false;
+  redirectingToPayment: boolean = false;
   
   constructor(
     private contexts: ChildrenOutletContexts,
@@ -152,21 +158,24 @@ export class AppComponent {
   }
 
   async onQuestionarySubmit(data: UserDTO){
-    // console.log("[inscripcion] => resp del form de inscricpion: ", data);
-    const respInscript: any = await this.adminInscriptService.onInscript(data);
-    // console.log("[inscripcion] => resp de la inscripcion: ", respInscript);
-    if(respInscript.status == 200){
-      if(respInscript.redirectPay){
-        this.router.navigate(['/event/payment']);
+    this.redirectingToPayment = true;
+    try {
+      const respInscript: any = await this.adminInscriptService.onInscript(data);
+      if(respInscript.status == 200){
+        if(respInscript.redirectPay){
+          this.router.navigate(['/event/payment']);
+        }
+        else{
+          this.notificationService.notifySuccess(respInscript.message)
+        }
       }
       else{
-        this.notificationService.notifySuccess(respInscript.message)
+        this.notificationService.notifyError("Ha ocurrido un error en la inscripcion al evento.");
       }
+    } finally {
+      this.redirectingToPayment = false;
+      this.cdr.detectChanges();
     }
-    else{
-      this.notificationService.notifyError("Ha ocurrido un error en la inscripcion al evento.");
-    }
-    this.cdr.detectChanges();
   }
   
   onProceedToQuestionary(data: any){

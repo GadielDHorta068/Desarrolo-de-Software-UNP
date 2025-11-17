@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { AdminEventService } from '../../../services/admin/adminEvent.service';
 import { QuestionaryComponent } from '../../../pages/questionary/questionary.component';
 import { HandleDatePipe } from '../../../pipes/handle-date.pipe';
+import { LoadingIndicator } from '../loading-indicator/loading-indicator';
 import { AuthService, UserResponse } from '../../../services/auth.service';
 import { Subscription } from 'rxjs';
 import { InfoModal, ModalInfo } from '../modal-info/modal-info';
@@ -20,7 +21,7 @@ import { StarRatingComponent } from '../../../pages/star-rating.component/star-r
 
 @Component({
   selector: 'app-draw-card',
-  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, HandleDatePipe, ModalDrawInfo, QuestionaryComponent, ModalInfo, StarRatingComponent],
+  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, HandleDatePipe, ModalDrawInfo, QuestionaryComponent, ModalInfo, StarRatingComponent, LoadingIndicator],
   templateUrl: './draw-card.html',
   styleUrl: './draw-card.css'
 })
@@ -48,6 +49,7 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   // modal de inscripcion a sorteo
   showFormGiveaway = false; // el modal empieza desactivado
   selectedEventId!: number;
+  isActionLoading = false;
 
   constructor(
     private router: Router,
@@ -139,21 +141,26 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async onInscript() {
+    this.isActionLoading = true;
     this.adminEventService.setSelectedEvent(this.event);
-    const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
-    // console.log("[onInscript] => estado del evento: ", respStatus);
-    if (!respStatus) {
-      this.notificationService.notifyError("No fue posible realizar la operación");
-    }
-    else {
+    try {
+      const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
+      if (!respStatus) {
+        this.notificationService.notifyError("No fue posible realizar la operación");
+        return;
+      }
       if (respStatus != StatusEvent.OPEN) {
-        // this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ",  this.handleStatusPipe.transform(respStatus));
         this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
         if (this.event) {
           this.event.statusEvent = respStatus as StatusEvent;
           this.cdr.detectChanges();
         }
+        return;
       }
+      this.showFormGiveaway = true;
+      this.selectedEventId = this.event?.id as number;
+    } finally {
+      this.isActionLoading = false;
     }
   }
 

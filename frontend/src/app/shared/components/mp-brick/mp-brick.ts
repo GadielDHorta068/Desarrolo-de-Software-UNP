@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { LoadingIndicator } from '../loading-indicator/loading-indicator';
 import { MercadoPagoService } from '../../../services/mercado-pago.service';
 import { AdminPaymentService, DataPayment } from '../../../services/admin/adminPayment.service';
 
@@ -6,7 +7,7 @@ declare var MercadoPago: any;
 
 @Component({
   selector: 'app-mp-brick',
-  imports: [],
+  imports: [LoadingIndicator],
   templateUrl: './mp-brick.html',
   styleUrl: './mp-brick.css'
 })
@@ -15,6 +16,7 @@ export class MpBrick {
   // private publicKey = 'TEST-3978631b-9a9f-4071-a497-792d8d0cad9d';
   private publicKey = 'TEST-fc380a7a-2c59-4119-b31e-00e8eac0ff9d';
   dataPayment!: DataPayment|null;
+  isPaymentLoading = false;
 
   @Output() resultPay = new EventEmitter<any>();
 
@@ -74,7 +76,7 @@ export class MpBrick {
           */
         },
         onSubmit: ({ selectedPaymentMethod, formData }: any) => {
-        // onSubmit: (formData: any) => {
+          this.isPaymentLoading = true;
           this.payMp(formData).subscribe({
             next: (data) => {
               console.log('[pagoMP] => datos del pago: ', data);
@@ -83,6 +85,9 @@ export class MpBrick {
             error: (err) => {
               console.error('[pagoMP] => Error al realizar el pago: ', err);
               this.resultPay.emit(err);
+            },
+            complete: () => {
+              this.isPaymentLoading = false;
             }
           })
           // console.log("[pagoMP] => datos del form de pago: ", formData);

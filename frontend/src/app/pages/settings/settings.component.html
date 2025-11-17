@@ -656,7 +656,8 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" [formGroup]="twoFAForm">
                   <!-- QR Code Display -->
                   <div
-                    class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6 text-center">
+                    class="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6 text-center">
+                    <app-loading-indicator [active]="is2FALoading" [type]="'overlay'" [message]="'Procesando...'" [size]="'md'"></app-loading-indicator>
                     <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Código QR</h4>
                     <div class="flex justify-center mb-4">
                       <!-- Real QR Code or Generate Button -->
