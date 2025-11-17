@@ -1,4 +1,6 @@
-<div *ngIf="loading" class="p-4">Cargando auditorias...</div>
+<div class="p-4">
+  <app-loading-indicator [active]="loading" [type]="'inline'" [message]="'Cargando auditorías...'" [size]="'md'"></app-loading-indicator>
+</div>
 
 <div *ngIf="!loading && auditEvents.length > 0" class="p-6">
     <h1 class="text-2xl font-bold mb-4">Auditorías</h1>

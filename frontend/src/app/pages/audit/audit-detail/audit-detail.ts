@@ -5,12 +5,13 @@ import { AuditService } from '../../../services/audit.service';
 import { CommonModule } from '@angular/common';
 import { HandleTypePipe } from '../../../pipes/handle-type.pipe';
 import { FormsModule } from '@angular/forms';
+import { LoadingIndicator } from '../../../shared/components/loading-indicator/loading-indicator';
 
 
 @Component({
   selector: 'app-audit-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, HandleTypePipe, FormsModule],
+  imports: [CommonModule, RouterModule, HandleTypePipe, FormsModule, LoadingIndicator],
   templateUrl: './audit-detail.html',
   styleUrls: ['./audit-detail.css']
 })
