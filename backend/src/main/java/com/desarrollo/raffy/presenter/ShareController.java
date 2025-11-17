@@ -19,6 +19,7 @@ public class ShareController {
     @Autowired
     private AuthService authService;
 
+    @SuppressWarnings("null")
     @GetMapping(value = "/profile/{nickname}", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> shareProfile(@PathVariable String nickname, HttpServletRequest request) {
         try {

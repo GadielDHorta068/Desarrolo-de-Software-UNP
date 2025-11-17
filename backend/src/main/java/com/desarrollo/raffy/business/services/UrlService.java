@@ -60,4 +60,48 @@ public class UrlService {
     public String convertLinkToQr(String link) {
         return LinkTransform.linkToQr(link);
     }
+
+    /**
+     * Crear una URL de uso único
+     * @param url URL original
+     * @return URL de uso único creada
+     */
+    public Url createSingleUseUrl(String url) {
+        Url newUrl = new Url();
+        newUrl.setOriginalUrl(url);
+        newUrl.setShortcode(LinkTransform.shortenUrl(url + System.currentTimeMillis())); // Añadir timestamp para hacerlo único
+        newUrl.setClickCount(0);
+        newUrl.setCreatedAt(LocalDateTime.now());
+        newUrl.setIsSingleUse(true);
+        newUrl.setIsUsed(false);
+        return urlRepository.save(newUrl);
+    }
+
+    /**
+     * Obtener una URL de uso único por su shortcode
+     * @param shortcode Shortcode de la URL
+     * @return URL encontrada o null si no existe
+     */
+    public Url getSingleUseUrlByShortcode(String shortcode) {
+        Url url = urlRepository.findByShortcode(shortcode);
+        if (url != null && url.getIsSingleUse() != null && url.getIsSingleUse()) {
+            return url;
+        }
+        return null;
+    }
+
+    /**
+     * Marcar una URL de uso único como usada
+     * @param shortcode Shortcode de la URL
+     * @return URL actualizada o null si no existe
+     */
+    public Url markSingleUseUrlAsUsed(String shortcode) {
+        Url url = getSingleUseUrlByShortcode(shortcode);
+        if (url != null && url.getIsUsed() != null && !url.getIsUsed()) {
+            url.setIsUsed(true);
+            url.setClickCount(url.getClickCount() + 1);
+            return urlRepository.save(url);
+        }
+        return null;
+    }
 }

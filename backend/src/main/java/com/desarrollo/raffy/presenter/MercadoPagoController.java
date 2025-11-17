@@ -1,8 +1,6 @@
 package com.desarrollo.raffy.presenter;
 
-import java.util.Optional;
 import java.util.Map;
-import java.util.HashMap;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -55,6 +53,7 @@ public class MercadoPagoController {
     private static final ObjectMapper mapper = new ObjectMapper();
     private String emailPayerMP = "jhon@doe.com";
 
+    @SuppressWarnings("deprecation")
     @PostMapping("/process-payment")
     public ResponseEntity<?> processPayment(@RequestBody PaymentMpDTO payment){
         log.warn("[PayMP] => Datos MP del pago recibido: " + payment.getPaymentMp().toString());

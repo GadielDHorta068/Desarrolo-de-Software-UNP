@@ -54,6 +54,7 @@ services:
       EVOLUTION_INSTANCE: Rafify
       DATABASE_PROVIDER: postgresql 
       TWOFA_API_URL: http://twofa:8080
+      FRONTEND_URL: https://raffyfy.argcloud.com.ar
     ports:
       - "${APP_PORT:-8080}:8080"
     volumes: []

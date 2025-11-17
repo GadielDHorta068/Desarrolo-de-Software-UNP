@@ -71,9 +71,9 @@ public class TwoFactorAuthService {
 		final User userRef = user;
 
 		QrData qrData = qrDataFactory.newBuilder()
-			.label("Mi App (" + userRef.getUsername() + ")")
+			.label(userRef.getUsername())
 			.secret(secret)
-			.issuer("Mi App")
+			.issuer("Rafify")
 			.build();
 		String mimeType = qrGenerator.getImageMimeType();
 		String qrCode = Utils.getDataUriForImage(qrGenerator.generate(qrData), mimeType);
