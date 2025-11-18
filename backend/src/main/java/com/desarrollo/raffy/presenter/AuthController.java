@@ -119,7 +119,7 @@ public class AuthController {
 
     @GetMapping("/users/search")
     public ResponseEntity<List<UserResponse>> searchUsers(@RequestParam("query") String query) {
-        List<UserResponse> users = authService.searchUsersByNickname(query);
+        List<UserResponse> users = authService.searchUsersByQuery(query);
         return ResponseEntity.ok(users);
     }
 

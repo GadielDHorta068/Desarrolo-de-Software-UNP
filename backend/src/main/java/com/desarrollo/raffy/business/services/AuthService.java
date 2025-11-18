@@ -268,6 +268,13 @@ public class AuthService {
                 .collect(Collectors.toList());
     }
 
+    public List<UserResponse> searchUsersByQuery(String query) {
+        List<RegisteredUser> users = userRepository.searchByQuery(query);
+        return users.stream()
+                .map(this::mapToUserResponse)
+                .collect(Collectors.toList());
+    }
+
     private UserResponse mapToUserResponse(RegisteredUser user) {
         String imagenBase64 = null;
         String coverBase64 = null;
