@@ -155,6 +155,7 @@ export class RafflesPanel implements OnInit {
       winners: new FormControl({value: 1, disabled: false}, {validators:[ Validators.required ]}),
       description: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
       image: new FormControl({value: null, disabled: false}),
+      isPrivate: new FormControl({value: false, disabled: false}),
       priceRaffle: new FormControl({value: '', disabled: false}),
       quantityNumbersRaffle: new FormControl({value: '', disabled: false})
     });
@@ -185,7 +186,8 @@ export class RafflesPanel implements OnInit {
       },
       endDate: dataEvent.executionDate,
       winnersCount: dataEvent.winners,
-      image: dataEvent.image
+      image: dataEvent.image,
+      isPrivate: !!dataEvent.isPrivate
     }
     if (isRaffle){
       event.quantityOfNumbers = dataEvent.quantityNumbersRaffle,

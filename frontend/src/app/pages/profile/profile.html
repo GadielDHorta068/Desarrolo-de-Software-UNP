@@ -116,7 +116,7 @@
                       </svg>
                     </button>
                     <span
-                      class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-3 py-1 rounded-full">
+                      class="inline-flex items-center whitespace-nowrap bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-3 py-1 rounded-full flex-shrink-0">
                       {{ createdEventsCount }} eventos creados
                     </span>
                     <span
@@ -233,17 +233,17 @@
 
             <!-- Mis eventos -->
             <div *ngIf="activeTab === 'mis-eventos'" [@tabTransition] class="space-y-6">
-              <div class="flex mb-2">
-                <div class="flex items-center w-1/2 gap-2">
+              <div class="flex mb-2 flex-col sm:flex-row">
+                <div class="flex items-center w-full sm:w-1/2 gap-2">
                   <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Sorteos Creados</h2>
-                  <div class="items-center justify-between space-x-2">
+                  <div class="flex items-center space-x-2">
                     <span
-                      class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded-full">
+                      class="inline-flex items-center bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded-full whitespace-nowrap">
                       {{ userEvents?.length || 0 }} eventos
                     </span>
                   </div>
                 </div>
-                <div class="flex justify-end w-1/2">
+                <div class="flex justify-end w-full sm:w-1/2 mt-2 sm:mt-0">
                   <div class="flex items-center space-x-2" *ngIf="isOwner">
                     <a routerLink="/audit" class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700"
                       style="cursor: pointer;">Auditorías</a>
