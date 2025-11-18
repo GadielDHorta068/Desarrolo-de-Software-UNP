@@ -38,6 +38,9 @@ export class EventsService {
     const params = (invite && invite.trim().length > 0)
       ? new HttpParams().set('invite', invite)
       : undefined;
+    if (invite && invite.trim().length > 0) {
+      try { localStorage.setItem('invite_token', invite); } catch {}
+    }
     return this.http.get<EventsTemp>(`${this.apiUrl}/id/${eventId}`, { headers, params });
   }
 
