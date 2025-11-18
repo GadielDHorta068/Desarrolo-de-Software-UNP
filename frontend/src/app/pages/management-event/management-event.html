@@ -149,9 +149,9 @@
             <p class="card-subtitle">Lista de todos los participantes inscritos en el evento</p>
           </div>
           
-          <div *ngIf="participants.length > 0; else noParticipants" class="p-6 space-y-4">
-            <!-- Modern Participants Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div *ngIf="(eventType !== typesOfEventes.RAFFLES && participants.length > 0) || (eventType === typesOfEventes.RAFFLES && raffleParticipantsGrouped.length > 0); else noParticipants" class="p-6 space-y-4">
+            <!-- Grid para sorteos (no rifas) -->
+            <div *ngIf="eventType !== typesOfEventes.RAFFLES" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               <div *ngFor="let p of participants" class="participant-card">
                 <div class="participant-avatar">
                   <span class="text-lg font-semibold">{{ p.name.charAt(0) }}{{ p.surname.charAt(0) }}</span>
@@ -159,13 +159,43 @@
                 <div class="participant-info">
                   <h3 class="font-semibold text-gray-900 dark:text-white">{{ p.name }} {{ p.surname }}</h3>
                   <p class="text-sm text-gray-600 dark:text-gray-400">{{ p.email }}</p>
-                  <div *ngIf="eventType === typesOfEventes.RAFFLES" class="mt-2">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100">
-                      Nº {{ p.number }}
+                  <div *ngIf="getGoalByEmailIfFinished(p.email) as dataGoal" class="mt-2 flex items-center space-x-2">
+                    <app-tag-prize [position]="dataGoal.position"></app-tag-prize>
+                    <a [routerLink]="['/chat', dataGoal.idUser]" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+                      Ir al chat
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Grid para rifas: agrupado por participante -->
+            <div *ngIf="eventType === typesOfEventes.RAFFLES" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div *ngFor="let gp of raffleParticipantsGrouped" class="participant-card">
+                <div class="participant-avatar">
+                  <span class="text-lg font-semibold">{{ gp.name.charAt(0) }}{{ gp.surname.charAt(0) }}</span>
+                </div>
+                <div class="participant-info">
+                  <h3 class="font-semibold text-gray-900 dark:text-white">{{ gp.name }} {{ gp.surname }}</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ gp.email }}</p>
+                  <div class="raffle-numbers">
+                    <span *ngFor="let n of getDisplayedNumbers(gp.email, gp.numbers)" 
+                          class="raffle-number-chip"
+                          [ngClass]="(getWinningRaffleNumber(gp.email) === n) ? 'raffle-number-chip-winner' : ''">
+                      Nº {{ n }}
+                    </span>
+                    <span *ngIf="getRemainingCount(gp.email, gp.numbers) as rest" class="raffle-toggle-chip" (click)="toggleExpanded(gp.email)">
+                      +{{ rest }} más
+                    </span>
+                    <span *ngIf="isExpanded(gp.email) && gp.numbers.length > raffleNumbersLimit" class="raffle-toggle-chip" (click)="toggleExpanded(gp.email)">
+                      Ver menos
                     </span>
                   </div>
-                  <div *ngIf="getPlaceGoal(p) as dataGoal" class="mt-2 flex items-center space-x-2">
+                  <div *ngIf="getGoalByEmailIfFinished(gp.email) as dataGoal" class="mt-3 flex items-center gap-2 flex-wrap">
                     <app-tag-prize [position]="dataGoal.position"></app-tag-prize>
+                    <span *ngIf="getWinningRaffleNumber(gp.email) as winNum" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                      Nº ganador: {{ winNum }}
+                    </span>
                     <a [routerLink]="['/chat', dataGoal.idUser]" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
                       Ir al chat
                     </a>

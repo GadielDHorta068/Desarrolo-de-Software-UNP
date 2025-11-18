@@ -256,3 +256,27 @@
 .shadow-card {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
+.raffle-numbers {
+  @apply flex flex-wrap gap-2 mt-2;
+}
+
+.raffle-number-chip {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100;
+}
+
+.raffle-number-chip-winner {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 ring-1 ring-yellow-400;
+}
+
+.raffle-toggle-chip {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600;
+}
+
+@media (max-width: 640px) {
+  .participant-card {
+    @apply p-4 space-x-3;
+  }
+  .raffle-numbers {
+    @apply gap-1;
+  }
+}

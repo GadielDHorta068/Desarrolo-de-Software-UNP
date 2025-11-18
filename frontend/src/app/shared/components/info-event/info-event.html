@@ -121,6 +121,9 @@
                     <div class="winner-info">
                         <span class="winner-name">{{winner?.name}} {{winner?.surname}}</span>
                         <app-tag-prize [position]="winner?.position || (i+1)"></app-tag-prize>
+                        <span *ngIf="event?.eventType == eventTypes.RAFFLES && winner?.raffleNumber as winNum" class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                            Nº ganador: {{ winNum }}
+                        </span>
                     </div>
                 </div>
             </div>

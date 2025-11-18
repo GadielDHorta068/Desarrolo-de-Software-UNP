@@ -64,6 +64,9 @@ export class ManagementEvent {
     selectedRaffleNumbers: number[] = [];
     typesOfEventes = EventTypes;
     participants: RaffleParticipantDTO[] = [];
+    raffleParticipantsGrouped: { name: string; surname: string; email: string; numbers: number[]; position: number }[] = [];
+    raffleNumbersLimit = 8;
+    expandedRaffleParticipants = new Set<string>();
     eventType!: EventTypes;
     winners: WinnerDTO[] = [];
     accessRestricted: boolean = false;
@@ -209,7 +212,27 @@ export class ManagementEvent {
     loadParticipants(eventId: number, eventType: EventTypes): void {
         this.eventService.getParticipantUsersByEventId(eventId, eventType, this.authService.getCurrentUserValue()?.email || "null").subscribe({
             next: (data) => {
-                this.participants = data;
+                if (eventType === EventTypes.RAFFLES) {
+                    const map = new Map<string, { name: string; surname: string; email: string; numbers: number[]; position: number }>();
+                    (data as RaffleParticipantDTO[]).forEach(p => {
+                        const key = p.email;
+                        const existing = map.get(key);
+                        if (existing) {
+                            existing.numbers.push(p.number);
+                            existing.position = existing.position || p.position || 0;
+                        } else {
+                            map.set(key, { name: p.name, surname: p.surname, email: p.email, numbers: [p.number], position: p.position || 0 });
+                        }
+                    });
+                    this.raffleParticipantsGrouped = Array.from(map.values()).map(g => ({
+                        ...g,
+                        numbers: g.numbers.sort((a, b) => a - b)
+                    }));
+                    this.participants = [];
+                } else {
+                    this.participants = data;
+                    this.raffleParticipantsGrouped = [];
+                }
                 this.cdr.detectChanges();
             },
             error: (err) => {
@@ -225,6 +248,46 @@ export class ManagementEvent {
         if (!dataPlace)
             return { idUser: null, position: -1 };
         return { idUser: dataPlace.participantId, position: dataPlace.position };
+    }
+
+    getGoalByEmail(email: string): { idUser: number | null; position: number } | null {
+        const dataPlace = this.winners.find(winner => winner.email === email);
+        if (!dataPlace) return null;
+        return { idUser: dataPlace.participantId, position: dataPlace.position };
+    }
+
+    getGoalByEmailIfFinished(email: string): { idUser: number | null; position: number } | null {
+        if (this.event?.statusEvent !== StatusEvent.FINISHED) return null;
+        return this.getGoalByEmail(email);
+    }
+
+    getWinningRaffleNumber(email: string): number | null {
+        if (this.event?.statusEvent !== StatusEvent.FINISHED) return null;
+        const w = this.winners.find(winner => winner.email === email);
+        return (w && typeof w.raffleNumber === 'number') ? w.raffleNumber : null;
+    }
+
+    isExpanded(email: string): boolean {
+        return this.expandedRaffleParticipants.has(email);
+    }
+
+    toggleExpanded(email: string): void {
+        if (this.expandedRaffleParticipants.has(email)) {
+            this.expandedRaffleParticipants.delete(email);
+        } else {
+            this.expandedRaffleParticipants.add(email);
+        }
+        this.cdr.detectChanges();
+    }
+
+    getDisplayedNumbers(email: string, all: number[]): number[] {
+        if (this.isExpanded(email)) return all;
+        return all.slice(0, this.raffleNumbersLimit);
+    }
+
+    getRemainingCount(email: string, all: number[]): number {
+        if (this.isExpanded(email)) return 0;
+        return Math.max(0, all.length - this.raffleNumbersLimit);
     }
 
     setTab(tabName: string): void {
