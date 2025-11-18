@@ -72,6 +72,11 @@ export class ManagementEvent {
     winners: WinnerDTO[] = [];
     accessRestricted: boolean = false;
 
+    // Expose StatusEvent enum to template
+    get StatusEvent() {
+        return StatusEvent;
+    }
+
     get canUserInscript(): boolean {
         if (!this.event) return false;
         const isCreator = this.authService.isAuthenticated() && (this.authService.getCurrentUserValue()?.id === this.event.creator?.id);

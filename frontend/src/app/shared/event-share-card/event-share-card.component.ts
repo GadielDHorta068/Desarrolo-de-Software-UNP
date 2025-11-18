@@ -8,103 +8,309 @@ import { Input } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="share-card">
-      <div class="share-card__header">
-        <!-- <div class="share-card__title">{{ title || 'Invitación al evento' }}</div> -->
-        <div class="share-card__subtitle" *ngIf="description">{{ description }}</div>
+    <div class="share-card-modern">
+      <div class="share-card-header">
+        <div class="share-card-subtitle" *ngIf="description">{{ description }}</div>
       </div>
-      <div class="share-card__content">
-        <div class="share-card__qr" *ngIf="qrBase64">
-          <img [src]="qrDataUrl" alt="QR del evento" />
+      <div class="share-card-content">
+        <div class="qr-section" *ngIf="qrBase64">
+          <div class="qr-container">
+            <img [src]="qrDataUrl" alt="QR del evento" class="qr-image" />
+          </div>
         </div>
-        <div class="share-card__info">
-          <div class="share-card__code">Código del evento: <strong>{{ shortcode }}</strong></div>
-          <div class="share-card__link">
-            <a [href]="shortLink" target="_blank" rel="noopener">{{ shortLink }}</a>
+        <div class="info-section">
+          <div class="code-display">
+            <span class="code-label">Código del evento:</span>
+            <span class="code-value">{{ shortcode }}</span>
+          </div>
+          <div class="link-display">
+            <a [href]="shortLink" target="_blank" rel="noopener" class="event-link">
+              {{ shortLink }}
+            </a>
           </div>
         </div>
       </div>
 
-      <div class="share-card__actions">
-        <button type="button" (click)="share()">Compartir</button>
-        <button type="button" (click)="copyLink()">Copiar link</button>
-        <button type="button" (click)="downloadQr()" [disabled]="!qrBase64">Descargar QR</button>
+      <div class="share-card-actions">
+        <button type="button" (click)="share()" class="action-btn primary">
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+          </svg>
+          Compartir
+        </button>
+        <button type="button" (click)="copyLink()" class="action-btn secondary">
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          Copiar link
+        </button>
+        <button type="button" (click)="downloadQr()" [disabled]="!qrBase64" class="action-btn tertiary">
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Descargar QR
+        </button>
       </div>
     </div>
   `,
   styles: [`
-    /* Variables de color para soportar modo claro/oscuro */
+    /* Modern Share Card Styles */
     :host {
-      --card-bg: #ffffff;
-      --card-border: #e5e7eb; /* gray-200 */
-      --text-secondary: #6b7280; /* gray-500 */
-      --link-color: #2563eb; /* blue-600 */
-      --btn-bg: #f9fafb; /* gray-50 */
-      --btn-bg-hover: #f3f4f6; /* gray-100 */
-      --btn-text: #111827; /* gray-900 */
+      --card-bg: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      --card-bg-dark: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+      --card-border: #e2e8f0;
+      --card-border-dark: #374151;
+      --text-primary: #1f2937;
+      --text-primary-dark: #f9fafb;
+      --text-secondary: #64748b;
+      --text-secondary-dark: #9ca3af;
+      --accent-color: #3b82f6;
+      --accent-color-dark: #60a5fa;
+      --success-color: #10b981;
+      --success-color-dark: #34d399;
     }
-    :host-context(.dark) {
-      --card-bg: #1f2937; /* gray-800 */
-      --card-border: #374151; /* gray-700 */
-      --text-secondary: #9ca3af; /* gray-300 */
-      --link-color: #93c5fd; /* blue-300 */
-      --btn-bg: #111827; /* gray-900 */
-      --btn-bg-hover: #1f2937; /* gray-800 */
-      --btn-text: #e5e7eb; /* gray-200 */
+
+    .share-card-modern {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 100%;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
-    @media (prefers-color-scheme: dark) {
-      :host {
-        --card-bg: #1f2937;
-        --card-border: #374151;
-        --text-secondary: #9ca3af;
-        --link-color: #93c5fd;
-        --btn-bg: #111827;
-        --btn-bg-hover: #1f2937;
-        --btn-text: #e5e7eb;
+
+    :host-context(.dark) .share-card-modern {
+      background: var(--card-bg-dark);
+      border-color: var(--card-border-dark);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .share-card-modern:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+    }
+
+    .share-card-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .share-card-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    :host-context(.dark) .share-card-subtitle {
+      color: var(--text-secondary-dark);
+    }
+
+    .share-card-content {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .qr-section {
+      display: flex;
+      justify-content: center;
+    }
+
+    .qr-container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+    }
+
+    .qr-container:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .qr-image {
+      width: 180px;
+      height: 180px;
+      object-fit: contain;
+      border-radius: 0.5rem;
+    }
+
+    .info-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .code-display {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .code-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .code-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, var(--accent-color), var(--success-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    :host-context(.dark) .code-label {
+      color: var(--text-secondary-dark);
+    }
+
+    :host-context(.dark) .code-value {
+      background: linear-gradient(135deg, var(--accent-color-dark), var(--success-color-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .link-display {
+      margin-top: 0.5rem;
+    }
+
+    .event-link {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      display: inline-block;
+      padding: 0.5rem 0;
+    }
+
+    .event-link:hover {
+      color: var(--success-color);
+      text-decoration: underline;
+    }
+
+    :host-context(.dark) .event-link {
+      color: var(--accent-color-dark);
+    }
+
+    :host-context(.dark) .event-link:hover {
+      color: var(--success-color-dark);
+    }
+
+    .share-card-actions {
+      margin-top: 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .btn-icon {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--accent-color), #2563eb);
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3), 0 2px 4px -1px rgba(59, 130, 246, 0.2);
+    }
+
+    .action-btn.primary:hover {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4), 0 4px 6px -2px rgba(59, 130, 246, 0.2);
+    }
+
+    .action-btn.secondary {
+      background: white;
+      color: var(--accent-color);
+      border: 1px solid var(--accent-color);
+    }
+
+    .action-btn.secondary:hover {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .action-btn.tertiary {
+      background: var(--success-color);
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -1px rgba(16, 185, 129, 0.2);
+    }
+
+    .action-btn.tertiary:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Dark mode button adjustments */
+    :host-context(.dark) .action-btn.secondary {
+      background: transparent;
+      color: var(--accent-color-dark);
+      border-color: var(--accent-color-dark);
+    }
+
+    :host-context(.dark) .action-btn.secondary:hover {
+      background: var(--accent-color-dark);
+      color: white;
+    }
+
+    /* Responsivo: en pantallas pequeñas apilar y ajustar tamaño */
+    @media (max-width: 768px) {
+      .share-card-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 1.5rem;
+      }
+      
+      .share-card-actions {
+        grid-template-columns: 1fr;
+      }
+      
+      .qr-image {
+        width: 160px;
+        height: 160px;
       }
     }
 
-    .share-card {
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 16px;
-      max-width: 100%;
-      background: var(--card-bg);
-      transition: background-color 150ms ease, border-color 150ms ease;
-    }
-    .share-card__header { margin-bottom: 12px; }
-    .share-card__title { font-size: 18px; font-weight: 600; }
-    .share-card__subtitle { font-size: 14px; color: var(--text-secondary); }
-    .share-card__content { display: flex; gap: 16px; align-items: flex-start; }
-    .share-card__qr img {
-      width: 240px;
-      height: 240px;
-      object-fit: contain;
-      border: 1px solid var(--card-border);
-      border-radius: 4px;
-      background: var(--card-bg);
-    }
-    .share-card__info { flex: 1; }
-    .share-card__code { margin-bottom: 8px; }
-    .share-card__link a { color: var(--link-color); text-decoration: none; }
-    .share-card__link a:hover { text-decoration: underline; }
-    .share-card__actions { margin-top: 16px; display: flex; gap: 8px; }
-    .share-card__actions button {
-      padding: 8px 12px;
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      background: var(--btn-bg);
-      color: var(--btn-text);
-      cursor: pointer;
-      transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
-    }
-    .share-card__actions button:hover { background: var(--btn-bg-hover); }
-    .share-card__actions button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    /* Responsivo: en pantallas pequeñas apilar y ajustar tamaño */
-    @media (max-width: 640px) {
-      .share-card__content { flex-direction: column; align-items: center; text-align: center; }
-      .share-card__qr img { width: 200px; height: 200px; }
+    @media (max-width: 480px) {
+      .share-card-modern {
+        padding: 1.5rem;
+      }
+      
+      .qr-image {
+        width: 140px;
+        height: 140px;
+      }
     }
   `]
 })
