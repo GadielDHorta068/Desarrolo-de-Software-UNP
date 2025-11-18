@@ -1,6 +1,284 @@
 .container{
     padding: 1% 3%;
 }
+
+/* Pill Toggle Styles */
+.pill-toggle-container {
+  width: 100%;
+  max-width: 200px;
+}
+
+.pill-toggle {
+  position: relative;
+  display: flex;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-radius: 50px;
+  padding: 4px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dark .pill-toggle {
+  background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.pill-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dark .pill-toggle:hover {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.pill-option {
+  position: relative;
+  z-index: 2;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  min-width: 60px;
+  user-select: none;
+}
+
+.public-option {
+  color: #6b7280;
+}
+
+.private-option {
+  color: #6b7280;
+}
+
+.dark .public-option,
+.dark .private-option {
+  color: #9ca3af;
+}
+
+.pill-slider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dark .pill-slider {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* When private is selected */
+input[type="checkbox"]:checked ~ .pill-toggle .pill-slider {
+  transform: translateX(100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dark input[type="checkbox"]:checked ~ .pill-toggle .pill-slider {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+input[type="checkbox"]:checked ~ .pill-toggle .private-option {
+  color: white;
+  font-weight: 600;
+}
+
+input[type="checkbox"]:not(:checked) ~ .pill-toggle .public-option {
+  color: white;
+  font-weight: 600;
+}
+
+/* Focus styles for accessibility */
+.pill-toggle:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .pill-toggle {
+    padding: 3px;
+  }
+  
+  .pill-option {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    min-width: 50px;
+  }
+}
+
+/* Enhanced form input styles */
+input[type="text"],
+input[type="date"],
+input[type="number"],
+textarea,
+select {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  color: #111827 !important;
+}
+
+.dark input[type="text"],
+.dark input[type="date"],
+.dark input[type="number"],
+.dark textarea,
+.dark select {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  color: #f9fafb !important;
+}
+
+/* Placeholder colors */
+input[type="text"]::placeholder,
+input[type="date"]::placeholder,
+input[type="number"]::placeholder,
+textarea::placeholder {
+  color: #6b7280 !important;
+  opacity: 1;
+}
+
+.dark input[type="text"]::placeholder,
+.dark input[type="date"]::placeholder,
+.dark input[type="number"]::placeholder,
+.dark textarea::placeholder {
+  color: #9ca3af !important;
+  opacity: 1;
+}
+
+/* Select option colors for dark mode */
+select option {
+  background-color: #ffffff;
+  color: #111827;
+}
+
+.dark select option {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15), 0 4px 6px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+  color: #111827 !important;
+}
+
+.dark input[type="text"]:focus,
+.dark input[type="date"]:focus,
+.dark input[type="number"]:focus,
+.dark textarea:focus,
+.dark select:focus {
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.25), 0 4px 6px rgba(0, 0, 0, 0.15);
+  color: #f9fafb !important;
+}
+
+/* Enhanced button styles */
+button[type="submit"],
+button[type="button"] {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button[type="submit"]:hover,
+button[type="button"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+button[type="submit"]:active,
+button[type="button"]:active {
+  transform: translateY(0);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Ripple effect for buttons */
+button[type="submit"]::after,
+button[type="button"]::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button[type="submit"]:active::after,
+button[type="button"]:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Enhanced form labels */
+label {
+  transition: all 0.3s ease;
+}
+
+label:hover {
+  color: #4f46e5;
+}
+
+.dark label:hover {
+  color: #818cf8;
+}
+
+/* Enhanced error messages */
+small {
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+small.text-red-600 {
+  opacity: 1;
+  transform: translateY(0);
+  animation: slideInError 0.3s ease-out;
+}
+
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced container styling */
+.container {
+  padding: 2% 4%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Grid layouts */
 .grid-custom-3{
     display: grid;
     grid-template-columns: repeat(3, 1fr);
