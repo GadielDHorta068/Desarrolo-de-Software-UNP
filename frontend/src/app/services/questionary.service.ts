@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { environment } from '../../environments/environment';
 import { GuestUser } from '../pages/questionary/guestUser';
@@ -21,19 +21,30 @@ export class QuestionaryService {
     ) {}
 
     save(aGuestUser: UserDTO, aEventId: number): Observable<any> {
-        
+        const invite = (typeof window !== 'undefined')
+            ? new URLSearchParams(window.location.search).get('invite')
+            : null;
+        const options = (invite && invite.trim().length > 0)
+            ? { params: new HttpParams().set('invite', invite) }
+            : {};
         return this.http.post<any>(
             `${this.API_URL}/${aEventId}/participants`,
-            aGuestUser
+            aGuestUser,
+            options
         );
-        
-        
     }
 
     saveRaffleNumber(aEventId: number, buyRaffleNumberRequest: BuyRaffleNumberDTO): Observable<any> {
+        const invite = (typeof window !== 'undefined')
+            ? new URLSearchParams(window.location.search).get('invite')
+            : null;
+        const options = (invite && invite.trim().length > 0)
+            ? { params: new HttpParams().set('invite', invite) }
+            : {};
         return this.http.post<any>(
             `${this.API_URL}/${aEventId}/buy-raffle-number`,
-            buyRaffleNumberRequest
+            buyRaffleNumberRequest,
+            options
         );
     }
 
