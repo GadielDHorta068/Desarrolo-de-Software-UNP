@@ -187,6 +187,13 @@
                   <div class="pt-3">
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Redes</p>
                     <div class="flex items-center gap-3">
+                      <!-- Sitio web -->
+                      <a *ngIf="userProfile?.website" [href]="userProfile.website" target="_blank" rel="noopener"
+                        class="social-btn" title="Sitio web">
+                        <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 2c1.73 0 3.35.51 4.71 1.39L12 10 6.29 5.39A8 8 0 0112 4zm8 8a8 8 0 01-1.39 4.71L14 12l4.61-4.61A8 8 0 0120 12zm-8 8a8 8 0 01-4.71-1.39L12 14l5.71 5.61A8 8 0 0112 20z" />
+                        </svg>
+                      </a>
                       <!-- Twitter -->
                       <a *ngIf="userProfile?.twitter" [href]="userProfile.twitter" target="_blank" rel="noopener"
                         class="social-btn" title="Twitter">
@@ -222,7 +229,7 @@
 
                       <!-- Placeholder cuando no hay enlaces -->
                       <span
-                        *ngIf="!userProfile?.twitter && !userProfile?.facebook && !userProfile?.instagram && !userProfile?.linkedin"
+                        *ngIf="!userProfile?.website && !userProfile?.twitter && !userProfile?.facebook && !userProfile?.instagram && !userProfile?.linkedin"
                         class="text-xs text-gray-500 dark:text-gray-400">Próximamente</span>
                     </div>
                   </div>

@@ -46,4 +46,7 @@ public class UpdateProfileRequest {
 
     @Size(max = 255, message = "El enlace de LinkedIn no puede exceder 255 caracteres")
     private String linkedin;
+
+    @Size(max = 255, message = "El enlace de sitio web no puede exceder 255 caracteres")
+    private String website;
 }

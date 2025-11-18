@@ -114,7 +114,8 @@ export class SettingsComponent implements OnInit {
       twitter: ['', [Validators.maxLength(255)]],
       facebook: ['', [Validators.maxLength(255)]],
       instagram: ['', [Validators.maxLength(255)]],
-      linkedin: ['', [Validators.maxLength(255)]]
+      linkedin: ['', [Validators.maxLength(255)]],
+      website: ['', [Validators.maxLength(255)]]
     });
 
     this.passwordForm = this.fb.group({
@@ -172,7 +173,8 @@ export class SettingsComponent implements OnInit {
           twitter: user.twitter || '',
           facebook: user.facebook || '',
           instagram: user.instagram || '',
-          linkedin: user.linkedin || ''
+          linkedin: user.linkedin || '',
+          website: user.website || ''
         });
         // Mostrar imagen actual si existe
         if (user.imagen) {
