@@ -1,5 +1,7 @@
 .container{
-    padding: 1% 3%;
+    padding: 2% 4%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 .grid-custom-3{
     display: grid;
@@ -41,7 +43,8 @@
 .grid-main {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  /* gap: 2px; espacio entre elementos */
+  gap: 1rem;
+  margin-top: 1rem;
 }
 /* En pantallas pequeñas, cambia a 1 columna y 2 filas */
 @media (max-width: 768px) {
@@ -54,12 +57,68 @@
   display: grid;
   align-items: baseline;
   grid-template-columns: 1fr 2fr;
-  gap: 2px; /* espacio entre elementos */
+  gap: 1rem;
 }
 /* En pantallas pequeñas, cambia a 1 columna y 2 filas */
 @media (max-width: 768px) {
   .grid-row {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(2, auto);
+  }
+}
+/* Espaciado y separación visual de secciones, coherente con edit-event */
+.bg-white,
+:host-context(.dark) .bg-gray-800 {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+form > div {
+  margin-bottom: 2rem;
+}
+
+form > div:last-child {
+  margin-bottom: 0;
+}
+
+/* Transiciones suaves */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Hover de labels similar */
+label {
+  transition: all 0.3s ease;
+}
+
+label:hover {
+  color: #4f46e5;
+}
+
+:host-context(.dark) label:hover {
+  color: #818cf8;
+}
+
+/* Mensajes de error animados */
+small {
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+small.text-red-600 {
+  opacity: 1;
+  transform: translateY(0);
+  animation: slideInError 0.3s ease-out;
+}
+
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

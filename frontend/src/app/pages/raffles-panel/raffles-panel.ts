@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EventsCreate, EventsTemp, EventType, EventTypes, RaffleCreate } from '../../models/events.model';
@@ -19,7 +19,7 @@ import { NotificationService } from '../../services/notification.service';
   styleUrl: './raffles-panel.css',
   standalone: true
 })
-export class RafflesPanel {
+export class RafflesPanel implements OnInit {
 
   formPanel: FormGroup;
   userCurrent: UserResponse|null = null;
@@ -69,6 +69,18 @@ export class RafflesPanel {
     });
   }
 
+  ngOnInit(): void {
+    if (!this.userCurrent && this.authService.isAuthenticated()) {
+      this.authService.getCurrentUser().subscribe({
+        next: user => {
+          this.userCurrent = user;
+          this.cdr.detectChanges();
+        },
+        error: () => {}
+      });
+    }
+  }
+
   private initDateMin(){
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -77,7 +89,11 @@ export class RafflesPanel {
 
   public async createDraw(){
     if(!this.formPanel.valid){
-      // console.log("[create] => No esta habilitado el boton!");
+      return;
+    }
+    const creatorId = this.userCurrent?.id;
+    if(!creatorId){
+      this.notificationService.notifyError("Debes iniciar sesión para crear eventos");
       return;
     }
     // aca deberiamos recuperar la imagen seleccionada si la hay
@@ -89,7 +105,7 @@ export class RafflesPanel {
     const dataNewEvent = this.getNewEvent(this.formPanel.value);
 
     // console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
-    this.eventService.createEvent(""+this.userCurrent?.id, dataNewEvent, this.getEventTypeForCreate()).subscribe({
+    this.eventService.createEvent(""+creatorId, dataNewEvent, this.getEventTypeForCreate()).subscribe({
       next: (response) => {
         // console.log('[initConfig] => nuevo evento creado: ', response);
         this.formPanel.disable();
