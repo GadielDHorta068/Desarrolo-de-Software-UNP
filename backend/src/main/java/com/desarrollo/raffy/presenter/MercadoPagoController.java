@@ -35,10 +35,13 @@ import org.springframework.web.client.RestClientResponseException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/mp")
+@Tag(name = "MercadoPago", description = "Integración de pagos con MercadoPago")
 public class MercadoPagoController {
 
     @Autowired
@@ -55,6 +58,7 @@ public class MercadoPagoController {
 
     @SuppressWarnings("deprecation")
     @PostMapping("/process-payment")
+    @Operation(summary = "Procesar pago", description = "Procesa un pago con datos de MercadoPago y persiste el resultado")
     public ResponseEntity<?> processPayment(@RequestBody PaymentMpDTO payment){
         log.warn("[PayMP] => Datos MP del pago recibido: " + payment.getPaymentMp().toString());
         try {

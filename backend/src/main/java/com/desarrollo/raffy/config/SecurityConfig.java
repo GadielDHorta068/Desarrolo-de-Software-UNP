@@ -68,6 +68,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/users/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Permitir handshake de WebSocket/SockJS
                         .requestMatchers("/ws", "/ws/**").permitAll()
                         // Endpoint público para obtener ganadores por auditoría

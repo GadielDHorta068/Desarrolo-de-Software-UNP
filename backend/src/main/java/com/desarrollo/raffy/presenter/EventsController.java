@@ -37,6 +37,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,6 +70,7 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @RequestMapping("/events")
+@Tag(name = "Eventos", description = "Gestión de eventos: creación, consulta, participantes, ganadores y filtros")
 public class EventsController {
     @Autowired
     private EventsService eventsService;
@@ -98,6 +101,7 @@ public class EventsController {
 
 
     @PostMapping("/create/giveaway/{idUser}")
+    @Operation(summary = "Crear sorteo (Giveaway)", description = "Crea un evento de tipo sorteo para el usuario creador")
     public ResponseEntity<?> createGiveaway(
         @RequestBody Giveaways giveaways, 
         @PathVariable("idUser") Long idUser) {
@@ -123,6 +127,7 @@ public class EventsController {
     }
 
     @PostMapping("/create/guessing-contest/{idUser}")
+    @Operation(summary = "Crear concurso de adivinanza", description = "Crea un evento de tipo concurso de adivinanza para el usuario creador")
     public ResponseEntity<?> createGuessingContest(
         @RequestBody GuessingContest guessingContest, 
         @PathVariable("idUser") Long idUser) {
@@ -146,6 +151,7 @@ public class EventsController {
     }
 
     @PostMapping("/create/raffle/{idUser}")
+    @Operation(summary = "Crear rifa", description = "Crea un evento de tipo rifa para el usuario creador")
     public ResponseEntity<?> createRaffle(
         @RequestBody Raffle aRaffle,
         @PathVariable("idUser") Long idUser
@@ -170,12 +176,14 @@ public class EventsController {
     }
 
     @GetMapping("/ping")
+    @Operation(summary = "Ping de eventos", description = "Verifica disponibilidad del servicio de eventos")
     public ResponseEntity<String> ping() {
         return ResponseEntity.ok("pong");
     }
 
 
     @GetMapping("/id/{id}")
+    @Operation(summary = "Detalle de evento", description = "Obtiene el resumen del evento por ID. Respeta privacidad e invites")
     public ResponseEntity<?> getById(@PathVariable @NotNull @Positive Long id, @RequestParam(required = false) String invite) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
@@ -208,6 +216,7 @@ public class EventsController {
     }
 
     @GetMapping("/status/id/{id}")
+    @Operation(summary = "Estado de evento", description = "Obtiene el estado actual del evento por ID")
     public ResponseEntity<?> getStatusById(@PathVariable @NotNull @Positive Long id) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
@@ -228,6 +237,7 @@ public class EventsController {
     }
 
     @PutMapping("/update/giveaway/{idEvent}/user/{idUser}")
+    @Operation(summary = "Actualizar sorteo", description = "Actualiza datos de un sorteo existente")
     public ResponseEntity<?> updateGiveaway(
             @PathVariable Long idEvent,
             @PathVariable Long idUser,
@@ -247,6 +257,7 @@ public class EventsController {
     }
 
     @PutMapping("/update/guessing-contest/{idEvent}/user/{idUser}")
+    @Operation(summary = "Actualizar concurso de adivinanza", description = "Actualiza datos de un concurso de adivinanza existente")
     public ResponseEntity<?> updateGuessingConstest(
             @PathVariable Long idEvent,
             @PathVariable Long idUser,
@@ -266,6 +277,7 @@ public class EventsController {
     }
 
     @PutMapping("/update/raffle/{idEvent}/user/{idUser}")
+    @Operation(summary = "Actualizar rifa", description = "Actualiza datos de una rifa existente")
     public ResponseEntity<?> updateRaffle(
         @PathVariable Long idEvent,
         @PathVariable Long idUser,
@@ -286,6 +298,7 @@ public class EventsController {
 
 
     @GetMapping("/creator/{idCreator}")
+    @Operation(summary = "Eventos por creador", description = "Lista eventos creados por un usuario")
     public ResponseEntity<?> getEventsByCreator(@PathVariable Long idCreator){
         List<Events> events = eventsService.findByEventsCreator(idCreator);
         if(events.isEmpty()){
@@ -301,6 +314,7 @@ public class EventsController {
      * Retorna los ganadores de un evento.
      */
     @GetMapping("/winners/event/{eventId}")
+    @Operation(summary = "Ganadores del evento", description = "Obtiene los ganadores y envía notificaciones por correo")
     public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable("eventId") Long eventId){
         try {
             // Obtener los ganadores del evento
@@ -384,6 +398,7 @@ public class EventsController {
     }
 
     @GetMapping("/participants/event/{eventId}")
+    @Operation(summary = "Participantes del evento", description = "Lista participantes del evento sin datos sensibles")
     public ResponseEntity<?> getParticipantsByEventId(@PathVariable("eventId") Long eventId){
         try {
             List<Participant> participants = participantService.findParticipantsByEventId(eventId);
@@ -409,6 +424,7 @@ public class EventsController {
      * No ejecuta la finalización ni envía correos; solo consulta.
      */
     @GetMapping("/winner/event/{eventId}/position/{position}")
+    @Operation(summary = "Ganador por posición", description = "Obtiene un ganador específico por posición para eventos finalizados")
     public ResponseEntity<?> getWinnerByEventAndPosition(
             @PathVariable("eventId") Long eventId,
             @PathVariable("position") short position) {
@@ -470,6 +486,7 @@ public class EventsController {
      * No ejecuta la finalización ni envía correos; solo consulta.
      */
     @GetMapping("/winners/event/{eventId}/list")
+    @Operation(summary = "Lista de ganadores", description = "Lista todos los ganadores de un evento finalizado")
     public ResponseEntity<?> getWinnersListByEventId(@PathVariable("eventId") Long eventId) {
         if (eventId == null || eventId <= 0) {
             return new ResponseEntity<>("El ID del evento debe ser positivo", HttpStatus.BAD_REQUEST);
@@ -555,12 +572,14 @@ public class EventsController {
     }
 
     @GetMapping("/event-types")
+    @Operation(summary = "Tipos de evento", description = "Lista los tipos de eventos disponibles")
     public ResponseEntity<?> getAllEventTypes() {
         EventTypes[] eventTypes = eventsService.getAllEventTypes();
         return new ResponseEntity<>(eventTypes, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/id/{id}")
+    @Operation(summary = "Eliminar evento", description = "Elimina un evento por ID")
     public ResponseEntity<?> delete(@PathVariable @NotNull @Positive Long id) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
@@ -581,24 +600,28 @@ public class EventsController {
     }
 
     @GetMapping("/all")
+    @Operation(summary = "Todos los eventos", description = "Lista todos los eventos en formato resumen")
     public ResponseEntity<?> getAll() {
         List<EventSummaryDTO> events = eventsService.getAllEventSummaries();
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
     @GetMapping("/status/{statusEvent}")
+    @Operation(summary = "Eventos por estado", description = "Lista eventos filtrados por estado")
     public ResponseEntity<?> getByStatusEvent(@PathVariable StatusEvent statusEvent) {
         List<EventSummaryDTO> events = eventsService.getEventSummariesByStatus(statusEvent);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
     @GetMapping("/type/{eventType}")
+    @Operation(summary = "Eventos por tipo", description = "Lista eventos filtrados por tipo")
     public ResponseEntity<?> getByEventType(@PathVariable EventTypes eventType) {
         List<EventSummaryDTO> events = eventsService.getEventSummariesByEventType(eventType);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
     @GetMapping("/category/{categoryId}")
+    @Operation(summary = "Eventos por categoría", description = "Lista eventos filtrados por categoría")
     public ResponseEntity<?> getByCategoryId(@PathVariable @NotNull @Positive Long categoryId) {
         List<EventSummaryDTO> events = eventsService.getEventSummariesByCategoryId(categoryId);
         if (events.isEmpty()) {
@@ -611,6 +634,7 @@ public class EventsController {
     //-------------------------- GADIEL, ESTOS SON LOS FILTROS --------------------------
     
     @GetMapping("/active")
+    @Operation(summary = "Eventos activos", description = "Lista eventos activos con filtros opcionales por tipo, categoría, fecha, ganadores y email")
     public ResponseEntity<?> getActiveEvents(
             @RequestParam(required = false) EventTypes type,
             @RequestParam(required = false) String categorie,
@@ -635,6 +659,7 @@ public class EventsController {
 
 
     @GetMapping("/date-range")
+    @Operation(summary = "Eventos por rango de fechas", description = "Lista eventos entre fechas especificadas")
     public ResponseEntity<?> getByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -647,6 +672,7 @@ public class EventsController {
     }
 
     @GetMapping("/start-date/{startDate}")
+    @Operation(summary = "Eventos por fecha de inicio", description = "Lista eventos por fecha de inicio")
     public ResponseEntity<?> getByStartDate(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
         List<EventSummaryDTO> events = eventsService.getEventSummariesByStartDate(startDate);
@@ -654,6 +680,7 @@ public class EventsController {
     }
 
     @GetMapping("/end-date/{endDate}")
+    @Operation(summary = "Eventos por fecha de fin", description = "Lista eventos por fecha de fin")
     public ResponseEntity<?> getByEndDate(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         List<EventSummaryDTO> events = eventsService.getEventSummariesByEndDate(endDate);
@@ -661,12 +688,14 @@ public class EventsController {
     }
 
     @GetMapping("/search")
+    @Operation(summary = "Buscar eventos", description = "Busca eventos por título")
     public ResponseEntity<?> searchByTitle(@RequestParam String title) {
         List<EventSummaryDTO> events = eventsService.searchEventSummariesByTitle(title);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
     
     @GetMapping("/exists/{title}")
+    @Operation(summary = "Verificar título", description = "Verifica existencia de un evento por título")
     public ResponseEntity<?> checkTitleExists(@PathVariable String title) {
         if (title == null || title.trim().isEmpty()) {
             return new ResponseEntity<>("El título es obligatorio", HttpStatus.BAD_REQUEST);
@@ -677,6 +706,7 @@ public class EventsController {
     }
     
     @GetMapping("/participant/{userId}")
+    @Operation(summary = "Eventos por participante", description = "Lista eventos en los que participa un usuario")
     public ResponseEntity<?> getEventsByParticipantId(@PathVariable @NotNull @Positive Long userId) {
         // Validar existencia del usuario
         User user = userService.findById(userId);
@@ -690,6 +720,7 @@ public class EventsController {
     }
 
     @PostMapping("/{eventId}/participants")
+    @Operation(summary = "Inscribir participante", description = "Inscribe un usuario invitado a un evento (respeta privacidad e invite)")
     public ResponseEntity<Object> registerParticipantToGiveaway(
         @Valid @RequestBody UserDTO aGuestUser,
         @PathVariable("eventId") Long aEventId,
@@ -732,6 +763,7 @@ public class EventsController {
     }
 
     @GetMapping("/raffle/{eventId}/sold-numbers")
+    @Operation(summary = "Números vendidos", description = "Lista números vendidos de una rifa (respeta privacidad e invite)")
         public ResponseEntity<Object> getSoldNumbersById(@PathVariable("eventId") Long aRaffleId,
             @RequestParam(required = false) String invite) {
             try {
@@ -766,6 +798,7 @@ public class EventsController {
     }
 
     @PostMapping("/{eventId}/buy-raffle-number")
+    @Operation(summary = "Comprar número de rifa", description = "Crea números de rifa comprados por un usuario invitado")
     public ResponseEntity<Object> buyRaffleNumber(
         @Valid @RequestBody BuyRaffleNumberRequestDTO aBuyRequest,
         @PathVariable("eventId") Long aEventId,
@@ -914,6 +947,7 @@ public class EventsController {
     // REFACTORIZAR LOS SIG DOS METODOS EN UNO
     // QUE OBTENGAN EL TIPO DE EVENTO DE LA URL Y DECIDA COMO OBTENER LOS PARTICIPANTES
     @GetMapping("/{eventId}/get-users-participants")
+    @Operation(summary = "Usuarios participantes", description = "Obtiene usuarios participantes de un evento")
     public ResponseEntity<Object> findUsersParticipantsByEventId(
         @PathVariable("eventId") Long anEventId,
         @RequestParam(required = false) String aUserEmail) {
@@ -931,6 +965,7 @@ public class EventsController {
     }
 
     @GetMapping("/{eventId}/get-raffle-owners")
+    @Operation(summary = "Propietarios de números", description = "Lista propietarios de números de una rifa")
     public ResponseEntity<Object> getRaffleOwnersByRaffleId(@PathVariable("eventId") Long aRaffleId) {
         // validar q sea tipo rifa???
         try {
@@ -948,6 +983,7 @@ public class EventsController {
     }
 
     @GetMapping("/{eventId}/get-raffle-participants")
+    @Operation(summary = "Participantes de rifa", description = "Lista participantes asociados a números de rifa (respeta privacidad e invite)")
     public ResponseEntity<Object> getRaffleNumbersByRaffleIdAndUser(
         @PathVariable("eventId") Long aRaffleId, 
         @RequestParam(required = false) String aUserEmail,
@@ -978,6 +1014,7 @@ public class EventsController {
         }
 
     @GetMapping("/featured")
+    @Operation(summary = "Eventos destacados", description = "Lista eventos destacados por tipo")
     public ResponseEntity<?> getFeaturedEvents(
             @RequestParam EventTypes type) {
         List<Events> featuredEvents = featuredEventsService.getFeaturedEvents(type);
