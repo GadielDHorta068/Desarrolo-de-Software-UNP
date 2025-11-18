@@ -14,6 +14,19 @@
           <h1 class="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
             {{ event?.title }}
           </h1>
+          <span *ngIf="event" class="privacy-icon" [title]="event.isPrivate ? 'Evento privado' : 'Evento público'"
+                [ngClass]="event.isPrivate 
+                  ? 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300 border-red-200 dark:border-red-700' 
+                  : 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300 border-green-200 dark:border-green-700'">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <ng-container *ngIf="event.isPrivate; else publicIcon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </ng-container>
+              <ng-template #publicIcon>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 0c2.5 2.5 4 6 4 10s-1.5 7.5-4 10m0-20c-2.5 2.5-4 6-4 10s1.5 7.5 4 10m-8-10h16" />
+              </ng-template>
+            </svg>
+          </span>
           <div class="hidden sm:flex items-center space-x-2">
             <span class="px-3 py-1 text-xs font-semibold rounded-full"
                   [ngClass]="{
@@ -233,6 +246,6 @@
 </div>
 
 <!-- Modals -->
-<app-modal-share-event #modalShareEvent></app-modal-share-event>
+<app-modal-share-event #modalShareEvent [eventId]="event?.id"></app-modal-share-event>
 <app-invite-login *ngIf="showInviteLogin" (close)="onInviteClosed($event)"></app-invite-login>
 <app-reports-form *ngIf="showFormReport" (informReport)="resultReport($event)" (close)="onReportClosed()"></app-reports-form>

@@ -78,10 +78,14 @@
                             <small>Debés seleccionar un tipo.</small>
                         </div>
                     </div>
-                    <div class="w-1/2 flex items-end">
+                    <div class="w-1/2 flex items-start">
                         <div class="flex flex-col w-full">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                                 Privacidad del evento
+                                <span class="tooltip-container" tabindex="0">
+                                    <span class="tooltip-button" title="Un evento privado no aparecerá en el explorador.">?</span>
+                                    <span class="tooltip-content">Un evento privado no aparecerá en el explorador.</span>
+                                </span>
                             </label>
                             <div class="pill-toggle-container">
                                 <input type="checkbox" id="private-event-toggle" formControlName="isPrivate" class="sr-only">

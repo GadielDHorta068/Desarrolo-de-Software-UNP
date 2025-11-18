@@ -73,6 +73,11 @@
   @apply border border-blue-200 dark:border-blue-600;
 }
 
+/* Privacy icon next to title */
+.privacy-icon {
+  @apply inline-flex items-center justify-center w-8 h-8 rounded-full border shadow-sm;
+}
+
 /* Modern Table Styles */
 .table-modern {
   @apply w-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden;
