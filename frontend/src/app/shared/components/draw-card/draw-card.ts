@@ -6,7 +6,6 @@ import { HandleIconTypePipe } from '../../../pipes/handle-icon-type.pipe';
 import { ModalDrawInfo } from '../modal-draw-info/modal-draw-info';
 import { Router } from '@angular/router';
 import { AdminEventService } from '../../../services/admin/adminEvent.service';
-import { QuestionaryComponent } from '../../../pages/questionary/questionary.component';
 import { HandleDatePipe } from '../../../pipes/handle-date.pipe';
 import { LoadingIndicator } from '../loading-indicator/loading-indicator';
 import { AuthService, UserResponse } from '../../../services/auth.service';
@@ -21,7 +20,7 @@ import { StarRatingComponent } from '../../../pages/star-rating.component/star-r
 
 @Component({
   selector: 'app-draw-card',
-  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, HandleDatePipe, ModalDrawInfo, QuestionaryComponent, ModalInfo, StarRatingComponent, LoadingIndicator],
+  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, HandleDatePipe, ModalDrawInfo, ModalInfo, StarRatingComponent, LoadingIndicator],
   templateUrl: './draw-card.html',
   styleUrl: './draw-card.css'
 })

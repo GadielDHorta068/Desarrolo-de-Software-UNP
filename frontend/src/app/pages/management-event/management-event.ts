@@ -5,20 +5,16 @@ import { CommonModule } from '@angular/common';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 import { Category } from '../../services/category.service';
 import { HandleDatePipe } from '../../pipes/handle-date.pipe';
-import { LoaderImage } from '../../shared/components/loader-image/loader-image';
-import { ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { InfoEvent } from '../../shared/components/info-event/info-event';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EventShareCardComponent } from '../../shared/event-share-card/event-share-card.component';
 import { AuthService } from '../../services/auth.service';
 import { ModalShareEvent } from '../../shared/components/modal-share-event/modal-share-event';
-import { QuestionaryComponent } from '../questionary/questionary.component';
 import { EventsService } from '../../services/events.service';
 import { UserDTO } from '../../models/UserDTO';
 import { WinnerDTO } from '../../models/winner.model';
 import { TagPrize } from '../../shared/components/tag-prize/tag-prize';
 import { NotificationService } from '../../services/notification.service';
-import { RaffleNumbersComponent } from '../raffle-numbers.component/raffle-numbers.component';
 import { AdminInscriptService } from '../../services/admin/adminInscript';
 import { InviteLoginComponent } from '../../shared/components/invite-login/invite-login.component';
 import { ReportsFormComponent, ResumeService } from '../../shared/components/reports-form/reports-form.component';
@@ -26,9 +22,9 @@ import { ReportService } from '../../services/report.service';
 
 @Component({
     selector: 'app-management-event',
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent,
-        HandleDatePipe, EventShareCardComponent, ModalShareEvent, RaffleNumbersComponent,
-        QuestionaryComponent, TagPrize, InviteLoginComponent, ReportsFormComponent],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, InfoEvent,
+        EventShareCardComponent, ModalShareEvent,
+        TagPrize, InviteLoginComponent, ReportsFormComponent],
     templateUrl: './management-event.html',
     styleUrl: './management-event.css',
     providers: [HandleDatePipe]
