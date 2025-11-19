@@ -237,6 +237,8 @@ html {
   will-change: transform;
 }
 
+
+
 /* Estilos para impresión */
 @media print {
   .hero-section,

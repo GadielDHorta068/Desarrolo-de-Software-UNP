@@ -15,7 +15,8 @@ export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent),
-    title: 'Inicio - Raffy'
+    title: 'Inicio - Raffy',
+    data: { animation: 'home' }
   },
   {
     path: 'login',
@@ -55,6 +56,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/management-event/management-event').then(m => m.ManagementEvent),
     // canActivate: [GuestGuard],
     title: 'Gestiona tu evento - Raffy',
+    data: { animation: 'eventManagement' }
   },
   {
     path: 'event/payment',
