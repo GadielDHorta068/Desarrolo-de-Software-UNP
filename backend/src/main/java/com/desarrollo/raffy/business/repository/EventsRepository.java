@@ -80,7 +80,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     List<Events> findRafflesByUserId(@Param("userId") Long userId);
 
     // Buscar eventos tipo GuessingContest en los que el usuario hizo intentos
-    @Query("SELECT gc FROM GuessAttempt ga JOIN ga.contest gc JOIN FETCH gc.creator JOIN FETCH gc.category WHERE ga.user.id = :userId")
+    @Query("SELECT gc FROM GuessProgress ga JOIN ga.contest gc JOIN FETCH gc.creator JOIN FETCH gc.category WHERE ga.user.id = :userId")
     List<Events> findGuessingByUserId(@Param("userId") Long userId);
 
     // Verificar participación del usuario en una rifa específica
@@ -88,7 +88,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     boolean existsRaffleParticipation(@Param("raffle") com.desarrollo.raffy.model.Raffle raffle, @Param("user") com.desarrollo.raffy.model.User user);
 
     // Verificar intentos del usuario en un concurso de adivinanzas específico
-    @Query("SELECT CASE WHEN COUNT(ga) > 0 THEN TRUE ELSE FALSE END FROM GuessAttempt ga WHERE ga.contest = :contest AND ga.user = :user")
+    @Query("SELECT CASE WHEN COUNT(ga) > 0 THEN TRUE ELSE FALSE END FROM GuessProgress ga WHERE ga.contest = :contest AND ga.user = :user")
     boolean existsGuessAttempt(@Param("contest") com.desarrollo.raffy.model.GuessingContest contest, @Param("user") com.desarrollo.raffy.model.User user);
 
     // Buscar por fecha que pase a traves del dia de hoy
