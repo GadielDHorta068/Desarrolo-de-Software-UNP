@@ -1,4 +1,5 @@
 <!-- mercado-pago-brick.component.html -->
-<div class="brick-wrapper">
+<div class="brick-wrapper relative">
+  <app-loading-indicator [active]="isPaymentLoading" [type]="'overlay'" [message]="'Procesando pago...'" [size]="'md'"></app-loading-indicator>
   <div id="card-payment-container"></div>
 </div>

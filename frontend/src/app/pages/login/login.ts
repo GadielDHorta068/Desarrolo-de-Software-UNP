@@ -2,13 +2,14 @@ import { Component, OnInit, OnDestroy, ElementRef, ViewChild, HostListener } fro
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { LoadingIndicator } from '../../shared/components/loading-indicator/loading-indicator';
 import { AuthService, LoginRequest } from '../../services/auth.service';
 import { fadeInUp, inputFocus } from '../../animations/route-animations';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LoadingIndicator],
   templateUrl: './login.html',
   styleUrl: './login.css',
   animations: [fadeInUp, inputFocus]

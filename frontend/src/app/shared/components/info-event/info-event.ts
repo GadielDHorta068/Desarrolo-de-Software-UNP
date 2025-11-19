@@ -46,16 +46,31 @@ export class InfoEvent implements OnInit, OnChanges{
             }
         });
     } 
-    console.log("[infoEvent] => ganadores recibidos: ", this.winners);
+    // console.log("[infoEvent] => ganadores recibidos: ", this.winners);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log("[infoEvent] => cambios detectados: ", changes);
-    // if (changes['valor']) {
-    //   const prev = changes['valor'].previousValue;
-    //   const curr = changes['valor'].currentValue;
-    //   console.log(`Cambio detectado: de "${prev}" a "${curr}"`);
-    // }
+    // console.log("[infoEvent] => cambios detectados: ", changes);
+    // ordenamos los ganadores segun su posicion
+    if (changes['winners']) {
+      this.winners = this.winners.sort((a, b) => a.position - b.position);
+    }
+  }
+
+  getStatusClass(): string {
+    if (!this.event) return '';
+    
+    const status = this.event.statusEvent?.toLowerCase();
+    switch (status) {
+      case 'abierto':
+        return 'status-abierto';
+      case 'cerrado':
+        return 'status-cerrado';
+      case 'finalizado':
+        return 'status-finalizado';
+      default:
+        return 'status-abierto';
+    }
   }
 
 }

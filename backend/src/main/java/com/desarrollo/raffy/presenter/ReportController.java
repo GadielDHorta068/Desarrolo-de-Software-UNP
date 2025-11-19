@@ -21,16 +21,20 @@ import com.desarrollo.raffy.model.Report;
 import com.desarrollo.raffy.model.StatusReport;
 
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Slf4j
 @RestController
 @RequestMapping("/reports")
+@Tag(name = "Reportes", description = "Gestión de reportes de eventos: creación, filtros, revisión y consultas")
 public class ReportController {
     
     @Autowired
     private ReportService service;
 
     @GetMapping
+    @Operation(summary = "Listar reportes", description = "Obtiene todos los reportes sin filtros")
     public ResponseEntity<?> getAllReports() {
         try {
             List<Report> reports = service.getAllReportFilter(null, null, null);
@@ -42,6 +46,7 @@ public class ReportController {
     }
 
     @PostMapping("/create")
+    @Operation(summary = "Crear reporte", description = "Crea un reporte sobre un evento")
     public ResponseEntity<?> createReport(
         @RequestBody Report report){
         
@@ -55,6 +60,7 @@ public class ReportController {
     }
 
     @GetMapping("/filter")
+    @Operation(summary = "Filtrar reportes", description = "Filtra reportes por estado y rango de fechas")
     public ResponseEntity<?> getReportsFiltered(
             @RequestParam(required = false) StatusReport status,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime start,
@@ -69,6 +75,7 @@ public class ReportController {
     }
 
     @GetMapping("/review/event/{eventId}")
+    @Operation(summary = "Reportes por evento", description = "Obtiene reportes asociados a un evento")
     public ResponseEntity<?> getReportsEventId(@PathVariable("eventId") Long eventId) {
         try {
             List<Report> reports = service.getReportEventId(eventId);
@@ -82,6 +89,7 @@ public class ReportController {
 
 
     @PutMapping("/review")
+    @Operation(summary = "Revisar reporte", description = "Actualiza el estado de revisión de un reporte")
     public ResponseEntity<?> reviewReport(
             @RequestParam Long reportId,
             @RequestParam Long eventId,
@@ -98,6 +106,7 @@ public class ReportController {
     }
 
     @GetMapping("/has-reported")
+    @Operation(summary = "Usuario reportó evento", description = "Verifica si un usuario ha reportado un evento")
     public ResponseEntity<Boolean> hasUserReportedEvent(
             @RequestParam Long eventId,
             @RequestParam String userMail) {

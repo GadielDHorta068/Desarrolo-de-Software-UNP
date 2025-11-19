@@ -18,15 +18,19 @@ import com.desarrollo.raffy.model.Categories;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/categories")
+@Tag(name = "Categorías", description = "Gestión de categorías de eventos")
 public class CategoriesController {
     
     @Autowired
     private CategoriesService categoriesService;
 
     @PostMapping("/save")
+    @Operation(summary = "Guardar categoría", description = "Crea una nueva categoría")
     public ResponseEntity<Categories> save(@Valid @RequestBody Categories categories){
         Categories saveCategories = categoriesService.save(categories);
             return new ResponseEntity<>(saveCategories, HttpStatus.CREATED);
@@ -34,12 +38,14 @@ public class CategoriesController {
 
     // Ruta alternativa para compatibilidad: POST /categories
     @PostMapping("")
+    @Operation(summary = "Guardar categoría (compat)", description = "Ruta alternativa para crear categoría")
     public ResponseEntity<Categories> saveRoot(@Valid @RequestBody Categories categories){
         Categories saveCategories = categoriesService.save(categories);
         return new ResponseEntity<>(saveCategories, HttpStatus.CREATED);
     }
 
     @GetMapping("/id/{id}")
+    @Operation(summary = "Categoría por ID", description = "Obtiene una categoría por su identificador")
     public ResponseEntity<?> findById(@PathVariable @NotNull @Positive Long id){
         if (id <= 0) {
             return new ResponseEntity<>("No se encontro la categoria", HttpStatus.BAD_REQUEST);
@@ -51,6 +57,7 @@ public class CategoriesController {
 
     // Ruta alternativa para compatibilidad: GET /categories/{id}
     @GetMapping("/{id}")
+    @Operation(summary = "Categoría por ID (compat)", description = "Ruta alternativa para obtener categoría por ID")
     public ResponseEntity<?> findByIdAlt(@PathVariable @NotNull @Positive Long id){
         if (id <= 0) {
             return new ResponseEntity<>("No se encontro la categoria", HttpStatus.BAD_REQUEST);
@@ -60,6 +67,7 @@ public class CategoriesController {
     }
 
     @GetMapping("/searchAll")
+    @Operation(summary = "Listar categorías", description = "Lista todas las categorías disponibles")
     public ResponseEntity<?> findAllCategories(){
         List<Categories> categories = categoriesService.findAll();
         if(categories.isEmpty()){

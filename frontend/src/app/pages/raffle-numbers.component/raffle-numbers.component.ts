@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
 import { EventsTemp, EventTypes, RaffleNumber, StatusEvent,  } from '../../models/events.model';
 import { EventsService } from '../../services/events.service';
-import { QuestionaryComponent } from '../questionary/questionary.component';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -12,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-raffle-numbers',
   standalone: true,
-  imports: [CommonModule, FormsModule, QuestionaryComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   templateUrl: './raffle-numbers.component.html',
   styleUrl: './raffle-numbers.component.css'
 })
@@ -87,7 +86,7 @@ export class RaffleNumbersComponent {
                 this.selectedNumbers = this.selectedNumbers.filter(n => n !== aRaffleNumber.ticketNumber);
             }
         }
-        console.log("[selectNumber] => nros elegidos: ",this.selectedNumbers);
+        // console.log("[selectNumber] => nros elegidos: ",this.selectedNumbers);
     }
 
     // inicializamos la grilla de numeros de las rifas
@@ -96,7 +95,6 @@ export class RaffleNumbersComponent {
             //   console.warn('[Raffle] No hay evento cargado aún.');
             return;
         }
-
 
         if (this.event.eventType !== EventTypes.RAFFLES) {
             //   console.log('[Raffle] El evento no es tipo RAFFLES. No se generan números.');
@@ -113,13 +111,11 @@ export class RaffleNumbersComponent {
 
         this.eventService.getSoldNumbersByRaffleId(this.event.id).subscribe({
             next: (boughtNumbers: number[]) => {
-
                 this.numeros = Array.from({ length: total }, (_, i) => ({
                     ticketNumber: i + 1,
                     buyStatus: boughtNumbers.includes(i + 1),
                     selectStatus: false
                 }));
-
                 this.cdr.detectChanges(); // forzamos render
             },
             error: (err) => {

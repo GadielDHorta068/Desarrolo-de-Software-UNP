@@ -42,7 +42,7 @@ export class ReportsFormComponent {
         this.form = this.fb.group({
             idEvent: [this.curentEvent?.id, Validators.required],
             titleEvent: [{value: this.curentEvent?.title, disabled: true}],
-            description: ['', [Validators.required]],
+            description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
             email: [{value: this.authService.getCurrentUserValue()?.email, disabled: true}, [Validators.required, Validators.email]]
         });
     }
@@ -63,12 +63,24 @@ export class ReportsFormComponent {
             }
           },
           error => {
-            let msgResponse = "";
-            msgResponse = error.error.message ? error.error.message : "No fue posible crear el reporte"; 
+            let msgResponse = this.parseServerError(error?.error?.message) || "No fue posible crear el reporte";
             this.informReport.emit({status: "ERROR", msg: msgResponse} as ResumeService);
             this.close.emit();
           }
         )
+    }
+
+    private parseServerError(message: string | undefined): string | null {
+        if (!message) return null;
+        // Extrae el interpolatedMessage entre comillas si existe
+        const match = message.match(/interpolatedMessage='([^']+)'/);
+        if (match && match[1]) return match[1];
+        // Fallback: intenta con messageTemplate
+        const tmpl = message.match(/messageTemplate='([^']+)'/);
+        if (tmpl && tmpl[1]) return tmpl[1];
+        // Fallback genérico: si contiene "reason" ofrece un mensaje amigable
+        if (message.includes('reason')) return 'El motivo debe tener entre 10 y 500 caracteres';
+        return null;
     }
 
     closeModal(): void {

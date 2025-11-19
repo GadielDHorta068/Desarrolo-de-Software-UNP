@@ -8,11 +8,12 @@ import { AuthService } from '../../../services/auth.service';
 import { HandleTypePipe } from '../../../pipes/handle-type.pipe';
 import { EventTypes } from '../../../models/events.model';
 import { FormsModule } from '@angular/forms';
+import { LoadingIndicator } from '../../../shared/components/loading-indicator/loading-indicator';
 
 @Component({
   selector: 'app-audit-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, HandleTypePipe, FormsModule],
+  imports: [CommonModule, RouterModule, HandleTypePipe, FormsModule, LoadingIndicator],
   templateUrl: './audit-list.html',
   styleUrls: ['./audit-list.css']
 })

@@ -56,9 +56,9 @@
                 <a *ngFor="let u of searchUsers" (click)="goToProfile(u.nickname)"
                    class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
                   <div class="h-8 w-8 rounded-full overflow-hidden bg-emerald-600 text-white text-sm flex items-center justify-center font-semibold">
-                    <img *ngIf="u.imagen" [src]="u.imagen?.startsWith('data:') ? u.imagen : ('data:image/jpeg;base64,' + u.imagen)"
+                    <img *ngIf="u.imagen" [src]="u.imagen.startsWith('data:') ? u.imagen : ('data:image/jpeg;base64,' + u.imagen)"
                          alt="Avatar" class="w-full h-full object-cover" />
-                    <span *ngIf="!u.imagen">{{ u.name?.charAt(0)?.toUpperCase() || u.nickname?.charAt(0)?.toUpperCase() || 'U' }}</span>
+                    <span *ngIf="!u.imagen">{{ u.name.charAt(0).toUpperCase() || u.nickname.charAt(0).toUpperCase() || 'U' }}</span>
                   </div>
                   <div class="flex flex-col">
                     <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ u.name }} {{ u.surname }}</span>
@@ -138,7 +138,7 @@
                   class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                   <div class="flex items-center space-x-2">
                     <div class="h-6 w-6 rounded-full bg-emerald-600 text-white text-xs flex items-center justify-center font-semibold">
-                      {{ peer.peerDisplayName?.charAt(0)?.toUpperCase() || 'U' }}
+                      {{ peer.peerDisplayName.charAt(0).toUpperCase() || 'U' }}
                     </div>
                     <span class="font-medium">{{ peer.peerDisplayName }}</span>
                   </div>
@@ -250,9 +250,9 @@
               <a *ngFor="let u of searchUsers" (click)="goToProfile(u.nickname)"
                  class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
                 <div class="h-8 w-8 rounded-full overflow-hidden bg-emerald-600 text-white text-sm flex items-center justify-center font-semibold">
-                  <img *ngIf="u.imagen" [src]="u.imagen?.startsWith('data:') ? u.imagen : ('data:image/jpeg;base64,' + u.imagen)"
+                  <img *ngIf="u.imagen" [src]="u.imagen.startsWith('data:') ? u.imagen : ('data:image/jpeg;base64,' + u.imagen)"
                        alt="Avatar" class="w-full h-full object-cover" />
-                  <span *ngIf="!u.imagen">{{ u.name?.charAt(0)?.toUpperCase() || u.nickname?.charAt(0)?.toUpperCase() || 'U' }}</span>
+                  <span *ngIf="!u.imagen">{{ u.name.charAt(0).toUpperCase() || u.nickname.charAt(0).toUpperCase() || 'U' }}</span>
                 </div>
                 <div class="flex flex-col">
                   <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ u.name }} {{ u.surname }}</span>

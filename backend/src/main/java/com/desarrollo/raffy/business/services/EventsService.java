@@ -119,12 +119,16 @@ public class EventsService {
 
         Events existing = eventsRepository.findById(idEvent)
             .orElseThrow(() -> new IllegalArgumentException("Evento no encontrado"));
-
+  
         RegisteredUser creator = registeredUserRepository.findById(idUser)
             .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-
+            
         if (!existing.getCreator().getId().equals(creator.getId())) {
-               throw new IllegalArgumentException("No tienes permiso para actualizar este evento");
+            throw new IllegalArgumentException("No tienes permiso para actualizar este evento");
+        }
+
+        if (!existing.getClass().equals(event.getClass())) {
+            throw new IllegalArgumentException("No se puede cambiar el tipo de evento");
         }
             
         existing.setTitle(event.getTitle());
@@ -132,24 +136,12 @@ public class EventsService {
         existing.setCategory(event.getCategory());
         existing.setEndDate(event.getEndDate());
         existing.setWinnersCount(event.getWinnersCount());
+        existing.setPrivate(event.isPrivate());
 
         if(event.getImageBase64() != null && !event.getImageBase64().isEmpty()){
         existing.setImagen(ImageUtils.base64ToBytes(event.getImageBase64()));
         } else{
             existing.setImagen(existing.getImagen());
-        }
-
-        if(existing instanceof Giveaways && event instanceof Giveaways){
-            // No hay campos específicos para actualizar en Giveaways por ahora
-        } else if(existing instanceof GuessingContest && event instanceof GuessingContest) {
-            GuessingContest existingContest = (GuessingContest) existing;
-            GuessingContest newContest = (GuessingContest) event;
-
-            existingContest.setMinValue(newContest.getMinValue());
-            existingContest.setMaxValue(newContest.getMaxValue());
-            existingContest.setMaxAttempts(newContest.getMaxAttempts());
-        } else if(existing instanceof Raffle && event instanceof Raffle){
-           // Los campos de Raffle no se debe modificar
         }
 
         return (T) eventsRepository.save(existing);
@@ -252,6 +244,11 @@ public class EventsService {
         RegisteredUser currentUser = getCurrentUser();
         if (currentUser != null) {
             boolean isRegistered = participantRepository.existsByParticipantAndEvent(currentUser, event);
+            if (event instanceof Raffle) {
+                isRegistered = isRegistered || eventsRepository.existsRaffleParticipation((Raffle) event, currentUser);
+            } else if (event instanceof GuessingContest) {
+                isRegistered = isRegistered || eventsRepository.existsGuessAttempt((GuessingContest) event, currentUser);
+            }
             dto.setIsUserRegistered(isRegistered);
         } else {
             dto.setIsUserRegistered(false);
@@ -429,7 +426,16 @@ public class EventsService {
     }
 
     public List<EventSummaryDTO> getEventSummariesByParticipantId(Long userId){
-        return eventsRepository.findByParticipantId(userId).stream()
+        List<Events> viaParticipant = eventsRepository.findByParticipantId(userId);
+        List<Events> viaRaffle = eventsRepository.findRafflesByUserId(userId);
+        List<Events> viaGuessing = eventsRepository.findGuessingByUserId(userId);
+
+        java.util.Map<Long, Events> unique = new java.util.LinkedHashMap<>();
+        for (Events e : viaParticipant) unique.put(e.getId(), e);
+        for (Events e : viaRaffle) unique.put(e.getId(), e);
+        for (Events e : viaGuessing) unique.put(e.getId(), e);
+
+        return unique.values().stream()
             .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }

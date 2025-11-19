@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,8 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -43,6 +40,7 @@ class UserManagementControllerTest {
         // MockitoAnnotations.openMocks(this); // No longer needed with @ExtendWith
     }
 
+    @SuppressWarnings("null")
     @Test
     void getTwoFactorStatus_UserExists_ReturnsStatus() {
         // Arrange
@@ -83,6 +81,7 @@ class UserManagementControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
+    @SuppressWarnings("null")
     @Test
     void getUser_UserExists_ReturnsUserInfo() {
         // Arrange
@@ -106,6 +105,7 @@ class UserManagementControllerTest {
         assertTrue(response.getBody().isTwoFactorEnabled());
     }
 
+    @SuppressWarnings("null")
     @Test
     void createUser_NewUser_ReturnsCreated() {
         // Arrange
@@ -166,6 +166,7 @@ class UserManagementControllerTest {
         verify(userRepository, times(1)).delete(user);
     }
 
+    @SuppressWarnings("null")
     @Test
     void deleteUser_UserNotFound_ReturnsNotFound() {
         // Arrange
@@ -180,6 +181,7 @@ class UserManagementControllerTest {
         verify(userRepository, never()).delete(any());
     }
 
+    @SuppressWarnings("null")
     @Test
     void getSystemStats_ReturnsStats() {
         // Arrange
@@ -211,6 +213,7 @@ class UserManagementControllerTest {
         assertEquals(66.67, response.getBody().getTwoFactorAdoptionRate(), 0.01);
     }
 
+    @SuppressWarnings("null")
     @Test
     void getUsersWith2FA_ReturnsFilteredList() {
         // Arrange

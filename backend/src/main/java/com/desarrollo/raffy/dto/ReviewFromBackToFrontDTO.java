@@ -13,9 +13,11 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class ReviewFromBackToFrontDTO {
+    private Long eventId;
     private String eventTitle;
     private String name;
     private String surname;
+    private String nickname;
     private Double score;
     private DeliveryStatus delivery;
     private String comment;

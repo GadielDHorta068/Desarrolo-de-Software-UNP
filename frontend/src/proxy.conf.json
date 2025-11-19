@@ -5,6 +5,13 @@
     "changeOrigin": true,
     "logLevel": "debug"
   },
+  "/mp": {
+    "target": "http://backend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {"^/mp": "/api/mp"}
+  },
   "/payments": {
     "target": "http://backend:8080",
     "secure": false,

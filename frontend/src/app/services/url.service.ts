@@ -20,6 +20,12 @@ export class UrlService {
     return this.http.post<SaveUrlResponse>(`${this.apiUrl}/save`, clean, { headers });
   }
 
+  saveUrlForEvent(eventId: number, originalUrl: string): Observable<SaveUrlResponse> {
+    const headers = new HttpHeaders({ 'Content-Type': 'text/plain' });
+    const clean = this.sanitizeUrl(originalUrl);
+    return this.http.post<SaveUrlResponse>(`${this.apiUrl}/event/${eventId}/save`, clean, { headers });
+  }
+
   /**
    * Obtiene la entidad Url por shortcode.
    */

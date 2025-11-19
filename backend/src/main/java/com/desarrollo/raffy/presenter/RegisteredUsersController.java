@@ -18,9 +18,12 @@ import com.desarrollo.raffy.dto.RegisteredUserDTO;
 import com.desarrollo.raffy.model.RegisteredUser;
 
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/registered-users")
+@Tag(name = "Usuarios registrados", description = "CRUD de usuarios registrados")
 public class RegisteredUsersController {
     
     @Autowired
@@ -30,6 +33,7 @@ public class RegisteredUsersController {
     private ModelMapper modelMapper;
 
     @PostMapping
+    @Operation(summary = "Crear usuario registrado", description = "Crea un usuario registrado a partir de un DTO")
     public ResponseEntity<RegisteredUserDTO> create(@Valid @RequestBody RegisteredUserDTO dto){
         RegisteredUser entity = modelMapper.map(dto, RegisteredUser.class);
         RegisteredUser created = registeredUserService.create(entity);
@@ -38,6 +42,7 @@ public class RegisteredUsersController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Usuario registrado por ID", description = "Obtiene un usuario registrado por su identificador")
     public ResponseEntity<RegisteredUserDTO> getById(@PathVariable Long id){
         RegisteredUser registeredUser = registeredUserService.getById(id);
         if (registeredUser != null) {
@@ -49,6 +54,7 @@ public class RegisteredUsersController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Actualizar usuario registrado", description = "Actualiza un usuario registrado por ID")
     public ResponseEntity<RegisteredUserDTO> update(@PathVariable Long id, @Valid @RequestBody RegisteredUserDTO dto) {
         dto.setId(id);
         RegisteredUser entity = modelMapper.map(dto, RegisteredUser.class);
@@ -58,6 +64,7 @@ public class RegisteredUsersController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar usuario registrado", description = "Elimina un usuario registrado por ID")
     public ResponseEntity<Boolean> delete(@PathVariable Long id) {
         boolean deleted = registeredUserService.delete(id);
         return new ResponseEntity<>(deleted, deleted ? HttpStatus.OK : HttpStatus.BAD_REQUEST);

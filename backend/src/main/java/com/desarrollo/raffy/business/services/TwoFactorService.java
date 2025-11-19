@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.http.HttpStatus;
 
 @Service
 public class TwoFactorService {
@@ -69,7 +71,14 @@ public class TwoFactorService {
     public Map<String, Object> status(String username) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + "/api/2fa/status/" + username);
         HttpEntity<Void> entity = new HttpEntity<>(jsonHeaders());
-        ResponseEntity<Map> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, Map.class);
-        return response.getBody();
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, Map.class);
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return Map.of("username", username, "twoFactorEnabled", false, "remainingCodes", 0);
+            }
+            throw e;
+        }
     }
 }

@@ -1,0 +1,12 @@
+.grid-resolution {
+  display: grid;
+  grid-template-columns: 5fr 1fr;
+  gap: 10px;
+}
+/* En pantallas pequeñas, cambia a 1 columna y 2 filas */
+@media (max-width: 768px) {
+  .grid-resolution {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(2, auto);
+  }
+}

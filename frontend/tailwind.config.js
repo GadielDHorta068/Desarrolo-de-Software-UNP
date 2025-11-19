@@ -26,7 +26,7 @@ module.exports = {
     },
   },
   plugins: [
-    // Aquí puedes agregar plugins de Tailwind si los necesitas
+    
   ],
 }
 

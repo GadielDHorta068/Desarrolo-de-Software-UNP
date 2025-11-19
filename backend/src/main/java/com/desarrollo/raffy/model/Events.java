@@ -120,4 +120,8 @@ public abstract class Events {
     @Column(name = "winners_count", nullable = false)
     private int winnersCount;
 
+    @Column(name = "is_private", nullable = false, columnDefinition = "boolean default false")
+    @com.fasterxml.jackson.annotation.JsonProperty("isPrivate")
+    private boolean isPrivate = false;
+
 }

@@ -63,6 +63,7 @@ export interface EventsTemp {
     isUserRegistered?: boolean; // Indica si el usuario actual está inscrito en el evento
     quantityOfNumbers: number;
     priceOfNumber: number;
+     isPrivate?: boolean;
 }
 // de momento no usamos extensiones sino un solo modelo de eventos con todos los atr (A.T)
 export interface RaffleEvent extends EventsTemp {
@@ -81,6 +82,7 @@ export interface EventsCreate {
     image: string;
     quantityOfNumbers: number;
     priceOfNumber: number;
+    isPrivate?: boolean;
 }
 // de momento no usamos extensiones sino un solo modelo de eventos con todos los atr (A.T)
 export interface RaffleCreate extends EventsCreate {

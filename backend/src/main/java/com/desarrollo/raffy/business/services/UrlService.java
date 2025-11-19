@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 public class UrlService {
     @Autowired
     private UrlRepository urlRepository;
+    @org.springframework.beans.factory.annotation.Value("${app.frontend.url:http://localhost:4200}")
+    private String frontendUrl;
     /**
      * Guardar una URL
      * @param url URL a guardar
@@ -25,6 +27,24 @@ public class UrlService {
         newUrl.setShortcode(LinkTransform.shortenUrl(url));
         newUrl.setClickCount(0);
         newUrl.setCreatedAt(LocalDateTime.now());
+        return urlRepository.save(newUrl);
+    }
+
+    public Url saveUrlForEvent(Long eventId, String url) {
+        String shortcode = LinkTransform.shortenUrl("event-" + eventId + "-" + System.currentTimeMillis());
+        String target = String.format("%s/event/management/%d?invite=%s", frontendUrl, eventId, shortcode);
+
+        Url existing = urlRepository.findByOriginalUrl(target);
+        if (existing != null) {
+            existing.setEventId(eventId);
+            return urlRepository.save(existing);
+        }
+        Url newUrl = new Url();
+        newUrl.setOriginalUrl(target);
+        newUrl.setShortcode(shortcode);
+        newUrl.setClickCount(0);
+        newUrl.setCreatedAt(LocalDateTime.now());
+        newUrl.setEventId(eventId);
         return urlRepository.save(newUrl);
     }
 
@@ -59,5 +79,57 @@ public class UrlService {
      */
     public String convertLinkToQr(String link) {
         return LinkTransform.linkToQr(link);
+    }
+
+    /**
+     * Crear una URL de uso único
+     * @param url URL original
+     * @return URL de uso único creada
+     */
+    public Url createSingleUseUrl(String url) {
+        Url newUrl = new Url();
+        newUrl.setOriginalUrl(url);
+        newUrl.setShortcode(LinkTransform.shortenUrl(url + System.currentTimeMillis())); // Añadir timestamp para hacerlo único
+        newUrl.setClickCount(0);
+        newUrl.setCreatedAt(LocalDateTime.now());
+        newUrl.setIsSingleUse(true);
+        newUrl.setIsUsed(false);
+        return urlRepository.save(newUrl);
+    }
+
+    /**
+     * Obtener una URL de uso único por su shortcode
+     * @param shortcode Shortcode de la URL
+     * @return URL encontrada o null si no existe
+     */
+    public Url getSingleUseUrlByShortcode(String shortcode) {
+        Url url = urlRepository.findByShortcode(shortcode);
+        if (url != null && url.getIsSingleUse() != null && url.getIsSingleUse()) {
+            return url;
+        }
+        return null;
+    }
+
+    public Url getUrlByShortcodeAndEvent(String shortcode, Long eventId){
+        Url url = urlRepository.findByShortcode(shortcode);
+        if (url != null && url.getEventId() != null && url.getEventId().equals(eventId)) {
+            return url;
+        }
+        return null;
+    }
+
+    /**
+     * Marcar una URL de uso único como usada
+     * @param shortcode Shortcode de la URL
+     * @return URL actualizada o null si no existe
+     */
+    public Url markSingleUseUrlAsUsed(String shortcode) {
+        Url url = getSingleUseUrlByShortcode(shortcode);
+        if (url != null && url.getIsUsed() != null && !url.getIsUsed()) {
+            url.setIsUsed(true);
+            url.setClickCount(url.getClickCount() + 1);
+            return urlRepository.save(url);
+        }
+        return null;
     }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { EventShareCardComponent } from '../../event-share-card/event-share-card.component';
 
 @Component({
@@ -11,6 +11,7 @@ import { EventShareCardComponent } from '../../event-share-card/event-share-card
 export class ModalShareEvent {
 
   show: boolean = false;
+  @Input() eventId?: number;
 
   constructor(
     private cdr: ChangeDetectorRef

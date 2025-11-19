@@ -1,4 +1,3 @@
-
 <!-- Hero Section -->
 <section class="bg-gradient-to-br from-primary via-blue-600 to-secondary min-h-screen flex items-center">
   <div class="container mx-auto px-6 py-8">
@@ -13,27 +12,82 @@
           La plataforma digital que moderniza tus sorteos y rifas con transparencia, seguridad y alcance global.
         </p>
         <div class="flex flex-col sm:flex-row gap-4">
-          <button (click)="onCreateRaffle()" class="bg-white text-primary hover:bg-gray-100 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105">
+          <button (click)="onCreateRaffle()"
+            class="bg-white text-primary hover:bg-gray-100 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105">
             Crear Sorteo Gratis
           </button>
         </div>
       </div>
       <div class="relative">
         <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-          <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-gray-800 dark:text-white font-bold text-lg">Sorteo Activo</h3>
-              <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-sm font-medium">En vivo</span>
-            </div>
-            <div class="text-center py-6">
-              <div class="text-3xl font-bold text-gray-800 dark:text-white mb-2">iPhone 15 Pro</div>
-              <div class="text-gray-600 dark:text-gray-300 mb-4">Participantes: 847/1000</div>
-              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4">
-                <div class="bg-gradient-to-r from-primary to-secondary h-3 rounded-full" style="width: 84.7%"></div>
+
+          <div
+            class="bg-white/10 dark:bg-gray-800/40 backdrop-blur-md rounded-2xl p-4 md:p-6 shadow-2xl border border-white/20">
+            <button *ngFor="let t of eventTypes" class="px-4 py-1 text-sm rounded-lg transition-colors"
+              (click)="onChangeType(t)" [class.bg-primary]="selectedType===t" [class.text-white]="selectedType===t"
+              [class.text-gray-800]="selectedType!==t" [class.dark:text-gray-200]="selectedType!==t">{{ t }}</button>
+            <div class="py-4">
+
+              <div class="flex items-center justify-between">
+                <div class="inline-flex items-center rounded-xl p-1 bg-black/20 dark:bg-white/10 backdrop-blur">
+                </div>
               </div>
-              <button (click)="onParticipateExample()" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-colors">
-                Participar - $5.00
-              </button>
+
+              <div
+                class="w-full bg-white/20 dark:bg-slate-900/50 backdrop-blur-md rounded-lg shadow-md border border-white/20 relative slider-wrapper">
+                <div class="relative overflow-hidden w-full min-h-60 sm:min-h-64 md:min-h-72 rounded-lg">
+                  <div class="absolute top-0 bottom-0 start-0 flex flex-nowrap transition-transform duration-700 slider-track"
+                    [style.will-change]="'transform'"
+                    [style.transitionTimingFunction]="'cubic-bezier(0.22, 1, 0.36, 1)'"
+                    [style.transform]="'translate3d(-' + (currentIndex * 100) + '%, 0, 0)'">
+                    <div class="w-full flex-shrink-0 featured-slide" *ngFor="let ev of featuredEvents">
+                      <div class="flex justify-center h-full p-4 md:p-6 w-full">
+                        <div class="w-full text-gray-800 dark:text-gray-100">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full"
+                              [ngClass]="statusClass(ev.statusEvent)">{{ getStatusLabel(ev.statusEvent) }}</span>
+                            <div class="flex items-center gap-2">
+                              <span
+                                class="px-2 py-1 text-xs font-medium rounded-full bg-white/40 text-gray-800 dark:bg-black/40 dark:text-gray-100">{{
+                                ev.categoryName }}</span>
+                              <span *ngIf="ev.isPrivate"
+                                class="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200">Privado</span>
+                              <span *ngIf="ev.isUserRegistered"
+                                class="px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200">Inscrito</span>
+                            </div>
+                          </div>
+
+                          <div class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-1">{{ ev.title }}
+                          </div>
+                          <div class="text-sm text-gray-700 dark:text-gray-300 mb-3">{{ ev.eventType }} • Ganadores: {{
+                            ev.winnersCount }}</div>
+
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                            <div class="text-sm text-gray-700 dark:text-gray-300">Organizador: <span
+                                class="font-medium">{{ getCreatorDisplay(ev) }}</span></div>
+                            <div class="text-sm text-gray-700 dark:text-gray-300">Del {{ formatDate(ev.startDate) }} al
+                              {{ formatDate(ev.endDate) }}</div>
+                          </div>
+
+                          <button (click)="onParticipate(ev)"
+                            class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-colors">
+                            Participar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+
+                <div class="flex justify-center absolute -bottom-8 sm:bottom-3 start-0 end-0 space-x-2">
+                  <button *ngFor="let _ of featuredEvents; let i = index"
+                    class="size-3 border border-gray-400 rounded-full cursor-pointer dark:border-neutral-600"
+                    [class.bg-blue-700]="currentIndex===i" [class.border-blue-700]="currentIndex===i"
+                    (click)="setSlide(i)" aria-label="Ir a slide {{i+1}}"></button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -47,23 +101,21 @@
   <div class="container mx-auto px-6">
     <div class="grid lg:grid-cols-2 gap-12 items-start">
       <div>
-        <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Comparte tu evento</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Genera y comparte el link corto y su código para invitar participantes.</p>
-        <app-event-share-card
-        ></app-event-share-card>
+        <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Comparte tu evento facilmente</h3>
+        <app-event-share-card></app-event-share-card>
       </div>
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow">
-        <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">¿Cómo funciona?</h4>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">¿Cómo funciona?</h3>
         <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-2">
-          <li>Guarda tu URL desde el panel o sección correspondiente.</li>
-          <li>Obtén el código del evento (shortcode) y compártelo.</li>
+          <li>Guarda tu URL desde el modal o sección correspondiente.</li>
+          <li>Obtén el código de invitacion y compártelo.</li>
           <li>Usa el botón Compartir para abrir el menú del sistema.</li>
           <li>Copia el link o descarga el QR según prefieras.</li>
         </ul>
       </div>
     </div>
   </div>
- </section>
+</section>
 
 <!-- Features Section -->
 <section class="py-20 bg-gray-50 dark:bg-gray-900">
@@ -73,69 +125,90 @@
         ¿Por qué elegir <span class="text-gradient">RAFFIFY</span>?
       </h2>
       <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-        Transformamos la manera tradicional de hacer sorteos con tecnología moderna, transparencia total y facilidad de uso.
+        Transformamos la manera tradicional de hacer sorteos con tecnología moderna, transparencia total y facilidad de
+        uso.
       </p>
     </div>
-    
+
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
       <div class="card text-center group hover:shadow-xl transition-all duration-300">
-        <div class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+        <div
+          class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
           <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
         <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">100% Transparente</h3>
-        <p class="text-gray-600 dark:text-gray-300">Tecnología blockchain garantiza que cada sorteo sea verificable públicamente y completamente justo.</p>
+        <p class="text-gray-600 dark:text-gray-300">Tecnología blockchain garantiza que cada sorteo sea verificable
+          públicamente y completamente justo.</p>
       </div>
-      
+
       <div class="card text-center group hover:shadow-xl transition-all duration-300">
-        <div class="w-16 h-16 bg-gradient-to-r from-secondary to-accent rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+        <div
+          class="w-16 h-16 bg-gradient-to-r from-secondary to-accent rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
           <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+            </path>
           </svg>
         </div>
         <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Seguro y Confiable</h3>
-        <p class="text-gray-600 dark:text-gray-300">Autenticación en dos pasos, pagos seguros y perfiles públicos con reputación verificada.</p>
+        <p class="text-gray-600 dark:text-gray-300">Autenticación en dos pasos, pagos seguros y perfiles públicos con
+          reputación verificada.</p>
       </div>
-      
+
       <div class="card text-center group hover:shadow-xl transition-all duration-300">
-        <div class="w-16 h-16 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+        <div
+          class="w-16 h-16 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
           <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
           </svg>
         </div>
         <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Fácil y Rápido</h3>
-        <p class="text-gray-600 dark:text-gray-300">Crea sorteos en minutos, comparte con código QR y gestiona todo desde un panel intuitivo.</p>
+        <p class="text-gray-600 dark:text-gray-300">Crea sorteos en minutos, comparte con código QR y gestiona todo
+          desde un panel intuitivo.</p>
       </div>
-      
+
       <div class="card text-center group hover:shadow-xl transition-all duration-300">
-        <div class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+        <div
+          class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
           <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+            </path>
           </svg>
         </div>
         <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Pagos Integrados</h3>
-        <p class="text-gray-600 dark:text-gray-300">Acepta pagos online automáticamente con comisión del solo 3% sobre la recaudación.</p>
+        <p class="text-gray-600 dark:text-gray-300">Acepta pagos online automáticamente con comisión del solo 3% sobre
+          la recaudación.</p>
       </div>
-      
+
       <div class="card text-center group hover:shadow-xl transition-all duration-300">
-        <div class="w-16 h-16 bg-gradient-to-r from-secondary to-accent rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+        <div
+          class="w-16 h-16 bg-gradient-to-r from-secondary to-accent rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
           <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
           </svg>
         </div>
         <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Alcance Global</h3>
-        <p class="text-gray-600 dark:text-gray-300">Llega a participantes de todo el mundo, 24/7, sin limitaciones geográficas.</p>
+        <p class="text-gray-600 dark:text-gray-300">Llega a participantes de todo el mundo, 24/7, sin limitaciones
+          geográficas.</p>
       </div>
-      
+
       <div class="card text-center group hover:shadow-xl transition-all duration-300">
-        <div class="w-16 h-16 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+        <div
+          class="w-16 h-16 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
           <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+            </path>
           </svg>
         </div>
         <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Analytics Completos</h3>
-        <p class="text-gray-600 dark:text-gray-300">Estadísticas detalladas, seguimiento de participantes y reportes de rendimiento.</p>
+        <p class="text-gray-600 dark:text-gray-300">Estadísticas detalladas, seguimiento de participantes y reportes de
+          rendimiento.</p>
       </div>
     </div>
   </div>
@@ -152,20 +225,24 @@
         Desde rifas tradicionales hasta sorteos en redes sociales, tenemos la solución perfecta para cada necesidad.
       </p>
     </div>
-    
+
     <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
       <div>
         <div class="bg-gradient-to-r from-primary to-secondary p-1 rounded-2xl">
           <div class="bg-white dark:bg-gray-800 rounded-2xl p-8">
             <div class="flex items-center mb-6">
-              <div class="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mr-4">
+              <div
+                class="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mr-4">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z">
+                  </path>
                 </svg>
               </div>
               <h3 class="text-2xl font-bold text-gray-800 dark:text-white">Rifas Digitales</h3>
             </div>
-            <p class="text-gray-600 dark:text-gray-300 mb-6">Moderniza las rifas tradicionales con numeración automática, pagos online y gestión centralizada. Ideal para clubes, asociaciones y organizaciones.</p>
+            <p class="text-gray-600 dark:text-gray-300 mb-6">Moderniza las rifas tradicionales con numeración
+              automática, pagos online y gestión centralizada. Ideal para clubes, asociaciones y organizaciones.</p>
             <ul class="space-y-3 text-gray-600 dark:text-gray-300">
               <li class="flex items-center">
                 <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,42 +266,54 @@
           </div>
         </div>
       </div>
-      
+
       <div class="space-y-8">
         <div class="card">
           <div class="flex items-center mb-4">
-            <div class="w-10 h-10 bg-gradient-to-r from-secondary to-accent rounded-full flex items-center justify-center mr-4">
+            <div
+              class="w-10 h-10 bg-gradient-to-r from-secondary to-accent rounded-full flex items-center justify-center mr-4">
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7">
+                </path>
               </svg>
             </div>
             <h4 class="text-lg font-bold text-gray-800 dark:text-white">Sorteos Gratuitos</h4>
           </div>
-          <p class="text-gray-600 dark:text-gray-300">Perfectos para promociones y eventos. Los usuarios se registran una vez para participar.</p>
+          <p class="text-gray-600 dark:text-gray-300">Perfectos para promociones y eventos. Los usuarios se registran
+            una vez para participar.</p>
         </div>
-        
+
         <div class="card">
           <div class="flex items-center mb-4">
-            <div class="w-10 h-10 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mr-4">
+            <div
+              class="w-10 h-10 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mr-4">
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z">
+                </path>
               </svg>
             </div>
             <h4 class="text-lg font-bold text-gray-800 dark:text-white">Sorteos en Redes Sociales</h4>
           </div>
-          <p class="text-gray-600 dark:text-gray-300">Integración con Instagram y otras plataformas con validación automática de requisitos.</p>
+          <p class="text-gray-600 dark:text-gray-300">Integración con Instagram y otras plataformas con validación
+            automática de requisitos.</p>
         </div>
-        
+
         <div class="card">
           <div class="flex items-center mb-4">
-            <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mr-4">
+            <div
+              class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mr-4">
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                </path>
               </svg>
             </div>
             <h4 class="text-lg font-bold text-gray-800 dark:text-white">Bingo Presencial</h4>
           </div>
-          <p class="text-gray-600 dark:text-gray-300">Herramientas digitales para eventos físicos con gestión de números y participantes.</p>
+          <p class="text-gray-600 dark:text-gray-300">Herramientas digitales para eventos físicos con gestión de números
+            y participantes.</p>
         </div>
       </div>
     </div>
@@ -242,7 +331,8 @@
         Únete a miles de organizadores que ya confían en RAFFIFY para sus sorteos y rifas digitales.
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <button (click)="onGetStarted()" class="bg-white text-primary hover:bg-gray-100 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105">
+        <button (click)="onGetStarted()"
+          class="bg-white text-primary hover:bg-gray-100 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105">
           Comenzar Gratis
         </button>
       </div>
@@ -254,12 +344,15 @@
 </section>
 
 <!-- Modal de Registro -->
-<div *ngIf="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" (click)="closeLoginModal()">
-  <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all" (click)="$event.stopPropagation()">
+<div *ngIf="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  (click)="closeLoginModal()">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all"
+    (click)="$event.stopPropagation()">
     <div class="text-center">
       <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mb-4">
         <svg class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       </div>
       <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -269,19 +362,16 @@
         Para crear sorteos necesitas tener una cuenta. Es gratis y solo toma unos minutos.
       </p>
       <div class="flex flex-col gap-3">
-        <button 
-          (click)="navigateToRegister()"
+        <button (click)="navigateToRegister()"
           class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition-colors">
           Crear cuenta gratis
         </button>
-        <button 
-          (click)="navigateToLogin()"
+        <button (click)="navigateToLogin()"
           class="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-3 px-4 rounded-lg transition-colors">
           Ya tengo cuenta
         </button>
       </div>
-      <button 
-        (click)="closeLoginModal()"
+      <button (click)="closeLoginModal()"
         class="mt-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
         Cancelar
       </button>

@@ -22,15 +22,19 @@ import com.desarrollo.raffy.model.auditlog.AuditAction;
 import com.desarrollo.raffy.model.auditlog.AuditActionType;
 import com.desarrollo.raffy.model.auditlog.AuditEvent;
 import com.desarrollo.raffy.model.auditlog.AuditParticipant;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/audit")
+@Tag(name = "Auditoría", description = "Registro y consulta de auditorías de eventos")
 public class AuditLogsController {
     
     @Autowired
     private AuditLogsService service;
 
     @PostMapping("/save")
+    @Operation(summary = "Guardar auditoría", description = "Crea un registro de auditoría para un evento")
     public ResponseEntity<?> saveAuditLog(@RequestBody AuditEvent auditEvent){
         
         if(auditEvent.getEventId() == null) {
@@ -50,6 +54,7 @@ public class AuditLogsController {
     }
 
     @GetMapping("/filter/event/{creator}")
+    @Operation(summary = "Auditorías por creador", description = "Lista auditorías del creador con filtros opcionales")
     public ResponseEntity<?> getAuditsByCreator(
         @PathVariable("creator") String creatorEvent,
         @RequestParam(name = "eventType", required = false) EventTypes eventTypes,
@@ -73,6 +78,7 @@ public class AuditLogsController {
     }
 
     @GetMapping("/filter/action/{eventId}")
+    @Operation(summary = "Acciones por filtros", description = "Lista acciones auditadas por evento, tipo y rango de fechas")
     public ResponseEntity<?> getActionsByFilters(
         @PathVariable("eventId") Long eventId,
         @RequestParam(name = "action", required = false) AuditActionType action,
@@ -97,6 +103,7 @@ public class AuditLogsController {
     }
 
     @GetMapping("/event/winners/{relatedEventID}")
+    @Operation(summary = "Ganadores auditados", description = "Obtiene ganadores auditados asociados a un evento")
     public ResponseEntity<?> getAuditWinnersByEventId(@PathVariable("relatedEventID") Long relatedEventID){
         try {
             List<AuditParticipant> winners = service.getAuditWinnersByEventId(relatedEventID);

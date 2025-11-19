@@ -21,9 +21,12 @@ import com.desarrollo.raffy.dto.ReviewFromFrontToBackDTO;
 import com.desarrollo.raffy.model.Review;
 
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/reviews")
+@Tag(name = "Reseñas", description = "Gestión de reseñas de eventos: consulta, promedio y creación")
 
 @Slf4j
 
@@ -33,23 +36,27 @@ public class ReviewController {
     private ReviewService reviewService;
 
     @GetMapping("/user/{userEmail}")
+    @Operation(summary = "Reseñas por usuario", description = "Obtiene reseñas asociadas al creador del evento por email")
     public ResponseEntity<?> getReviewsByUserEmail(
         @PathVariable("userEmail") String aUserEmail
     ) {
         try {
             List<ReviewFromBackToFrontDTO> reviews = reviewService.findReviewsByEventCreatorEmail(aUserEmail);
+            // log.warn("[reviews] => reviews obtenidos: " + reviews);
             if (reviews.isEmpty() || reviews == null) {
-                return new ResponseEntity<>("no se encontraron reviews para el usuario con email: " + aUserEmail, null);
+                // return new ResponseEntity<>("no se encontraron reviews para el usuario con email: " + aUserEmail, null);
+                return Response.ok(reviews, "No se encontraron reviews para el usuario con email"+aUserEmail);
             }
-            return new ResponseEntity<>(reviews, HttpStatus.OK);
+            return Response.ok(reviews, "Se econtraron "+reviews.size()+" reviews");
         }
         catch (Exception e) {
-            return new ResponseEntity<>("error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            return Response.error(null, e.getMessage());
         }
 
     }
 
     @GetMapping("/avg-score")
+    @Operation(summary = "Promedio de reseñas", description = "Obtiene el puntaje promedio de reseñas para un usuario")
     public ResponseEntity<?> getAvgScoreByUserEmail(
         @RequestParam("email") String aUserEmail) {
         try {
@@ -62,17 +69,23 @@ public class ReviewController {
     }
 
     @PostMapping("/event/{eventId}/create-review")
+    @Operation(summary = "Crear reseña", description = "Crea una reseña asociada a un evento")
     public ResponseEntity<?> createReview(
         @PathVariable("eventId") Long aEventId,
         @RequestBody ReviewFromFrontToBackDTO aReviewFromFrontToBack
     ) {
         try {
             Review savedReview = reviewService.save(aReviewFromFrontToBack, aEventId);
-            return Response.ok(savedReview, "Review creada con éxito");
+            // return Response.ok(savedReview, "Review creada con éxito");
+            return Response.ok(null, "Review creada con éxito");
         } catch (IllegalArgumentException e) {
             return Response.error(e, e.getMessage()); // error controlado (400)
         } catch (Exception e) {
-            return Response.error(e, "Ocurrió un error al crear la review");
+            String msgError = "Ocurrió un error inesperado al crear la review";
+            if(e.getMessage() != null){
+                msgError = e.getMessage();
+            }
+            return Response.error(null, msgError);
         }
     }
 

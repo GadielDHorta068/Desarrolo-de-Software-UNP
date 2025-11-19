@@ -1,6 +1,9 @@
 package com.desarrollo.raffy.model;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -24,12 +27,13 @@ public class GuessingContest extends Events {
     @Column(name = "max_value", nullable = false)
     private int maxValue;
 
+    @JsonIgnore
     @Column(name = "target_number", nullable = false)
     private int targetNumber;
 
     @Column(name = "max_attempts", nullable = false)
     private int maxAttempts;
 
-    @OneToMany(mappedBy = "contest", cascade = CascadeType.ALL)
-    private List<GuessAttempt> attempts;
+    @OneToMany(mappedBy = "contest", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GuessProgress> attempts = new ArrayList<>();
 }

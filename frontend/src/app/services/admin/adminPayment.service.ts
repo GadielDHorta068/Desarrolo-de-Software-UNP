@@ -8,7 +8,8 @@ export interface DataPayment {
   idEvent: string,
   email: string,
   phone: string,
-  ammount: number
+  ammount: number,
+  numbers: number[]
 }
 
 @Injectable({

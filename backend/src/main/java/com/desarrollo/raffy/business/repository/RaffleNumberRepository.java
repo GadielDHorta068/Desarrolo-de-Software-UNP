@@ -32,4 +32,7 @@ public interface RaffleNumberRepository extends JpaRepository<RaffleNumber, Long
         + "FROM RaffleNumber rn "
         + "WHERE rn.raffle = :aRaffle AND rn.number = :aNumber")
     public boolean existsByRaffleAndNumber(@Param("aRaffle") Raffle aRaffle, @Param("aNumber") int aNumber);
+
+    @Query("SELECT rn FROM RaffleNumber rn WHERE rn.raffle.id = :aEventId AND rn.number = :aNumber")
+    public RaffleNumber findNumberByEventIdAndNumber(@Param("aEventId") Long aEventId, @Param("aNumber") int aNumber);
 }

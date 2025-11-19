@@ -8,16 +8,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.desarrollo.raffy.Response;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.desarrollo.raffy.business.services.TwoFactorService;
 
 @RestController
 @RequestMapping("/2fa")
+@Tag(name = "2FA", description = "Autenticación de dos factores: habilitar, verificar, rotar, deshabilitar y estado")
 public class TwoFactorController {
 
     @Autowired
     private TwoFactorService twoFactorService;
 
     @PostMapping(path = "/enable", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Habilitar 2FA", description = "Habilita la autenticación de dos factores para un usuario")
     public ResponseEntity<Object> enable(@RequestBody Map<String, Object> request) {
         try {
             Object u = request.get("username");
@@ -36,6 +40,7 @@ public class TwoFactorController {
     }
 
     @PostMapping(path = "/verify", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Verificar 2FA", description = "Verifica un código TOTP enviado por el usuario")
     public ResponseEntity<Object> verify(@RequestBody Map<String, Object> request) {
         try {
             Map<String, Object> res = twoFactorService.verify(request);
@@ -46,6 +51,7 @@ public class TwoFactorController {
     }
 
     @PostMapping(path = "/verify-recovery/{username}", consumes = MediaType.TEXT_PLAIN_VALUE)
+    @Operation(summary = "Verificar código de recuperación", description = "Verifica un código de respaldo para 2FA")
     public ResponseEntity<Object> verifyRecovery(@PathVariable("username") String username, @RequestBody String code) {
         try {
             Map<String, Object> res = twoFactorService.verifyRecovery(username, code);
@@ -56,6 +62,7 @@ public class TwoFactorController {
     }
 
     @PostMapping(path = "/rotate/{username}")
+    @Operation(summary = "Rotar secreto 2FA", description = "Genera y configura un nuevo secreto de 2FA para el usuario")
     public ResponseEntity<Object> rotate(@PathVariable("username") String username, @RequestBody(required = false) Map<String, Object> body) {
         try {
             boolean authorized = false;
@@ -82,6 +89,7 @@ public class TwoFactorController {
     }
 
     @PostMapping(path = "/disable/{username}")
+    @Operation(summary = "Deshabilitar 2FA", description = "Deshabilita 2FA para el usuario tras verificación de código o respaldo")
     public ResponseEntity<Object> disable(@PathVariable("username") String username, @RequestBody Map<String, Object> body) {
         try {
             if ((body == null) || (!body.containsKey("code") && !body.containsKey("recoveryCode"))) {
@@ -95,6 +103,7 @@ public class TwoFactorController {
     }
 
     @GetMapping(path = "/status/{username}")
+    @Operation(summary = "Estado 2FA", description = "Obtiene el estado actual de 2FA para el usuario")
     public ResponseEntity<Object> status(@PathVariable("username") String username) {
         try {
             Map<String, Object> res = twoFactorService.status(username);

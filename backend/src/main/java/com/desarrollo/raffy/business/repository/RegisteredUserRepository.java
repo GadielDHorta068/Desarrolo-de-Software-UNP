@@ -27,6 +27,13 @@ public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, 
     // Búsqueda parcial por nickname (case-insensitive)
     List<RegisteredUser> findByNicknameContainingIgnoreCase(String nickname);
 
+    @Query("SELECT r FROM RegisteredUser r WHERE "
+            + "LOWER(r.nickname) LIKE LOWER(CONCAT('%', :q, '%')) OR "
+            + "LOWER(r.name) LIKE LOWER(CONCAT('%', :q, '%')) OR "
+            + "LOWER(r.surname) LIKE LOWER(CONCAT('%', :q, '%')) OR "
+            + "LOWER(CONCAT(r.name, ' ', r.surname)) LIKE LOWER(CONCAT('%', :q, '%'))")
+    List<RegisteredUser> searchByQuery(@Param("q") String q);
+
     // Métodos para update: verifica existencia excluyendo un id dado
     @Query("SELECT COUNT(r) > 0 FROM RegisteredUser r WHERE r.email = :email AND r.id != :id")
     public boolean existsByEmailAndIdNot(@Param("email") String email, @Param("id") Long id);

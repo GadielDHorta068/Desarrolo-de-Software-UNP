@@ -13,7 +13,7 @@ import com.desarrollo.raffy.model.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    @Query("SELECT r FROM Review r WHERE r.event.creator = :creatorEmail")
+    @Query("SELECT r FROM Review r WHERE r.event.creator.email = :creatorEmail")
     public List<Review> findReviewsByEventCreatorEmail(@Param("creatorEmail") String creatorEmail);
 
     @Query("SELECT AVG(r.score) FROM Review r WHERE r.event.creator.email = :userEmail")

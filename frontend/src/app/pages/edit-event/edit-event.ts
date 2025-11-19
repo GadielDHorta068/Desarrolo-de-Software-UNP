@@ -59,7 +59,7 @@ export class EditEvent implements OnInit{
         // console.log("[edit-event] => evento seleccionado: ", this.event);
         if(this.event){
           this.initForm();
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       }
     )
@@ -77,7 +77,7 @@ export class EditEvent implements OnInit{
           if(this.event){
             this.eventAux = {...this.event};
             this.initForm();
-            this.cdr.detectChanges();
+            this.cdr.markForCheck();
           }
         }
       )
@@ -119,6 +119,7 @@ export class EditEvent implements OnInit{
         endDate: dataEvent.executionDate,
         winnersCount: dataEvent.winners,
         image: dataEvent.image,
+        isPrivate: !!dataEvent.isPrivate,
         priceOfNumber: dataEvent.priceOfNumber,
         quantityOfNumbers: dataEvent.quantityOfNumbers
       } as EventsCreate;
@@ -155,6 +156,7 @@ export class EditEvent implements OnInit{
       winners: new FormControl({value: this.event?.winnersCount, disabled: true}, {validators:[ Validators.required ]}),
       description: new FormControl({value: this.event?.description, disabled: false}, {validators:[ Validators.required ]}),
       image: new FormControl({value: null, disabled: false}),
+      isPrivate: new FormControl({value: this.event?.isPrivate ?? false, disabled: false}),
       priceRaffle: new FormControl({value: this.event?.priceOfNumber, disabled: true}),
       quantityNumbersRaffle: new FormControl({value: this.event?.quantityOfNumbers, disabled: true})
     });
@@ -164,12 +166,12 @@ export class EditEvent implements OnInit{
     // Suscribirse a los observables para obtener los datos cuando estén disponibles
     this.configService.categories$.subscribe( categories => {
       this.categories = categories || [];
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
     
     this.configService.typeEvents$.subscribe(types => {
       this.types = types || [];
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
   }
 
@@ -205,6 +207,7 @@ export class EditEvent implements OnInit{
       executionDate: this.parseDate(dateEvent),
       winners: this.eventAux?.winnersCount,
       description: this.eventAux?.description,
+      isPrivate: this.eventAux?.isPrivate ?? false,
       priceRaffle: this.eventAux?.priceOfNumber,
       quantityNumbersRaffle: this.eventAux?.quantityOfNumbers
     });

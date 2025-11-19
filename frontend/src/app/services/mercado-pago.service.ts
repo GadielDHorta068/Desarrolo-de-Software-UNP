@@ -20,7 +20,7 @@ export class MercadoPagoService {
     private authService: AuthService
   ) {}
 
-  // recupera todos los eventos creados (usado para test rapido)
+  // reporta un pago a traves de MercadoPago
   reportPayment(payload: any): Observable<any> {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.authService.getToken()}`,

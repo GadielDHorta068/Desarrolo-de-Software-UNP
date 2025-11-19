@@ -96,7 +96,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
           this.searching = true;
           return forkJoin({
             users: this.authService.searchUsers(q).pipe(catchError(() => of([]))),
-            events: this.eventsService.searchEvents(q).pipe(catchError(() => of([])))
+            events: this.eventsService.getActiveEvents().pipe(catchError(() => of([])))
           }).pipe(finalize(() => {
             this.searching = false;
           }));
@@ -109,8 +109,46 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.searchEvents = base.filter(evt => {
           const t = (evt.title || '').toLowerCase();
           const d = (evt.description || '').toLowerCase();
-          return t.includes(q) || d.includes(q);
+          const fullCreator = (((evt.creator?.name || '') + ' ' + (evt.creator?.surname || '')).trim()).toLowerCase();
+          return t.includes(q) || d.includes(q) || fullCreator.includes(q);
         });
+
+        const seen = new Set((this.searchUsers || []).map(u => (u.nickname || '').toLowerCase()));
+        const extraUsers = base
+          .map(evt => evt.creator)
+          .filter(c => !!c)
+          .filter(c => {
+            const name = (c.name || '').toLowerCase();
+            const surname = (c.surname || '').toLowerCase();
+            const full = (name + ' ' + surname).trim();
+            const nick = (c.nickname || '').toLowerCase();
+            return name.includes(q) || surname.includes(q) || full.includes(q) || nick.includes(q);
+          })
+          .filter(c => {
+            const nick = (c.nickname || '').toLowerCase();
+            if (!nick) return false;
+            if (seen.has(nick)) return false;
+            seen.add(nick);
+            return true;
+          })
+          .map(c => ({
+            id: c.id,
+            name: c.name,
+            surname: c.surname,
+            email: c.email,
+            nickname: c.nickname,
+            userType: '',
+            imagen: undefined,
+            coverImage: undefined,
+            description: undefined,
+            twitter: undefined,
+            facebook: undefined,
+            instagram: undefined,
+            linkedin: undefined,
+            cellphone: undefined
+          } as UserResponse));
+
+        this.searchUsers = [...this.searchUsers, ...extraUsers];
         this.cdr.detectChanges();
       });
   }
