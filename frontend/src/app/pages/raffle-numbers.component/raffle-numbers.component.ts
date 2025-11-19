@@ -87,7 +87,7 @@ export class RaffleNumbersComponent {
                 this.selectedNumbers = this.selectedNumbers.filter(n => n !== aRaffleNumber.ticketNumber);
             }
         }
-        console.log("[selectNumber] => nros elegidos: ",this.selectedNumbers);
+        // console.log("[selectNumber] => nros elegidos: ",this.selectedNumbers);
     }
 
     // inicializamos la grilla de numeros de las rifas
@@ -96,7 +96,6 @@ export class RaffleNumbersComponent {
             //   console.warn('[Raffle] No hay evento cargado aún.');
             return;
         }
-
 
         if (this.event.eventType !== EventTypes.RAFFLES) {
             //   console.log('[Raffle] El evento no es tipo RAFFLES. No se generan números.');
@@ -113,13 +112,11 @@ export class RaffleNumbersComponent {
 
         this.eventService.getSoldNumbersByRaffleId(this.event.id).subscribe({
             next: (boughtNumbers: number[]) => {
-
                 this.numeros = Array.from({ length: total }, (_, i) => ({
                     ticketNumber: i + 1,
                     buyStatus: boughtNumbers.includes(i + 1),
                     selectStatus: false
                 }));
-
                 this.cdr.detectChanges(); // forzamos render
             },
             error: (err) => {

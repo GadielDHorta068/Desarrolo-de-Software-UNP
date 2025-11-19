@@ -131,7 +131,7 @@ public class PaymentController {
             
             Payment createdPayment = paymentService.createPayment(
                 paymentId, externalReference, userId, eventId, receiverId, 
-                amount, currency, paymentMethodId, paymentTypeId);
+                amount, currency, paymentMethodId, paymentTypeId, null);
             return Response.ok(createdPayment, "Pago creado exitosamente");
         } catch (Exception e) {
             log.error("Error al crear pago con parámetros: {}", e.getMessage());

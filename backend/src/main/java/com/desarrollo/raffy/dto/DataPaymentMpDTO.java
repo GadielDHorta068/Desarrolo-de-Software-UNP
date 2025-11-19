@@ -13,5 +13,5 @@ public class DataPaymentMpDTO {
     private String idUser;
     private String idEvent;
     private String mailUser;
-    // ver si meter el id de los numeros?
+    private int[] numbers;
 }

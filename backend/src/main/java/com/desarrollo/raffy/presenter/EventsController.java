@@ -17,6 +17,7 @@ import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
+import com.desarrollo.raffy.model.Payment;
 import com.desarrollo.raffy.model.auditlog.AuditActionType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.desarrollo.raffy.model.EventTypes;
@@ -40,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.time.LocalDate;
 
 import org.springframework.http.HttpStatus;
@@ -696,6 +698,30 @@ public class EventsController {
                 if (someSoldNumbers == null) {
                     someSoldNumbers = Collections.emptyList();
                 }
+                // if(someSoldNumbers.size() > 0){
+                //     Set<String> validStatus = Set.of("pending", "approved");
+                //     // recupero los rafflNumber y en base al estado del pago de cada uno actualizo los disponibles
+                //     for (Integer number : someSoldNumbers) {
+                //         RaffleNumber rafNumber = raffleNumberService.findRaffleNumberByEventIdAndNumber(number, aRaffleId);
+                //         Payment payNumber = rafNumber.getPayment();
+                //         log.warn("[numbersSold] => Id pago: " + payNumber.getId().toString());
+                //         log.warn("[numbersSold] => Estado del pago: " + payNumber.getStatus());
+                //         // if((payNumber != null) && !payNumber.getStatus().equals("pending") && !payNumber.getStatus().equals("approved")){
+                //         if((payNumber != null) && !validStatus.contains(payNumber.getStatus())){
+                //             // aca sacamos el numero de los vendidos
+                //             someSoldNumbers.remove(Integer.valueOf(number));
+                //         }
+                //     }
+                // }
+                Set<String> validStatus = Set.of("pending", "approved");
+                someSoldNumbers.removeIf(number -> {
+                    RaffleNumber rafNumber = raffleNumberService.findRaffleNumberByEventIdAndNumber(number, aRaffleId);
+                    Payment payNumber = rafNumber.getPayment();
+                    return ((payNumber == null) || (payNumber != null) && !validStatus.contains(payNumber.getStatus()));
+                });
+
+
+
                 return ResponseEntity.ok(someSoldNumbers);
             }
             catch (IllegalArgumentException e) {

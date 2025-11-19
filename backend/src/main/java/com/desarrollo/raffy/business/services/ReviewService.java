@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.Raffle;
+import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.Review;
 import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.ParticipantRepository;
@@ -54,6 +55,14 @@ public class ReviewService {
         for (Review r : reviews) {
             ReviewFromBackToFrontDTO reviewToFront = new ReviewFromBackToFrontDTO();
             reviewToFront.setName(r.getUser().getName());
+
+            User user = r.getUser();
+            if (user instanceof RegisteredUser) {
+                // log.warn("El user es de la clase RegisteredUser");
+                RegisteredUser regUser = (RegisteredUser) user;
+                reviewToFront.setNickname(regUser.getNickname());
+            }
+
             reviewToFront.setSurname(r.getUser().getSurname());
             reviewToFront.setEventId(r.getEvent().getId());
             reviewToFront.setEventTitle(r.getEvent().getTitle());

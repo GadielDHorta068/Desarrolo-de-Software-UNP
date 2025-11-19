@@ -17,6 +17,7 @@ public class ReviewFromBackToFrontDTO {
     private String eventTitle;
     private String name;
     private String surname;
+    private String nickname;
     private Double score;
     private DeliveryStatus delivery;
     private String comment;

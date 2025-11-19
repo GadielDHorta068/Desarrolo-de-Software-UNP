@@ -118,7 +118,8 @@ export class MpBrick {
       paymentData: {
         idUser: this.dataPayment?.idUser,
         mailUser: this.dataPayment?.email,
-        idEvent: this.dataPayment?.idEvent
+        idEvent: this.dataPayment?.idEvent,
+        numbers: this.dataPayment?.numbers
       },
       paymentMp: paymentData
     }

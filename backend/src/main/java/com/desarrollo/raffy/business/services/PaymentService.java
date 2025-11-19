@@ -270,13 +270,9 @@ public class PaymentService {
      */
     public Payment createPayment(String paymentId, String externalReference, Long userId, 
                                Long eventId, Long receiverId, Double amount, String currency,
-                               String paymentMethodId, String paymentTypeId) {
+                               String paymentMethodId, String paymentTypeId, String status) {
         // Buscar las entidades
         User user = (userId != null) ? userService.findById(userId) : null;
-        // esto no deberia limitar el pago, dado que pueden pagar los usuarios visitantes
-        // if (user == null) {
-        //     throw new PaymentValidationException("Usuario no encontrado con ID: " + userId);
-        // }
         
         Events event = eventsService.getById(eventId);
         if (event == null) {
@@ -298,7 +294,8 @@ public class PaymentService {
         payment.setCurrency(currency);
         payment.setPaymentMethodId(paymentMethodId);
         payment.setPaymentTypeId(paymentTypeId);
-        payment.setStatus("pending"); // Estado inicial
+        // payment.setStatus("pending"); // Estado inicial
+        payment.setStatus(status != null ? status : "pending");
         payment.setCreatedAt(LocalDateTime.now());
         payment.setUpdatedAt(LocalDateTime.now());
         

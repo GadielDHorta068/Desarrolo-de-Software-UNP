@@ -67,7 +67,7 @@ export class AdminInscriptService {
         )
         // si es exitosa la inscripcion, guardamos los datos para la compra
         if(response.status == 200){
-          this.adminPaymentService.setDataPayment(this.getDataPayment(user));
+          this.adminPaymentService.setDataPayment(this.getDataPayment(user, this.selectedRaffleNumbers));
         }
         let customResponse = {...response};
         customResponse.redirectPay = true;
@@ -124,7 +124,7 @@ export class AdminInscriptService {
   }
 
   // recupera los datos necesarios para realizar la compra
-  getDataPayment(user: UserDTO){
+  getDataPayment(user: UserDTO, numbers: number[]){
     const operator = this.authService.getCurrentUserValue();
     if(this.event){
       const ammount = this.selectedRaffleNumbers.length * this.event.priceOfNumber;
@@ -135,7 +135,8 @@ export class AdminInscriptService {
         idEvent: ""+this.event.id,
         email: user.email,
         phone: user.cellphone ? user.cellphone: "",
-        ammount: ammount
+        ammount: ammount,
+        numbers: numbers
       }
       return data as DataPayment;
     }

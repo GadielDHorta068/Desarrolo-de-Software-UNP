@@ -46,13 +46,18 @@ public class RaffleNumber {
     @NotNull(message = "Todo numero de una rifa debe estar asociado a un usuario")
     private User numberOwner;
     
+    @ManyToOne
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
+    
     // position: 0 = no ganador, >0 = lugar en el ranking
     private short position = 0;
 
-    public RaffleNumber(Raffle aRaffle, User aUser, int aNumber) {
+    public RaffleNumber(Raffle aRaffle, User aUser, int aNumber, Payment aPayment) {
         this.setNumber(aNumber);
         this.setRaffle(aRaffle);
         this.setNumberOwner(aUser);
+        this.setPayment(aPayment);
         this.setPosition((short)0);
     }
     
