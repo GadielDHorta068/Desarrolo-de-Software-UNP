@@ -109,7 +109,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     @Query("""
         SELECT gc, COUNT(a)
         FROM GuessingContest gc
-        LEFT JOIN GuessAttempt a ON a.contest = gc
+        LEFT JOIN GuessProgress a ON a.contest = gc
         WHERE gc.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
         GROUP BY gc
         ORDER BY COUNT(a) DESC

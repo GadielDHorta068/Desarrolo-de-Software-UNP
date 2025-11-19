@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.desarrollo.raffy.business.repository.GuessProgressRepository;
 import com.desarrollo.raffy.business.repository.ParticipantRepository;
 import com.desarrollo.raffy.business.repository.RaffleNumberRepository;
 import com.desarrollo.raffy.business.utils.WinnerSelectionStrategy;
@@ -13,6 +14,8 @@ import com.desarrollo.raffy.business.utils.WinnerStrategyFactory;
 import com.desarrollo.raffy.exception.AlreadyRegisteredToGiveawayExeption;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
+import com.desarrollo.raffy.model.GuessProgress;
+import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
@@ -32,11 +35,21 @@ public class ParticipantService {
     private RaffleNumberRepository raffleNumberRepository;
 
     @Autowired
+    private GuessProgressRepository guessProgressRepository;
+
+    @Autowired
     private WinnerStrategyFactory strategyFactory;
 
     @Autowired
     private AuditLogsService auditLogsService;
 
+    /*
+     * El método runEvents maneja la lógica para ejecutar eventos de diferentes tipos
+     * (Raffle, Giveaways, GuessingContest) y seleccionar ganadores utilizando estrategias
+     * específicas para cada tipo de evento. El método carga los datos necesarios según el
+     * tipo de evento, selecciona la estrategia adecuada, ejecuta la selección de ganadores
+     * y guarda los resultados. Finalmente, devuelve una lista de los ganadores.
+     */
     @Transactional
     public List<?> runEvents(Events event) {
         try {
@@ -50,7 +63,7 @@ public class ParticipantService {
                 }
 
                 WinnerSelectionStrategy<RaffleNumber> strategy =
-                        strategyFactory.getStrategy(event.getEventType());
+                        strategyFactory.getStrategy(raffle.getEventType());
                 log.info("Estrategia seleccionada: {}", strategy.getClass().getSimpleName());
 
                 strategy.selectWinners(event, numbers);
@@ -60,14 +73,13 @@ public class ParticipantService {
                         .filter(n -> n.getPosition() > 0)
                         .toList();
 
-            } else {
-                List<Participant> participants = participantRepository.findParticipantsByEventId(event.getId());
+            } else if(event instanceof Giveaways giveaways){
+                List<Participant> participants = participantRepository.findParticipantsByEventId(giveaways.getId());
                 if (participants.isEmpty()) {
                     throw new RuntimeException("No hay participantes en este evento.");
                 }
 
-                WinnerSelectionStrategy<Participant> strategy =
-                        strategyFactory.getStrategy(event.getEventType());
+                WinnerSelectionStrategy<Participant> strategy = strategyFactory.getStrategy(giveaways.getEventType());
                 log.info("Estrategia seleccionada: {}", strategy.getClass().getSimpleName());
 
                 strategy.selectWinners(event, participants);
@@ -76,6 +88,22 @@ public class ParticipantService {
                 return participants.stream()
                         .filter(p -> p.getPosition() > 0)
                         .toList();
+            } else if(event instanceof GuessingContest guessingContest) {
+                List<GuessProgress> attempts = guessProgressRepository.findByContestId(guessingContest.getId());
+                if(attempts.isEmpty()){
+                    throw new RuntimeException("No hay participantes en este evento.");
+                }
+
+                WinnerSelectionStrategy<GuessProgress> strategy = strategyFactory.getStrategy(guessingContest.getEventType());
+
+                strategy.selectWinners(event, attempts);
+                guessProgressRepository.saveAll(attempts);
+
+                return attempts.stream()
+                            .filter(p -> p.getPosition() > 0)
+                            .toList();
+            } else {
+                throw new IllegalArgumentException("Tipo de evento no soportado para la selección de ganadores.");
             }
 
         } catch (Exception e) {

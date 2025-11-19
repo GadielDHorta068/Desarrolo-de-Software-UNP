@@ -12,11 +12,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "guess_attempt")
+@Table(name = "guess_progress")
+@NoArgsConstructor
 @Data
-public class GuessAttempt {
+public class GuessProgress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,10 +31,22 @@ public class GuessAttempt {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "guessed_number", nullable = false)
-    private int guessedNumber;
+    @Column(name = "attempt_count", nullable = false)
+    private int attemptCount = 0;
+
+    @Column(name = "numbers_tried", nullable = false)
+    private String numbersTried;
 
     @NotNull(message = "La fecha y hora del intento no debe ser nula")
     @Column(name = "attempt_time", nullable = false)
     private LocalDateTime attemptTime;
+
+    @Column(name = "duration_seconds", nullable = false)
+    private Long durationSeconds = 0L;
+
+    @Column(name = "has_won", nullable = false)
+    private boolean hasWon = false;
+
+    @Column(name = "position", nullable = false)
+    private short position = 0;
 }

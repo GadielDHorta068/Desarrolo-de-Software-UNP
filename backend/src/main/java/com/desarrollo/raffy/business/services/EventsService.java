@@ -119,12 +119,16 @@ public class EventsService {
 
         Events existing = eventsRepository.findById(idEvent)
             .orElseThrow(() -> new IllegalArgumentException("Evento no encontrado"));
-
+  
         RegisteredUser creator = registeredUserRepository.findById(idUser)
             .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-
+            
         if (!existing.getCreator().getId().equals(creator.getId())) {
-               throw new IllegalArgumentException("No tienes permiso para actualizar este evento");
+            throw new IllegalArgumentException("No tienes permiso para actualizar este evento");
+        }
+
+        if (!existing.getClass().equals(event.getClass())) {
+            throw new IllegalArgumentException("No se puede cambiar el tipo de evento");
         }
             
         existing.setTitle(event.getTitle());
@@ -137,19 +141,6 @@ public class EventsService {
         existing.setImagen(ImageUtils.base64ToBytes(event.getImageBase64()));
         } else{
             existing.setImagen(existing.getImagen());
-        }
-
-        if(existing instanceof Giveaways && event instanceof Giveaways){
-            // No hay campos específicos para actualizar en Giveaways por ahora
-        } else if(existing instanceof GuessingContest && event instanceof GuessingContest) {
-            GuessingContest existingContest = (GuessingContest) existing;
-            GuessingContest newContest = (GuessingContest) event;
-
-            existingContest.setMinValue(newContest.getMinValue());
-            existingContest.setMaxValue(newContest.getMaxValue());
-            existingContest.setMaxAttempts(newContest.getMaxAttempts());
-        } else if(existing instanceof Raffle && event instanceof Raffle){
-           // Los campos de Raffle no se debe modificar
         }
 
         return (T) eventsRepository.save(existing);

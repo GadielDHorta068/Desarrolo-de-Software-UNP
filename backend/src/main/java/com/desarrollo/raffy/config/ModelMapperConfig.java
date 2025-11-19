@@ -11,10 +11,14 @@ import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.dto.EventSummaryDTO;
 import com.desarrollo.raffy.dto.GiveawaysDTO;
+import com.desarrollo.raffy.dto.GuessProgressDTO;
+import com.desarrollo.raffy.dto.GuessProgressResponseDTO;
 import com.desarrollo.raffy.dto.GuessingContestDTO;
 import com.desarrollo.raffy.dto.RaffleDTO;
+import com.desarrollo.raffy.dto.UserDTO;
 import com.desarrollo.raffy.dto.CreatorSummaryDTO;
 import com.desarrollo.raffy.model.Giveaways;
+import com.desarrollo.raffy.model.GuessProgress;
 import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.Raffle;
 
@@ -143,11 +147,6 @@ public class ModelMapperConfig {
                 m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
                 m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
             });
-        /* mapper.createTypeMap(GuessingContest.class, GuessingContestDTO.class)
-            .addMappings(m -> {
-                m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
-                m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
-            }); */
 
         // Configuración específica para GuessingContest -> GuessingContestDTO
         mapper.createTypeMap(GuessingContest.class, GuessingContestDTO.class)
@@ -158,6 +157,7 @@ public class ModelMapperConfig {
                   m.map(GuessingContest::getMaxValue, GuessingContestDTO::setMaxValue);
                   m.map(GuessingContest::getMaxAttempts, GuessingContestDTO::setMaxAttempts);
               });
+
         // Configuración para Raffle -> RaffleDTO (si tienes uno)
         mapper.createTypeMap(Raffle.class, RaffleDTO.class)
               .addMappings(m -> {
@@ -167,8 +167,24 @@ public class ModelMapperConfig {
                   m.map(Raffle::getPriceOfNumber, RaffleDTO::setPriceOfNumber);
               });
 
+        // Configuración para GuessProgress -> GuessProgressResponseDTO   
+        mapper.createTypeMap(GuessProgress.class, GuessProgressResponseDTO.class)
+              .addMappings(m -> {
+                  m.map(src -> src.getContest().getTitle(), GuessProgressResponseDTO::setEventTitle);
+                  m.map(src -> src.getUser().getName(), GuessProgressResponseDTO::setName);
+                  m.map(src -> src.getUser().getSurname(), GuessProgressResponseDTO::setSurname);
+                  m.map(src -> src.getUser().getEmail(), GuessProgressResponseDTO::setEmail);
+                  m.map(src -> src.getUser().getCellphone(), GuessProgressResponseDTO::setCellphone);
+                  m.map(GuessProgress::getAttemptCount, GuessProgressResponseDTO::setAttemptCount);
+                  m.map(GuessProgress::getNumbersTried, GuessProgressResponseDTO::setNumbersTried);
+                  m.map(GuessProgress::isHasWon, GuessProgressResponseDTO::setHasWon);
+                  m.map(GuessProgress::getAttemptTime, GuessProgressResponseDTO::setLastAttemptTime);
+                  m.map(GuessProgress::getDurationSeconds, GuessProgressResponseDTO::setDurationSeconds);
+                  
+              });
+        
         return mapper;
-    }
+}
     
     /*
      * TIPS PARA EL EQUIPO:
