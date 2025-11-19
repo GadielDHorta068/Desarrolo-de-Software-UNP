@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { environment } from '../../environments/environment';
 import { GuestUser } from '../pages/questionary/guestUser';
@@ -21,20 +21,32 @@ export class QuestionaryService {
     ) {}
 
     save(aGuestUser: UserDTO, aEventId: number): Observable<any> {
-        
-        return this.http.post<any>(
-            `${this.API_URL}/${aEventId}/participants`,
-            aGuestUser
-        );
-        
-        
+        const invite = this.getInviteToken();
+        const url = (invite && invite.trim().length > 0)
+            ? `${this.API_URL}/${aEventId}/participants?invite=${encodeURIComponent(invite)}`
+            : `${this.API_URL}/${aEventId}/participants`;
+        return this.http.post<any>(url, aGuestUser);
     }
 
     saveRaffleNumber(aEventId: number, buyRaffleNumberRequest: BuyRaffleNumberDTO): Observable<any> {
-        return this.http.post<any>(
-            `${this.API_URL}/${aEventId}/buy-raffle-number`,
-            buyRaffleNumberRequest
-        );
+        const invite = this.getInviteToken();
+        const url = (invite && invite.trim().length > 0)
+            ? `${this.API_URL}/${aEventId}/buy-raffle-number?invite=${encodeURIComponent(invite)}`
+            : `${this.API_URL}/${aEventId}/buy-raffle-number`;
+        return this.http.post<any>(url, buyRaffleNumberRequest);
+    }
+
+    private getInviteToken(): string | null {
+        const fromUrl = (typeof window !== 'undefined')
+            ? new URLSearchParams(window.location.search).get('invite')
+            : null;
+        if (fromUrl && fromUrl.trim().length > 0) return fromUrl;
+        try {
+            const stored = localStorage.getItem('invite_token');
+            return stored && stored.trim().length > 0 ? stored : null;
+        } catch {
+            return null;
+        }
     }
 
 }

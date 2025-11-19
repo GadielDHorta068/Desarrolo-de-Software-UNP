@@ -116,7 +116,7 @@
                       </svg>
                     </button>
                     <span
-                      class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-3 py-1 rounded-full">
+                      class="inline-flex items-center whitespace-nowrap bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-3 py-1 rounded-full flex-shrink-0">
                       {{ createdEventsCount }} eventos creados
                     </span>
                     <span
@@ -187,6 +187,13 @@
                   <div class="pt-3">
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Redes</p>
                     <div class="flex items-center gap-3">
+                      <!-- Sitio web -->
+                      <a *ngIf="userProfile?.website" [href]="userProfile.website" target="_blank" rel="noopener"
+                        class="social-btn" title="Sitio web">
+                        <svg class="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 2c1.73 0 3.35.51 4.71 1.39L12 10 6.29 5.39A8 8 0 0112 4zm8 8a8 8 0 01-1.39 4.71L14 12l4.61-4.61A8 8 0 0120 12zm-8 8a8 8 0 01-4.71-1.39L12 14l5.71 5.61A8 8 0 0112 20z" />
+                        </svg>
+                      </a>
                       <!-- Twitter -->
                       <a *ngIf="userProfile?.twitter" [href]="userProfile.twitter" target="_blank" rel="noopener"
                         class="social-btn" title="Twitter">
@@ -222,7 +229,7 @@
 
                       <!-- Placeholder cuando no hay enlaces -->
                       <span
-                        *ngIf="!userProfile?.twitter && !userProfile?.facebook && !userProfile?.instagram && !userProfile?.linkedin"
+                        *ngIf="!userProfile?.website && !userProfile?.twitter && !userProfile?.facebook && !userProfile?.instagram && !userProfile?.linkedin"
                         class="text-xs text-gray-500 dark:text-gray-400">Próximamente</span>
                     </div>
                   </div>
@@ -233,17 +240,17 @@
 
             <!-- Mis eventos -->
             <div *ngIf="activeTab === 'mis-eventos'" [@tabTransition] class="space-y-6">
-              <div class="flex mb-2">
-                <div class="flex items-center w-1/2 gap-2">
+              <div class="flex mb-2 flex-col sm:flex-row">
+                <div class="flex items-center w-full sm:w-1/2 gap-2">
                   <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Sorteos Creados</h2>
-                  <div class="items-center justify-between space-x-2">
+                  <div class="flex items-center space-x-2">
                     <span
-                      class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded-full">
-                      {{ userEvents?.length || 0 }} eventos
+                      class="inline-flex items-center bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded-full whitespace-nowrap">
+                      {{ userEvents.length || 0 }} eventos
                     </span>
                   </div>
                 </div>
-                <div class="flex justify-end w-1/2">
+                <div class="flex justify-end w-full sm:w-1/2 mt-2 sm:mt-0">
                   <div class="flex items-center space-x-2" *ngIf="isOwner">
                     <a routerLink="/audit" class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700"
                       style="cursor: pointer;">Auditorías</a>
@@ -279,7 +286,7 @@
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Eventos inscritos</h2>
                 <span
                   class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded-full">
-                  {{ joinedEvents?.length || 0 }} eventos
+                  {{ joinedEvents.length || 0 }} eventos
                 </span>
               </div>
 

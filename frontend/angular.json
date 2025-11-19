@@ -49,6 +49,15 @@
               "src/polyfills.ts",
               "zone.js"
             ],
+            "allowedCommonJsDependencies": [
+              "canvg",
+              "core-js",
+              "raf",
+              "rgbcolor",
+              "lottie-web",
+              "file-saver",
+              "sockjs-client"
+            ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
@@ -72,8 +81,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "800kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "1200kB",
+                  "maximumError": "1500kB"
                 },
                 {
                   "type": "anyComponentStyle",

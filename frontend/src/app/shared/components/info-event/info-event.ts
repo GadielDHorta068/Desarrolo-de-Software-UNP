@@ -57,4 +57,20 @@ export class InfoEvent implements OnInit, OnChanges{
     }
   }
 
+  getStatusClass(): string {
+    if (!this.event) return '';
+    
+    const status = this.event.statusEvent?.toLowerCase();
+    switch (status) {
+      case 'abierto':
+        return 'status-abierto';
+      case 'cerrado':
+        return 'status-cerrado';
+      case 'finalizado':
+        return 'status-finalizado';
+      default:
+        return 'status-abierto';
+    }
+  }
+
 }

@@ -17,15 +17,15 @@ import java.util.Optional;
 public interface EventsRepository extends JpaRepository<Events, Long> {
     
     // Buscar eventos por estado
-    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.statusEvent = :statusEvent")
+    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.statusEvent = :statusEvent AND e.isPrivate = FALSE")
     List<Events> findByStatusEvent(@Param("statusEvent") StatusEvent statusEvent);
     
     // Buscar eventos por tipo
-    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.eventType = :eventType")
+    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.eventType = :eventType AND e.isPrivate = FALSE")
     List<Events> findByEventType(@Param("eventType") EventTypes eventType);
     
     // Buscar eventos por categoría
-    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.category.id = :categoryId")
+    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.category.id = :categoryId AND e.isPrivate = FALSE")
     List<Events> findByCategoryId(@Param("categoryId") Long categoryId);
     
     // Buscar eventos con filtros progresivos y estado opcional
@@ -40,7 +40,8 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
         AND e.startDate >= COALESCE(:start, e.startDate)
         AND e.endDate <= COALESCE(:end, e.endDate)
         AND e.winnersCount = COALESCE(:winnerCount, e.winnersCount)
-        AND (:email IS NULL OR cr.email <> :email)       
+        AND (:email IS NULL OR cr.email <> :email)
+        AND e.isPrivate = FALSE      
         ORDER BY e.startDate DESC
     """)
     List<Events> findActiveEvents(
@@ -52,27 +53,43 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
         @Param("email") String email);
     
     // Buscar eventos por rango de fechas
-    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.startDate >= :startDate AND e.endDate <= :endDate")
+    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.startDate >= :startDate AND e.endDate <= :endDate AND e.isPrivate = FALSE")
     List<Events> findByDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
     
     // Buscar eventos que empiezan en una fecha específica
-    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.startDate = :startDate")
+    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.startDate = :startDate AND e.isPrivate = FALSE")
     List<Events> findByStartDate(@Param("startDate") LocalDate startDate);
     
     // Buscar eventos que terminan en una fecha específica
-    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.endDate = :endDate")
+    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.endDate = :endDate AND e.isPrivate = FALSE")
     List<Events> findByEndDate(@Param("endDate") LocalDate endDate);
     
     // Verificar si existe un evento con el mismo título
     boolean existsByTitle(String title);
     
     // Buscar eventos por título (búsqueda parcial)
-    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE LOWER(e.title) LIKE LOWER(CONCAT('%', :title, '%'))")
+    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE LOWER(e.title) LIKE LOWER(CONCAT('%', :title, '%')) AND e.isPrivate = FALSE")
     List<Events> findByTitleContainingIgnoreCase(@Param("title") String title);
     
     // Buscar eventos por participante (usando entidad Participant)
     @Query("SELECT e FROM Participant p JOIN p.event e JOIN FETCH e.creator JOIN FETCH e.category WHERE p.participant.id = :userId")
     List<Events> findByParticipantId(@Param("userId") Long userId);
+
+    // Buscar eventos tipo Raffle en los que el usuario posee números
+    @Query("SELECT r FROM RaffleNumber rn JOIN rn.raffle r JOIN FETCH r.creator JOIN FETCH r.category WHERE rn.numberOwner.id = :userId")
+    List<Events> findRafflesByUserId(@Param("userId") Long userId);
+
+    // Buscar eventos tipo GuessingContest en los que el usuario hizo intentos
+    @Query("SELECT gc FROM GuessAttempt ga JOIN ga.contest gc JOIN FETCH gc.creator JOIN FETCH gc.category WHERE ga.user.id = :userId")
+    List<Events> findGuessingByUserId(@Param("userId") Long userId);
+
+    // Verificar participación del usuario en una rifa específica
+    @Query("SELECT CASE WHEN COUNT(rn) > 0 THEN TRUE ELSE FALSE END FROM RaffleNumber rn WHERE rn.raffle = :raffle AND rn.numberOwner = :user")
+    boolean existsRaffleParticipation(@Param("raffle") com.desarrollo.raffy.model.Raffle raffle, @Param("user") com.desarrollo.raffy.model.User user);
+
+    // Verificar intentos del usuario en un concurso de adivinanzas específico
+    @Query("SELECT CASE WHEN COUNT(ga) > 0 THEN TRUE ELSE FALSE END FROM GuessAttempt ga WHERE ga.contest = :contest AND ga.user = :user")
+    boolean existsGuessAttempt(@Param("contest") com.desarrollo.raffy.model.GuessingContest contest, @Param("user") com.desarrollo.raffy.model.User user);
 
     // Buscar por fecha que pase a traves del dia de hoy
     @Query("SELECT e FROM Events e WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN AND e.endDate <= :today")
@@ -92,7 +109,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     Optional<Events> findByIdWithDetails(@Param("id") Long id);
 
     // Buscar todos los eventos con detalles necesarios
-    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category")
+    @Query("SELECT e FROM Events e JOIN FETCH e.creator JOIN FETCH e.category WHERE e.isPrivate = FALSE")
     List<Events> findAllWithDetails();
 
     // --------- Métodos para el destacada de cada tipo ---------
@@ -100,7 +117,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
         SELECT g, COUNT(p)
         FROM Giveaways g
         LEFT JOIN Participant p ON p.event = g
-        WHERE g.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
+        WHERE g.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN AND g.isPrivate = FALSE
         GROUP BY g
         ORDER BY COUNT(p) DESC        
     """)
@@ -110,7 +127,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
         SELECT gc, COUNT(a)
         FROM GuessingContest gc
         LEFT JOIN GuessProgress a ON a.contest = gc
-        WHERE gc.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
+        WHERE gc.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN AND gc.isPrivate = FALSE
         GROUP BY gc
         ORDER BY COUNT(a) DESC
         """)
@@ -120,7 +137,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
         SELECT r, COUNT(n)
         FROM Raffle r
         LEFT JOIN RaffleNumber n ON n.raffle = r
-        WHERE r.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
+        WHERE r.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN AND r.isPrivate = FALSE
         GROUP BY r
         ORDER BY COUNT(n) DESC
         """)
@@ -129,7 +146,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     @Query("""
         SELECT e
         FROM Events e
-        WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
+        WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN AND e.isPrivate = FALSE
           AND e.eventType = :eventType
         ORDER BY e.startDate DESC
         """)

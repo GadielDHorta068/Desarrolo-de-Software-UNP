@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { Events, EventsCreate, EventsTemp, EventTypes, RaffleCreate, RaffleParticipantDTO, StatusEvent } from '../models/events.model';
 import { environment } from '../../environments/environment';
@@ -30,12 +30,18 @@ export class EventsService {
   }
 
   // recupera los datos de un evento segun el id recibido
-  getEventById(eventId: string): Observable<EventsTemp> {
+  getEventById(eventId: string, invite?: string): Observable<EventsTemp> {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.authService.getToken()}`,
       'Content-Type': 'application/json'
     });
-    return this.http.get<EventsTemp>(`${this.apiUrl}/id/${eventId}`, { headers });
+    const params = (invite && invite.trim().length > 0)
+      ? new HttpParams().set('invite', invite)
+      : undefined;
+    if (invite && invite.trim().length > 0) {
+      try { localStorage.setItem('invite_token', invite); } catch {}
+    }
+    return this.http.get<EventsTemp>(`${this.apiUrl}/id/${eventId}`, { headers, params });
   }
 
   // recupera el estado de un evento segun el id recibido

@@ -21,9 +21,12 @@ import com.desarrollo.raffy.dto.ReviewFromFrontToBackDTO;
 import com.desarrollo.raffy.model.Review;
 
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/reviews")
+@Tag(name = "Reseñas", description = "Gestión de reseñas de eventos: consulta, promedio y creación")
 
 @Slf4j
 
@@ -33,6 +36,7 @@ public class ReviewController {
     private ReviewService reviewService;
 
     @GetMapping("/user/{userEmail}")
+    @Operation(summary = "Reseñas por usuario", description = "Obtiene reseñas asociadas al creador del evento por email")
     public ResponseEntity<?> getReviewsByUserEmail(
         @PathVariable("userEmail") String aUserEmail
     ) {
@@ -52,6 +56,7 @@ public class ReviewController {
     }
 
     @GetMapping("/avg-score")
+    @Operation(summary = "Promedio de reseñas", description = "Obtiene el puntaje promedio de reseñas para un usuario")
     public ResponseEntity<?> getAvgScoreByUserEmail(
         @RequestParam("email") String aUserEmail) {
         try {
@@ -64,6 +69,7 @@ public class ReviewController {
     }
 
     @PostMapping("/event/{eventId}/create-review")
+    @Operation(summary = "Crear reseña", description = "Crea una reseña asociada a un evento")
     public ResponseEntity<?> createReview(
         @PathVariable("eventId") Long aEventId,
         @RequestBody ReviewFromFrontToBackDTO aReviewFromFrontToBack

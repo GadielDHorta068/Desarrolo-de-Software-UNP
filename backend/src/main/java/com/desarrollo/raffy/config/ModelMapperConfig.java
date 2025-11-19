@@ -123,6 +123,7 @@ public class ModelMapperConfig {
               .addMappings(m -> {
                   m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
                   m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
+                  m.map(Events::isPrivate, EventSummaryDTO::setIsPrivate);
                   // creator se mapea automáticamente usando el typeMap RegisteredUser -> CreatorSummaryDTO
               });
 
@@ -131,6 +132,7 @@ public class ModelMapperConfig {
               .addMappings(m -> {
                   m.using(categoryIdConverter).map(src -> src, EventSummaryDTO::setCategoryId);
                   m.using(categoryNameConverter).map(src -> src, EventSummaryDTO::setCategoryName);
+                  m.map(Giveaways::isPrivate, EventSummaryDTO::setIsPrivate);
               });
 
         // Mapeo polimórfico para Events -> EventSummaryDTO según la subclase
@@ -153,6 +155,7 @@ public class ModelMapperConfig {
               .addMappings(m -> {
                   m.using(categoryIdConverter).map(src -> src, GuessingContestDTO::setCategoryId);
                   m.using(categoryNameConverter).map(src -> src, GuessingContestDTO::setCategoryName);
+                  m.map(GuessingContest::isPrivate, GuessingContestDTO::setIsPrivate);
                   m.map(GuessingContest::getMinValue, GuessingContestDTO::setMinValue);
                   m.map(GuessingContest::getMaxValue, GuessingContestDTO::setMaxValue);
                   m.map(GuessingContest::getMaxAttempts, GuessingContestDTO::setMaxAttempts);

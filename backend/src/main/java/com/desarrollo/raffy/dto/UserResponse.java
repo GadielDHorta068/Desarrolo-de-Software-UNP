@@ -27,4 +27,5 @@ public class UserResponse {
     private String facebook;
     private String instagram;
     private String linkedin;
+    private String website;
 }

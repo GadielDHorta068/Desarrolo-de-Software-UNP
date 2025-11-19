@@ -26,6 +26,7 @@ public class ChatController {
     @Autowired
     private UserRepository userRepository;
 
+    @SuppressWarnings("null")
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(Message payload, Authentication authentication) {
         // Identificar remitente desde el contexto de seguridad
@@ -44,6 +45,7 @@ public class ChatController {
         Message saved = messageRepository.save(payload);
 
         // Obtener email/username del destinatario para enrutamiento de usuario
+        @SuppressWarnings("null")
         Optional<User> recipientOpt = userRepository.findById(saved.getDestinatarioId());
         if (recipientOpt.isPresent()) {
             String recipientEmail = recipientOpt.get().getEmail();

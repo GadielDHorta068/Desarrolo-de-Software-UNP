@@ -2,14 +2,13 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { HeaderComponent } from '../../shared/components/header/header.component';
 import { EventShareCardComponent } from '../../shared/event-share-card/event-share-card.component';
 import { AuthService, UserResponse } from '../../services/auth.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, EventShareCardComponent],
+  imports: [CommonModule, EventShareCardComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })

@@ -136,6 +136,7 @@ public class EventsService {
         existing.setCategory(event.getCategory());
         existing.setEndDate(event.getEndDate());
         existing.setWinnersCount(event.getWinnersCount());
+        existing.setPrivate(event.isPrivate());
 
         if(event.getImageBase64() != null && !event.getImageBase64().isEmpty()){
         existing.setImagen(ImageUtils.base64ToBytes(event.getImageBase64()));
@@ -243,6 +244,11 @@ public class EventsService {
         RegisteredUser currentUser = getCurrentUser();
         if (currentUser != null) {
             boolean isRegistered = participantRepository.existsByParticipantAndEvent(currentUser, event);
+            if (event instanceof Raffle) {
+                isRegistered = isRegistered || eventsRepository.existsRaffleParticipation((Raffle) event, currentUser);
+            } else if (event instanceof GuessingContest) {
+                isRegistered = isRegistered || eventsRepository.existsGuessAttempt((GuessingContest) event, currentUser);
+            }
             dto.setIsUserRegistered(isRegistered);
         } else {
             dto.setIsUserRegistered(false);
@@ -420,7 +426,16 @@ public class EventsService {
     }
 
     public List<EventSummaryDTO> getEventSummariesByParticipantId(Long userId){
-        return eventsRepository.findByParticipantId(userId).stream()
+        List<Events> viaParticipant = eventsRepository.findByParticipantId(userId);
+        List<Events> viaRaffle = eventsRepository.findRafflesByUserId(userId);
+        List<Events> viaGuessing = eventsRepository.findGuessingByUserId(userId);
+
+        java.util.Map<Long, Events> unique = new java.util.LinkedHashMap<>();
+        for (Events e : viaParticipant) unique.put(e.getId(), e);
+        for (Events e : viaRaffle) unique.put(e.getId(), e);
+        for (Events e : viaGuessing) unique.put(e.getId(), e);
+
+        return unique.values().stream()
             .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());
     }

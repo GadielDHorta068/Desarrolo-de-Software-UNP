@@ -137,6 +137,66 @@ export const routes: Routes = [
     title: 'Stars'
   },
   {
+    path: 'features',
+    loadComponent: () => import('./pages/features/features.component').then(m => m.FeaturesComponent),
+    title: 'Características - Raffy'
+  },
+  {
+    path: 'pricing',
+    loadComponent: () => import('./pages/pricing/pricing.component').then(m => m.PricingComponent),
+    title: 'Precios - Raffy'
+  },
+  {
+    path: 'api',
+    loadComponent: () => import('./pages/api/api.component').then(m => m.ApiComponent),
+    title: 'API - Raffy'
+  },
+  {
+    path: 'integrations',
+    loadComponent: () => import('./pages/integrations/integrations.component').then(m => m.IntegrationsComponent),
+    title: 'Integraciones - Raffy'
+  },
+  {
+    path: 'help',
+    loadComponent: () => import('./pages/help/help.component').then(m => m.HelpComponent),
+    title: 'Centro de Ayuda - Raffy'
+  },
+  {
+    path: 'docs',
+    loadComponent: () => import('./pages/docs/docs.component').then(m => m.DocsComponent),
+    title: 'Documentación - Raffy'
+  },
+  {
+    path: 'contact',
+    loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent),
+    title: 'Contacto - Raffy'
+  },
+  {
+    path: 'status',
+    loadComponent: () => import('./pages/status/status.component').then(m => m.StatusComponent),
+    title: 'Estado del Sistema - Raffy'
+  },
+  {
+    path: 'terms',
+    loadComponent: () => import('./pages/legal/terms.component').then(m => m.TermsComponent),
+    title: 'Términos de Uso - Raffy'
+  },
+  {
+    path: 'privacy',
+    loadComponent: () => import('./pages/legal/privacy.component').then(m => m.PrivacyComponent),
+    title: 'Política de Privacidad - Raffy'
+  },
+  {
+    path: 'cookies',
+    loadComponent: () => import('./pages/legal/cookies.component').then(m => m.CookiesComponent),
+    title: 'Cookies - Raffy'
+  },
+  {
+    path: 'transparency',
+    loadComponent: () => import('./pages/legal/transparency.component').then(m => m.TransparencyComponent),
+    title: 'Transparencia - Raffy'
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }

@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
 import { EventsTemp, EventTypes, RaffleNumber, StatusEvent,  } from '../../models/events.model';
 import { EventsService } from '../../services/events.service';
-import { QuestionaryComponent } from '../questionary/questionary.component';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -12,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-raffle-numbers',
   standalone: true,
-  imports: [CommonModule, FormsModule, QuestionaryComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   templateUrl: './raffle-numbers.component.html',
   styleUrl: './raffle-numbers.component.css'
 })

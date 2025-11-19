@@ -1,73 +1,282 @@
-.container{
-    padding: 1% 3%;
-}
-.grid-custom-3{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-}
-.grid-custom-2{
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-}
-.grid-description{
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    gap: 1rem;
-}
-/* un grilla con 2 columnas donde una tiene 2 filas y la otra ocupa el lugar de esas 2 filas */
-.grid-name-description-image{
-    display: grid;
-    grid-template-columns: 2fr 1fr; /* Dos columnas: izquierda más angosta */
-    grid-template-rows: auto auto; /* Dos filas */
-    gap: 10px; /* Espacio entre elementos */
-}
-.item-name {
-  grid-column: 1;
-  grid-row: 1;
+/* Modern Event Management Styles */
+
+/* Custom Card Component */
+.card-modern {
+  @apply bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700;
+  @apply backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95;
+  @apply transition-all duration-300 hover:shadow-xl;
+  overflow: hidden;
 }
 
-.item-description {
-  grid-column: 1;
-  grid-row: 2;
+.card-header {
+  @apply p-8 border-b border-gray-100 dark:border-gray-700;
 }
 
-.item-image {
-  grid-column: 2;
-  grid-row: 1 / span 2; /* Ocupa ambas filas */
+.card-title {
+  @apply text-xl font-bold text-gray-900 dark:text-white mb-2;
+  @apply bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text;
 }
-.container-columns{
-  display: flex;
-  gap: 4px;
-  padding-top: 2%;
+
+.card-subtitle {
+  @apply text-sm text-gray-600 dark:text-gray-400;
 }
-.column{
-  flex: 1;
+
+/* Modern Button Animations */
+.btn-gradient {
+  @apply bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700;
+  @apply text-white font-semibold px-6 py-3 rounded-xl shadow-lg;
+  @apply transition-all duration-200 hover:shadow-xl hover:scale-105 transform;
 }
-.grid-test {
-  display: grid;
-  align-items: baseline;
-  grid-template-columns: 1fr 2fr;
-  gap: 2px; /* espacio entre elementos */
+
+/* Participant Cards */
+.participant-card {
+  @apply bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-100 dark:border-gray-700;
+  @apply flex items-center space-x-4 transition-all duration-200 hover:shadow-lg hover:scale-105;
+  @apply hover:border-blue-200 dark:hover:border-blue-500;
 }
-/* En pantallas pequeñas, cambia a 1 columna y 2 filas */
-@media (max-width: 768px) {
-  .grid-test {
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(2, auto);
+
+.participant-avatar {
+  @apply w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full;
+  @apply flex items-center justify-center text-white font-bold;
+  @apply shadow-lg;
+}
+
+.participant-info {
+  @apply flex-1 min-w-0;
+}
+
+/* Enhanced QR Code Section */
+.qr-enhanced {
+  @apply bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900;
+  @apply rounded-2xl p-6 border-2 border-dashed border-gray-300 dark:border-gray-600;
+  @apply transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-500;
+}
+
+/* Status Badges */
+.status-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  @apply transition-all duration-200 hover:scale-105;
+}
+
+.status-open {
+  @apply bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100;
+  @apply border border-green-200 dark:border-green-600;
+}
+
+.status-closed {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100;
+  @apply border border-yellow-200 dark:border-yellow-600;
+}
+
+.status-finished {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100;
+  @apply border border-blue-200 dark:border-blue-600;
+}
+
+/* Privacy icon next to title */
+.privacy-icon {
+  @apply inline-flex items-center justify-center w-8 h-8 rounded-full border shadow-sm;
+}
+
+/* Modern Table Styles */
+.table-modern {
+  @apply w-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden;
+  @apply border border-gray-200 dark:border-gray-700;
+}
+
+.table-modern th {
+  @apply px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider;
+  @apply bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600;
+}
+
+.table-modern td {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100;
+  @apply border-b border-gray-100 dark:border-gray-700;
+}
+
+.table-modern tr:hover {
+  @apply bg-gray-50 dark:bg-gray-700 transition-colors duration-200;
+}
+
+/* Micro-interactions */
+.hover-lift {
+  @apply transition-all duration-200 hover:transform hover:scale-105 hover:shadow-lg;
+}
+
+.hover-glow {
+  @apply transition-all duration-300 hover:shadow-blue-500/25 hover:shadow-lg;
+}
+
+/* Loading States */
+.loading-shimmer {
+  @apply animate-pulse bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600;
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .card-modern {
+    @apply mx-2 rounded-xl;
+  }
+  
+  .participant-card {
+    @apply flex-col text-center space-y-3;
+  }
+  
+  .participant-avatar {
+    @apply mx-auto;
   }
 }
 
-.grid-test-main {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  /* gap: 2px; espacio entre elementos */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .participant-card {
+    @apply flex-row;
+  }
 }
-/* En pantallas pequeñas, cambia a 1 columna y 2 filas */
-@media (max-width: 768px) {
-  .grid-test-main {
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(2, auto);
+
+@media (min-width: 1025px) {
+  .participant-card {
+    @apply flex-row;
+  }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  .card-modern {
+    @apply shadow-2xl;
+  }
+}
+
+/* Focus states for accessibility */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
+}
+
+/* Custom scrollbar for dark mode */
+.dark::-webkit-scrollbar {
+  @apply w-2;
+}
+
+.dark::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+.dark::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded-full;
+}
+
+.dark::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* Gradient text effects */
+.text-gradient-primary {
+  @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+}
+
+.text-gradient-secondary {
+  @apply bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent;
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Container improvements */
+.container-enhanced {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  @apply transition-all duration-300;
+}
+
+/* Glass morphism effect */
+.glass {
+  @apply backdrop-blur-lg bg-white/70 dark:bg-gray-800/70;
+  @apply border border-white/20 dark:border-gray-700/50;
+  @apply shadow-2xl;
+}
+
+/* Modern grid layouts */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.grid-masonry {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-auto-rows: minmax(200px, auto);
+  gap: 1.5rem;
+}
+
+/* Enhanced spacing utilities */
+.space-y-enhanced > * + * {
+  margin-top: 1.5rem;
+}
+
+.space-x-enhanced > * + * {
+  margin-left: 1.5rem;
+}
+
+/* Modern border radius */
+.rounded-modern {
+  border-radius: 1rem;
+}
+
+.rounded-card {
+  border-radius: 1.5rem;
+}
+
+/* Shadow enhancements */
+.shadow-modern {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-card {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+.raffle-numbers {
+  @apply flex flex-wrap gap-2 mt-2;
+}
+
+.raffle-number-chip {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100;
+}
+
+.raffle-number-chip-winner {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 ring-1 ring-yellow-400;
+}
+
+.raffle-toggle-chip {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600;
+}
+
+@media (max-width: 640px) {
+  .participant-card {
+    @apply p-4 space-x-3;
+  }
+  .raffle-numbers {
+    @apply gap-1;
   }
 }

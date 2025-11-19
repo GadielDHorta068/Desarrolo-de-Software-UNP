@@ -10,20 +10,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.*;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -40,6 +37,7 @@ class TwoFactorAuthIntegrationTest {
     private static String qrCodeData;
     private static String recoveryCode;
 
+    @SuppressWarnings("null")
     @Test
     @Order(1)
     void testCreateUser_Success() throws Exception {
@@ -70,6 +68,7 @@ class TwoFactorAuthIntegrationTest {
         Enable2FARequest request = new Enable2FARequest();
         request.setUsername(testUsername);
 
+        @SuppressWarnings("null")
         String response = mockMvc.perform(post("/api/2fa/enable")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -94,6 +93,7 @@ class TwoFactorAuthIntegrationTest {
                 .andExpect(jsonPath("$.remainingRecoveryCodes").value(10));
     }
 
+    @SuppressWarnings("null")
     @Test
     @Order(5)
     void testVerify2FA_WithInvalidCode_Fails() throws Exception {
@@ -108,6 +108,7 @@ class TwoFactorAuthIntegrationTest {
                 .andExpect(jsonPath("$.verified").value(false));
     }
 
+    @SuppressWarnings("null")
     @Test
     @Order(6)
     void testVerifyRecoveryCode_Success() throws Exception {
@@ -118,6 +119,7 @@ class TwoFactorAuthIntegrationTest {
                 .andExpect(jsonPath("$.verified").value(true));
     }
 
+    @SuppressWarnings("null")
     @Test
     @Order(7)
     void testVerifyRecoveryCode_UsedCode_Fails() throws Exception {
@@ -138,6 +140,7 @@ class TwoFactorAuthIntegrationTest {
                 .andExpect(jsonPath("$.recoveryCodes").isNotEmpty());
     }
 
+    @SuppressWarnings("null")
     @Test
     @Order(9)
     void testGetSystemStats_ReturnsData() throws Exception {
