@@ -204,5 +204,11 @@ export class EventsService {
     return this.http.get<EventsTemp[]>(`${this.apiUrl}/active`, { params });
   }
 
+  getFeaturedEvents(type?: EventTypes): Observable<EventsTemp[]> {
+    const params: any = {};
+    if (type) params['type'] = type;
+    return this.http.get<EventsTemp[]>(`${this.apiUrl}/featured`, { params });
+  }
+
 
 }
