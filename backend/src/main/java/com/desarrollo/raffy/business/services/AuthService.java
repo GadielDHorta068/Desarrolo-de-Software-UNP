@@ -231,6 +231,7 @@ public class AuthService {
         user.setFacebook(request.getFacebook() != null && !request.getFacebook().trim().isEmpty() ? request.getFacebook().trim() : null);
         user.setInstagram(request.getInstagram() != null && !request.getInstagram().trim().isEmpty() ? request.getInstagram().trim() : null);
         user.setLinkedin(request.getLinkedin() != null && !request.getLinkedin().trim().isEmpty() ? request.getLinkedin().trim() : null);
+        user.setWebsite(request.getWebsite() != null && !request.getWebsite().trim().isEmpty() ? request.getWebsite().trim() : null);
 
         RegisteredUser updatedUser = userRepository.save(user);
         return mapToUserResponse(updatedUser);
@@ -263,6 +264,13 @@ public class AuthService {
 
     public List<UserResponse> searchUsersByNickname(String query) {
         List<RegisteredUser> users = userRepository.findByNicknameContainingIgnoreCase(query);
+        return users.stream()
+                .map(this::mapToUserResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserResponse> searchUsersByQuery(String query) {
+        List<RegisteredUser> users = userRepository.searchByQuery(query);
         return users.stream()
                 .map(this::mapToUserResponse)
                 .collect(Collectors.toList());
@@ -301,6 +309,7 @@ public class AuthService {
                 .facebook(user.getFacebook())
                 .instagram(user.getInstagram())
                 .linkedin(user.getLinkedin())
+                .website(user.getWebsite())
                 .build();
     }
 }

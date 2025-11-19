@@ -11,15 +11,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.desarrollo.raffy.business.services.AuthService;
 import com.desarrollo.raffy.dto.UserResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/share")
+@Tag(name = "Compartir", description = "Generación de páginas de compartido con metadatos sociales")
 public class ShareController {
 
     @Autowired
     private AuthService authService;
 
+    @SuppressWarnings("null")
     @GetMapping(value = "/profile/{nickname}", produces = MediaType.TEXT_HTML_VALUE)
+    @Operation(summary = "Compartir perfil", description = "Genera HTML con metadatos Open Graph/Twitter y redirige al perfil")
     public ResponseEntity<String> shareProfile(@PathVariable String nickname, HttpServletRequest request) {
         try {
             UserResponse user = authService.getUserByNickname(nickname);

@@ -1,4 +1,5 @@
-<div class="shadow-md rounded-lg p-4 hover:shadow-lg transition border border-gray-200 dark:border-zinc-700 hover:border-emerald-600" [ngClass]="customBackground()">
+<div class="relative shadow-md rounded-lg p-4 hover:shadow-lg transition border border-gray-200 dark:border-zinc-700 hover:border-emerald-600" [ngClass]="customBackground()">
+  <app-loading-indicator [active]="isActionLoading" [type]="'overlay'" [message]="'Procesando...'" [size]="'md'"></app-loading-indicator>
     <div class="flex gap-4">
         <img style="width: 30px; height: 30px;" [src]="event?.eventType | handleIconTypePipe" alt="">
         <h2 class="text-lg font-semibold text-emerald-500 mb-2 pl-1">{{event?.title}}</h2>
@@ -47,6 +48,12 @@
         </div>
     </div>
 
+    <div *ngIf="event?.isPrivate" class="mt-2">
+        <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+            🔒 Privado
+        </span>
+    </div>
+
     <!-- botones de accion -->
     <div class="flex mt-2 justify-center gap-[4%] pt-1">
         <!-- Botón Ver detalles - siempre visible -->
@@ -71,18 +78,20 @@
         <!-- Botón Inscribirme - solo visible si el usuario puede registrarse -->
         <button 
             *ngIf="!isAdmin && showRegisterButton"
-            class="bg-orange-600 dark:bg-orange-300 hover:bg-orange-500 dark:hover:bg-orange-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
-            [disabled]="!event?.id" 
+            class="bg-orange-600 dark:bg-orange-300 hover:bg-orange-500 dark:hover:bg-orange-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2" 
+            [disabled]="isActionLoading || !event?.id" 
             (click)="onInscript()">
+            <app-loading-indicator [active]="isActionLoading" [type]="'inline'" [size]="'sm'"></app-loading-indicator>
             Inscribirme
         </button>
         
         <!-- Botón Inscribirme para invitados (sin autenticación) -->
         <button 
             *ngIf="!isAdmin && !isAuthenticated && !isUserCreator && event?.statusEvent === StatusEvent.OPEN"
-            class="bg-orange-600 dark:bg-orange-300 hover:bg-orange-500 dark:hover:bg-orange-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
-            [disabled]="!event?.id" 
+            class="bg-orange-600 dark:bg-orange-300 hover:bg-orange-500 dark:hover:bg-orange-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2" 
+            [disabled]="isActionLoading || !event?.id" 
             (click)="onInscript()">
+            <app-loading-indicator [active]="isActionLoading" [type]="'inline'" [size]="'sm'"></app-loading-indicator>
             Participar!
         </button>
 

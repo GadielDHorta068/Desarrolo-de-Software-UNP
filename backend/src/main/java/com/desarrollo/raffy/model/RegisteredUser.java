@@ -59,6 +59,9 @@ public class RegisteredUser extends User implements UserDetails {
     @Column(name = "linkedin", length = 255)
     private String linkedin;
 
+    @Column(name = "website", length = 255)
+    private String website;
+
     @Column(nullable = false)
     private boolean enabled = true;
 

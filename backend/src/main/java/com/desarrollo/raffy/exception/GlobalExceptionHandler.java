@@ -120,4 +120,24 @@ public class GlobalExceptionHandler {
         
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", ex.getMessage());
+        body.put("status", 404);
+        body.put("timestamp", LocalDateTime.now());
+        
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    /* @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleServerErrors(Exception ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "Error interno del servidor");
+        body.put("details", ex.getMessage());
+        body.put("status", 500);
+        body.put("timestamp", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    } */
 }

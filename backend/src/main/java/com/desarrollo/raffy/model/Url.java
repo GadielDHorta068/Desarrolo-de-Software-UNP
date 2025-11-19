@@ -34,4 +34,13 @@ public class Url {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "is_single_use")
+    private Boolean isSingleUse;
+
+    @Column(name = "is_used")
+    private Boolean isUsed;
+
+    @Column(name = "event_id")
+    private Long eventId;
 }

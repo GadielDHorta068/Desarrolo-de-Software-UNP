@@ -1,77 +1,161 @@
-<div class="grid-main">
-    <div>
-        <div class="grid-row">
-            <div class="text-base font-bold pt-2">Nombre</div>
-            <div class="p-2">{{event?.title}}</div>
-        </div>
-        <div class="grid-row">
-            <div class="text-base font-bold pt-2">Descripción</div>
-            <div class="p-2"><p>{{event?.description}}</p></div>
-        </div>
-        <div class="grid-row">
-            <div class="text-base font-bold pt-2">Tipo</div>
-            <div class="flex gap-2 p-2">
-                <p>{{event?.eventType | handleTypePipe}}</p>
-                <img style="width: 1.2rem;" [src]="event?.eventType | handleIconTypePipe" alt="">
-            </div>
-        </div>
-        <div class="grid-row">
-            <div class="text-base font-bold pt-2">Categoría</div>
-            <div class="p-2"><app-tag-category [category]="event?.categoryName"></app-tag-category></div>
-        </div>
-        <div class="grid-row">
-            <div class="text-base font-bold pt-2">Número de ganadores</div>
-            <div class="p-2">{{event?.winnersCount}}</div>
-        </div>
-        <div class="grid-row">
-            <div class="text-base font-bold pt-2">Fecha de realización</div>
-            <div class="p-2">{{event?.endDate | handleDatePipe}}</div>
-        </div>
-        <div class="grid-row">
-            <div class="text-base font-bold pt-2">Estado</div>
-            <div class="p-2">{{event?.statusEvent | handleStatusPipe}}</div>
-            <!-- <button disabled class="px-3 py-1 text-sm font-semibold rounded-full bg-green-500 text-white opacity-80 cursor-default">
-            Abierto
-            </button> -->
-        </div>
-        <!-- <div class="grid-row">
-            <div class="text-base font-bold pt-2">Estado</div>
-            <div class="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-md">
-                <span class="text-green-700 font-medium">Abierto</span>
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+<div class="info-event-modern">
+    <div class="info-grid">
+        <!-- Event Title -->
+        <div class="info-item">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                 </svg>
+                <span>Nombre</span>
             </div>
-        </div> -->
-        <div *ngIf="event?.eventType == eventTypes.RAFFLES" class="grid-row">
-            <div class="text-base font-bold pt-2">Cantidad de números</div>
-            <div class="p-2">{{event?.quantityOfNumbers}}</div>
+            <div class="info-value title">{{event?.title}}</div>
         </div>
-        <div *ngIf="event?.eventType == eventTypes.RAFFLES" class="grid-row">
-            <div class="text-base font-bold pt-2">Precio del número</div>
-            <div class="p-2">{{event?.priceOfNumber}}</div>
+
+        <!-- Event Description -->
+        <div class="info-item">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                </svg>
+                <span>Descripción</span>
+            </div>
+            <div class="info-value description">{{event?.description}}</div>
         </div>
-        <div *ngIf="event?.statusEvent == eventStatus.FINISHED " class="grid-row">
-            <div class="text-base font-bold pt-2">Ganadores</div>
-            <div class="p-2 flex flex-col gap-2">
-                <div *ngFor="let winner of winners; let i = index" class="flex items-center gap-3">
-                    <span>{{winner?.name}} {{winner?.surname}}</span>
-                    <app-tag-prize [position]="winner?.position || (i+1)"></app-tag-prize>
+
+        <!-- Event Type -->
+        <div class="info-item">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 16h4m10 0h4"/>
+                </svg>
+                <span>Tipo</span>
+            </div>
+            <div class="info-value type-badge">
+                <span>{{event?.eventType | handleTypePipe}}</span>
+                <img class="type-icon" [src]="event?.eventType | handleIconTypePipe" alt="">
+            </div>
+        </div>
+
+        <!-- Category -->
+        <div class="info-item">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
+                <span>Categoría</span>
+            </div>
+            <div class="info-value">
+                <app-tag-category [category]="event?.categoryName"></app-tag-category>
+            </div>
+        </div>
+
+        <!-- Number of Winners -->
+        <div class="info-item">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                <span>Número de ganadores</span>
+            </div>
+            <div class="info-value winners-count">{{event?.winnersCount}}</div>
+        </div>
+
+        <!-- Event Date -->
+        <div class="info-item">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>Fecha de realización</span>
+            </div>
+            <div class="info-value date">{{event?.endDate | handleDatePipe}}</div>
+        </div>
+
+        <!-- Status -->
+        <div class="info-item">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Estado</span>
+            </div>
+            <div class="info-value">
+                <span class="status-badge" [ngClass]="getStatusClass()">
+                    {{event?.statusEvent | handleStatusPipe}}
+                </span>
+            </div>
+        </div>
+
+        <!-- Raffle Numbers (if applicable) -->
+        <div *ngIf="event?.eventType == eventTypes.RAFFLES" class="info-item">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                </svg>
+                <span>Cantidad de números</span>
+            </div>
+            <div class="info-value">{{event?.quantityOfNumbers}}</div>
+        </div>
+
+        <!-- Raffle Price (if applicable) -->
+        <div *ngIf="event?.eventType == eventTypes.RAFFLES" class="info-item">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Precio del número</span>
+            </div>
+            <div class="info-value price">{{event?.priceOfNumber}}</div>
+        </div>
+
+        <!-- Winners (if finished) -->
+        <div *ngIf="event?.statusEvent == eventStatus.FINISHED" class="info-item winners-section">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                </svg>
+                <span>Ganadores</span>
+            </div>
+            <div class="info-value winners-list">
+                <div *ngFor="let winner of winners; let i = index" class="winner-item">
+                    <div class="winner-info">
+                        <span class="winner-name">{{winner?.name}} {{winner?.surname}}</span>
+                        <app-tag-prize [position]="winner?.position || (i+1)"></app-tag-prize>
+                        <span *ngIf="event?.eventType == eventTypes.RAFFLES && winner?.raffleNumber as winNum" class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                            Nº ganador: {{ winNum }}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="grid-row">
-            <div class="text-base font-bold pt-2">Reputacion del creador</div>
-            <app-star-rating
-                [rating] = "avgUserScore"
-            ></app-star-rating>
+
+        <!-- Creator Reputation -->
+        <div class="info-item">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                </svg>
+                <span>Reputación del creador</span>
+            </div>
+            <div class="info-value">
+                <app-star-rating [rating]="avgUserScore"></app-star-rating>
+            </div>
         </div>
     </div>
-    <div *ngIf="event?.imageUrl">
-        <div class="grid-row" style="align-items: start;">
-            <div class="text-base font-bold pt-2">Imagen del evento</div>
-            <div class="p-2" style="border: solid 2px lightslategray; border-radius: 5px;">
-                <img style="width: 20vw;" [src]="event?.imageUrl ? 'data:image/jpeg;base64,' + event?.imageUrl : 'assets/no-image.jpg'" >
+
+    <!-- Event Image (if available) -->
+    <div *ngIf="event?.imageUrl" class="image-section">
+        <div class="image-container">
+            <div class="image-header">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>Imagen del evento</span>
+            </div>
+            <div class="image-wrapper">
+                <img [src]="event?.imageUrl ? 'data:image/jpeg;base64,' + event?.imageUrl : 'assets/no-image.jpg'" 
+                     alt="Imagen del evento" 
+                     class="event-image">
             </div>
         </div>
     </div>

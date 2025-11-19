@@ -5,20 +5,16 @@ import { CommonModule } from '@angular/common';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 import { Category } from '../../services/category.service';
 import { HandleDatePipe } from '../../pipes/handle-date.pipe';
-import { LoaderImage } from '../../shared/components/loader-image/loader-image';
-import { ModalInfo } from '../../shared/components/modal-info/modal-info';
 import { InfoEvent } from '../../shared/components/info-event/info-event';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EventShareCardComponent } from '../../shared/event-share-card/event-share-card.component';
 import { AuthService } from '../../services/auth.service';
 import { ModalShareEvent } from '../../shared/components/modal-share-event/modal-share-event';
-import { QuestionaryComponent } from '../questionary/questionary.component';
 import { EventsService } from '../../services/events.service';
 import { UserDTO } from '../../models/UserDTO';
 import { WinnerDTO } from '../../models/winner.model';
 import { TagPrize } from '../../shared/components/tag-prize/tag-prize';
 import { NotificationService } from '../../services/notification.service';
-import { RaffleNumbersComponent } from '../raffle-numbers.component/raffle-numbers.component';
 import { AdminInscriptService } from '../../services/admin/adminInscript';
 import { InviteLoginComponent } from '../../shared/components/invite-login/invite-login.component';
 import { ReportsFormComponent, ResumeService } from '../../shared/components/reports-form/reports-form.component';
@@ -26,9 +22,9 @@ import { ReportService } from '../../services/report.service';
 
 @Component({
     selector: 'app-management-event',
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, LoaderImage, ModalInfo, InfoEvent,
-        HandleDatePipe, EventShareCardComponent, ModalShareEvent, RaffleNumbersComponent,
-        QuestionaryComponent, TagPrize, InviteLoginComponent, ReportsFormComponent],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, InfoEvent,
+        EventShareCardComponent, ModalShareEvent,
+        TagPrize, InviteLoginComponent, ReportsFormComponent],
     templateUrl: './management-event.html',
     styleUrl: './management-event.css',
     providers: [HandleDatePipe]
@@ -68,8 +64,27 @@ export class ManagementEvent {
     selectedRaffleNumbers: number[] = [];
     typesOfEventes = EventTypes;
     participants: RaffleParticipantDTO[] = [];
+    raffleParticipantsGrouped: { name: string; surname: string; email: string; numbers: number[]; position: number }[] = [];
+    raffleNumbersLimit = 8;
+    expandedRaffleParticipants = new Set<string>();
     eventType!: EventTypes;
     winners: WinnerDTO[] = [];
+    accessRestricted: boolean = false;
+
+    // Expose StatusEvent enum to template
+    get StatusEvent() {
+        return StatusEvent;
+    }
+
+    get canUserInscript(): boolean {
+        if (!this.event) return false;
+        const isCreator = this.authService.isAuthenticated() && (this.authService.getCurrentUserValue()?.id === this.event.creator?.id);
+        const invite = this.route.snapshot.queryParamMap.get('invite');
+        if (this.event.isPrivate && !isCreator && (!invite || invite.trim().length === 0)) {
+            return false;
+        }
+        return !isCreator && !this.event?.isUserRegistered && this.event?.statusEvent === StatusEvent.OPEN;
+    }
 
     constructor(
         private adminEventService: AdminEventService,
@@ -82,13 +97,12 @@ export class ManagementEvent {
         private notificationService: NotificationService,
         private adminInscriptService: AdminInscriptService,
         private reportsService: ReportService
-    ) {
-        this.adminEventService.winnersEvent$.subscribe(
-            winners => {
-                this.winners = winners;
-                this.cdr.detectChanges();
-            }
-        )
+    ) {}
+
+    ngAfterViewInit(){
+        this.adminEventService.winnersEvent$.subscribe(winners => {
+            this.winners = winners;
+        });
     }
 
     ngOnInit() {
@@ -96,12 +110,16 @@ export class ManagementEvent {
         // console.log("[admin-event] => ide del evento recibido por param: ", this.eventIdParam);
         // revisamos si los datos del evento ya fueron seteados desde la lista de eventos
         if (!this.event) {
-            this.eventService.getEventById("" + this.eventIdParam).subscribe(
-                resp => {
-                    // console.log("[admin-event] => evento recuperado por id de param: ", resp);
+            const invite = this.route.snapshot.queryParamMap.get('invite') || undefined;
+            this.eventService.getEventById("" + this.eventIdParam, invite || undefined).subscribe({
+                next: (resp) => {
                     this.adminEventService.setSelectedEvent(resp);
+                },
+                error: () => {
+                    this.accessRestricted = true;
+                    this.cdr.markForCheck();
                 }
-            )
+            })
         }
         // si hay un usuario logueado revisamos si ya ha reportado el evento
         this.adminEventService.selectedEvent$.subscribe(
@@ -111,18 +129,18 @@ export class ManagementEvent {
                 if (this.event) {
                     this.eventType = this.event.eventType;
                     this.initForm();
-                    this.cdr.detectChanges();
+                    this.cdr.markForCheck();
 
                     if(this.authService.isAuthenticated()){
                         this.reportsService.hasReportedEvent(""+this.event?.id, ""+this.authService.getCurrentUserValue()?.email).subscribe(
                             data => {
                                 this.hasReport = data;
-                                this.cdr.detectChanges();
+                                this.cdr.markForCheck();
                             },
                             error => {
                                 console.log("[control-report] => Ha ocurrido un error al consultar los reportes del usuario");
                                 this.hasReport = false;
-                                this.cdr.detectChanges();
+                                this.cdr.markForCheck();
                             }
                         )
                     }
@@ -166,21 +184,11 @@ export class ManagementEvent {
         return this.authService.getCurrentUserValue()?.id === this.event?.creator?.id;
     }
 
-    get canUserInscript(): boolean {
-        // El usuario puede inscribirse si:
-        // 1. Está autenticado
-        // 2. No es el creador del evento
-        // 3. No está ya registrado
-        // return this.authService.isAuthenticated() && 
-        //         !this.isUserCreator && 
-        //         !this.event?.isUserRegistered &&
-        //         this.event?.statusEvent === StatusEvent.OPEN;
-        return !this.isUserCreator &&
-            !this.event?.isUserRegistered &&
-            this.event?.statusEvent === StatusEvent.OPEN;
-    }
 
     async onInscript(){
+        if (this.accessRestricted) {
+            return;
+        }
         const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
         // console.log("[onInscript] => estado del evento: ", respStatus);
         if(!respStatus){
@@ -197,10 +205,34 @@ export class ManagementEvent {
         }
     }
 
+    goHome(){
+        this.router.navigate(['/home']);
+    }
+
     loadParticipants(eventId: number, eventType: EventTypes): void {
         this.eventService.getParticipantUsersByEventId(eventId, eventType, this.authService.getCurrentUserValue()?.email || "null").subscribe({
             next: (data) => {
-                this.participants = data;
+                if (eventType === EventTypes.RAFFLES) {
+                    const map = new Map<string, { name: string; surname: string; email: string; numbers: number[]; position: number }>();
+                    (data as RaffleParticipantDTO[]).forEach(p => {
+                        const key = p.email;
+                        const existing = map.get(key);
+                        if (existing) {
+                            existing.numbers.push(p.number);
+                            existing.position = existing.position || p.position || 0;
+                        } else {
+                            map.set(key, { name: p.name, surname: p.surname, email: p.email, numbers: [p.number], position: p.position || 0 });
+                        }
+                    });
+                    this.raffleParticipantsGrouped = Array.from(map.values()).map(g => ({
+                        ...g,
+                        numbers: g.numbers.sort((a, b) => a - b)
+                    }));
+                    this.participants = [];
+                } else {
+                    this.participants = data;
+                    this.raffleParticipantsGrouped = [];
+                }
                 this.cdr.detectChanges();
             },
             error: (err) => {
@@ -216,6 +248,46 @@ export class ManagementEvent {
         if (!dataPlace)
             return { idUser: null, position: -1 };
         return { idUser: dataPlace.participantId, position: dataPlace.position };
+    }
+
+    getGoalByEmail(email: string): { idUser: number | null; position: number } | null {
+        const dataPlace = this.winners.find(winner => winner.email === email);
+        if (!dataPlace) return null;
+        return { idUser: dataPlace.participantId, position: dataPlace.position };
+    }
+
+    getGoalByEmailIfFinished(email: string): { idUser: number | null; position: number } | null {
+        if (this.event?.statusEvent !== StatusEvent.FINISHED) return null;
+        return this.getGoalByEmail(email);
+    }
+
+    getWinningRaffleNumber(email: string): number | null {
+        if (this.event?.statusEvent !== StatusEvent.FINISHED) return null;
+        const w = this.winners.find(winner => winner.email === email);
+        return (w && typeof w.raffleNumber === 'number') ? w.raffleNumber : null;
+    }
+
+    isExpanded(email: string): boolean {
+        return this.expandedRaffleParticipants.has(email);
+    }
+
+    toggleExpanded(email: string): void {
+        if (this.expandedRaffleParticipants.has(email)) {
+            this.expandedRaffleParticipants.delete(email);
+        } else {
+            this.expandedRaffleParticipants.add(email);
+        }
+        this.cdr.detectChanges();
+    }
+
+    getDisplayedNumbers(email: string, all: number[]): number[] {
+        if (this.isExpanded(email)) return all;
+        return all.slice(0, this.raffleNumbersLimit);
+    }
+
+    getRemainingCount(email: string, all: number[]): number {
+        if (this.isExpanded(email)) return 0;
+        return Math.max(0, all.length - this.raffleNumbersLimit);
     }
 
     setTab(tabName: string): void {

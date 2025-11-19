@@ -21,6 +21,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +36,7 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping("/payments")
+@Tag(name = "Pagos", description = "Endpoints para creación, consulta, actualización y verificación de pagos")
 public class PaymentController {
 
     @Autowired
@@ -45,6 +48,7 @@ public class PaymentController {
      * @return ResponseEntity con la lista de todos los pagos
      */
     @GetMapping
+    @Operation(summary = "Listar pagos", description = "Obtiene todos los pagos registrados")
     public ResponseEntity<?> getAllPayments() {
         try {
             log.info("Obteniendo todos los pagos");
@@ -63,6 +67,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago encontrado
      */
     @GetMapping("/{id}")
+    @Operation(summary = "Pago por ID", description = "Obtiene un pago por su identificador")
     public ResponseEntity<?> getPaymentById(
             @PathVariable @NotNull @Positive Long id) {
         try {
@@ -87,6 +92,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago creado
      */
     @PostMapping
+    @Operation(summary = "Crear pago", description = "Crea un nuevo pago con cuerpo de solicitud")
     public ResponseEntity<?> createPayment(@Valid @RequestBody Payment payment) {
         try {
             log.info("Creando nuevo pago para usuario: {} y evento: {}", 
@@ -116,6 +122,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago creado
      */
     @PostMapping("/create")
+    @Operation(summary = "Crear pago (parámetros)", description = "Crea un nuevo pago enviando parámetros en la query")
     public ResponseEntity<?> createPaymentWithParams(
             @RequestParam @NotBlank String paymentId,
             @RequestParam @NotBlank String externalReference,
@@ -147,6 +154,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago actualizado
      */
     @PutMapping("/{id}")
+    @Operation(summary = "Actualizar pago", description = "Actualiza los datos de un pago existente")
     public ResponseEntity<?> updatePayment(
             @PathVariable @NotNull @Positive Long id,
             @Valid @RequestBody Payment payment) {
@@ -174,6 +182,7 @@ public class PaymentController {
      * @return ResponseEntity confirmando la eliminación
      */
     @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar pago", description = "Elimina un pago por su ID")
     public ResponseEntity<?> deletePayment(@PathVariable @NotNull @Positive Long id) {
         try {
             log.info("Eliminando pago con ID: {}", id);
@@ -195,6 +204,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago encontrado
      */
     @GetMapping("/event/{eventId}/receiver/{receiverId}")
+    @Operation(summary = "Pago por evento y receptor", description = "Obtiene el pago asociado a un evento y receptor")
     public ResponseEntity<?> getPaymentByEventAndReceiver(
             @PathVariable @NotNull @Positive Long eventId,
             @PathVariable @NotNull @Positive Long receiverId) {
@@ -222,6 +232,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago encontrado
      */
     @GetMapping("/user/{userId}/event/{eventId}")
+    @Operation(summary = "Pago por usuario y evento", description = "Obtiene el pago de un usuario para un evento específico")
     public ResponseEntity<?> getPaymentByUserAndEvent(
             @PathVariable @NotNull @Positive Long userId,
             @PathVariable @NotNull @Positive Long eventId) {
@@ -248,6 +259,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago encontrado
      */
     @GetMapping("/event/{eventId}")
+    @Operation(summary = "Pago por evento", description = "Obtiene el pago asociado a un evento")
     public ResponseEntity<?> getPaymentByEvent(@PathVariable @NotNull @Positive Long eventId) {
         try {
             log.info("Obteniendo pago para evento: {}", eventId);
@@ -271,6 +283,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago encontrado
      */
     @GetMapping("/receiver/{receiverId}")
+    @Operation(summary = "Pago por receptor", description = "Obtiene el pago asociado a un receptor")
     public ResponseEntity<?> getPaymentByReceiver(@PathVariable @NotNull @Positive Long receiverId) {
         try {
             log.info("Obteniendo pago para receptor: {}", receiverId);
@@ -294,6 +307,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago encontrado
      */
     @GetMapping("/user/{userId}")
+    @Operation(summary = "Pago por usuario", description = "Obtiene el pago asociado a un usuario")
     public ResponseEntity<?> getPaymentByUser(@PathVariable @NotNull @Positive Long userId) {
         try {
             log.info("Obteniendo pago para usuario: {}", userId);
@@ -317,6 +331,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago encontrado
      */
     @GetMapping("/status/{status}")
+    @Operation(summary = "Pago por estado", description = "Obtiene pagos por estado")
     public ResponseEntity<?> getPaymentByStatus(@PathVariable @NotNull String status) {
         try {
             log.info("Obteniendo pago con estado: {}", status);
@@ -342,6 +357,7 @@ public class PaymentController {
      * @return ResponseEntity con la lista de pagos encontrados
      */
     @GetMapping("/user/{userId}/all")
+    @Operation(summary = "Pagos por usuario (todos)", description = "Lista todos los pagos asociados a un usuario")
     public ResponseEntity<?> getAllPaymentsByUser(@PathVariable @NotNull @Positive Long userId) {
         try {
             log.info("Obteniendo todos los pagos para usuario: {}", userId);
@@ -365,6 +381,7 @@ public class PaymentController {
      * @return ResponseEntity con la lista de pagos encontrados
      */
     @GetMapping("/receiver/{receiverId}/all")
+    @Operation(summary = "Pagos por receptor (todos)", description = "Lista todos los pagos asociados a un receptor")
     public ResponseEntity<?> getAllPaymentsByReceiver(@PathVariable @NotNull @Positive Long receiverId) {
         try {
             log.info("Obteniendo todos los pagos para receptor: {}", receiverId);
@@ -388,6 +405,7 @@ public class PaymentController {
      * @return ResponseEntity con la lista de pagos encontrados
      */
     @GetMapping("/event/{eventId}/all")
+    @Operation(summary = "Pagos por evento (todos)", description = "Lista todos los pagos asociados a un evento")
     public ResponseEntity<?> getAllPaymentsByEvent(@PathVariable @NotNull @Positive Long eventId) {
         try {
             log.info("Obteniendo todos los pagos para evento: {}", eventId);
@@ -411,6 +429,7 @@ public class PaymentController {
      * @return ResponseEntity con la lista de pagos encontrados
      */
     @GetMapping("/status/{status}/all")
+    @Operation(summary = "Pagos por estado (todos)", description = "Lista todos los pagos filtrados por estado")
     public ResponseEntity<?> getAllPaymentsByStatus(@PathVariable @NotNull String status) {
         try {
             log.info("Obteniendo todos los pagos con estado: {}", status);
@@ -435,6 +454,7 @@ public class PaymentController {
      * @return ResponseEntity con la lista de pagos encontrados
      */
     @GetMapping("/user/{userId}/event/{eventId}/all")
+    @Operation(summary = "Pagos por usuario y evento (todos)", description = "Lista todos los pagos de un usuario para un evento")
     public ResponseEntity<?> getAllPaymentsByUserAndEvent(
             @PathVariable @NotNull @Positive Long userId,
             @PathVariable @NotNull @Positive Long eventId) {
@@ -462,6 +482,7 @@ public class PaymentController {
      * @return ResponseEntity con la lista de pagos encontrados
      */
     @GetMapping("/event/{eventId}/receiver/{receiverId}/all")
+    @Operation(summary = "Pagos por evento y receptor (todos)", description = "Lista todos los pagos por evento y receptor")
     public ResponseEntity<?> getAllPaymentsByEventAndReceiver(
             @PathVariable @NotNull @Positive Long eventId,
             @PathVariable @NotNull @Positive Long receiverId) {
@@ -492,6 +513,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago actualizado
      */
     @PutMapping("/{paymentId}/status")
+    @Operation(summary = "Actualizar estado de pago", description = "Actualiza el estado y detalle de un pago")
     public ResponseEntity<?> updatePaymentStatus(
             @PathVariable @NotNull @Positive Long paymentId,
             @RequestParam @NotNull @NotBlank String newStatus,
@@ -514,6 +536,7 @@ public class PaymentController {
      * @return ResponseEntity con el resultado de la verificación
      */
     @GetMapping("/verify/user/{userId}/event/{eventId}")
+    @Operation(summary = "Verificar pago de usuario para evento", description = "Verifica si un usuario ha pagado para un evento")
     public ResponseEntity<?> hasUserPaidForEvent(
             @PathVariable @NotNull @Positive Long userId,
             @PathVariable @NotNull @Positive Long eventId) {
@@ -541,6 +564,7 @@ public class PaymentController {
      * @return ResponseEntity con el pago aprobado
      */
     @GetMapping("/approved/event/{eventId}")
+    @Operation(summary = "Pago aprobado por evento", description = "Obtiene el pago aprobado de un evento")
     public ResponseEntity<?> getApprovedPaymentForEvent(@PathVariable @NotNull @Positive Long eventId) {
         try {
             log.info("Obteniendo pago aprobado para evento: {}", eventId);
@@ -564,6 +588,7 @@ public class PaymentController {
      * @return ResponseEntity con el resultado de la verificación
      */
     @GetMapping("/approved/verify/event/{eventId}")
+    @Operation(summary = "Verificar pago aprobado", description = "Verifica si existe un pago aprobado para un evento")
     public ResponseEntity<?> hasApprovedPaymentForEvent(@PathVariable @NotNull @Positive Long eventId) {
         try {
             log.info("Verificando si existe pago aprobado para evento: {}", eventId);
@@ -587,6 +612,7 @@ public class PaymentController {
      * @return ResponseEntity con el resultado de la verificación
      */
     @GetMapping("/exists/{paymentId}")
+    @Operation(summary = "Verificar existencia de pago", description = "Verifica si existe un pago por su ID")
     public ResponseEntity<?> paymentExists(@PathVariable @NotNull @Positive Long paymentId) {
         try {
             log.info("Verificando si existe pago con ID: {}", paymentId);

@@ -1,6 +1,5 @@
 package com.desarrollo.raffy.presenter;
 
-import java.util.Optional;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -46,10 +45,13 @@ import org.springframework.web.client.RestClientResponseException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/mp")
+@Tag(name = "MercadoPago", description = "Integración de pagos con MercadoPago")
 public class MercadoPagoController {
 
     @Autowired
@@ -70,7 +72,9 @@ public class MercadoPagoController {
     private static final ObjectMapper mapper = new ObjectMapper();
     private String emailPayerMP = "jhon@doe.com";
 
+    @SuppressWarnings("deprecation")
     @PostMapping("/process-payment")
+    @Operation(summary = "Procesar pago", description = "Procesa un pago con datos de MercadoPago y persiste el resultado")
     public ResponseEntity<?> processPayment(@RequestBody PaymentMpDTO payment){
         // log.warn("[PayMP] => Datos MP del pago recibido: " + payment.getPaymentMp().toString());
         try {

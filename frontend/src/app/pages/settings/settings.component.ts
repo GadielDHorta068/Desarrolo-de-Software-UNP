@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, A
 import { Router } from '@angular/router';
 import { AuthService, TwoFactorEnableResponse } from '../../services/auth.service';
 import { ImageCroppedEvent, LoadedImage, ImageCropperComponent } from 'ngx-image-cropper';
+import { LoadingIndicator } from '../../shared/components/loading-indicator/loading-indicator';
 import { PaymentService } from '../../services/payment.service';
 import { Payment, PaymentSortType, PaymentFilter, PaymentStatus } from '../../models/payment.model';
 import jsPDF from 'jspdf';
@@ -14,7 +15,7 @@ import { saveAs } from 'file-saver';
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ImageCropperComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ImageCropperComponent, LoadingIndicator],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })
@@ -113,7 +114,8 @@ export class SettingsComponent implements OnInit {
       twitter: ['', [Validators.maxLength(255)]],
       facebook: ['', [Validators.maxLength(255)]],
       instagram: ['', [Validators.maxLength(255)]],
-      linkedin: ['', [Validators.maxLength(255)]]
+      linkedin: ['', [Validators.maxLength(255)]],
+      website: ['', [Validators.maxLength(255)]]
     });
 
     this.passwordForm = this.fb.group({
@@ -171,7 +173,8 @@ export class SettingsComponent implements OnInit {
           twitter: user.twitter || '',
           facebook: user.facebook || '',
           instagram: user.instagram || '',
-          linkedin: user.linkedin || ''
+          linkedin: user.linkedin || '',
+          website: user.website || ''
         });
         // Mostrar imagen actual si existe
         if (user.imagen) {

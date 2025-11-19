@@ -13,7 +13,6 @@ import lombok.Setter;
 
 @Getter @Setter
 @NoArgsConstructor
-
 @Entity @Table(name = "raffle")
 @Inheritance(strategy = InheritanceType.JOINED)
 

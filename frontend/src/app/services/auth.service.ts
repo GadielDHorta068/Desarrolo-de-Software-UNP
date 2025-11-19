@@ -44,6 +44,7 @@ export interface UserResponse {
   facebook?: string;
   instagram?: string;
   linkedin?: string;
+  website?: string;
 }
 
 export interface RefreshTokenRequest {
