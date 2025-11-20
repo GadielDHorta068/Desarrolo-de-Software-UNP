@@ -1,0 +1,78 @@
+<div class="bg-white/10 backdrop-blur-lg rounded-3xl p-4 md:p-8 border border-white/20">
+
+    <div
+        class="bg-white/10 dark:bg-gray-800/40 backdrop-blur-md rounded-2xl p-4 md:p-6 shadow-2xl border border-white/20">
+        <button *ngFor="let t of eventTypes" class="px-4 py-1 text-sm rounded-lg transition-colors"
+            (click)="onChangeType(t)" [class.bg-primary]="selectedType===t" [class.text-white]="selectedType===t"
+            [class.text-gray-800]="selectedType!==t" [class.dark:text-gray-200]="selectedType!==t">{{ t }}</button>
+        <div class="py-4">
+
+            <div class="flex items-center justify-between">
+                <div class="inline-flex items-center rounded-xl p-1 bg-black/20 dark:bg-white/10 backdrop-blur">
+                </div>
+            </div>
+
+            <div
+                class="w-full bg-white/20 dark:bg-slate-900/50 backdrop-blur-md rounded-lg shadow-md border border-white/20 relative slider-wrapper">
+                <div class="relative overflow-hidden w-full rounded-lg">
+                    <div class="flex flex-nowrap transition-transform duration-700 slider-track"
+                        [style.will-change]="'transform'"
+                        [style.transitionTimingFunction]="'cubic-bezier(0.22, 1, 0.36, 1)'"
+                        [style.transform]="'translate3d(-' + (currentIndex * 100) + '%, 0, 0)'">
+                        <div class="w-full flex-shrink-0 featured-slide" *ngFor="let ev of featuredEvents">
+                            <div class="flex justify-center h-full p-4 md:p-6 pb-12 md:pb-12 w-full">
+                                <div class="w-full text-gray-800 dark:text-gray-100">
+                                    <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full"
+                                            [ngClass]="statusClass(ev.statusEvent)">{{ getStatusLabel(ev.statusEvent)
+                                            }}</span>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span
+                                                class="px-2 py-1 text-xs font-medium rounded-full bg-white/40 text-gray-800 dark:bg-black/40 dark:text-gray-100">{{
+                                                ev.categoryName }}</span>
+                                            <span *ngIf="ev.isPrivate"
+                                                class="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200">Privado</span>
+                                            <span *ngIf="ev.isUserRegistered"
+                                                class="px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200">Inscrito</span>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-1 break-words">
+                                        {{
+                                        ev.title }}
+                                    </div>
+                                    <div class="text-sm text-gray-700 dark:text-gray-300 mb-3">{{ ev.eventType }} •
+                                        Ganadores: {{
+                                        ev.winnersCount }}</div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                                        <div class="text-sm text-gray-700 dark:text-gray-300">Organizador: <span
+                                                class="font-medium">{{ getCreatorDisplay(ev) }}</span></div>
+                                        <div class="text-sm text-gray-700 dark:text-gray-300">Del {{
+                                            formatDate(ev.startDate) }} al
+                                            {{ formatDate(ev.endDate) }}</div>
+                                    </div>
+
+                                    <button (click)="onParticipate(ev)"
+                                        class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-colors">
+                                        Participar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="flex justify-center absolute bottom-4 start-0 end-0 space-x-2">
+                    <button *ngFor="let _ of featuredEvents; let i = index"
+                        class="size-3 border border-gray-400 rounded-full cursor-pointer dark:border-neutral-600"
+                        [class.bg-blue-700]="currentIndex===i" [class.border-blue-700]="currentIndex===i"
+                        (click)="setSlide(i)" aria-label="Ir a slide {{i+1}}"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
