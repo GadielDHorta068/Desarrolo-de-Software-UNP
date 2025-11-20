@@ -1,0 +1,218 @@
+<!-- API Documentation - RAFFIFY -->
+
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-primary via-blue-600 to-secondary py-16 sm:py-20">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="max-w-4xl mx-auto text-center text-white">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
+                <span class="text-gradient bg-gradient-to-r from-white to-yellow-300 bg-clip-text text-transparent">
+                    API de RAFFIFY
+                </span>
+            </h1>
+            <p class="text-lg sm:text-xl lg:text-2xl text-blue-100">
+                Integra sorteos verificables en tu aplicación con nuestra API REST
+            </p>
+            <div class="flex gap-4 justify-center mt-8">
+                <a href="/swagger-ui/index.html" target="_blank"
+                    class="bg-white text-primary hover:bg-gray-100 font-bold py-3 px-6 rounded-lg transition-all">
+                    Ver Swagger/OpenAPI
+                </a>
+                <a href="/docs"
+                    class="border-2 border-white text-white hover:bg-white hover:text-primary font-bold py-3 px-6 rounded-lg transition-all">
+                    Documentación Completa
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="py-12 sm:py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto">
+
+            <!-- Inicio Rápido -->
+            <div
+                class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg mb-8 border border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">🚀 Inicio Rápido</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">Comienza a usar la API de RAFFIFY en 3 pasos:</p>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div
+                            class="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-3">
+                            1</div>
+                        <h3 class="font-semibold text-gray-800 dark:text-white mb-2">Obtén tu API Key</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Regístrate y genera tu clave API desde tu
+                            panel</p>
+                    </div>
+                    <div class="text-center">
+                        <div
+                            class="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-3">
+                            2</div>
+                        <h3 class="font-semibold text-gray-800 dark:text-white mb-2">Haz tu primera llamada</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Usa cualquier cliente HTTP para interactuar
+                        </p>
+                    </div>
+                    <div class="text-center">
+                        <div
+                            class="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-3">
+                            3</div>
+                        <h3 class="font-semibold text-gray-800 dark:text-white mb-2">Integra en tu app</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Implementa sorteos en tu aplicación</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Autenticación -->
+            <div
+                class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg mb-8 border border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">🔐 Autenticación</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">Todas las peticiones requieren autenticación mediante
+                    Bearer Token:</p>
+                <div class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto">
+                    <pre class="text-sm">Authorization: Bearer YOUR_API_KEY_HERE</pre>
+                </div>
+            </div>
+
+            <!-- Endpoints Principales -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-gray-800 dark:text-white">Endpoints Principales</h2>
+
+                <!-- GET Events -->
+                <div
+                    class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="px-3 py-1 bg-green-500 text-white text-sm font-bold rounded">GET</span>
+                        <code class="text-gray-800 dark:text-gray-200 font-mono">/api/v1/events</code>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">Obtener lista de eventos/sorteos</p>
+
+                    <div class="mb-4">
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">Parámetros de Query</h4>
+                        <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                            <li><code>page</code> - Número de página (default: 1)</li>
+                            <li><code>limit</code> - Resultados por página (default: 10, max: 100)</li>
+                            <li><code>status</code> - Filtrar por estado: active, finished, cancelled</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">Ejemplo de respuesta</h4>
+                        <div class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto">
+                            <pre class="text-xs">"data": [...]
+"pagination": {{ '{' }} "page": 1, "limit": 10, "total": 45 {{ '}' }}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- POST Event -->
+                <div
+                    class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="px-3 py-1 bg-blue-500 text-white text-sm font-bold rounded">POST</span>
+                        <code class="text-gray-800 dark:text-gray-200 font-mono">/api/v1/events</code>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">Crear un nuevo evento/sorteo</p>
+
+                    <div>
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">Ejemplo de request body</h4>
+                        <div class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto">
+                            <pre class="text-xs">"title": "Mi Sorteo"
+"description": "Descripción del sorteo"
+"drawDate": "2025-12-31T23:59:59Z"
+"maxParticipants": 100
+"ticketPrice": 500</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GET Event by ID -->
+                <div
+                    class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="px-3 py-1 bg-green-500 text-white text-sm font-bold rounded">GET</span>
+                        <code class="text-gray-800 dark:text-gray-200 font-mono">/api/v1/events/:id</code>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">Obtener detalles de un evento específico</p>
+                </div>
+
+                <!-- POST Participate -->
+                <div
+                    class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="px-3 py-1 bg-blue-500 text-white text-sm font-bold rounded">POST</span>
+                        <code class="text-gray-800 dark:text-gray-200 font-mono">/api/v1/events/:id/participate</code>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">Registrar participación en un sorteo</p>
+                </div>
+
+                <!-- POST Execute Draw -->
+                <div
+                    class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="px-3 py-1 bg-blue-500 text-white text-sm font-bold rounded">POST</span>
+                        <code class="text-gray-800 dark:text-gray-200 font-mono">/api/v1/events/:id/draw</code>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">Ejecutar el sorteo y seleccionar ganadores</p>
+                </div>
+
+            </div>
+
+            <!-- Rate Limiting -->
+            <div
+                class="mt-8 bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">⚡ Rate Limiting</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">Límites de uso por API key:</p>
+                <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2">
+                    <li><strong>Plan Gratis:</strong> 100 requests/hora</li>
+                    <li><strong>Plan Pro:</strong> 1,000 requests/hora</li>
+                    <li><strong>Plan Enterprise:</strong> Sin límite</li>
+                </ul>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
+                    Los headers de respuesta incluyen <code>X-RateLimit-Remaining</code> y
+                    <code>X-RateLimit-Reset</code>
+                </p>
+            </div>
+
+            <!-- Códigos de Error -->
+            <div
+                class="mt-8 bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">❌ Códigos de Error</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="border-b border-gray-200 dark:border-gray-700">
+                            <tr>
+                                <th class="pb-3 text-gray-800 dark:text-white">Código</th>
+                                <th class="pb-3 text-gray-800 dark:text-white">Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-600 dark:text-gray-300 text-sm">
+                            <tr class="border-b border-gray-100 dark:border-gray-800">
+                                <td class="py-3"><code>400</code></td>
+                                <td>Bad Request - Parámetros inválidos</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 dark:border-gray-800">
+                                <td class="py-3"><code>401</code></td>
+                                <td>Unauthorized - API key inválida o faltante</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 dark:border-gray-800">
+                                <td class="py-3"><code>404</code></td>
+                                <td>Not Found - Recurso no encontrado</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 dark:border-gray-800">
+                                <td class="py-3"><code>429</code></td>
+                                <td>Too Many Requests - Rate limit excedido</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3"><code>500</code></td>
+                                <td>Internal Server Error - Error del servidor</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>

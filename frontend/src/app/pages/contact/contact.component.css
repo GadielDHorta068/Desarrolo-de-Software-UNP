@@ -1,0 +1,47 @@
+/* Contact Component Styles */
+
+/* Form inputs */
+input,
+select,
+textarea {
+    transition: all 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Gradiente de texto */
+.text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+}
+
+/* Button hover effect */
+button[type="submit"]:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+}
+
+/* Smooth animations */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Responsive spacing */
+@media (max-width: 640px) {
+
+    input,
+    select,
+    textarea {
+        @apply py-2 px-3 text-sm;
+    }
+}

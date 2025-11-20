@@ -1,26 +1,81 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
+interface Service {
+  name: string;
+  description: string;
+  status: 'operational' | 'degraded' | 'down';
+  statusText: string;
+  uptime: number;
+}
+
+interface Incident {
+  title: string;
+  description: string;
+  date: string;
+  resolved: boolean;
+}
 
 @Component({
   selector: 'app-status',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <section class="container mx-auto px-6 py-12">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Estado del Sistema</h1>
-      <p class="text-gray-600 dark:text-gray-300">Todos los servicios operativos.</p>
-      <div class="mt-6 grid md:grid-cols-2 gap-4">
-        <div class="card">
-          <h2 class="text-lg font-semibold">Backend API</h2>
-          <p class="text-green-600 dark:text-green-400">Operativo</p>
-        </div>
-        <div class="card">
-          <h2 class="text-lg font-semibold">Base de Datos</h2>
-          <p class="text-green-600 dark:text-green-400">Operativa</p>
-        </div>
-      </div>
-    </section>
-  `,
-  styles: []
+  templateUrl: './status.component.html',
+  styleUrls: ['./status.component.css']
 })
-export class StatusComponent {}
+export class StatusComponent implements OnInit {
+  lastCheckTime = 'hace 2 minutos';
+
+  services: Service[] = [
+    {
+      name: 'API REST',
+      description: 'API principal de RAFFIFY',
+      status: 'operational',
+      statusText: 'Operativo',
+      uptime: 99.98
+    },
+    {
+      name: 'Base de Datos',
+      description: 'PostgreSQL principal',
+      status: 'operational',
+      statusText: 'Operativo',
+      uptime: 99.99
+    },
+    {
+      name: 'Frontend',
+      description: 'Aplicación web Angular',
+      status: 'operational',
+      statusText: 'Operativo',
+      uptime: 99.97
+    },
+    {
+      name: 'WhatsApp Business',
+      description: 'Mensajería con usuarios',
+      status: 'operational',
+      statusText: 'Operativo',
+      uptime: 99.94
+    },
+    {
+      name: 'Email/Notificaciones',
+      description: 'Servicio de correo electrónico',
+      status: 'operational',
+      statusText: 'Operativo',
+      uptime: 99.92
+    },
+    {
+      name: 'Almacenamiento',
+      description: 'Archivos y recursos multimedia',
+      status: 'operational',
+      statusText: 'Operativo',
+      uptime: 99.96
+    }
+  ];
+
+  incidents: Incident[] = [
+    // Placeholder: sin incidentes recientes
+  ];
+
+  ngOnInit(): void {
+    window.scrollTo(0, 0);
+  }
+}
