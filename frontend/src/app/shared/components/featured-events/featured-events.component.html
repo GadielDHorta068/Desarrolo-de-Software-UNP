@@ -1,11 +1,11 @@
-<div class="bg-white/10 backdrop-blur-lg rounded-3xl p-4 md:p-8 border border-white/20">
+<div class="bg-white/10 backdrop-blur-lg rounded-3xl p-2 sm:p-4 md:p-8 border border-white/20">
 
     <div
-        class="bg-white/10 dark:bg-gray-800/40 backdrop-blur-md rounded-2xl p-4 md:p-6 shadow-2xl border border-white/20">
-        <button *ngFor="let t of eventTypes" class="px-4 py-1 text-sm rounded-lg transition-colors"
+        class="bg-white/10 dark:bg-gray-800/40 backdrop-blur-md rounded-2xl p-3 sm:p-4 md:p-6 shadow-2xl border border-white/20">
+        <button *ngFor="let t of eventTypes" class="px-3 sm:px-4 py-1 text-xs sm:text-sm rounded-lg transition-colors"
             (click)="onChangeType(t)" [class.bg-primary]="selectedType===t" [class.text-white]="selectedType===t"
             [class.text-gray-800]="selectedType!==t" [class.dark:text-gray-200]="selectedType!==t">{{ t }}</button>
-        <div class="py-4">
+        <div class="py-3 sm:py-4">
 
             <div class="flex items-center justify-between">
                 <div class="inline-flex items-center rounded-xl p-1 bg-black/20 dark:bg-white/10 backdrop-blur">
@@ -20,7 +20,7 @@
                         [style.transitionTimingFunction]="'cubic-bezier(0.22, 1, 0.36, 1)'"
                         [style.transform]="'translate3d(-' + (currentIndex * 100) + '%, 0, 0)'">
                         <div class="w-full flex-shrink-0 featured-slide" *ngFor="let ev of featuredEvents">
-                            <div class="flex justify-center h-full p-4 md:p-6 pb-12 md:pb-12 w-full">
+                            <div class="flex justify-center h-full p-3 sm:p-4 md:p-6 pb-10 sm:pb-12 md:pb-12 w-full">
                                 <div class="w-full text-gray-800 dark:text-gray-100">
                                     <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
                                         <span class="px-2 py-1 text-xs font-medium rounded-full"
@@ -38,7 +38,7 @@
                                     </div>
 
                                     <div
-                                        class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-1 break-words">
+                                        class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-1 break-words">
                                         {{
                                         ev.title }}
                                     </div>
@@ -46,16 +46,16 @@
                                         Ganadores: {{
                                         ev.winnersCount }}</div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                                        <div class="text-sm text-gray-700 dark:text-gray-300">Organizador: <span
-                                                class="font-medium">{{ getCreatorDisplay(ev) }}</span></div>
-                                        <div class="text-sm text-gray-700 dark:text-gray-300">Del {{
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                                        <div class="text-xs sm:text-sm text-gray-700 dark:text-gray-300">Organizador:
+                                            <span class="font-medium">{{ getCreatorDisplay(ev) }}</span></div>
+                                        <div class="text-xs sm:text-sm text-gray-700 dark:text-gray-300">Del {{
                                             formatDate(ev.startDate) }} al
                                             {{ formatDate(ev.endDate) }}</div>
                                     </div>
 
                                     <button (click)="onParticipate(ev)"
-                                        class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-colors">
+                                        class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base">
                                         Participar
                                     </button>
                                 </div>
