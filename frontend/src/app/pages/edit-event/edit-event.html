@@ -14,8 +14,10 @@
         <div
             class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                <svg class="w-6 h-6 mr-3 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <svg class="w-6 h-6 mr-3 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 Información básica
             </h3>
@@ -24,51 +26,48 @@
                     <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Nombre (*)
                     </label>
-                    <input
-                        type="text"
-                        id="titulo"
-                        formControlName="title"
-                        name="titulo"
+                    <input type="text" id="titulo" formControlName="title" name="titulo"
                         class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                         [ngClass]="formEvent.get('title')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' "
-                        placeholder="Ej. Ruleta de Primavera"
-                    />
+                        placeholder="Ej. Ruleta de Primavera" />
                 </div>
                 <div class="pt-2 item-description">
                     <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Descripción (*)
                     </label>
-                    <textarea
-                        id="description"
-                        formControlName="description"
-                        name="Descripción de tu sorteo"
-                        rows="3"
-                        class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02] resize-none"
-                    ></textarea>
+                    <textarea id="description" formControlName="description" name="Descripción de tu sorteo" rows="3"
+                        class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02] resize-none"></textarea>
                 </div>
                 <div class="pt-2 item-image">
                     <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Imagen de tu evento
                     </label>
-                    <app-loader-image [enabled]="true" [setTrigger]="setImageTrigger$" (changeSelectedImage)="onChangeSelectedImge($event)"></app-loader-image>
+                    <app-loader-image [enabled]="true" [setTrigger]="setImageTrigger$"
+                        (changeSelectedImage)="onChangeSelectedImge($event)"></app-loader-image>
                 </div>
             </div>
         </div>
 
         <!-- Event Details Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                <svg class="w-6 h-6 mr-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                <svg class="w-6 h-6 mr-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                    </path>
                 </svg>
                 Detalles del evento
             </h3>
             <div class="grid-main pt-4 gap-4">
-                <div class="flex gap-2">
-                    <div class="w-1/2">
-                        <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo (*)</label>
-                        <select formControlName="drawType" id="draw" class="bg-white dark:bg-gray-800 rounded-md px-4 py-2 w-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        [ngClass]="formEvent.get('drawType')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02] '">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full md:w-1/2">
+                        <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo
+                            (*)</label>
+                        <select formControlName="drawType" id="draw"
+                            class="bg-white dark:bg-gray-800 rounded-md px-4 py-2 w-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            [ngClass]="formEvent.get('drawType')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02] '">
                             <!-- <option value="">-- Seleccioná el tipo --</option> -->
                             <option *ngFor="let type of types" [value]="type.code">
                                 {{ type.name }}
@@ -78,26 +77,34 @@
                             <small>Debés seleccionar un tipo.</small>
                         </div>
                     </div>
-                    <div class="w-1/2 flex items-start">
+                    <div class="w-full md:w-1/2 flex items-start">
                         <div class="flex flex-col w-full">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                                 Privacidad del evento
                                 <span class="tooltip-container" tabindex="0">
-                                    <span class="tooltip-button" title="Un evento privado no aparecerá en el explorador.">?</span>
-                                    <span class="tooltip-content">Un evento privado no aparecerá en el explorador.</span>
+                                    <span class="tooltip-button"
+                                        title="Un evento privado no aparecerá en el explorador.">?</span>
+                                    <span class="tooltip-content">Un evento privado no aparecerá en el
+                                        explorador.</span>
                                 </span>
                             </label>
                             <div class="pill-toggle-container">
-                                <input type="checkbox" id="private-event-toggle" formControlName="isPrivate" class="sr-only">
+                                <input type="checkbox" id="private-event-toggle" formControlName="isPrivate"
+                                    class="sr-only">
                                 <label for="private-event-toggle" class="pill-toggle">
                                     <span class="pill-option public-option">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z">
+                                            </path>
                                         </svg>
                                     </span>
                                     <span class="pill-option private-option">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                            </path>
                                         </svg>
                                     </span>
                                     <div class="pill-slider"></div>
@@ -106,44 +113,35 @@
                         </div>
                     </div>
                 </div>
-                <div class="w-1/2">
+                <div class="w-full md:w-1/2">
                     <label for="executionDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Fecha de realización (*)
                     </label>
-                    <input
-                        type="date"
-                        id="executionDate"
-                        formControlName="executionDate"
-                        name="Fecha de realización"
-                        class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]"
-                    />
+                    <input type="date" id="executionDate" formControlName="executionDate" name="Fecha de realización"
+                        class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]" />
                     <div *ngIf="formEvent.get('executionDate')?.invalid && formEvent.get('executionDate')?.touched">
                         <small class="text-red-600">Debés asignar una fecha</small>
                     </div>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <div class="w-1/2">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="w-full md:w-1/2">
                     <label for="winners" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Cantidad de ganadores (*)
                     </label>
-                    <input
-                        type="number"
-                        id="winners"
-                        max=1
-                        min=10
-                        formControlName="winners"
+                    <input type="number" id="winners" max=1 min=10 formControlName="winners"
                         name="Cantidad de ganadores"
                         class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                        [ngClass]="formEvent.get('winners')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' "
-                    />
+                        [ngClass]="formEvent.get('winners')?.disabled ? '': 'transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]' " />
                     <div *ngIf="formEvent.get('winners')?.invalid && formEvent.get('winners')?.touched">
                         <small class="text-red-600">Debés asignar un cantidad</small>
                     </div>
                 </div>
-                <div class="w-1/2">
-                    <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
-                    <select formControlName="category" id="category" class="bg-white dark:bg-gray-800 rounded-md px-4 py-2 w-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]">
+                <div class="w-full md:w-1/2">
+                    <label for="draw"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
+                    <select formControlName="category" id="category"
+                        class="bg-white dark:bg-gray-800 rounded-md px-4 py-2 w-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]">
                         <!-- <option value="">-- Seleccioná una categoria --</option> -->
                         <option *ngFor="let category of categories" [value]="category.id">
                             {{ category.name }}
@@ -157,28 +155,33 @@
         </div>
 
         <!-- Raffle Configuration Section -->
-        <div *ngIf="event?.eventType == eventTypes.RAFFLES" class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
+        <div *ngIf="event?.eventType == eventTypes.RAFFLES"
+            class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                <svg class="w-6 h-6 mr-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                <svg class="w-6 h-6 mr-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
+                    </path>
                 </svg>
                 Configuración de la rifa
             </h3>
             <div class="grid-main gap-4 pt-4">
                 <!-- careacteristicas del sorteo, tipo y categoria -->
-                <div class="flex gap-2">
-                    <div class="w-1/2">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full md:w-1/2">
                         <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Cantidad de nros[50-500] (*)
                         </label>
                         <input type="text" id="cantNros" formControlName="quantityNumbersRaffle" name="cantidad de nros"
                             class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-800 rounded-lg"
                             placeholder="Ej. 100" />
-                        <div *ngIf="formEvent.get('quantityNumbersRaffle')?.invalid && formEvent.get('quantityNumbersRaffle')?.touched">
+                        <div
+                            *ngIf="formEvent.get('quantityNumbersRaffle')?.invalid && formEvent.get('quantityNumbersRaffle')?.touched">
                             <small class="text-red-600">Debés asignar una cantidad entre el rango especificado</small>
                         </div>
                     </div>
-                    <div class="w-1/2">
+                    <div class="w-full md:w-1/2">
                         <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Precio del numero(*)
                         </label>
@@ -194,12 +197,13 @@
         </div>
 
         <!-- Action Buttons Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
             <div class="flex justify-end gap-4">
                 <button *ngIf="formEvent.dirty" type="button" (click)="onDiscardChanges()"
                     class="group relative bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 hover:from-blue-700 hover:to-blue-800 dark:hover:from-blue-600 dark:hover:to-blue-700 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                    <svg class="w-4 h-4 mr-2 inline-block group-hover:rotate-12 transition-transform duration-300" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-2 inline-block group-hover:rotate-12 transition-transform duration-300"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                         </path>
@@ -208,8 +212,8 @@
                 </button>
                 <button type="submit" [ngStyle]="formEvent.dirty ? {'opacity': '1'} : {'opacity': '0.6'}"
                     class="group relative bg-gradient-to-r from-emerald-600 to-emerald-700 dark:from-emerald-500 dark:to-emerald-600 hover:from-emerald-700 hover:to-emerald-800 dark:hover:from-emerald-600 dark:hover:to-emerald-700 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:cursor-not-allowed">
-                    <svg class="w-4 h-4 mr-2 inline-block group-hover:scale-110 transition-transform duration-300" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-2 inline-block group-hover:scale-110 transition-transform duration-300"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     Guardar cambios
