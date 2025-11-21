@@ -1,12 +1,26 @@
-<header class="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm border-b border-gray-200 dark:border-gray-700">
+<header
+  class="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm border-b border-gray-200 dark:border-gray-700">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
       <!-- Logo and Brand -->
       <div class="flex items-center">
         <a routerLink="/" aria-label="Inicio - Raffy"
-          class="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
-          <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          class="logo-container flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+          <svg class="h-10 w-10" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="emerald-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#10B981;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M40 128C40 110.3 54.3 96 72 96H440C457.7 96 472 110.3 472 128V160C472 177.7 486.3 192 504 192V320C486.3 320 472 334.3 472 352V384C472 401.7 457.7 416 440 416H72C54.3 416 40 401.7 40 384V352C40 334.3 25.7 320 8 320V192C25.7 192 40 177.7 40 160V128Z"
+              fill="url(#emerald-gradient)" />
+            <path d="M144 96V416" stroke="white" stroke-width="24" stroke-dasharray="40 20" stroke-linecap="round"
+              opacity="0.3" />
+            <path
+              d="M308 160L334.6 213.9L394.1 222.5L351 264.5L361.2 323.8L308 295.8L254.8 323.8L264.9 264.5L221.9 222.5L281.4 213.9L308 160Z"
+              fill="white" />
           </svg>
           <span class="text-xl font-bold">Raffy</span>
         </a>
@@ -32,36 +46,47 @@
       <div class="flex items-center space-x-4">
         <!-- Search (Desktop) -->
         <div class="relative hidden md:flex items-center">
-          <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
-               [style.width.px]="isSearchOpen ? 320 : 40" aria-label="Buscar perfiles o eventos">
-            <button (click)="toggleSearch()" class="p-2 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors" aria-label="Abrir búsqueda">
+          <div
+            class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
+            [style.width.px]="isSearchOpen ? 320 : 40" aria-label="Buscar perfiles o eventos">
+            <button (click)="toggleSearch()"
+              class="p-2 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              aria-label="Abrir búsqueda">
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" />
               </svg>
             </button>
-            <input #searchInputRef type="text" [attr.aria-expanded]="isSearchOpen" [attr.tabindex]="isSearchOpen ? 0 : -1"
-                   class="bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 px-2 py-1 flex-1 placeholder-gray-400 dark:placeholder-gray-500"
-                   placeholder="Buscar perfiles o eventos..." [(ngModel)]="searchTerm" (input)="onSearchInput()"
-                   [style.opacity]="isSearchOpen ? 1 : 0" />
-            <div *ngIf="searching" class="mr-2 h-4 w-4 border-2 border-gray-400 dark:border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+            <input #searchInputRef type="text" [attr.aria-expanded]="isSearchOpen"
+              [attr.tabindex]="isSearchOpen ? 0 : -1"
+              class="bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 px-2 py-1 flex-1 placeholder-gray-400 dark:placeholder-gray-500"
+              placeholder="Buscar perfiles o eventos..." [(ngModel)]="searchTerm" (input)="onSearchInput()"
+              [style.opacity]="isSearchOpen ? 1 : 0" />
+            <div *ngIf="searching"
+              class="mr-2 h-4 w-4 border-2 border-gray-400 dark:border-gray-500 border-t-transparent rounded-full animate-spin">
+            </div>
           </div>
 
           <!-- Resultados -->
           <div *ngIf="isSearchOpen && (searchUsers.length || searchEvents.length)"
-               class="absolute left-0 top-full mt-2 w-[28rem] max-w-[28rem] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 dropdown-enter-active">
+            class="absolute left-0 top-full mt-2 w-[28rem] max-w-[28rem] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 dropdown-enter-active">
             <div class="max-h-80 overflow-auto py-2">
               <!-- Perfiles -->
               <div *ngIf="searchUsers.length" class="px-3 pb-2">
                 <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Perfiles</div>
                 <a *ngFor="let u of searchUsers" (click)="goToProfile(u.nickname)"
-                   class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
-                  <div class="h-8 w-8 rounded-full overflow-hidden bg-emerald-600 text-white text-sm flex items-center justify-center font-semibold">
-                    <img *ngIf="u.imagen" [src]="u.imagen.startsWith('data:') ? u.imagen : ('data:image/jpeg;base64,' + u.imagen)"
-                         alt="Avatar" class="w-full h-full object-cover" />
-                    <span *ngIf="!u.imagen">{{ u.name.charAt(0).toUpperCase() || u.nickname.charAt(0).toUpperCase() || 'U' }}</span>
+                  class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                  <div
+                    class="h-8 w-8 rounded-full overflow-hidden bg-emerald-600 text-white text-sm flex items-center justify-center font-semibold">
+                    <img *ngIf="u.imagen"
+                      [src]="u.imagen.startsWith('data:') ? u.imagen : ('data:image/jpeg;base64,' + u.imagen)"
+                      alt="Avatar" class="w-full h-full object-cover" />
+                    <span *ngIf="!u.imagen">{{ u.name.charAt(0).toUpperCase() || u.nickname.charAt(0).toUpperCase() ||
+                      'U' }}</span>
                   </div>
                   <div class="flex flex-col">
-                    <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ u.name }} {{ u.surname }}</span>
+                    <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ u.name }} {{ u.surname
+                      }}</span>
                     <span class="text-xs text-gray-500 dark:text-gray-400">@{{ u.nickname }}</span>
                   </div>
                 </a>
@@ -71,10 +96,12 @@
               <div *ngIf="searchEvents.length" class="px-3 pt-2 border-t border-gray-200 dark:border-gray-700">
                 <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Eventos</div>
                 <a *ngFor="let evt of searchEvents" (click)="goToEvent(evt.id)"
-                   class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
-                  <div class="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
+                  class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                  <div
+                    class="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
                     <img *ngIf="evt.imageUrl" [src]="evt.imageUrl" alt="Imagen" class="w-full h-full object-cover" />
-                    <svg *ngIf="!evt.imageUrl" class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg *ngIf="!evt.imageUrl" class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8" />
                     </svg>
                   </div>
@@ -91,13 +118,15 @@
         <button (click)="toggleTheme()" aria-label="Cambiar tema de color"
           class="hidden md:flex text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
           <svg *ngIf="!isDarkMode" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
           </svg>
           <svg *ngIf="isDarkMode" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
         </button>
-        
+
         <!-- Desktop User Menu -->
         <div class="hidden md:flex items-center space-x-4">
           <ng-container *ngIf="!isAuthenticated">
@@ -106,7 +135,7 @@
               Iniciar Sesión
             </a>
             <a routerLink="/register"
-              class="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm hover:shadow-md">
+              class="btn-pulse bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm hover:shadow-md">
               Registrarse
             </a>
           </ng-container>
@@ -128,16 +157,19 @@
 
               <div *ngIf="isUnreadOpen"
                 class="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 py-1 z-50 dropdown-enter-active">
-                <div class="px-4 py-2 font-semibold text-sm text-gray-800 dark:text-gray-200 border-b dark:border-gray-700">
+                <div
+                  class="px-4 py-2 font-semibold text-sm text-gray-800 dark:text-gray-200 border-b dark:border-gray-700">
                   Mensajes no leídos
                 </div>
-                <div *ngIf="unreadPeers.length === 0" class="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
+                <div *ngIf="unreadPeers.length === 0"
+                  class="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
                   No tienes mensajes nuevos.
                 </div>
                 <a *ngFor="let peer of unreadPeers" (click)="openChat(peer.peerId)"
                   class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                   <div class="flex items-center space-x-2">
-                    <div class="h-6 w-6 rounded-full bg-emerald-600 text-white text-xs flex items-center justify-center font-semibold">
+                    <div
+                      class="h-6 w-6 rounded-full bg-emerald-600 text-white text-xs flex items-center justify-center font-semibold">
                       {{ peer.peerDisplayName.charAt(0).toUpperCase() || 'U' }}
                     </div>
                     <span class="font-medium">{{ peer.peerDisplayName }}</span>
@@ -151,7 +183,8 @@
             <div class="relative">
               <button (click)="toggleUserMenu()"
                 class="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                <div class="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center bg-emerald-600 user-avatar">
+                <div
+                  class="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center bg-emerald-600 user-avatar">
                   <img [src]="profileImageSrc" [alt]="currentUser?.name || 'Usuario'" class="w-full h-full object-cover"
                     (error)="$event.target.src = 'assets/default-profile.jpg'">
                   <span *ngIf="!currentUser?.imagen" class="text-white text-sm font-medium">
@@ -232,27 +265,35 @@
       <!-- Mobile Search -->
       <div class="px-1 py-2">
         <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Buscar</div>
-        <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-2">
+        <div
+          class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-2">
           <svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" />
           </svg>
-          <input type="text" class="bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 px-2 py-2 flex-1 placeholder-gray-400 dark:placeholder-gray-500"
-                 placeholder="Perfiles o eventos..." [(ngModel)]="searchTerm" (input)="onSearchInput()" />
-          <div *ngIf="searching" class="ml-2 h-4 w-4 border-2 border-gray-400 dark:border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+          <input type="text"
+            class="bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 px-2 py-2 flex-1 placeholder-gray-400 dark:placeholder-gray-500"
+            placeholder="Perfiles o eventos..." [(ngModel)]="searchTerm" (input)="onSearchInput()" />
+          <div *ngIf="searching"
+            class="ml-2 h-4 w-4 border-2 border-gray-400 dark:border-gray-500 border-t-transparent rounded-full animate-spin">
+          </div>
         </div>
 
         <div *ngIf="(searchUsers.length || searchEvents.length) && (searchTerm || '').trim().length"
-             class="mt-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+          class="mt-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
           <div class="max-h-64 overflow-auto py-2">
             <!-- Perfiles -->
             <div *ngIf="searchUsers.length" class="px-3 pb-2">
               <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Perfiles</div>
               <a *ngFor="let u of searchUsers" (click)="goToProfile(u.nickname)"
-                 class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
-                <div class="h-8 w-8 rounded-full overflow-hidden bg-emerald-600 text-white text-sm flex items-center justify-center font-semibold">
-                  <img *ngIf="u.imagen" [src]="u.imagen.startsWith('data:') ? u.imagen : ('data:image/jpeg;base64,' + u.imagen)"
-                       alt="Avatar" class="w-full h-full object-cover" />
-                  <span *ngIf="!u.imagen">{{ u.name.charAt(0).toUpperCase() || u.nickname.charAt(0).toUpperCase() || 'U' }}</span>
+                class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                <div
+                  class="h-8 w-8 rounded-full overflow-hidden bg-emerald-600 text-white text-sm flex items-center justify-center font-semibold">
+                  <img *ngIf="u.imagen"
+                    [src]="u.imagen.startsWith('data:') ? u.imagen : ('data:image/jpeg;base64,' + u.imagen)"
+                    alt="Avatar" class="w-full h-full object-cover" />
+                  <span *ngIf="!u.imagen">{{ u.name.charAt(0).toUpperCase() || u.nickname.charAt(0).toUpperCase() || 'U'
+                    }}</span>
                 </div>
                 <div class="flex flex-col">
                   <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ u.name }} {{ u.surname }}</span>
@@ -265,10 +306,12 @@
             <div *ngIf="searchEvents.length" class="px-3 pt-2 border-t border-gray-200 dark:border-gray-700">
               <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Eventos</div>
               <a *ngFor="let evt of searchEvents" (click)="goToEvent(evt.id)"
-                 class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
-                <div class="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
+                class="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                <div
+                  class="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
                   <img *ngIf="evt.imageUrl" [src]="evt.imageUrl" alt="Imagen" class="w-full h-full object-cover" />
-                  <svg *ngIf="!evt.imageUrl" class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg *ngIf="!evt.imageUrl" class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8" />
                   </svg>
                 </div>
@@ -303,7 +346,7 @@
           class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md text-base font-medium transition-colors">
           Configuración
         </a>
-        
+
         <button (click)="logout()"
           class="block w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 rounded-md text-base font-medium transition-colors">
           Cerrar Sesión
@@ -326,13 +369,16 @@
         </a>
       </ng-container>
 
-      <button (click)="toggleTheme()" class="mt-2 w-full flex items-center justify-between px-3 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+      <button (click)="toggleTheme()"
+        class="mt-2 w-full flex items-center justify-between px-3 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
         <span>{{ isDarkMode ? 'Tema oscuro' : 'Tema claro' }}</span>
         <svg *ngIf="!isDarkMode" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
         </svg>
         <svg *ngIf="isDarkMode" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
       </button>
     </div>
