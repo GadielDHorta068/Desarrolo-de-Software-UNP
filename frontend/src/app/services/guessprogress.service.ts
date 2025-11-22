@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ParticipantRequestDTO } from '../models/participantRequestDTO';
 import { CheckGuessNumberDTO } from '../models/checkGuessNumberDTO';
+import { GuessCheckResponseDTO } from '../models/guessCheckResponseDTO';
 
 @Injectable({
   providedIn: 'root',
@@ -23,15 +24,15 @@ export class GuessprogressService {
   }
 
   // Chequea si el usuario ya participó en el evento
-  checkParticipation(contestId: number, email: string): Observable<any>{
-    return this.http.get<any>(`${this.apiUrl}/check-participant/guess/${contestId}`, {
+  checkParticipation(contestId: number, email: string): Observable<GuessCheckResponseDTO>{
+    return this.http.get<GuessCheckResponseDTO>(`${this.apiUrl}/check-participant/guess/${contestId}`, {
       params : {email}
     });
   }
 
   // Chequea el número ingresado (mayor, menor, igual al número objetivo)
-  checkGuessNumber(contestId: number, guessedNumber: number): Observable<any> {
-    return this.http.get<any>(
+  checkGuessNumber(contestId: number, guessedNumber: number): Observable<CheckGuessNumberDTO> {
+    return this.http.get<CheckGuessNumberDTO>(
       `${this.apiUrl}/${contestId}/guess/check-number`,
       { params: { guessedNumber } }
     );
