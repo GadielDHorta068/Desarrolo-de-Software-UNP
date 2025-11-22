@@ -88,6 +88,8 @@ public class SecurityConfig {
                         .requestMatchers("/reports/**").permitAll()
                         // Reviews
                         .requestMatchers("/reviews/**").permitAll()
+                        // Region
+                        .requestMatchers(HttpMethod.GET,"/region/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
