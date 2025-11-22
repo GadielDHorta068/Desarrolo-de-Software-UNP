@@ -64,8 +64,8 @@
                 Detalles del evento
             </h3>
             <div class="grid-main pt-4 gap-4">
-                <div class="flex gap-2">
-                    <div class="w-1/2">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full md:w-1/2">
                         <label for="draw" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo
                             (*)</label>
                         <select formControlName="drawType" id="draw"
@@ -79,7 +79,7 @@
                             <small class="text-red-600">Debés seleccionar un tipo</small>
                         </div>
                     </div>
-                    <div class="w-1/2">
+                    <div class="w-full md:w-1/2">
                         <label for="executionDate"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Fecha de realización (*)
@@ -92,8 +92,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-2">
-                    <div class="w-1/2">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full md:w-1/2">
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                             Privacidad del evento
@@ -125,10 +125,10 @@
                             </label>
                         </div>
                     </div>
-                    <div class="w-1/2"></div>
+                    <div class="w-full md:w-1/2"></div>
                 </div>
-                <div class="flex gap-2">
-                    <div class="w-1/2">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full md:w-1/2">
                         <label for="winners" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Cantidad de ganadores (*)
                         </label>
@@ -139,7 +139,7 @@
                             <small class="text-red-600">Debés asignar un cantidad</small>
                         </div>
                     </div>
-                    <div class="w-1/2">
+                    <div class="w-full md:w-1/2">
                         <label for="draw"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria(*)</label>
                         <!-- class="appearance-none relative block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]" -->
@@ -171,8 +171,8 @@
                 </h3>
                 <div class="grid-main gap-4 pt-4">
                     <!-- careacteristicas del sorteo, tipo y categoria -->
-                    <div class="flex gap-2">
-                        <div class="w-1/2">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="w-full md:w-1/2">
                             <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Cantidad de nros[50-500] (*)
                             </label>
@@ -186,7 +186,7 @@
                                     especificado</small>
                             </div>
                         </div>
-                        <div class="w-1/2">
+                        <div class="w-full md:w-1/2">
                             <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Precio del numero(*)
                             </label>
@@ -214,7 +214,7 @@
                     Configuración de adivinanzas
                 </h3>
                 <div class="grid-main gap-4 pt-4">
-                    <!-- careacteristicas del sorteo, tipo y categoria -->
+                    <!-- careacteristicas del sorteo, rangos, intentos y objetivo -->
                     <div class="flex gap-2">
                         <div class="w-1/2">
                             <label for="rangoInf"
@@ -259,12 +259,12 @@
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Nro de intentos(*)
                             </label>
-                            <input type="number" min="1" max="10" id="attempts" formControlName="quantityAttempts"
-                                name="attempts"
+                            <input type="number" min="1" [max]="maxAttempts" id="attempts"
+                                formControlName="quantityAttempts" name="attempts"
                                 class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]" />
                             <div
                                 *ngIf="formPanel.get('quantityAttempts')?.invalid && formPanel.get('quantityAttempts')?.touched">
-                                <small class="text-red-600">Debés seleccionar un número de intentos entre 1 y 10</small>
+                                <small class="text-red-600">Debés seleccionar una cantidad de intentos</small>
                             </div>
                         </div>
                     </div>

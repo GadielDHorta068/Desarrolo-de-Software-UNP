@@ -1,30 +1,38 @@
-.container{
-    padding: 2% 4%;
-    max-width: 1200px;
-    margin: 0 auto;
+.container {
+  padding: 2% 4%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
-.grid-custom-3{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+
+.grid-custom-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
 }
-.grid-custom-2{
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+
+.grid-custom-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
-.grid-description{
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    gap: 1rem;
+
+.grid-description {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 1rem;
 }
+
 /* un grilla con 2 columnas donde una tiene 2 filas y la otra ocupa el lugar de esas 2 filas */
-.grid-name-description-image{
-    display: grid;
-    grid-template-columns: 2fr 1fr; /* Dos columnas: izquierda más angosta */
-    grid-template-rows: auto auto; /* Dos filas */
-    gap: 10px; /* Espacio entre elementos */
+.grid-name-description-image {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  /* Dos columnas: izquierda más angosta */
+  grid-template-rows: auto auto;
+  /* Dos filas */
+  gap: 10px;
+  /* Espacio entre elementos */
 }
+
 .item-name {
   grid-column: 1;
   grid-row: 1;
@@ -37,28 +45,24 @@
 
 .item-image {
   grid-column: 2;
-  grid-row: 1 / span 2; /* Ocupa ambas filas */
+  grid-row: 1 / span 2;
+  /* Ocupa ambas filas */
 }
 
 .grid-main {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
   margin-top: 1rem;
 }
-/* En pantallas pequeñas, cambia a 1 columna y 2 filas */
-@media (max-width: 768px) {
-  .grid-main {
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(2, auto);
-  }
-}
+
 .grid-row {
   display: grid;
   align-items: baseline;
   grid-template-columns: 1fr 2fr;
   gap: 1rem;
 }
+
 /* En pantallas pequeñas, cambia a 1 columna y 2 filas */
 @media (max-width: 768px) {
   .grid-row {
@@ -66,6 +70,7 @@
     grid-template-rows: repeat(2, auto);
   }
 }
+
 /* Espaciado y separación visual de secciones, coherente con edit-event */
 .bg-white,
 :host-context(.dark) .bg-gray-800 {
@@ -73,11 +78,11 @@
   position: relative;
 }
 
-form > div {
+form>div {
   margin-bottom: 2rem;
 }
 
-form > div:last-child {
+form>div:last-child {
   margin-bottom: 0;
 }
 
@@ -117,11 +122,13 @@ small.text-red-600 {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 .pill-toggle-container {
   width: 100%;
   max-width: 160px;
@@ -225,6 +232,7 @@ input[type="checkbox"]:not(:checked)~.pill-toggle .public-option {
   .pill-toggle {
     padding: 3px;
   }
+
   .pill-option {
     padding: 6px 12px;
     font-size: 0.8rem;

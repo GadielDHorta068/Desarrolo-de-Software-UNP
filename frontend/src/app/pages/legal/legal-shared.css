@@ -1,0 +1,96 @@
+/* Estilos compartidos para todas las páginas legales */
+
+/* Variables CSS para tema del sistema */
+:host {
+    --primary-color: theme('colors.primary');
+    --secondary-color: theme('colors.secondary');
+    --accent-color: theme('colors.accent');
+}
+
+/* Gradiente de texto */
+.text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+}
+
+/* Estilos para tabla de contenidos */
+.toc-link {
+    @apply text-primary dark:text-blue-400 hover:underline transition-all duration-200;
+}
+
+.toc-link:hover {
+    @apply text-secondary;
+}
+
+/* Secciones de contenido legal */
+.legal-section {
+    @apply mb-8 sm:mb-12 scroll-mt-20;
+}
+
+.legal-section h2 {
+    @apply text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-6;
+}
+
+.legal-section h3 {
+    @apply text-xl sm:text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-3 sm:mb-4;
+}
+
+.legal-section p {
+    @apply text-gray-600 dark:text-gray-300 mb-4 leading-relaxed;
+}
+
+.legal-section ul,
+.legal-section ol {
+    @apply text-gray-600 dark:text-gray-300 mb-4 pl-6 space-y-2;
+}
+
+.legal-section li {
+    @apply leading-relaxed;
+}
+
+/* Card para documentos relacionados */
+.related-doc-card {
+    @apply bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl border border-gray-200 dark:border-gray-700;
+    @apply hover:shadow-lg transition-all duration-300 cursor-pointer;
+}
+
+.related-doc-card:hover {
+    @apply border-primary dark:border-primary;
+    transform: translateY(-2px);
+}
+
+/* Última actualización */
+.last-updated {
+    @apply text-sm text-gray-500 dark:text-gray-400 italic;
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .legal-section h2 {
+        @apply text-xl;
+    }
+
+    .legal-section h3 {
+        @apply text-lg;
+    }
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+}

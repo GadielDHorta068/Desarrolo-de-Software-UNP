@@ -21,18 +21,39 @@ export class AdminEventService {
 
   constructor(
     private eventService: EventsService
-  ) {}
+  ) {
+    const savedEvent = localStorage.getItem('selectedEvent');
+    if (savedEvent) {
+      try {
+        const parsedEvent = JSON.parse(savedEvent);
+        this.selectedEventSubject.next(parsedEvent);
+        // Optionally reload winners if needed, but might be better to do lazily or let component trigger
+        if (parsedEvent?.statusEvent == StatusEvent.FINISHED) {
+          this.loadWinners("" + parsedEvent.id);
+        }
+      } catch (e) {
+        console.error('Error parsing selectedEvent from localStorage', e);
+        localStorage.removeItem('selectedEvent');
+      }
+    }
+  }
 
-  public getSelectedEvent(): EventsTemp|null{
+  public getSelectedEvent(): EventsTemp | null {
     return this.selectedEventSubject.getValue();
   }
-  
-  public setSelectedEvent(event: EventsTemp|null){
+
+  public setSelectedEvent(event: EventsTemp | null) {
     this.selectedEventSubject.next(event);
-    if(event?.statusEvent == StatusEvent.FINISHED){
+    if (event) {
+      localStorage.setItem('selectedEvent', JSON.stringify(event));
+    } else {
+      localStorage.removeItem('selectedEvent');
+    }
+
+    if (event?.statusEvent == StatusEvent.FINISHED) {
       // console.log("[loadWinners] => Evento finalizado, vamos a buscar los ganadores!");
       // vamos a buscar los ganadores del evento
-      this.loadWinners(""+event.id);
+      this.loadWinners("" + event.id);
     }
   }
 
@@ -48,5 +69,5 @@ export class AdminEventService {
       }
     });
   }
-  
+
 }

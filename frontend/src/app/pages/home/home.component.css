@@ -30,18 +30,24 @@
 
 /* Animaciones personalizadas */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-10px);
   }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
   }
+
   50% {
     box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
   }
@@ -71,7 +77,7 @@
   position: absolute;
   top: 0;
   left: -100%;
-  width: 100%;
+  width: 100%++;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.5s;
@@ -86,7 +92,7 @@
   transition: all 0.3s ease;
 }
 
-/* Efectos de parallax suave */
+/* Efectos de  parallax suave */
 .hero-bg {
   background-attachment: fixed;
   background-position: center;
@@ -103,6 +109,7 @@
   from {
     width: 0%;
   }
+
   to {
     width: 84.7%;
   }
@@ -115,51 +122,84 @@
 }
 
 /* Responsividad mejorada */
+
+/* Móviles muy pequeños */
+@media (max-width: 480px) {
+  .hero-title {
+    @apply text-3xl;
+  }
+
+  .hero-subtitle {
+    @apply text-base;
+  }
+
+  .section-title {
+    @apply text-2xl;
+  }
+
+  .card {
+    @apply p-4;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    @apply py-2 px-4 text-sm;
+  }
+}
+
+/* Móviles estándar */
 @media (max-width: 640px) {
   .hero-title {
     @apply text-4xl;
   }
-  
+
   .hero-subtitle {
     @apply text-lg;
   }
-  
+
   .section-title {
     @apply text-3xl;
   }
-  
+
   .card {
     @apply p-4;
   }
-  
+
   .btn-primary,
   .btn-secondary {
     @apply py-3 px-4 text-base;
   }
 }
 
+/* Tablets */
 @media (max-width: 768px) {
   .grid-features {
     @apply grid-cols-1 gap-6;
   }
-  
+
   .grid-hero {
     @apply grid-cols-1 gap-8;
   }
-  
+
   .flex-buttons {
     @apply flex-col space-y-4;
   }
 }
 
-@media (max-width: 1024px) {
+/* Tablets grandes */
+@media (min-width: 769px) and (max-width: 1024px) {
   .grid-features {
-    @apply grid-cols-2;
+    @apply grid-cols-2 gap-8;
+  }
+
+  .section-title {
+    @apply text-4xl;
   }
 }
 
 /* Accesibilidad mejorada */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -195,8 +235,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Efectos de scroll suave */
@@ -209,7 +254,7 @@ html {
   .card:hover {
     transform: none;
   }
-  
+
   .btn-primary:hover,
   .btn-secondary:hover {
     transform: none;
@@ -221,7 +266,7 @@ html {
   .card {
     @apply border-2 border-gray-800 dark:border-white;
   }
-  
+
   .text-gradient {
     @apply text-primary;
     background: none;
@@ -237,20 +282,19 @@ html {
   will-change: transform;
 }
 
-
-
 /* Estilos para impresión */
 @media print {
+
   .hero-section,
   .cta-section {
     @apply bg-white text-black;
   }
-  
+
   .btn-primary,
   .btn-secondary {
     @apply border border-black text-black bg-transparent;
   }
-  
+
   .text-gradient {
     @apply text-black;
     background: none;

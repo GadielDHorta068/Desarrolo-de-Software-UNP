@@ -61,8 +61,14 @@ export interface EventsTemp {
     creator: Creator,
     imageUrl?: string; // Campo opcional para la imagen en base64
     isUserRegistered?: boolean; // Indica si el usuario actual está inscrito en el evento
+    // propio de rifas
     quantityOfNumbers: number;
     priceOfNumber: number;
+    // propio de adivinanzas
+    targetNumber: number;
+    minValue: number;
+    maxValue: number;
+    maxAttempts: number;
     isPrivate?: boolean;
 }
 // de momento no usamos extensiones sino un solo modelo de eventos con todos los atr (A.T)

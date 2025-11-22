@@ -1,16 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-privacy',
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <section class="container mx-auto px-6 py-12">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Política de Privacidad</h1>
-      <p class="text-gray-600 dark:text-gray-300">Tu privacidad es importante. Documento preliminar.</p>
-    </section>
-  `,
-  styles: []
+  imports: [CommonModule, RouterModule],
+  templateUrl: './privacy.component.html',
+  styleUrls: ['./privacy.component.css']
 })
-export class PrivacyComponent {}
+export class PrivacyComponent implements OnInit {
+  ngOnInit(): void {
+    window.scrollTo(0, 0);
+  }
+}

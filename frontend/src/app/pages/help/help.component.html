@@ -1,0 +1,199 @@
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-primary via-blue-600 to-secondary py-16 sm:py-20">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="text-center text-white max-w-4xl mx-auto">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
+                <span class="text-gradient bg-gradient-to-r from-white to-yellow-300 bg-clip-text text-transparent">
+                    Centro de Ayuda
+                </span>
+            </h1>
+            <p class="text-lg sm:text-xl lg:text-2xl text-blue-100">
+                Encuentra respuestas a tus preguntas y aprende a aprovechar al máximo RAFFIFY
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Guides Section -->
+<section class="py-12 sm:py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="text-center mb-10 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-4">
+                Guías Rápidas
+            </h2>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+                Tutoriales paso a paso para las tareas más comunes
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div class="card group cursor-pointer" *ngFor="let guide of quickGuides">
+                <div
+                    [class]="'w-12 h-12 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ' + guide.iconBg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="guide.iconPath">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-3">{{ guide.title }}</h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">{{ guide.description }}</p>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <li *ngFor="let step of guide.steps" class="flex items-start">
+                        <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                        <span>{{ step }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Categories Section -->
+<section class="py-12 sm:py-16 bg-white dark:bg-gray-800">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="text-center mb-10 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-4">
+                Preguntas Frecuentes
+            </h2>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+                Explora las preguntas más comunes organizadas por categoría
+            </p>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="flex flex-wrap gap-3 mb-8 justify-center">
+            <button *ngFor="let category of faqCategories" (click)="selectCategory(category.id)"
+                [class.active]="selectedCategory === category.id"
+                class="category-tab px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+                {{ category.name }}
+            </button>
+        </div>
+
+        <!-- FAQ Accordion -->
+        <div class="max-w-4xl mx-auto">
+            <div class="space-y-4">
+                <div *ngFor="let faq of filteredFaqs; let i = index"
+                    class="faq-item bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <button (click)="toggleFaq(i)"
+                        class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                        <span class="font-semibold text-gray-800 dark:text-white pr-4">{{ faq.question }}</span>
+                        <svg class="w-6 h-6 text-gray-600 dark:text-gray-400 flex-shrink-0 transition-transform duration-300"
+                            [class.rotate-180]="faq.expanded" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer overflow-hidden transition-all duration-300" [class.expanded]="faq.expanded">
+                        <div
+                            class="px-6 py-4 text-gray-600 dark:text-gray-300 border-t border-gray-200 dark:border-gray-700">
+                            {{ faq.answer }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Help Categories Section -->
+<section class="py-12 sm:py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="text-center mb-10 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-4">
+                ¿En qué podemos ayudarte?
+            </h2>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+                Selecciona una categoría para obtener ayuda específica
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div *ngFor="let category of helpCategories"
+                class="card group cursor-pointer hover:shadow-xl transition-all duration-300">
+                <div
+                    [class]="'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform ' + category.bgGradient">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            [attr.d]="category.iconPath"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-3 text-center">{{ category.title }}</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-center">{{ category.description }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact & Support Section -->
+<section class="py-12 sm:py-16 bg-gradient-to-r from-primary via-blue-600 to-secondary">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="max-w-4xl mx-auto text-center text-white">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">
+                ¿Necesitas más ayuda?
+            </h2>
+            <p class="text-lg sm:text-xl text-blue-100 mb-8">
+                Nuestro equipo está aquí para ayudarte. Contáctanos o explora recursos adicionales.
+            </p>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                <div class="glass-card p-6 rounded-xl">
+                    <svg class="w-10 h-10 text-white mx-auto mb-3" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    <h3 class="font-semibold mb-2">Email</h3>
+                    <p class="text-sm text-blue-100">soporte&#64;raffify.com</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl cursor-pointer" routerLink="/contact">
+                    <svg class="w-10 h-10 text-white mx-auto mb-3" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
+                        </path>
+                    </svg>
+                    <h3 class="font-semibold mb-2">Contacto</h3>
+                    <p class="text-sm text-blue-100">Formulario de contacto</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl cursor-pointer" routerLink="/docs">
+                    <svg class="w-10 h-10 text-white mx-auto mb-3" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                        </path>
+                    </svg>
+                    <h3 class="font-semibold mb-2">Documentación</h3>
+                    <p class="text-sm text-blue-100">Guías completas</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl cursor-pointer" routerLink="/status">
+                    <svg class="w-10 h-10 text-white mx-auto mb-3" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="font-semibold mb-2">Estado</h3>
+                    <p class="text-sm text-blue-100">Ver estado del sistema</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button routerLink="/contact"
+                    class="bg-white text-primary hover:bg-gray-100 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105">
+                    Contactar Soporte
+                </button>
+                <button routerLink="/docs"
+                    class="border-2 border-white text-white hover:bg-white hover:text-primary font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300">
+                    Ver Documentación
+                </button>
+            </div>
+        </div>
+    </div>
+</section>

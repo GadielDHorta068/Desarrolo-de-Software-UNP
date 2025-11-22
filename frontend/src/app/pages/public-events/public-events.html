@@ -24,66 +24,61 @@
       </div>
     </div>
   
-    <!-- Filtros (progresivos: /events/active) -->
-    <div class="filters">
-      <div class="filter-search">
-        <label for="search">Buscar</label>
-        <input id="search" type="text" placeholder="Buscar" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" />
+    <!-- Filtros (contenedor moderno) -->
+    <div class="card-modern mb-6">
+      <div class="card-header">
+        <h3 class="card-title">Filtros</h3>
+        <p class="card-subtitle">Refina tu búsqueda de eventos</p>
       </div>
-      <div class="filter-type">
-        <label for="type">Tipo</label>
-        <select id="type" [ngModel]="selectedType" (ngModelChange)="applyTypeFilter($event)">
-          <option [ngValue]="'ALL'">Todos</option>
-          <option [ngValue]="EventTypes.GIVEAWAY">Sorteo</option>
-          <option [ngValue]="EventTypes.RAFFLES">Rifas</option>
-        </select>
-      </div>
-      <div class="filter-category">
-        <label for="category">Categoría</label>
-       
+      <div class="filters">
+        <div class="filter-search">
+          <label for="search">Buscar</label>
+          <input id="search" type="text" placeholder="Buscar" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" />
+        </div>
+        <div class="filter-type">
+          <label for="type">Tipo</label>
+          <select id="type" [ngModel]="selectedType" (ngModelChange)="applyTypeFilter($event)">
+            <option [ngValue]="'ALL'">Todos</option>
+            <option [ngValue]="EventTypes.GIVEAWAY">Sorteo</option>
+            <option [ngValue]="EventTypes.RAFFLES">Rifas</option>
+          </select>
+        </div>
+        <div class="filter-category">
+          <label for="category">Categoría</label>
           <input id="category" matInput type="text" placeholder="Elegí una categoría" [ngModel]="categoryQuery" (ngModelChange)="onCategoryInputChange($event)" [matAutocomplete]="auto" />
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event.option.value)">
             <mat-option *ngFor="let c of filteredCategories" [value]="c.name">{{ c.name }}</mat-option>
           </mat-autocomplete>
-       
-      </div>
-      <div class="filter-start">
-        <label for="start">Inicio</label>
-        <mat-form-field appearance="outline" style="width: 100%;">
-          <input matInput [matDatepicker]="pickerStart" 
-            [value]="filterStart ? toDateObj(filterStart) : null" 
-            (dateChange)="onStartDateChange($event)" 
-            placeholder="Selecciona fecha de inicio" />
-          <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
-          <mat-datepicker #pickerStart></mat-datepicker>
-        </mat-form-field>
-      </div>
-      <div class="filter-end">
-        <label for="end">Fin</label>
-        <mat-form-field appearance="outline" style="width: 100%;">
-          <input matInput [matDatepicker]="pickerEnd" 
-            [value]="filterEnd ? toDateObj(filterEnd) : null" 
-            (dateChange)="onEndDateChange($event)" 
-            placeholder="Selecciona fecha de fin" />
-          <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
-          <mat-datepicker #pickerEnd></mat-datepicker>
-        </mat-form-field>
-      </div>
-      <div class="filter-winners">
-        <label for="winners">Ganadores</label>
-        <input id="winners" type="number" min="1" [(ngModel)]="filterWinners" (ngModelChange)="onFiltersChanged()" />
-      </div>
-      <!-- <div class="filter-status">
-        <label for="status">Estado</label>
-        <select id="status" [ngModel]="selectedStatus" (ngModelChange)="applyFilter($event)">
-          <option [ngValue]="'ALL'">Todos</option>
-          <option [ngValue]="StatusEvent.OPEN">Activos</option>
-          <option [ngValue]="StatusEvent.CLOSED">Cerrados</option>
-          <option [ngValue]="StatusEvent.FINISHED">Finalizados</option>
-        </select>
-      </div> -->
-      <div class="filter-clear">
-        <button class="btn btn-outline" (click)="clearFilters()">Limpiar filtros</button>
+        </div>
+        <div class="filter-start">
+          <label for="start">Inicio</label>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <input matInput [matDatepicker]="pickerStart" 
+              [value]="filterStart ? toDateObj(filterStart) : null" 
+              (dateChange)="onStartDateChange($event)" 
+              placeholder="Selecciona fecha de inicio" />
+            <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+            <mat-datepicker #pickerStart></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="filter-end">
+          <label for="end">Fin</label>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <input matInput [matDatepicker]="pickerEnd" 
+              [value]="filterEnd ? toDateObj(filterEnd) : null" 
+              (dateChange)="onEndDateChange($event)" 
+              placeholder="Selecciona fecha de fin" />
+            <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+            <mat-datepicker #pickerEnd></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="filter-winners">
+          <label for="winners">Ganadores</label>
+          <input id="winners" type="number" min="1" [(ngModel)]="filterWinners" (ngModelChange)="onFiltersChanged()" />
+        </div>
+        <div class="filter-clear">
+          <button class="btn btn-outline" (click)="clearFilters()">Limpiar filtros</button>
+        </div>
       </div>
     </div>
   </section>

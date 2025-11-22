@@ -19,6 +19,7 @@ import com.desarrollo.raffy.dto.GuessProgressResponseDTO;
 import com.desarrollo.raffy.dto.ParticipantRequestDTO;
 import com.desarrollo.raffy.exception.NoInscriptEventExeption;
 import com.desarrollo.raffy.model.GuessProgress;
+import com.desarrollo.raffy.model.GuessStatus;
 import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.StatusEvent;
 
@@ -39,18 +40,19 @@ public class ContestParticipantController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @PostMapping("/{eventId}/participants")
+    @PostMapping("/{contestId}/participants")
     public ResponseEntity<?> registerParticipant(
-        @PathVariable("eventId") Long eventId,
-        @Valid @RequestBody ParticipantRequestDTO dto
+        @PathVariable("contestId") Long contestId,
+        @Valid @RequestBody ParticipantRequestDTO dto,
+        @RequestParam(required = false) String invite
         ) {
 
-        GuessingContest contest = (GuessingContest) eventsService.getById(eventId);
+        GuessingContest contest = (GuessingContest) eventsService.getById(contestId);
         // Verificamos que el evento exista
         if(contest == null){
             return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body("El evento con id "+ eventId + "No existe");
+                .body("El evento con id "+ contestId + "No existe");
         }
         // Controlamos que el evento este abierto
         if(contest.getStatusEvent() != StatusEvent.OPEN){
@@ -63,14 +65,15 @@ public class ContestParticipantController {
                 .body("No se cargaron los resultados del del evento");
         }
         // Verificamos que el usuario no haya participado antes
-        GuessCheckResponseDTO guessCheckResponseDTO = guessProgressService.hasAlreadyParticipated(eventId, dto.getUser().getEmail());
+        GuessCheckResponseDTO guessCheckResponseDTO = guessProgressService.hasAlreadyParticipated(contestId, dto.getUser().getEmail());
         if (guessCheckResponseDTO.isAlreadyParticipated()) {
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(guessCheckResponseDTO);
         }
+        boolean isCreator = false;
         // Si no esta inscripto entonces se crea el usuario
-        GuessProgress guessProgress = guessProgressService.register(dto.getGuessProgress(), dto.getUser(), eventId); 
+        GuessProgress guessProgress = guessProgressService.register(dto.getGuessProgress(), dto.getUser(), contestId); 
 
         GuessProgressResponseDTO response = modelMapper.map(guessProgress, GuessProgressResponseDTO.class);
         return ResponseEntity
@@ -78,9 +81,9 @@ public class ContestParticipantController {
             .body(response);
     }
 
-    @GetMapping("/guess/check")
+    @GetMapping("/check-participant/guess/{contestId}")
     public ResponseEntity<?> checkParticipation(
-            @RequestParam Long contestId,
+            @PathVariable("contestId") Long contestId,
             @RequestParam String email) {
 
         GuessCheckResponseDTO response =
@@ -94,24 +97,29 @@ public class ContestParticipantController {
     /**
      * Método para verificar si el usuario acierta o no el número ganador.
      */
-    @GetMapping("/{eventId}/guess/check-number")
+    @GetMapping("/guess/{contestId}/check-number")
     public ResponseEntity<CheckGuessNumberDTO> checkGuessNumber(
-            @PathVariable Long eventId,
-            @RequestParam int guessedNumber) {
+            @PathVariable("contestId") Long contestId,
+            @RequestParam("guessedNumber") int guessedNumber) {
 
-        GuessingContest contest = (GuessingContest) eventsService.getById(eventId);
+        GuessingContest contest = (GuessingContest) eventsService.getById(contestId);
+
+        int target = contest.getTargetNumber(); // el número real que hay que adivinar
 
         CheckGuessNumberDTO response = new CheckGuessNumberDTO();
-        response.setGuessedNumber(guessedNumber);
 
-        if (guessedNumber > contest.getTargetNumber()) {
-            response.setMessage("El número ingresado es mayor al número objetivo.");
-        } else if (guessedNumber < contest.getTargetNumber()) {
-            response.setMessage("El número ingresado es menor al número objetivo.");
+        if (guessedNumber < target) {
+            response.setStatus(GuessStatus.HIGHER);
+            response.setMessage("El número objetivo es mayor.");
+        } else if (guessedNumber > target) {
+            response.setStatus(GuessStatus.LOWER);
+            response.setMessage("El número objetivo es menor.");
         } else {
-            response.setMessage("¡Felicidades! Has adivinado el número correcto.");
+            response.setStatus(GuessStatus.WIN);
+            response.setMessage("¡Adivinaste!");
         }
 
         return ResponseEntity.ok(response);
     }
+
 }

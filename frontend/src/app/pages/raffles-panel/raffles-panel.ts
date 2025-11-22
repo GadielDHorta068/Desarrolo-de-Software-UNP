@@ -66,9 +66,7 @@ export function lowerRangeValidator(upperKey: string): ValidatorFn {
       return { notNumber: true };
     }
 
-    console.log("[validRange] => min=", min, "max=", max);
     if (min > max) {
-      console.log("[validRange] => sale por el error en minRange");
       return { errorRange: true };
     }
 
@@ -126,6 +124,7 @@ export class RafflesPanel implements OnInit {
   eventTypes = EventTypes;
   // indica si ya se ha creado un evento
   eventCreated: boolean = false;
+  maxAttempts: number = 5;
 
   constructor(
     private configService: configService,
@@ -173,6 +172,14 @@ export class RafflesPanel implements OnInit {
         error: () => { }
       });
     }
+    this.formPanel.get('lowerLimit')?.valueChanges.subscribe(value => {
+      this.maxAttempts = this.calculateValue(value, this.formPanel.get('upperLimit')?.value);
+      console.log("maxAttempts: ", this.maxAttempts);
+    });
+    this.formPanel.get('upperLimit')?.valueChanges.subscribe(value => {
+      this.maxAttempts = this.calculateValue(this.formPanel.get('lowerLimit')?.value, value);
+      console.log("maxAttempts: ", this.maxAttempts);
+    });
   }
 
   private initDateMin() {
@@ -277,6 +284,7 @@ export class RafflesPanel implements OnInit {
 
   private getNewEvent(dataEvent: any) {
     let isRaffle = (dataEvent.drawType == EventTypes.RAFFLES);
+    let isGuessingContest = (dataEvent.drawType == EventTypes.GUESSING_CONTEST);
     let event: any = {
       title: dataEvent.title,
       description: dataEvent.description,
@@ -290,8 +298,14 @@ export class RafflesPanel implements OnInit {
       isPrivate: !!dataEvent.isPrivate
     }
     if (isRaffle) {
-      event.quantityOfNumbers = dataEvent.quantityNumbersRaffle,
-        event.priceOfNumber = dataEvent.priceRaffle
+      event.quantityOfNumbers = dataEvent.quantityNumbersRaffle;
+      event.priceOfNumber = dataEvent.priceRaffle;
+    }
+    if (isGuessingContest) {
+      event.numberToGuess = dataEvent.numberToGuess;
+      event.upperLimit = dataEvent.upperLimit;
+      event.lowerLimit = dataEvent.lowerLimit;
+      event.quantityAttempts = dataEvent.quantityAttempts;
     }
     // return isRaffle ? event as RaffleCreate: event as EventsCreate;
     return event as EventsCreate;
@@ -340,26 +354,15 @@ export class RafflesPanel implements OnInit {
     this.formPanel.get('lowerLimit')?.updateValueAndValidity();
     this.formPanel.get('quantityAttempts')?.updateValueAndValidity();
   }
-  private setValidatorsGuessingContest() {
-    // this.formPanel.get('numberToGuess')?.clearValidators();
-    // this.formPanel.get('quantityAttempts')?.setValidators([Validators.required, Validators.pattern(/^\d+$/), Validators.min(1), Validators.max(10)]);
-    // this.formPanel.get('upperLimit')?.clearValidators();
-    // this.formPanel.get('lowerLimit')?.clearValidators();
-    // this.formPanel.get('numberToGuess')?.updateValueAndValidity();
-    // this.formPanel.get('upperLimit')?.updateValueAndValidity();
-    // this.formPanel.get('lowerLimit')?.updateValueAndValidity();
-    // this.formPanel.get('quantityAttempts')?.updateValueAndValidity();
 
+  private setValidatorsGuessingContest() {
     this.formPanel.get('numberToGuess')?.setValidators([
       Validators.required,
       Validators.pattern(/^\d+$/),
       reviewRangeValidators('lowerLimit', 'upperLimit') // tu validador cruzado
     ]);
     this.formPanel.get('quantityAttempts')?.setValidators([
-      Validators.required,
-      Validators.pattern(/^\d+$/),
-      Validators.min(1),
-      Validators.max(10)
+      Validators.required
     ]);
     this.formPanel.get('lowerLimit')?.setValidators([
       Validators.required,
@@ -374,6 +377,8 @@ export class RafflesPanel implements OnInit {
 
     this.formPanel.get('numberToGuess')?.updateValueAndValidity();
     this.formPanel.get('quantityAttempts')?.updateValueAndValidity();
+    this.formPanel.get('lowerLimit')?.updateValueAndValidity();
+    this.formPanel.get('upperLimit')?.updateValueAndValidity();
   }
 
   resetForm() {
@@ -388,6 +393,13 @@ export class RafflesPanel implements OnInit {
 
   get eventTypeSelected() {
     return this.formPanel.get('drawType')?.value;
+  }
+
+  private calculateValue(min: number, max: number): number {
+    if (max <= (min - 1)) {
+      return 0;
+    }
+    return Math.round(Math.log2(max - min + 1));
   }
 
 }
