@@ -7,6 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -39,6 +41,11 @@ public abstract class User {
     @NotBlank(message = "El campo email es obligatorio")
     @Email(message = "El Email debe tener un formato valido")
     private String email;
+
+
+    @ManyToOne
+    @JoinColumn(name = "region_id")
+    private Region region;
 
     @Column(nullable = true)
     private String cellphone;
