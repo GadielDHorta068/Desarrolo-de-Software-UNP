@@ -136,12 +136,32 @@ public class EventsController {
         
         // Validaciones de fechas
         if (guessingContest.getEndDate() == null) {
-            return new ResponseEntity<>("Debe especificar la fecha de fin del evento", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Debe especificar la fecha de fin del evento.", HttpStatus.BAD_REQUEST);
         }
         if (guessingContest.getEndDate().isBefore(LocalDate.now())) {
-            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio.", HttpStatus.BAD_REQUEST);
+        }
+
+        if(guessingContest.getMaxValue() < guessingContest.getMinValue()){
+            return new ResponseEntity<>("El número mínimo no puede ser mayor que el número mayor.", HttpStatus.BAD_REQUEST);
         }
         
+        if(guessingContest.getMaxValue() == guessingContest.getMinValue()){
+            return new ResponseEntity<>("El número mínimo no puede ser igual que el número mayor.", HttpStatus.BAD_REQUEST);
+        }
+
+        if(guessingContest.getMaxValue() == 0 || guessingContest.getMinValue() == 0){
+            return new ResponseEntity<>("No puede ser 0 el máximo o mínimo.", HttpStatus.BAD_REQUEST);
+        }
+
+        if((guessingContest.getMaxValue() < guessingContest.getTargetNumber()) || (guessingContest.getMinValue() > guessingContest.getTargetNumber())){
+            return new ResponseEntity<>("El número objetivo Estas fuera del rango." + 
+            " min: " + guessingContest.getMinValue() +
+            " max: " + guessingContest.getMaxValue() +
+            "objectivo: " + guessingContest.getTargetNumber(), 
+            HttpStatus.BAD_REQUEST);
+        }
+
         GuessingContest created = eventsService.create(guessingContest, idUser);
         if (created != null) {
             auditLogsService.createAuditEvent(created);

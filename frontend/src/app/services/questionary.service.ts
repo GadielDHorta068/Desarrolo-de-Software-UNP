@@ -7,6 +7,7 @@ import { GuestUser } from '../pages/questionary/guestUser';
 import { EventTypes } from '../models/events.model';
 import { BuyRaffleNumberDTO } from '../models/buyRaffleNumberDTO';
 import { UserDTO } from '../models/UserDTO';
+import { ParticipantRequestDTO } from '../models/participantRequestDTO';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,7 @@ import { UserDTO } from '../models/UserDTO';
 export class QuestionaryService {
 
     private API_URL = `${environment.apiUrl}/events`;
+    private apiUrl = `${environment.apiUrl}/api/contest`;
 
     constructor (
         private http: HttpClient
@@ -26,6 +28,14 @@ export class QuestionaryService {
             ? `${this.API_URL}/${aEventId}/participants?invite=${encodeURIComponent(invite)}`
             : `${this.API_URL}/${aEventId}/participants`;
         return this.http.post<any>(url, aGuestUser);
+    }
+
+    saveGuessProgress(contestId: number, participantRequestDTO: ParticipantRequestDTO): Observable<any> {
+        const invite = this.getInviteToken();
+        const url = (invite && invite.trim().length > 0) 
+        ? `${this.apiUrl}/${contestId}/participants?invite=${encodeURIComponent(invite)}`
+        : `${this.apiUrl}/${contestId}/participants`;
+        return this.http.post<any>(url,participantRequestDTO);
     }
 
     saveRaffleNumber(aEventId: number, buyRaffleNumberRequest: BuyRaffleNumberDTO): Observable<any> {
