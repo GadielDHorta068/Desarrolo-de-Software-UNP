@@ -8,7 +8,7 @@ export enum StatusEvent {
 
 export enum EventTypes {
     GIVEAWAY = 'GIVEAWAYS',     // sorteo
-    CONTEST = 'CONTEST',
+    GUESSING_CONTEST = "GUESSING_CONTEST",
     TOURNAMENT = 'TOURNAMENT',
     RAFFLES = 'RAFFLES'         // rifa
 }
@@ -63,7 +63,7 @@ export interface EventsTemp {
     isUserRegistered?: boolean; // Indica si el usuario actual está inscrito en el evento
     quantityOfNumbers: number;
     priceOfNumber: number;
-     isPrivate?: boolean;
+    isPrivate?: boolean;
 }
 // de momento no usamos extensiones sino un solo modelo de eventos con todos los atr (A.T)
 export interface RaffleEvent extends EventsTemp {
@@ -102,5 +102,5 @@ export interface RaffleParticipantDTO {
     surname: string;
     email: string;
     number: number;
-    position:number;
+    position: number;
 }

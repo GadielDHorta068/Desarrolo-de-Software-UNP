@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ViewChild, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { EventsCreate, EventsTemp, EventType, EventTypes, RaffleCreate } from '../../models/events.model';
 import { Category } from '../../services/category.service';
 import { configService } from '../../services/config.service';
@@ -11,6 +11,100 @@ import { InfoModal } from '../../shared/components/modal-info/modal-info';
 import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 import { ParseFileService } from '../../services/utils/parseFile.service';
 import { NotificationService } from '../../services/notification.service';
+
+export function reviewRangeValidators(lowerKey: string, upperKey: string): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    // Si el control aún no está dentro de un FormGroup, no validamos
+    if (!control.parent) {
+      return null;
+    }
+
+    const lower = control.parent.get(lowerKey)?.value;
+    const upper = control.parent.get(upperKey)?.value;
+    const value = control.value;
+
+    // Si falta algún valor, no validamos aquí
+    if (value === null || value === '' || lower === null || upper === null) {
+      return null;
+    }
+
+    const numero = Number(value);
+    const min = Number(lower);
+    const max = Number(upper);
+
+    if (isNaN(numero) || isNaN(min) || isNaN(max)) {
+      return { notNumber: true };
+    }
+
+    if (numero < min || numero > max) {
+      return { outOfRange: { min, max } };
+    }
+
+    return null; // válido
+  };
+}
+
+export function lowerRangeValidator(upperKey: string): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    // Si el control aún no está dentro de un FormGroup, no validamos
+    if (!control.parent) {
+      return null;
+    }
+
+    const lower = control.value;
+    const upper = control.parent.get(upperKey)?.value;
+
+    // Si falta algún valor, no validamos aquí
+    if (lower === '' || lower === null || upper === '' || upper === null) {
+      return null;
+    }
+
+    const min = Number(lower);
+    const max = Number(upper);
+
+    if (isNaN(min) || isNaN(max)) {
+      return { notNumber: true };
+    }
+
+    console.log("[validRange] => min=", min, "max=", max);
+    if (min > max) {
+      console.log("[validRange] => sale por el error en minRange");
+      return { errorRange: true };
+    }
+
+    return null; // válido
+  };
+}
+
+export function upperRangeValidator(lowerKey: string): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    // Si el control aún no está dentro de un FormGroup, no validamos
+    if (!control.parent) {
+      return null;
+    }
+
+    const upper = control.value;
+    const lower = control.parent.get(lowerKey)?.value;
+
+    // Si falta algún valor, no validamos aquí
+    if (lower === '' || lower === null || upper === '' || upper === null) {
+      return null;
+    }
+
+    const min = Number(lower);
+    const max = Number(upper);
+
+    if (isNaN(min) || isNaN(max)) {
+      return { notNumber: true };
+    }
+
+    if (min > max) {
+      return { errorRange: true };
+    }
+
+    return null; // válido
+  };
+}
 
 @Component({
   selector: 'app-raffles-panel',
@@ -22,11 +116,11 @@ import { NotificationService } from '../../services/notification.service';
 export class RafflesPanel implements OnInit {
 
   formPanel: FormGroup;
-  userCurrent: UserResponse|null = null;
+  userCurrent: UserResponse | null = null;
 
   categories: Category[] = [];
   types: EventType[] = [];
-  imageEvent: File|null = null;
+  imageEvent: File | null = null;
   minDate?: string;
 
   eventTypes = EventTypes;
@@ -40,26 +134,26 @@ export class RafflesPanel implements OnInit {
     private parseFileService: ParseFileService,
     private cdr: ChangeDetectorRef,
     private router: Router,
-    private notificationService: NotificationService 
-  ){
+    private notificationService: NotificationService
+  ) {
     this.initDateMin();
     this.userCurrent = this.authService.getCurrentUserValue();
     // console.log("[createEvent] => usuario actual: ", this.userCurrent);
-    
+
     // Inicializar datos de configuración (categorías y tipos de eventos)
     this.configService.initData();
-    
+
     // Suscribirse a los observables para obtener los datos cuando estén disponibles
     this.configService.categories$.subscribe(categories => {
       this.categories = categories || [];
       this.cdr.detectChanges();
     });
-    
+
     this.configService.typeEvents$.subscribe(types => {
       this.types = types || [];
       this.cdr.detectChanges();
     });
-    
+
     // inicializacion del form de creacion de eventos
     this.formPanel = this.initForm();
 
@@ -76,58 +170,58 @@ export class RafflesPanel implements OnInit {
           this.userCurrent = user;
           this.cdr.detectChanges();
         },
-        error: () => {}
+        error: () => { }
       });
     }
   }
 
-  private initDateMin(){
+  private initDateMin() {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     this.minDate = tomorrow.toISOString().split('T')[0]; // formato yyyy-MM-dd
   }
 
-  public async createDraw(){
-    if(!this.formPanel.valid){
+  public async createDraw() {
+    if (!this.formPanel.valid) {
       return;
     }
     const creatorId = this.userCurrent?.id;
-    if(!creatorId){
+    if (!creatorId) {
       this.notificationService.notifyError("Debes iniciar sesión para crear eventos");
       return;
     }
     // aca deberiamos recuperar la imagen seleccionada si la hay
     // this.checkStatusControl();
-    if(this.imageEvent){
+    if (this.imageEvent) {
       this.formPanel.get('image')?.setValue(await this.getB64Image(this.imageEvent));
-    }    
+    }
     // console.log("[crearSorteo] => datos del sorteo: ", this.formPanel.value);
     const dataNewEvent = this.getNewEvent(this.formPanel.value);
 
     // console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
-    this.eventService.createEvent(""+creatorId, dataNewEvent, this.getEventTypeForCreate()).subscribe({
+    this.eventService.createEvent("" + creatorId, dataNewEvent, this.getEventTypeForCreate()).subscribe({
       next: (response) => {
         // console.log('[initConfig] => nuevo evento creado: ', response);
         this.formPanel.disable();
         this.eventCreated = true;
         this.notificationService.notifySuccess("Evento creado correctamente");
-        this.router.navigateByUrl("/event/management/"+response.id);
+        this.router.navigateByUrl("/event/management/" + response.id);
       },
       error: (error) => {
-          console.warn('[Eventos]: error al crear el evento: ', error);
-          // // NOTA: cuando la fecha esta errada no es un json la respuesta, corregir
-          this.notificationService.notifyError("Error al crear el evento. ", error.error);
+        console.warn('[Eventos]: error al crear el evento: ', error);
+        // // NOTA: cuando la fecha esta errada no es un json la respuesta, corregir
+        this.notificationService.notifyError("Error al crear el evento. ", error.error);
         // });
       }
     });
   }
 
-  private getEventTypeForCreate(){
+  private getEventTypeForCreate() {
     let type = this.formPanel.get('drawType')?.value;
-    if(type == EventTypes.GIVEAWAY){
+    if (type == EventTypes.GIVEAWAY) {
       return "giveaway";
     }
-    if(type == EventTypes.RAFFLES){
+    if (type == EventTypes.RAFFLES) {
       return "raffle";
     }
     // por default toma el sorteo
@@ -146,36 +240,42 @@ export class RafflesPanel implements OnInit {
   //   console.log("[validForm] => winners erros: ", this.formPanel.get('winners')?.errors);
   // }
 
-  initForm(){
+  initForm() {
     return new FormGroup({
-      title: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-      drawType: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-      category: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-      executionDate: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-      winners: new FormControl({value: 1, disabled: false}, {validators:[ Validators.required ]}),
-      description: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
-      image: new FormControl({value: null, disabled: false}),
-      isPrivate: new FormControl({value: false, disabled: false}),
-      priceRaffle: new FormControl({value: '', disabled: false}),
-      quantityNumbersRaffle: new FormControl({value: '', disabled: false})
+      title: new FormControl({ value: '', disabled: false }, { validators: [Validators.required] }),
+      drawType: new FormControl({ value: '', disabled: false }, { validators: [Validators.required] }),
+      category: new FormControl({ value: '', disabled: false }, { validators: [Validators.required] }),
+      executionDate: new FormControl({ value: '', disabled: false }, { validators: [Validators.required] }),
+      winners: new FormControl({ value: 1, disabled: false }, { validators: [Validators.required] }),
+      description: new FormControl({ value: '', disabled: false }, { validators: [Validators.required] }),
+      image: new FormControl({ value: null, disabled: false }),
+      isPrivate: new FormControl({ value: false, disabled: false }),
+      // propios de rifas
+      priceRaffle: new FormControl({ value: '', disabled: false }),
+      quantityNumbersRaffle: new FormControl({ value: '', disabled: false }),
+      // propios de adivinanzas
+      numberToGuess: new FormControl({ value: '', disabled: false }),
+      upperLimit: new FormControl({ value: '', disabled: false }),
+      lowerLimit: new FormControl({ value: '', disabled: false }),
+      quantityAttempts: new FormControl({ value: '', disabled: false })
     });
   }
 
-  public onChangeSelectedImge(image: File|null){
+  public onChangeSelectedImge(image: File | null) {
     // console.log("[imagen] => archivo seleccionado desde el componente de carga: ", image);
     this.imageEvent = image;
   }
 
-  private async getB64Image(image: File|null){
-    if(!image){
+  private async getB64Image(image: File | null) {
+    if (!image) {
       return;
     }
     const respConvertImage = await this.parseFileService.convertImageToBase64(image);
     // aca deberiamos ver cuando da error para enviar null
     return respConvertImage;
   }
-  
-  private getNewEvent(dataEvent: any){
+
+  private getNewEvent(dataEvent: any) {
     let isRaffle = (dataEvent.drawType == EventTypes.RAFFLES);
     let event: any = {
       title: dataEvent.title,
@@ -189,32 +289,94 @@ export class RafflesPanel implements OnInit {
       image: dataEvent.image,
       isPrivate: !!dataEvent.isPrivate
     }
-    if (isRaffle){
+    if (isRaffle) {
       event.quantityOfNumbers = dataEvent.quantityNumbersRaffle,
-      event.priceOfNumber = dataEvent.priceRaffle
+        event.priceOfNumber = dataEvent.priceRaffle
     }
     // return isRaffle ? event as RaffleCreate: event as EventsCreate;
     return event as EventsCreate;
   }
 
   // aca actualizamos la visualizacion de nuevos campos en el caso de una rifa por ej
-  private updateAvailabilityControls(eventType: string){
-    if(eventType == EventTypes.RAFFLES){
-      this.formPanel.get('priceRaffle')?.setValidators(Validators.required);
-      this.formPanel.get('quantityNumbersRaffle')?.setValidators([Validators.required, Validators.min(50), Validators.max(500)]);
-      this.formPanel.get('priceRaffle')?.updateValueAndValidity();
-      this.formPanel.get('quantityNumbersRaffle')?.updateValueAndValidity();
+  private updateAvailabilityControls(eventType: string) {
+    if (eventType == EventTypes.RAFFLES) {
+      this.clearValidatorsGuessingContest();    // limpio controles de adivinanzas
+      this.setValidatorsRaffles();
     }
-    else{
-      this.formPanel.get('priceRaffle')?.clearValidators();
-      this.formPanel.get('quantityNumbersRaffle')?.clearValidators();
-      this.formPanel.get('priceRaffle')?.updateValueAndValidity();
-      this.formPanel.get('quantityNumbersRaffle')?.updateValueAndValidity();
+    else {
+      if (eventType == EventTypes.GUESSING_CONTEST) {
+        this.clearValidatorsRaffles();    // limpio controles de rifa
+        this.setValidatorsGuessingContest();
+      }
+      else {
+        // no es ni rifas ni adivinzas, limpio los validadors de esos tipos
+        this.clearValidatorsRaffles();
+        this.clearValidatorsGuessingContest();
+      }
     }
     this.cdr.detectChanges();
   }
-  
-  resetForm(){
+
+  private clearValidatorsRaffles() {
+    this.formPanel.get('priceRaffle')?.clearValidators();
+    this.formPanel.get('quantityNumbersRaffle')?.clearValidators();
+    this.formPanel.get('priceRaffle')?.updateValueAndValidity();
+    this.formPanel.get('quantityNumbersRaffle')?.updateValueAndValidity();
+  }
+  private setValidatorsRaffles() {
+    this.formPanel.get('priceRaffle')?.setValidators(Validators.required);
+    this.formPanel.get('quantityNumbersRaffle')?.setValidators([Validators.required, Validators.min(50), Validators.max(500)]);
+    this.formPanel.get('priceRaffle')?.updateValueAndValidity();
+    this.formPanel.get('quantityNumbersRaffle')?.updateValueAndValidity();
+  }
+
+  private clearValidatorsGuessingContest() {
+    this.formPanel.get('numberToGuess')?.clearValidators();
+    this.formPanel.get('upperLimit')?.clearValidators();
+    this.formPanel.get('lowerLimit')?.clearValidators();
+    this.formPanel.get('quantityAttempts')?.clearValidators();
+    this.formPanel.get('numberToGuess')?.updateValueAndValidity();
+    this.formPanel.get('upperLimit')?.updateValueAndValidity();
+    this.formPanel.get('lowerLimit')?.updateValueAndValidity();
+    this.formPanel.get('quantityAttempts')?.updateValueAndValidity();
+  }
+  private setValidatorsGuessingContest() {
+    // this.formPanel.get('numberToGuess')?.clearValidators();
+    // this.formPanel.get('quantityAttempts')?.setValidators([Validators.required, Validators.pattern(/^\d+$/), Validators.min(1), Validators.max(10)]);
+    // this.formPanel.get('upperLimit')?.clearValidators();
+    // this.formPanel.get('lowerLimit')?.clearValidators();
+    // this.formPanel.get('numberToGuess')?.updateValueAndValidity();
+    // this.formPanel.get('upperLimit')?.updateValueAndValidity();
+    // this.formPanel.get('lowerLimit')?.updateValueAndValidity();
+    // this.formPanel.get('quantityAttempts')?.updateValueAndValidity();
+
+    this.formPanel.get('numberToGuess')?.setValidators([
+      Validators.required,
+      Validators.pattern(/^\d+$/),
+      reviewRangeValidators('lowerLimit', 'upperLimit') // tu validador cruzado
+    ]);
+    this.formPanel.get('quantityAttempts')?.setValidators([
+      Validators.required,
+      Validators.pattern(/^\d+$/),
+      Validators.min(1),
+      Validators.max(10)
+    ]);
+    this.formPanel.get('lowerLimit')?.setValidators([
+      Validators.required,
+      Validators.pattern(/^\d+$/),
+      lowerRangeValidator('upperLimit')
+    ]);
+    this.formPanel.get('upperLimit')?.setValidators([
+      Validators.required,
+      Validators.pattern(/^\d+$/),
+      upperRangeValidator('lowerLimit')
+    ]);
+
+    this.formPanel.get('numberToGuess')?.updateValueAndValidity();
+    this.formPanel.get('quantityAttempts')?.updateValueAndValidity();
+  }
+
+  resetForm() {
     this.eventCreated = false;
     this.formPanel.enable();
     this.formPanel.reset({
@@ -224,7 +386,7 @@ export class RafflesPanel implements OnInit {
     this.cdr.detectChanges();
   }
 
-  get eventTypeSelected(){
+  get eventTypeSelected() {
     return this.formPanel.get('drawType')?.value;
   }
 
