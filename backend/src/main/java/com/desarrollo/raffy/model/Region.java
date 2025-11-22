@@ -3,17 +3,14 @@ package com.desarrollo.raffy.model;
 
 import org.locationtech.jts.geom.MultiPolygon;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,27 +24,18 @@ import lombok.Setter;
 public class Region {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @Column(name = "name", nullable = false)
-    @NotNull(message = "el nombre es obligatorio")
-    private String name;
-    
-    @Column(name = "region_type", nullable = false)
-    @NotNull(message = "El tipo de region es obligatorio")
-    @Enumerated(EnumType.STRING)
-    private RegionType regionType;
-
-    @ManyToOne
-    @JoinColumn(name = "parent_id", nullable = true)
-    private Region parent;
-
+    @JsonIgnore
     @Column(
         name = "geom",
-        columnDefinition = "geometry(Multipolygon,4326)",
-        nullable = false
+        columnDefinition = "geometry(MULTIPOLYGON,4326)"
     )
-    @NotNull(message = "la geometria es obligatoria")
-    private MultiPolygon geom; 
+    private MultiPolygon geom;
+    
+    @Column(name = "gna")
+    private String regionType;
+
+    @Column(name = "fna")
+    private String name;
 }
