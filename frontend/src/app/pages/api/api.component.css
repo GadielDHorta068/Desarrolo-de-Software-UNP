@@ -1,0 +1,19 @@
+/* API Documentation Styles */
+
+.text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+}
+
+code {
+    @apply bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-sm;
+}
+
+pre code {
+    @apply bg-transparent px-0 py-0;
+}
+
+/* Smooth transitions */
+a,
+button {
+    transition: all 0.2s ease;
+}

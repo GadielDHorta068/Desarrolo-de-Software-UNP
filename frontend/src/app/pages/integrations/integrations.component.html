@@ -1,0 +1,125 @@
+<!-- Integraciones - RAFFIFY -->
+
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-primary via-blue-600 to-secondary py-16 sm:py-20">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="max-w-4xl mx-auto text-center text-white">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
+                <span class="text-gradient bg-gradient-to-r from-white to-yellow-300 bg-clip-text text-transparent">
+                    Integraciones
+                </span>
+            </h1>
+            <p class="text-lg sm:text-xl lg:text-2xl text-blue-100">
+                Conecta RAFFIFY con tus herramientas y plataformas favoritas
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="py-12 sm:py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto">
+
+            <!-- Integrac iones Destacadas -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2 text-center">Integraciones Disponibles
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300 text-center mb-8">Conecta con los servicios que ya utilizas
+                </p>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <div *ngFor="let integration of integrations"
+                        class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:border-primary transition-all cursor-pointer">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+                                [style.background]="integration.color">
+                                {{integration.icon}}
+                            </div>
+                            <span *ngIf="integration.status === 'active'"
+                                class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-semibold rounded">
+                                Activo
+                            </span>
+                            <span *ngIf="integration.status === 'soon'"
+                                class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-semibold rounded">
+                                Próximamente
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">{{integration.name}}</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">{{integration.description}}</p>
+                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
+                                </path>
+                            </svg>
+                            {{integration.category}}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Cómo Funcionan las Integraciones -->
+            <div
+                class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg mb-12 border border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center">¿Cómo Funcionan las
+                    Integraciones?</h2>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div
+                            class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800 dark:text-white mb-2">1. Activa la Integración</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Conecta tu cuenta desde la configuración del
+                            sorteo</p>
+                    </div>
+                    <div class="text-center">
+                        <div
+                            class="w-16 h-16 bg-gradient-to-r from-secondary to-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800 dark:text-white mb-2">2. Configura Opciones</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Personaliza cómo quieres que funcione la
+                            integración</p>
+                    </div>
+                    <div class="text-center">
+                        <div
+                            class="w-16 h-16 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800 dark:text-white mb-2">3. Listo para Usar</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">La integración funciona automáticamente en
+                            tus sorteos</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Solicitar Nueva Integración -->
+            <div class="bg-gradient-to-r from-primary to-secondary p-8 rounded-xl shadow-lg text-center text-white">
+                <h2 class="text-2xl font-bold mb-4">¿No encuentras la integración que necesitas?</h2>
+                <p class="mb-6 text-blue-100">Solicita una nueva integración y la consideraremos para futuras versiones
+                </p>
+                <button class="bg-white text-primary hover:bg-gray-100 font-bold py-3 px-8 rounded-lg transition-all">
+                    Solicitar Integración
+                </button>
+            </div>
+
+        </div>
+    </div>
+</section>

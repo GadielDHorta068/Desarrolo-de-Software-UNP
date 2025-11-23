@@ -1,0 +1,10 @@
+/* Integrations Component Styles */
+
+.text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+}
+
+/* Smooth transitions for integration cards */
+.transition-all {
+    transition: all 0.3s ease;
+}

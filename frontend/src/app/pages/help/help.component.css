@@ -1,0 +1,151 @@
+/* Help Component Styles */
+
+/* Variables CSS para tema del sistema */
+:host {
+    --primary-color: theme('colors.primary');
+    --secondary-color: theme('colors.secondary');
+    --accent-color: theme('colors.accent');
+}
+
+/* Gradiente de texto */
+.text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+}
+
+/* Card base styles */
+.card {
+    @apply bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+    @apply shadow-2xl;
+    transform: translateY(-5px);
+}
+
+/* Category tabs styles */
+.category-tab {
+    @apply bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300;
+    transition: all 0.3s ease;
+}
+
+.category-tab:hover {
+    @apply bg-gray-300 dark:bg-gray-600;
+}
+
+.category-tab.active {
+    @apply bg-gradient-to-r from-primary to-secondary text-white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* FAQ Accordion styles */
+.faq-item {
+    transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+    @apply shadow-md;
+}
+
+.faq-answer {
+    max-height: 0;
+    opacity: 0;
+}
+
+.faq-answer.expanded {
+    max-height: 500px;
+    opacity: 1;
+}
+
+/* Glassmorphism effects */
+.glass-card {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+    @apply bg-white/20;
+    transform: translateY(-2px);
+}
+
+/* Rotate animation for chevron */
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .card {
+        @apply p-4;
+    }
+
+    .faq-item button {
+        @apply px-4 py-3;
+    }
+
+    .faq-answer.expanded {
+        max-height: 800px;
+    }
+
+    .glass-card {
+        @apply p-4;
+    }
+}
+
+/* Accessibility improvements */
+.category-tab:focus,
+.faq-item button:focus {
+    @apply outline-none ring-4 ring-primary/50;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+    .card {
+        @apply border-2 border-gray-800 dark:border-white;
+    }
+
+    .text-gradient {
+        @apply text-primary;
+        background: none;
+        -webkit-background-clip: unset;
+        -webkit-text-fill-color: unset;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .card:hover {
+        transform: none;
+    }
+
+    .glass-card:hover {
+        transform: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .glass-card {
+        @apply bg-white border border-black;
+    }
+
+    .text-gradient {
+        @apply text-black;
+        background: none;
+        -webkit-background-clip: unset;
+        -webkit-text-fill-color: unset;
+    }
+}

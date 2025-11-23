@@ -1,0 +1,18 @@
+/* Pricing Component Styles */
+
+.text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+}
+
+/* Hover effects for plan cards */
+.transform {
+    transition: transform 0.3s ease;
+}
+
+.hover\:scale-105:hover {
+    filter: drop-shadow(0 20px 25px rgba(59, 130, 246, 0.2));
+}
+
+.hover\:scale-110:hover {
+    filter: drop-shadow(0 25px 35px rgba(59, 130, 246, 0.3));
+}

@@ -22,7 +22,7 @@
 
 
 /* Contenedor principal */
-.public-events { padding: 16px; }
+.public-events { padding: 0; }
 
 .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 
@@ -31,10 +31,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 10px;
-  margin-bottom: 16px;
-  background: #ffffff; /* light default */
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  margin-bottom: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   padding: 12px;
 }
 .filters label {
@@ -118,7 +118,7 @@
   align-items: center;
 }
 /* Tema oscuro (aplicado cuando <html> tiene .dark) */
-:host-context(.dark) .filters { background: #0d1117; border-color: #1f2937; }
+:host-context(.dark) .filters { background: transparent; border-color: transparent; }
 :host-context(.dark) .filters label { color: #9ca3af; }
 :host-context(.dark) .filter-search input,
 :host-context(.dark) .filters select,
@@ -189,4 +189,9 @@
 
 /* Dark variants for skeleton */
 :host-context(.dark) .skeleton-card { background-color: #27272a; }
+
+.card-modern { @apply bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95 transition-all duration-300 hover:shadow-xl overflow-hidden; }
+.card-header { @apply p-6 border-b border-gray-100 dark:border-gray-700; }
+.card-title { @apply text-xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text; }
+.card-subtitle { @apply text-sm text-gray-600 dark:text-gray-400; }
 

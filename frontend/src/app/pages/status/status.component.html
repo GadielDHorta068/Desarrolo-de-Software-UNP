@@ -1,0 +1,133 @@
+<!-- Estado del Sistema - RAFFIFY -->
+
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-primary via-blue-600 to-secondary py-16 sm:py-20">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="max-w-4xl mx-auto text-center text-white">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
+                <span class="text-gradient bg-gradient-to-r from-white to-yellow-300 bg-clip-text text-transparent">
+                    Estado del Sistema
+                </span>
+            </h1>
+            <p class="text-lg sm:text-xl lg:text-2xl text-blue-100">
+                Monitoreo en tiempo real de todos nuestros servicios
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="py-12 sm:py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto">
+
+            <!-- Estado General -->
+            <div
+                class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg mb-8 border border-gray-200 dark:border-gray-700 text-center">
+                <div class="flex items-center justify-center gap-4 mb-4">
+                    <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Todos los Sistemas Operativos</h2>
+                <p class="text-gray-600 dark:text-gray-300">Última verificación: {{lastCheckTime}}</p>
+            </div>
+
+            <!-- Grid de Servicios -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+
+                <div *ngFor="let service of services"
+                    class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white">{{service.name}}</h3>
+                        <div class="w-4 h-4 rounded-full" [ngClass]="{
+                'bg-green-500': service.status === 'operational',
+                'bg-yellow-500': service.status === 'degraded',
+                'bg-red-500': service.status === 'down'
+              }"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">{{service.description}}</p>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-semibold" [ngClass]="{
+                'text-green-600 dark:text-green-400': service.status === 'operational',
+                'text-yellow-600 dark:text-yellow-400': service.status === 'degraded',
+                'text-red-600 dark:text-red-400': service.status === 'down'
+              }">
+                            {{service.statusText}}
+                        </span>
+                        <span class="text-gray-500 dark:text-gray-400">Uptime: {{service.uptime}}%</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Métricas de Rendimiento -->
+            <div
+                class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg mb-8 border border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">📊 Métricas de Rendimiento</h2>
+                <div class="grid md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-primary mb-2">99.9%</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-300">Uptime (30 días)</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-secondary mb-2">145ms</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-300">Latencia Promedio</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-accent mb-2">1,234</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-300">Sorteos Activos</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-primary mb-2">0</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-300">Incidentes Abiertos</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial de Incidentes -->
+            <div
+                class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">📋 Historial de Incidentes</h2>
+
+                <div *ngIf="incidents.length === 0" class="text-center py-8">
+                    <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-gray-600 dark:text-gray-300">No hay incidentes reportados en los últimos 30 días</p>
+                </div>
+
+                <div *ngIf="incidents.length > 0" class="space-y-4">
+                    <div *ngFor="let incident of incidents"
+                        class="border-l-4 border-gray-300 dark:border-gray-600 pl-4 py-2">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="font-semibold text-gray-800 dark:text-white">{{incident.title}}</h4>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{incident.date}}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">{{incident.description}}</p>
+                        <span
+                            class="inline-block mt-2 px-2 py-1 text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded">
+                            Resuelto
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suscripción a Actualizaciones -->
+            <div
+                class="mt-8 bg-gradient-to-r from-primary to-secondary p-8 rounded-xl shadow-lg text-center text-white">
+                <h2 class="text-2xl font-bold mb-4">¿Quieres recibir actualizacio nes?</h2>
+                <p class="mb-6">Suscríbete para recibir notificaciones sobre mantenimientos e incidentes</p>
+                <button class="bg-white text-primary hover:bg-gray-100 font-bold py-3 px-8 rounded-lg transition-all">
+                    Suscribirme a Actualizaciones
+                </button>
+            </div>
+
+        </div>
+    </div>
+</section>

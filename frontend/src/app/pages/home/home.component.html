@@ -1,14 +1,14 @@
 <!-- Hero Section -->
 <section class="bg-gradient-to-br from-primary via-blue-600 to-secondary min-h-screen flex items-center">
-  <div class="container mx-auto px-6 py-8">
-    <div class="grid lg:grid-cols-2 gap-12 items-center">
+  <div class="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
       <div class="text-white">
-        <h1 class="text-5xl lg:text-7xl font-bold mb-6 leading-tight">
+        <h1 class="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-tight">
           <span class="text-gradient bg-gradient-to-r from-white to-yellow-300 bg-clip-text text-transparent">
             RAFFIFY
           </span>
         </h1>
-        <p class="text-xl lg:text-2xl mb-8 text-blue-100">
+        <p class="text-lg sm:text-xl lg:text-2xl mb-6 sm:mb-8 text-blue-100">
           La plataforma digital que moderniza tus sorteos y rifas con transparencia, seguridad y alcance global.
         </p>
         <div class="flex flex-col sm:flex-row gap-4">
@@ -19,92 +19,22 @@
         </div>
       </div>
       <div class="relative">
-        <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-
-          <div
-            class="bg-white/10 dark:bg-gray-800/40 backdrop-blur-md rounded-2xl p-4 md:p-6 shadow-2xl border border-white/20">
-            <button *ngFor="let t of eventTypes" class="px-4 py-1 text-sm rounded-lg transition-colors"
-              (click)="onChangeType(t)" [class.bg-primary]="selectedType===t" [class.text-white]="selectedType===t"
-              [class.text-gray-800]="selectedType!==t" [class.dark:text-gray-200]="selectedType!==t">{{ t }}</button>
-            <div class="py-4">
-
-              <div class="flex items-center justify-between">
-                <div class="inline-flex items-center rounded-xl p-1 bg-black/20 dark:bg-white/10 backdrop-blur">
-                </div>
-              </div>
-
-              <div
-                class="w-full bg-white/20 dark:bg-slate-900/50 backdrop-blur-md rounded-lg shadow-md border border-white/20 relative slider-wrapper">
-                <div class="relative overflow-hidden w-full min-h-60 sm:min-h-64 md:min-h-72 rounded-lg">
-                  <div class="absolute top-0 bottom-0 start-0 flex flex-nowrap transition-transform duration-700 slider-track"
-                    [style.will-change]="'transform'"
-                    [style.transitionTimingFunction]="'cubic-bezier(0.22, 1, 0.36, 1)'"
-                    [style.transform]="'translate3d(-' + (currentIndex * 100) + '%, 0, 0)'">
-                    <div class="w-full flex-shrink-0 featured-slide" *ngFor="let ev of featuredEvents">
-                      <div class="flex justify-center h-full p-4 md:p-6 w-full">
-                        <div class="w-full text-gray-800 dark:text-gray-100">
-                          <div class="flex items-center justify-between mb-2">
-                            <span class="px-2 py-1 text-xs font-medium rounded-full"
-                              [ngClass]="statusClass(ev.statusEvent)">{{ getStatusLabel(ev.statusEvent) }}</span>
-                            <div class="flex items-center gap-2">
-                              <span
-                                class="px-2 py-1 text-xs font-medium rounded-full bg-white/40 text-gray-800 dark:bg-black/40 dark:text-gray-100">{{
-                                ev.categoryName }}</span>
-                              <span *ngIf="ev.isPrivate"
-                                class="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200">Privado</span>
-                              <span *ngIf="ev.isUserRegistered"
-                                class="px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200">Inscrito</span>
-                            </div>
-                          </div>
-
-                          <div class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-1">{{ ev.title }}
-                          </div>
-                          <div class="text-sm text-gray-700 dark:text-gray-300 mb-3">{{ ev.eventType }} • Ganadores: {{
-                            ev.winnersCount }}</div>
-
-                          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                            <div class="text-sm text-gray-700 dark:text-gray-300">Organizador: <span
-                                class="font-medium">{{ getCreatorDisplay(ev) }}</span></div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">Del {{ formatDate(ev.startDate) }} al
-                              {{ formatDate(ev.endDate) }}</div>
-                          </div>
-
-                          <button (click)="onParticipate(ev)"
-                            class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-colors">
-                            Participar
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-
-
-                <div class="flex justify-center absolute -bottom-8 sm:bottom-3 start-0 end-0 space-x-2">
-                  <button *ngFor="let _ of featuredEvents; let i = index"
-                    class="size-3 border border-gray-400 rounded-full cursor-pointer dark:border-neutral-600"
-                    [class.bg-blue-700]="currentIndex===i" [class.border-blue-700]="currentIndex===i"
-                    (click)="setSlide(i)" aria-label="Ir a slide {{i+1}}"></button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <app-featured-events></app-featured-events>
       </div>
     </div>
   </div>
 </section>
 
 <!-- Share Card Section -->
-<section class="py-10 bg-gray-50 dark:bg-gray-900">
-  <div class="container mx-auto px-6">
-    <div class="grid lg:grid-cols-2 gap-12 items-start">
+<section class="py-8 sm:py-10 bg-gray-50 dark:bg-gray-900">
+  <div class="container mx-auto px-4 sm:px-6">
+    <div class="grid md:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-start">
       <div>
-        <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Comparte tu evento facilmente</h3>
+        <h3 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-3 sm:mb-4">Comparte tu evento
+          facilmente</h3>
         <app-event-share-card></app-event-share-card>
       </div>
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 shadow">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">¿Cómo funciona?</h3>
         <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-2">
           <li>Guarda tu URL desde el modal o sección correspondiente.</li>
@@ -118,10 +48,10 @@
 </section>
 
 <!-- Features Section -->
-<section class="py-20 bg-gray-50 dark:bg-gray-900">
-  <div class="container mx-auto px-6">
-    <div class="text-center mb-16">
-      <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 dark:text-white mb-6">
+<section class="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
+  <div class="container mx-auto px-4 sm:px-6">
+    <div class="text-center mb-10 sm:mb-12 lg:mb-16">
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-6">
         ¿Por qué elegir <span class="text-gradient">RAFFIFY</span>?
       </h2>
       <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
@@ -215,10 +145,10 @@
 </section>
 
 <!-- Types of Raffles Section -->
-<section class="py-20 bg-white dark:bg-gray-800">
-  <div class="container mx-auto px-6">
-    <div class="text-center mb-16">
-      <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 dark:text-white mb-6">
+<section class="py-12 sm:py-16 lg:py-20 bg-white dark:bg-gray-800">
+  <div class="container mx-auto px-4 sm:px-6">
+    <div class="text-center mb-10 sm:mb-12 lg:mb-16">
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-6">
         Tipos de <span class="text-gradient">Sorteos</span>
       </h2>
       <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
@@ -226,10 +156,10 @@
       </p>
     </div>
 
-    <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
+    <div class="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center mb-10 sm:mb-12 lg:mb-16">
       <div>
         <div class="bg-gradient-to-r from-primary to-secondary p-1 rounded-2xl">
-          <div class="bg-white dark:bg-gray-800 rounded-2xl p-8">
+          <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 sm:p-6 lg:p-8">
             <div class="flex items-center mb-6">
               <div
                 class="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mr-4">
@@ -321,10 +251,10 @@
 </section>
 
 <!-- CTA Section -->
-<section class="py-20 bg-gradient-to-r from-primary via-blue-600 to-secondary">
-  <div class="container mx-auto px-6 text-center">
+<section class="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-primary via-blue-600 to-secondary">
+  <div class="container mx-auto px-4 sm:px-6 text-center">
     <div class="max-w-4xl mx-auto">
-      <h2 class="text-4xl lg:text-5xl font-bold text-white mb-6">
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
         ¿Listo para modernizar tus sorteos?
       </h2>
       <p class="text-xl text-blue-100 mb-8">
@@ -344,9 +274,9 @@
 </section>
 
 <!-- Modal de Registro -->
-<div *ngIf="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+<div *ngIf="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
   (click)="closeLoginModal()">
-  <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all"
+  <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 max-w-md w-full transform transition-all"
     (click)="$event.stopPropagation()">
     <div class="text-center">
       <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mb-4">

@@ -27,7 +27,6 @@ public class GuessingContest extends Events {
     @Column(name = "max_value", nullable = false)
     private int maxValue;
 
-    @JsonIgnore
     @Column(name = "target_number", nullable = false)
     private int targetNumber;
 

@@ -1,5 +1,7 @@
 package com.desarrollo.raffy.dto;
 
+import com.desarrollo.raffy.model.GuessStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CheckGuessNumberDTO {
     
-    private int guessedNumber; // Número que el usuario está adivinando
+    private GuessStatus status; // Estado en que se encuentra
     private String message;    // Mensaje adicional sobre el estado de la adivinanza
 }

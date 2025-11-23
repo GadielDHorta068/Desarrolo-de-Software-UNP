@@ -1,5 +1,28 @@
 <!-- mercado-pago-brick.component.html -->
 <div class="brick-wrapper relative">
-  <app-loading-indicator [active]="isPaymentLoading" [type]="'overlay'" [message]="'Procesando pago...'" [size]="'md'"></app-loading-indicator>
+
+  <!-- Resumen de compra -->
+  <div class="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600">
+    <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Resumen de compra
+    </h3>
+    <div class="space-y-2">
+      <div class="flex justify-between items-center">
+        <span class="text-gray-600 dark:text-gray-300">Total a pagar</span>
+        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ dataPayment?.ammount |
+          currency:'ARS':'symbol-narrow' }}</span>
+      </div>
+      <div class="flex justify-between items-center text-sm">
+        <span class="text-gray-500 dark:text-gray-400">Cantidad de números</span>
+        <span class="font-medium text-gray-700 dark:text-gray-200">{{ dataPayment?.numbers?.length || 0 }}</span>
+      </div>
+      <div class="flex justify-between items-center text-sm">
+        <span class="text-gray-500 dark:text-gray-400">Email</span>
+        <span class="font-medium text-gray-700 dark:text-gray-200">{{ dataPayment?.email }}</span>
+      </div>
+    </div>
+  </div>
+
+  <app-loading-indicator [active]="isPaymentLoading" [type]="'overlay'" [message]="'Procesando pago...'"
+    [size]="'md'"></app-loading-indicator>
   <div id="card-payment-container"></div>
 </div>

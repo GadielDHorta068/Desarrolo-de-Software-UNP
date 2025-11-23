@@ -572,6 +572,7 @@ public class EmailService {
      * @param priceOfNumber Precio por número
      * @param purchasedNumbers Lista de números adquiridos
      */
+    @Async
     public void sendRaffleNumbersPurchasedEmail(String to,
                                                 String buyerName,
                                                 Long eventId,

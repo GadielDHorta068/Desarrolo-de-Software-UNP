@@ -45,6 +45,7 @@ public class RaffleNumberService {
     @Value("${evolution.defaultInstance:raffy}")
     private String defaultEvolutionInstance;
 
+    @org.springframework.scheduling.annotation.Async
     public void sendWhatsAppText(String number, String text) {
         try {
             if (number == null || number.isBlank() || text == null || text.isBlank()) {
