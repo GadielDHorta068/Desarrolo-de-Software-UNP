@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.desarrollo.raffy.Response;
@@ -21,7 +22,22 @@ public class RegionController {
     
     @GetMapping("/all")
     public ResponseEntity<?> getAllRegions() {
-        List<String> result = regionService.findAllRegionNames();
+        List<Region> result = regionService.findAllRegionNames();
         return Response.ok(result, "ok");
+    }
+
+    @GetMapping("/non-countries")
+    public ResponseEntity<?> getNonCountrieRegions() {
+        List<Region> result = regionService.findAllRegionNames();
+        return Response.ok(result, "ok");
+    }
+
+    @GetMapping("/is-region-contained/event/{eventRegionId}/user/{userRegionId}")
+    public ResponseEntity<?> isUserRegionInsideEventRegion(
+        @PathVariable("eventRegionId") Long eventRegionId,
+        @PathVariable("userRegionId") Long userRegionId
+    ) {
+        boolean result = this.regionService.isUserRegionInsideEventRegion(eventRegionId, userRegionId);
+        return Response.ok(result);
     }
 }

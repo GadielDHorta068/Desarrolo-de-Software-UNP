@@ -79,6 +79,11 @@ public abstract class Events {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // ver
     private Categories category;
 
+    @ManyToOne
+    @JoinColumn(name = "region_id", nullable = true)
+    @NotNull(message = "Debe seleccionar una region")
+    private Region region;
+
     @NotNull(message = "El estado del evento no debe estar vacío")
     @Enumerated(EnumType.STRING)
     @Column(name = "status_event", nullable = false)

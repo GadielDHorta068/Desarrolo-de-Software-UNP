@@ -1,3 +1,5 @@
+import { Region } from "./region";
+
 export enum StatusEvent {
     ACTIVE = 'ACTIVE',
     OPEN = 'OPEN',
@@ -58,12 +60,13 @@ export interface EventsTemp {
     winnersCount: number;
     categoryId: number,
     categoryName: Category,
+    region: Region,
     creator: Creator,
     imageUrl?: string; // Campo opcional para la imagen en base64
     isUserRegistered?: boolean; // Indica si el usuario actual está inscrito en el evento
     quantityOfNumbers: number;
     priceOfNumber: number;
-     isPrivate?: boolean;
+    isPrivate?: boolean;
 }
 // de momento no usamos extensiones sino un solo modelo de eventos con todos los atr (A.T)
 export interface RaffleEvent extends EventsTemp {

@@ -886,6 +886,7 @@ public class EventsController {
             guestUserToSave.setName(aUserCandidate.getName());
             guestUserToSave.setSurname(aUserCandidate.getSurname());
             guestUserToSave.setEmail(aUserCandidate.getEmail());
+            guestUserToSave.setRegion(aUserCandidate.getRegion());
             guestUserToSave.setCellphone(aUserCandidate.getCellphone());
 
             // Guarda el nuevo usuario
@@ -896,6 +897,7 @@ public class EventsController {
             // lo actualiza
             userFromDb.setName(aUserCandidate.getName());
             userFromDb.setSurname(aUserCandidate.getSurname());
+            // userFromDb.setRegion(aUserCandidate.getRegion()); // actualizar?
             userFromDb.setCellphone(aUserCandidate.getCellphone());
             
             // Guarda el usuario actualizado

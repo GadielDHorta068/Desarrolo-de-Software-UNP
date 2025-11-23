@@ -46,6 +46,17 @@
                 </div>
             </div>
 
+            <div>
+                <label for="region">Región</label>
+                <select id="region" formControlName="region" class="form-select">
+                    <option value="" disabled selected>Seleccione una región</option>
+
+                    <option *ngFor="let r of regions" [ngValue]="r">
+                        {{ r.name }}
+                    </option>
+                </select>
+            </div>
+
             <!-- Celular -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Celular (opcional)</label>

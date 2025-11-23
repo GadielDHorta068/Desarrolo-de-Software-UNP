@@ -9,6 +9,8 @@ import { UserDTO } from '../../models/UserDTO';
 import { EventsService } from '../../services/events.service';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Region } from '../../models/region';
+import { RegionService } from '../../services/region.service';
 
 @Component({
   selector: 'app-questionary',
@@ -31,20 +33,30 @@ export class QuestionaryComponent {
 
   form!: FormGroup;
 
+  regions: Region[] = [];
+
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
         private eventService: EventsService,
         private activatedRoute: ActivatedRoute,
+        private regionService: RegionService
     ) {}
 
     ngOnInit() {
         this.initializeUserLogged();
+
+        this.regionService.getAllRegions().subscribe({
+            next: (res) => this.regions = res.data,   // si tu Response tiene structure {data:..., message:...}
+            error: err => console.error(err)
+        });
+        
         // Inicializar form reactivo
         this.form = this.fb.group({
             name: ['', Validators.required],
             surname: ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
+            region: [null, Validators.required],
             cellphone: ['']
         });
 
@@ -65,6 +77,7 @@ export class QuestionaryComponent {
                     name: currentUser.name ?? '',
                     surname: currentUser.surname ?? '',
                     email: currentUser.email ?? '',
+                    region: currentUser.region ?? '',
                     cellphone: currentUser.cellphone ?? ''
                 };
                 this.loggedUser = userDto;
@@ -104,6 +117,7 @@ export class QuestionaryComponent {
             name: this.form.value.name,
             surname: this.form.value.surname,
             email: this.form.value.email,
+            region: this.form.value.region,
             cellphone: cellphone
         };
 

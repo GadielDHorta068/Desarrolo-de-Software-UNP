@@ -10,11 +10,11 @@ import com.desarrollo.raffy.model.Region;
 
 public interface RegionRepository extends JpaRepository<Region, Long> {
     
-    @Query("SELECT r.name FROM Region r")
-    public List<String> findAllRegionNames();
+    @Query("SELECT r FROM Region r")
+    public List<Region> findAllRegions();
 
-    @Query("SELECT r.name FROM Region r WHERE r.regionType != República")
-    public List<String> findRegionNamesWichAreNotCountrys();
+    @Query("SELECT r FROM Region r WHERE r.regionType != 'República'")
+    public List<Region> findRegionsWichAreNotCountrys();
 
     @Query(
         value = 

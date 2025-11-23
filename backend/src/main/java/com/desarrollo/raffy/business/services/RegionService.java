@@ -15,8 +15,15 @@ public class RegionService {
     @Autowired
     private RegionRepository regionRepository;
 
-    public List<String> findAllRegionNames() {
-    
-        return regionRepository.findAllRegionNames();
+    public List<Region> findAllRegionNames() {
+        return regionRepository.findAllRegions();
+    }
+
+    public List<Region> findRegionNamesWichAreNotCountrys() {
+        return regionRepository.findRegionsWichAreNotCountrys();
+    }
+
+    public boolean isUserRegionInsideEventRegion(Long eventGeomId, Long userGeomId) {
+        return regionRepository.isUserRegionInsideEventRegion(eventGeomId, userGeomId);
     }
 }
