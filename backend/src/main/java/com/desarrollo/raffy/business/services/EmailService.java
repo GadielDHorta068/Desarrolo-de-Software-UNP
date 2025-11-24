@@ -15,6 +15,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -679,6 +680,54 @@ public class EmailService {
             </html>
             """,eventTitle, status, reason);
     }
+
+    /**
+     * 
+     * @param to
+     * @param eventTitle
+     * @param userName
+     * @param NumbersTriedUser
+     * @param attemptTime
+     * @param attemptCount
+     * @param attemptEvent
+     */
+    public void sendGuessProgressEmail(
+                                       String to, 
+                                       String eventTitle, 
+                                       String userName, 
+                                       String NumbersTriedUser, 
+                                       LocalDateTime attemptTime, 
+                                       int attemptCount, 
+                                       int attemptEvent,
+                                    Long durationSeconds) {
+        
+        if (to == null || to.isBlank()) return;
+
+        String htmlContent = emailTemplateService.generateGuessProgressTemplate(
+            eventTitle, 
+            userName, 
+            NumbersTriedUser, 
+            attemptTime, 
+            attemptCount, 
+            attemptEvent,
+            durationSeconds
+        );
+        String subject = " tu progreso en el evento - Raffify";
+        try {
+            sendEmailWithInlineResources(to, subject, htmlContent, 
+                                       emailTemplateService.getDefaultInlineResources());
+        } catch (Exception e) {
+            // Fallback a correo simple si falla el HTML
+           sendEmail(to, subject, "Hola " + userName + ",\n\n" +
+                                   "Has realizado un intento en el evento '" + eventTitle + "'.\n" +
+                                   "Números intentados: " + NumbersTriedUser + "\n" +
+                                   "Hora del intento: " + attemptTime + "\n" +
+                                   "Número de intentos: " + attemptCount + " de " + attemptEvent + "\n\n" +
+                                   "Gracias por participar en Raffify.");
+        }
+    }
+
+   
 
     /**
      * Recurso inline para referenciar via CID en HTML.

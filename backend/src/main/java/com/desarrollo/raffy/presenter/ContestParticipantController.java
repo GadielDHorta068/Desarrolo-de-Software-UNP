@@ -3,6 +3,8 @@ package com.desarrollo.raffy.presenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.GuessProgressService;
+import com.desarrollo.raffy.business.services.UrlService;
 import com.desarrollo.raffy.dto.CheckGuessNumberDTO;
 import com.desarrollo.raffy.dto.GuessCheckResponseDTO;
 import com.desarrollo.raffy.dto.GuessProgressResponseDTO;
@@ -21,6 +24,7 @@ import com.desarrollo.raffy.exception.NoInscriptEventExeption;
 import com.desarrollo.raffy.model.GuessProgress;
 import com.desarrollo.raffy.model.GuessStatus;
 import com.desarrollo.raffy.model.GuessingContest;
+import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.StatusEvent;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +49,9 @@ public class ContestParticipantController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private UrlService urlService;
 
     @PostMapping("/{contestId}/participants")
     @Operation(
@@ -81,7 +88,24 @@ public class ContestParticipantController {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(guessCheckResponseDTO);
         }
+
         boolean isCreator = false;
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if(auth != null && auth.getPrincipal() instanceof RegisteredUser u){
+                isCreator = contest.getCreator() != null && contest.getCreator().getId().equals(u.getId());
+
+            }
+        } catch (Exception e) { isCreator = false; }
+        if (contest.isPrivate() && !isCreator) {
+            // Si el concurso es privado, verificamos el código de invitación
+            if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, contestId) == null) {
+                return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("Acceso restringido: Evento privado.");
+            }
+            
+        }
         // Si no esta inscripto entonces se crea el usuario
         GuessProgress guessProgress = guessProgressService.register(dto.getGuessProgress(), dto.getUser(), contestId); 
 

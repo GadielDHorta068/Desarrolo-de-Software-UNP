@@ -1,8 +1,10 @@
 package com.desarrollo.raffy.business.services;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +22,7 @@ import com.desarrollo.raffy.model.User;
 
 @Service
 public class GuessProgressService {
-    
+
     @Autowired
     private GuessProgressRepository repository;
 
@@ -36,27 +38,45 @@ public class GuessProgressService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private EvolutionService evolutionService;
+
+    @Value("${evolution.defaultInstance:raffy}")
+    private String defaultEvolutionInstance;
+
     @Transactional
     public GuessProgress register(GuessProgressDTO dto, UserDTO userDto, Long eventId) {
 
-        GuessingContest contest =
-            (GuessingContest) eventsService.getById(eventId);
+        GuessingContest contest = (GuessingContest) eventsService.getById(eventId);
 
         // Crear el usuario y persistirlo
         User user = getOrCreateUser(userDto);
 
-        //Crear el progreso
+        // Crear el progreso
         GuessProgress gp = new GuessProgress();
         gp.setContest(contest);
         gp.setUser(user);
         gp.setAttemptCount(dto.getAttemptCount());
         gp.setNumbersTried(dto.getNumbersTried());
         gp.setAttemptTime(LocalDateTime.now());
+        gp.setDurationSeconds(dto.getDurationSeconds());
         gp.setHasWon(dto.isHasWon());
 
+        // Enviar correo de notificación
+        emailService.sendGuessProgressEmail(
+                user.getEmail(),
+                contest.getTitle(),
+                user.getName() + " " + user.getSurname(),
+                dto.getNumbersTried(),
+                gp.getAttemptTime(),
+                dto.getAttemptCount(),
+                contest.getMaxAttempts(),
+                gp.getDurationSeconds());
         return repository.save(gp);
     }
-
 
     private User getOrCreateUser(UserDTO userDto) {
         // Buscar usuario existente
@@ -76,7 +96,6 @@ public class GuessProgressService {
         return userService.save(user);
     }
 
-
     @Transactional(readOnly = true)
     public boolean hasUserWon(Long contestId, Long userId) {
         return repository.existsByContestIdAndUserIdAndHasWonTrue(contestId, userId);
@@ -85,18 +104,15 @@ public class GuessProgressService {
     @Transactional(readOnly = true)
     public GuessCheckResponseDTO hasAlreadyParticipated(Long contestId, String email) {
         GuessingContest contest = (GuessingContest) eventsRepository
-            .findById(contestId)
-            .orElseThrow(() ->  new ResourceNotFoundException("Evento no encontrado"));
+                .findById(contestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado"));
 
-        boolean exists = repository.existsByContestIdAndUserEmail(contestId, email);
+        boolean exists = repository.existsByContestIdAndUserEmail(contest.getId(), email);
 
         GuessCheckResponseDTO dto = new GuessCheckResponseDTO();
         dto.setAlreadyParticipated(exists);
         dto.setMessage(
-            exists ?
-            "El usuario ya participó en este concurso." :
-            "El usuario puede participar en este concurso."
-        );
+                exists ? "El usuario ya participó en este concurso." : "El usuario puede participar en este concurso.");
         return dto;
     }
 
@@ -104,7 +120,7 @@ public class GuessProgressService {
     @Transactional
     public User getOrCreateByEmail(UserDTO dto) {
         return userRepository.findByEmail(dto.getEmail())
-            .orElseGet(() -> createGuestUser(dto));
+                .orElseGet(() -> createGuestUser(dto));
     }
 
     private GuestUser createGuestUser(UserDTO dto) {
@@ -117,28 +133,15 @@ public class GuessProgressService {
         return userRepository.save(user);
     }
 
-   /*  public GuessProgress getOrCreateProgress(GuessingContest contest, User user) {
-    return repository.findByContestIdAndUserId(contest.getId(), user.getId())
-            .orElseGet(() -> {
-                GuessProgress gp = new GuessProgress();
-                gp.setUser(user);
-                gp.setContest(contest);
-                gp.setAttemptCount(0);;
-                gp.setNumbersTried("");
-                gp.setDurationSeconds(0L);
-                gp.setHasWon(false);
-                return repository.save(gp);
-            });
-    }
-    */
+    @Transactional(readOnly = true)
+    public List<GuessProgress> findGuessProgressesByContestId(Long contestId) {
 
+        List<GuessProgress> progresses = repository.findByContestId(contestId);
 
+        if (progresses.isEmpty())
+            throw new ResourceNotFoundException("No se encontraron participantes.");
 
-
-
-    public void save(GuessProgress progress) {
-        repository.save(progress);
+        return progresses;
     }
 
-    
 }

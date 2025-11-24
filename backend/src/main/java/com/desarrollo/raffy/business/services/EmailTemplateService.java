@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
@@ -525,5 +526,64 @@ public class EmailTemplateService {
                   .replace(">", "&gt;")
                   .replace("\"", "&quot;")
                   .replace("'", "&#39;");
+    }
+
+    public String generateGuessProgressTemplate(String eventTitle, String userName, String numbersTriedUser,
+            LocalDateTime attemptTime, int attemptCount, int attemptEvent, Long durationSeconds) {
+        
+        String title = "Confirmación de participación en el evento";
+        
+        List<Integer> numbers = new ArrayList<>();
+        for (String numStr : numbersTriedUser.split(",")) {
+            try {
+                numbers.add(Integer.parseInt(numStr.trim()));
+            } catch (NumberFormatException e) {
+                // Ignorar números inválidos
+            }
+        }
+        Collections.sort(numbers);
+        String numbersHtml;
+        if (numbers.isEmpty()) {
+            numbersHtml = "<p style=\"color:#6b7280;\">No se registraron números intentados.</p>";
+        } else {
+            String items = numbers.stream()
+                .map(n -> "<li style=\"margin-bottom:4px;\"><strong>" + escapeHtml(String.valueOf(n)) + "</strong></li>")
+                .collect(Collectors.joining(""));
+            numbersHtml = "<ul style=\"list-style:disc;padding-left:20px;margin-top:8px;\">" + items + "</ul>";
+        }
+
+        StringBuilder msg = new StringBuilder();
+        msg.append("<p>")
+           .append("Hola ").append(escapeHtml(userName)).append(", ")
+           .append("¡gracias por participar en el evento!")
+           .append("</p>");
+        
+        msg.append("<p>")
+           .append("Informe de su participación en el evento <strong>")
+           .append(escapeHtml(eventTitle))
+           .append("</strong>")
+           .append("</p>");
+
+        msg.append("<div style=\"margin-top:12px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;\">")
+           .append("<p style=\"margin:0 0 8px 0;\"><strong>Detalles del participante</strong></p>")
+           .append("<p style=\"margin:0;\">Fecha y hora de participación: <strong>")
+           .append(escapeHtml(attemptTime.toString()))
+           .append("</strong></p>")
+           .append("<p style=\"margin:0;\">Cantidad de intentos realizados: <strong>")
+           .append(escapeHtml(String.valueOf(attemptCount)))
+           .append("/")
+           .append(escapeHtml(String.valueOf(attemptEvent)))
+           .append("</strong></p>")
+           .append("<p style=\"margin:8px 0 0 0;\">Números intentados:</p>")
+           .append(numbersHtml)
+           .append("<p style=\"margin:0;\">Duración total (segundos): <strong>")
+           .append(escapeHtml(String.valueOf(durationSeconds)))
+           .append("</strong></p>")
+           .append("</div>");
+
+        String actionText = "Ver detalles del evento";
+        String footerMessage = "¡Gracias por participar en Rafiffy! Esperamos verte pronto en más eventos.";
+        return renderNotificationFromTemplate(title, msg.toString(), actionText, frontendUrl, footerMessage);
+        
     }
 }
