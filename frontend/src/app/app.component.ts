@@ -9,11 +9,13 @@ import { CommonModule } from '@angular/common';
 import { AdminInscriptService } from './services/admin/adminInscript';
 import { NotificationService } from './services/notification.service';
 import { UserDTO } from './models/UserDTO';
+import { EventTypes } from './models/events.model';
+import { Guessprogress } from './pages/guessprogress/guessprogress';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, HeaderComponent, QuestionaryComponent, RaffleNumbersComponent, LoadingIndicator],
+  imports: [CommonModule, RouterOutlet, RouterLink, HeaderComponent, QuestionaryComponent, RaffleNumbersComponent, LoadingIndicator, Guessprogress],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   animations: [slideInAnimation],
@@ -25,8 +27,9 @@ export class AppComponent {
 
   showModalInscript: boolean = false;
   showRaffleModal: boolean = false;
+  showGuessModal: boolean = false;
   redirectingToPayment: boolean = false;
-  
+
   constructor(
     private contexts: ChildrenOutletContexts,
     private cdr: ChangeDetectorRef,
@@ -44,35 +47,63 @@ export class AppComponent {
       this.showRaffleModal = resp;
       this.cdr.markForCheck();
     })
+
+    this.adminInscriptService.openGuessing$.subscribe(resp => {
+      this.showGuessModal = resp;
+      this.cdr.markForCheck();
+    })
   }
-  
-  openModalRaffle(){
+
+  openModalRaffle() {
     this.showRaffleModal = !this.showRaffleModal;
   }
-  openModalInscript(){
+  openModalInscript() {
     this.showModalInscript = !this.showModalInscript;
   }
 
-  onRaffleClosed(){
+  openModalGuess() {
+    this.showGuessModal = !this.showGuessModal;
+    this.cdr.detectChanges();
+  }
+
+  onRaffleClosed() {
     this.adminInscriptService.setOpenModalRaffle(false);
   }
-  onInscriptClosed(){
+  onInscriptClosed() {
     this.adminInscriptService.setOpenModalInscript(false);
   }
 
-  async onQuestionarySubmit(data: UserDTO){
+  onGuessClosed() {
+    this.adminInscriptService.setOpenModalGuessing(false);
+  }
+
+  async onQuestionarySubmit(data: UserDTO) {
     this.redirectingToPayment = true;
     try {
       const respInscript: any = await this.adminInscriptService.onInscript(data);
-      if(respInscript.status == 200){
-        if(respInscript.redirectPay){
-          this.router.navigate(['/event/payment']);
-        }
-        else{
-          this.notificationService.notifySuccess(respInscript.message)
+      if (respInscript.status == 200) {
+        // if (respInscript.redirectPay) {
+        //   this.router.navigate(['/event/payment']);
+        // }
+        // else {
+        //   this.notificationService.notifySuccess(respInscript.message)
+        // }
+        if (respInscript.status == 200) {
+          if (respInscript.redirectPay) {
+            this.router.navigate(['/event/payment']);
+          }
+          else {
+            if (respInscript.isGuessing) {
+              this.notificationService.notifySuccess(respInscript.message + ". A jugar!")
+              this.adminInscriptService.setOpenModalGuessing(true);
+            }
+            else {
+              this.notificationService.notifySuccess(respInscript.message + ". Gracias por inscribirse!")
+            }
+          }
         }
       }
-      else{
+      else {
         this.notificationService.notifyError("Ha ocurrido un error en la inscripcion al evento.");
       }
     } finally {
@@ -80,8 +111,8 @@ export class AppComponent {
       this.cdr.markForCheck();
     }
   }
-  
-  onProceedToQuestionary(data: any){
+
+  onProceedToQuestionary(data: any) {
     this.adminInscriptService.toBuyNumbersRaffle(data);
   }
 

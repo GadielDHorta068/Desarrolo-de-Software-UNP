@@ -11,32 +11,32 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-questionary',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './questionary.component.html',
-  styleUrl: './questionary.component.css'
+    selector: 'app-questionary',
+    standalone: true,
+    imports: [CommonModule, ReactiveFormsModule],
+    templateUrl: './questionary.component.html',
+    styleUrl: './questionary.component.css'
 })
 export class QuestionaryComponent {
 
-  @Input() eventId!: number;
+    @Input() eventId!: number;
 
-  loggedUser?: UserDTO;
-  @Output() onInscript = new EventEmitter<UserDTO>();
-  @Output() close = new EventEmitter<void>();
+    loggedUser?: UserDTO;
+    @Output() onInscript = new EventEmitter<UserDTO>();
+    @Output() close = new EventEmitter<void>();
 
-  event!: EventsTemp | null;
-  allEventTypes = EventTypes;
-  allEventStates = StatusEvent;
+    event!: EventsTemp | null;
+    allEventTypes = EventTypes;
+    allEventStates = StatusEvent;
 
-  form!: FormGroup;
+    form!: FormGroup;
 
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
         private eventService: EventsService,
         private activatedRoute: ActivatedRoute,
-    ) {}
+    ) { }
 
     ngOnInit() {
         this.initializeUserLogged();
@@ -49,30 +49,30 @@ export class QuestionaryComponent {
         });
 
         if (this.loggedUser) {
-          // Procesar el número de teléfono antes de hacer patchValue
-          const processedUser = { ...this.loggedUser };
-          if (processedUser.cellphone) {
-            processedUser.cellphone = this.normalizePhoneNumber(processedUser.cellphone);
-          }
-          this.form.patchValue(processedUser);
+            // Procesar el número de teléfono antes de hacer patchValue
+            const processedUser = { ...this.loggedUser };
+            if (processedUser.cellphone) {
+                processedUser.cellphone = this.normalizePhoneNumber(processedUser.cellphone);
+            }
+            this.form.patchValue(processedUser);
         }
     }
 
     private initializeUserLogged(): void {
         const currentUser = this.authService.getCurrentUserValue();
-            if (currentUser) {
-                const userDto: UserDTO = {
-                    name: currentUser.name ?? '',
-                    surname: currentUser.surname ?? '',
-                    email: currentUser.email ?? '',
-                    cellphone: currentUser.cellphone ?? ''
-                };
-                this.loggedUser = userDto;
-                console.log("userLogged: ", this.loggedUser);
-            }
-            else {
-                console.error('error al obtener el userLogged');
-            }
+        if (currentUser) {
+            const userDto: UserDTO = {
+                name: currentUser.name ?? '',
+                surname: currentUser.surname ?? '',
+                email: currentUser.email ?? '',
+                cellphone: currentUser.cellphone ?? ''
+            };
+            this.loggedUser = userDto;
+            console.log("userLogged: ", this.loggedUser);
+        }
+        else {
+            console.warn('error al obtener el userLogged');
+        }
     }
 
     validatePhoneInput(event: KeyboardEvent) {
@@ -88,7 +88,7 @@ export class QuestionaryComponent {
         const normalizedDigits = this.normalizePhoneNumber(input.value || '');
         this.form.get('cellphone')?.setValue(normalizedDigits, { emitEvent: false });
     }
-    
+
     onConfirmInscription(): void {
         // Forzamos validación visual si el usuario intenta enviar sin completar
         if (this.form.invalid) {
@@ -114,12 +114,12 @@ export class QuestionaryComponent {
     // Método privado para normalizar números de teléfono
     private normalizePhoneNumber(phoneNumber: string): string {
         const digits = (phoneNumber || '').replace(/\D/g, ''); // solo dígitos
-        
+
         // Si el número tiene 12 dígitos y empieza con "54", recortar los primeros 2 dígitos
         if (digits.length === 12 && digits.startsWith('54')) {
             return digits.substring(2); // Remover los primeros 2 dígitos (54)
         }
-        
+
         // Si tiene más de 10 dígitos, tomar solo los primeros 10
         return digits.slice(0, 10);
     }

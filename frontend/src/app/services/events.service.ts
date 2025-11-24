@@ -16,7 +16,7 @@ export class EventsService {
   constructor(
     private http: HttpClient,
     private authService: AuthService
-  ) {}
+  ) { }
 
   // crea eventos del tipo SORTEO
   // createEvent(creatorId: string, event: EventsCreate|RaffleCreate, eventType: string): Observable<EventsTemp[]> {
@@ -39,7 +39,7 @@ export class EventsService {
       ? new HttpParams().set('invite', invite)
       : undefined;
     if (invite && invite.trim().length > 0) {
-      try { localStorage.setItem('invite_token', invite); } catch {}
+      try { localStorage.setItem('invite_token', invite); } catch { }
     }
     return this.http.get<EventsTemp>(`${this.apiUrl}/id/${eventId}`, { headers, params });
   }
@@ -67,7 +67,7 @@ export class EventsService {
       'Authorization': `Bearer ${this.authService.getToken()}`,
       'Content-Type': 'application/json'
     });
-    return this.http.get<EventsTemp[]>(`${this.apiUrl}/creator/`+id, { headers });
+    return this.http.get<EventsTemp[]>(`${this.apiUrl}/creator/` + id, { headers });
   }
 
   // recupera todos los eventos creados (usado para test rapido)
@@ -86,8 +86,8 @@ export class EventsService {
   }
 
   // actualiza los datos del evento
-  updateGiveaways(dataEvent: EventsCreate, eventId: string, userId: number|undefined): Observable<EventsTemp[]> {
-    if(!userId){
+  updateGiveaways(dataEvent: EventsCreate, eventId: string, userId: number | undefined): Observable<EventsTemp[]> {
+    if (!userId) {
       console.warn("Error al actualizar el evento. Se espera el id de un usuario.");
       return throwError(() => new Error("Se espera el id de un usuario."));
     }
@@ -99,8 +99,8 @@ export class EventsService {
   }
 
   // actualiza los datos del evento, sean sorteos o rifas
-  updateEvents(dataEvent: EventsCreate, eventId: string, userId: number|undefined): Observable<any> {
-    if(!userId){
+  updateEvents(dataEvent: EventsCreate, eventId: string, userId: number | undefined): Observable<any> {
+    if (!userId) {
       console.warn("Error al actualizar el evento. Se espera el id de un usuario.");
       return throwError(() => new Error("Se espera el id de un usuario."));
     }
@@ -108,11 +108,15 @@ export class EventsService {
       'Authorization': `Bearer ${this.authService.getToken()}`,
       'Content-Type': 'application/json'
     });
-    let pathEventType = (dataEvent.eventType == EventTypes.GIVEAWAY) ? "giveaway" : "raffle";
+    let pathEventType = (dataEvent.eventType == EventTypes.GIVEAWAY) ? "giveaway"
+      : (dataEvent.eventType == EventTypes.GUESSING_CONTEST) ? "guessing-contest" : "raffle";
+    if (dataEvent.eventType == EventTypes.GUESSING_CONTEST) {
+      dataEvent.targetNumber = -1;
+    }
     return this.http.put<any>(`${this.apiUrl}/update/${pathEventType}/${eventId}/user/${userId}`, dataEvent, { headers });
   }
 
-// Actualiza el estado de un evento (ABIERTO/CERRADO/FINALIZADO/BLOQUEADO)
+  // Actualiza el estado de un evento (ABIERTO/CERRADO/FINALIZADO/BLOQUEADO)
   updateEventStatus(eventId: number, userId: number, status: StatusEvent): Observable<EventsTemp> {
     const payload = { statusEvent: status };
     const headers = new HttpHeaders({
@@ -149,26 +153,28 @@ export class EventsService {
     return this.http.get<any[]>(`${this.apiUrl}/participants/event/${eventId}`, { headers });
   }
 
-    getSoldNumbersByRaffleId(aRaffleId: number): Observable<number[]> {
-        return this.http.get<number[]>(`${this.apiUrl}/raffle/${aRaffleId}/sold-numbers`);
-    }
+  getSoldNumbersByRaffleId(aRaffleId: number): Observable<number[]> {
+    return this.http.get<number[]>(`${this.apiUrl}/raffle/${aRaffleId}/sold-numbers`);
+  }
 
-    getParticipantUsersByEventId(anEventId: number, anEventType: EventTypes, aUserEmail: string): Observable<RaffleParticipantDTO[]> {
-        const headers = new HttpHeaders({
-            'Authorization': `Bearer ${this.authService.getToken()}`,
-            'Content-Type': 'application/json'
-        });
-        if (anEventType != EventTypes.RAFFLES) {
-            return this.http.get<RaffleParticipantDTO[]>(`${this.apiUrl}/${anEventId}/get-users-participants`, { headers, 
-                params: { aUserEmail }
-            });
-        }
-        // return this.http.get<UserDTO[]>(`${this.apiUrl}/${anEventId}/get-raffle-owners`, { headers });
-        return this.http.get<RaffleParticipantDTO[]>(`${this.apiUrl}/${anEventId}/get-raffle-participants`, { headers,
-            params: { aUserEmail }
-        });
+  getParticipantUsersByEventId(anEventId: number, anEventType: EventTypes, aUserEmail: string): Observable<RaffleParticipantDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.authService.getToken()}`,
+      'Content-Type': 'application/json'
+    });
+    if (anEventType != EventTypes.RAFFLES) {
+      return this.http.get<RaffleParticipantDTO[]>(`${this.apiUrl}/${anEventId}/get-users-participants`, {
+        headers,
+        params: { aUserEmail }
+      });
     }
-    // USAR RAFFLE PARTICIPANT PARA AMBOS CASOS.
+    // return this.http.get<UserDTO[]>(`${this.apiUrl}/${anEventId}/get-raffle-owners`, { headers });
+    return this.http.get<RaffleParticipantDTO[]>(`${this.apiUrl}/${anEventId}/get-raffle-participants`, {
+      headers,
+      params: { aUserEmail }
+    });
+  }
+  // USAR RAFFLE PARTICIPANT PARA AMBOS CASOS.
 
   // Buscar eventos por título (endpoint público)
   searchEvents(title: string): Observable<EventsTemp[]> {
@@ -179,7 +185,7 @@ export class EventsService {
   getEventsByStatus(status: StatusEvent): Observable<EventsTemp[]> {
     return this.http.get<EventsTemp[]>(`${this.apiUrl}/status/${status}`);
   }
- //Obtener eventos por tipo (endpoint público)
+  //Obtener eventos por tipo (endpoint público)
   getEventsByType(type: EventTypes): Observable<EventsTemp[]> {
     return this.http.get<EventsTemp[]>(`${this.apiUrl}/type/${type}`);
   }
@@ -199,7 +205,7 @@ export class EventsService {
     if (options.start) params['start'] = options.start;
     if (options.end) params['end'] = options.end;
     if (options.winnerCount !== undefined && options.winnerCount !== null) params['winnerCount'] = options.winnerCount;
-    if( options.emailUserRegister) params['emailUserRegister'] = options.emailUserRegister;
+    if (options.emailUserRegister) params['emailUserRegister'] = options.emailUserRegister;
     console.log('Fetching active events with params:', params);
     return this.http.get<EventsTemp[]>(`${this.apiUrl}/active`, { params });
   }

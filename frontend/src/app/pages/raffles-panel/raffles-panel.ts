@@ -172,13 +172,13 @@ export class RafflesPanel implements OnInit {
         error: () => { }
       });
     }
-    this.formPanel.get('lowerLimit')?.valueChanges.subscribe(value => {
-      this.maxAttempts = this.calculateValue(value, this.formPanel.get('upperLimit')?.value);
-      console.log("maxAttempts: ", this.maxAttempts);
+    this.formPanel.get('minValue')?.valueChanges.subscribe(value => {
+      this.maxAttempts = this.calculateValue(value, this.formPanel.get('maxValue')?.value);
+      // console.log("maxAttempts: ", this.maxAttempts);
     });
-    this.formPanel.get('upperLimit')?.valueChanges.subscribe(value => {
-      this.maxAttempts = this.calculateValue(this.formPanel.get('lowerLimit')?.value, value);
-      console.log("maxAttempts: ", this.maxAttempts);
+    this.formPanel.get('maxValue')?.valueChanges.subscribe(value => {
+      this.maxAttempts = this.calculateValue(this.formPanel.get('minValue')?.value, value);
+      // console.log("maxAttempts: ", this.maxAttempts);
     });
   }
 
@@ -231,8 +231,11 @@ export class RafflesPanel implements OnInit {
     if (type == EventTypes.RAFFLES) {
       return "raffle";
     }
+    if (type == EventTypes.GUESSING_CONTEST) {
+      return "guessing-contest";
+    }
     // por default toma el sorteo
-    return "giveaway";
+    return "raffle";
   }
 
   // para test interno
@@ -261,10 +264,10 @@ export class RafflesPanel implements OnInit {
       priceRaffle: new FormControl({ value: '', disabled: false }),
       quantityNumbersRaffle: new FormControl({ value: '', disabled: false }),
       // propios de adivinanzas
-      numberToGuess: new FormControl({ value: '', disabled: false }),
-      upperLimit: new FormControl({ value: '', disabled: false }),
-      lowerLimit: new FormControl({ value: '', disabled: false }),
-      quantityAttempts: new FormControl({ value: '', disabled: false })
+      targetNumber: new FormControl({ value: '', disabled: false }),
+      maxValue: new FormControl({ value: '', disabled: false }),
+      minValue: new FormControl({ value: '', disabled: false }),
+      maxAttempts: new FormControl({ value: '', disabled: false })
     });
   }
 
@@ -302,10 +305,10 @@ export class RafflesPanel implements OnInit {
       event.priceOfNumber = dataEvent.priceRaffle;
     }
     if (isGuessingContest) {
-      event.numberToGuess = dataEvent.numberToGuess;
-      event.upperLimit = dataEvent.upperLimit;
-      event.lowerLimit = dataEvent.lowerLimit;
-      event.quantityAttempts = dataEvent.quantityAttempts;
+      event.targetNumber = dataEvent.targetNumber;
+      event.maxValue = dataEvent.maxValue;
+      event.minValue = dataEvent.minValue;
+      event.maxAttempts = dataEvent.maxAttempts;
     }
     // return isRaffle ? event as RaffleCreate: event as EventsCreate;
     return event as EventsCreate;
@@ -345,40 +348,40 @@ export class RafflesPanel implements OnInit {
   }
 
   private clearValidatorsGuessingContest() {
-    this.formPanel.get('numberToGuess')?.clearValidators();
-    this.formPanel.get('upperLimit')?.clearValidators();
-    this.formPanel.get('lowerLimit')?.clearValidators();
-    this.formPanel.get('quantityAttempts')?.clearValidators();
-    this.formPanel.get('numberToGuess')?.updateValueAndValidity();
-    this.formPanel.get('upperLimit')?.updateValueAndValidity();
-    this.formPanel.get('lowerLimit')?.updateValueAndValidity();
-    this.formPanel.get('quantityAttempts')?.updateValueAndValidity();
+    this.formPanel.get('targetNumber')?.clearValidators();
+    this.formPanel.get('maxValue')?.clearValidators();
+    this.formPanel.get('minValue')?.clearValidators();
+    this.formPanel.get('maxAttempts')?.clearValidators();
+    this.formPanel.get('targetNumber')?.updateValueAndValidity();
+    this.formPanel.get('maxValue')?.updateValueAndValidity();
+    this.formPanel.get('minValue')?.updateValueAndValidity();
+    this.formPanel.get('maxAttempts')?.updateValueAndValidity();
   }
 
   private setValidatorsGuessingContest() {
-    this.formPanel.get('numberToGuess')?.setValidators([
+    this.formPanel.get('targetNumber')?.setValidators([
       Validators.required,
       Validators.pattern(/^\d+$/),
-      reviewRangeValidators('lowerLimit', 'upperLimit') // tu validador cruzado
+      reviewRangeValidators('minValue', 'maxValue') // tu validador cruzado
     ]);
-    this.formPanel.get('quantityAttempts')?.setValidators([
+    this.formPanel.get('maxAttempts')?.setValidators([
       Validators.required
     ]);
-    this.formPanel.get('lowerLimit')?.setValidators([
+    this.formPanel.get('minValue')?.setValidators([
       Validators.required,
       Validators.pattern(/^\d+$/),
-      lowerRangeValidator('upperLimit')
+      lowerRangeValidator('maxValue')
     ]);
-    this.formPanel.get('upperLimit')?.setValidators([
+    this.formPanel.get('maxValue')?.setValidators([
       Validators.required,
       Validators.pattern(/^\d+$/),
-      upperRangeValidator('lowerLimit')
+      upperRangeValidator('minValue')
     ]);
 
-    this.formPanel.get('numberToGuess')?.updateValueAndValidity();
-    this.formPanel.get('quantityAttempts')?.updateValueAndValidity();
-    this.formPanel.get('lowerLimit')?.updateValueAndValidity();
-    this.formPanel.get('upperLimit')?.updateValueAndValidity();
+    this.formPanel.get('targetNumber')?.updateValueAndValidity();
+    this.formPanel.get('maxAttempts')?.updateValueAndValidity();
+    this.formPanel.get('minValue')?.updateValueAndValidity();
+    this.formPanel.get('maxValue')?.updateValueAndValidity();
   }
 
   resetForm() {

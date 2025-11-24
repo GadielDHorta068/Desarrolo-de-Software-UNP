@@ -89,6 +89,11 @@ export interface EventsCreate {
     quantityOfNumbers: number;
     priceOfNumber: number;
     isPrivate?: boolean;
+    // propio de adivinanzas
+    targetNumber: number;
+    minValue: number;
+    maxValue: number;
+    maxAttempts: number;
 }
 // de momento no usamos extensiones sino un solo modelo de eventos con todos los atr (A.T)
 export interface RaffleCreate extends EventsCreate {

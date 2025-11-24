@@ -10,6 +10,7 @@ import { GuessprogressService } from '../../services/guessprogress.service';
 import { QuestionaryComponent } from '../questionary/questionary.component';
 import { UserDTO } from '../../models/UserDTO';
 import { NotificationService } from '../../services/notification.service';
+import { AdminInscriptService } from '../../services/admin/adminInscript';
 
 @Component({
   selector: 'app-guessprogress',
@@ -18,14 +19,14 @@ import { NotificationService } from '../../services/notification.service';
   templateUrl: './guessprogress.html',
   styleUrl: './guessprogress.css'
 })
-export class Guessprogress implements OnInit{
+export class Guessprogress implements OnInit {
 
   @Output() closeGuessProgressModal = new EventEmitter<void>()
   @Output() proceedToInscript = new EventEmitter<string>();
 
   event!: EventsTemp | null;
   allEventStates = StatusEvent;
-  
+
   //Estado del juego
   gamePhase: 'registration' | 'playing' | 'won' = 'registration';
   showModalInscript = false;
@@ -35,7 +36,7 @@ export class Guessprogress implements OnInit{
   resultMessage: string = '';
   resultMessageType: 'info' | 'success' | 'error' = 'info';
   enteredNumbers: string = '';
-  currentUser?: UserDTO;
+  currentUser?: UserDTO | null;
 
   // Cronómetro
   elapsedTime: number = 0;
@@ -49,8 +50,8 @@ export class Guessprogress implements OnInit{
   //Rango
   minValue: number = 0;
   maxValue: number = 0;
-  
-  private subscription?: Subscription;         
+
+  private subscription?: Subscription;
 
   constructor(
     private eventService: EventsService,
@@ -58,15 +59,16 @@ export class Guessprogress implements OnInit{
     private cdr: ChangeDetectorRef,
     private adminEventService: AdminEventService,
     private guessProgressService: GuessprogressService,
-    private notificationService: NotificationService
-  ){}
+    private notificationService: NotificationService,
+    private adminInscriptService: AdminInscriptService
+  ) { }
 
   ngOnInit(): void {
     // Obtener eventId de la ruta
     this.activatedRoute.params.subscribe(params => {
       const eventId = params['eventId'];
       console.log('eventId de ruta:', eventId); // Debug
-      
+
       if (eventId) {
         // Obtener el evento del backend
         this.eventService.getEventById(eventId).subscribe({
@@ -99,6 +101,23 @@ export class Guessprogress implements OnInit{
         }
       }
     });
+
+    this.adminInscriptService.openGuessing$.subscribe(open => {
+      this.showModalInscript = open;
+      this.cdr.detectChanges();
+    })
+
+    this.adminInscriptService.dataCurrentPlayer$.subscribe(player => {
+      this.currentUser = player;
+      console.log("[playerCurrent] => datos del jugador: ", this.currentUser);
+      // this.cdr.detectChanges();
+      if (this.currentUser) {
+        this.gamePhase = 'playing';
+        this.startTimer();
+        this.cdr.detectChanges();
+        // this.onInscriptionSubmit(this.currentUser);
+      }
+    })
   }
 
   private initGuessProgressDummy(): void {
@@ -111,7 +130,7 @@ export class Guessprogress implements OnInit{
   }
 
   private initGuessProgress(): void {
-    if(!this.event) return;
+    if (!this.event) return;
 
     //Extraer datos del evento
     this.minValue = (this.event as any).minValue;
@@ -133,11 +152,11 @@ export class Guessprogress implements OnInit{
 
   onInscriptionSubmit(user: UserDTO): void {
     this.currentUser = user;
-    
+
     //Verificar si el usuario ya participó
     this.guessProgressService.checkParticipation(this.event!.id, user.email).subscribe({
       next: (response) => {
-        if(response.alreadyParticipated){
+        if (response.alreadyParticipated) {
           this.notificationService.notifyError(response.message);
           this.closeModal();
           return;
@@ -154,15 +173,15 @@ export class Guessprogress implements OnInit{
         this.notificationService.notifyError('Error al verificar participación');
       }
     });
-  //Debug sin backend
+    //Debug sin backend
     /* this.gamePhase = 'playing';
         this.showModalInscript = false;
         this.startTimer();
         this.cdr.detectChanges(); */
   }
 
-  onInscriptionClosed(): void{
-    this.closeModal();
+  onInscriptionClosed(): void {
+    this.showModalInscript = false;
   }
 
 
@@ -185,7 +204,7 @@ export class Guessprogress implements OnInit{
     this.attemptCount++;
 
     // Verificar si ya excedió intentos
-    if (this.attemptCount > this.maxAttempts) {
+    if (this.attemptCount >= this.maxAttempts) {
       this.resultMessage = `Has excedido el máximo de ${this.maxAttempts} intentos`;
       this.resultMessageType = 'error';
       this.gamePhase = 'won'; // Terminar juego (perdió)

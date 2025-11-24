@@ -89,26 +89,31 @@
                                         explorador.</span>
                                 </span>
                             </label>
-                            <div class="pill-toggle-container">
-                                <input type="checkbox" id="private-event-toggle" formControlName="isPrivate"
-                                    class="sr-only">
-                                <label for="private-event-toggle" class="pill-toggle">
-                                    <span class="pill-option public-option">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z">
-                                            </path>
-                                        </svg>
-                                    </span>
-                                    <span class="pill-option private-option">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                                            </path>
-                                        </svg>
-                                    </span>
-                                    <div class="pill-slider"></div>
-                                </label>
+                            <div class="pill-toggle-container flex items-center gap-[3%]">
+                                <div>
+                                    <input type="checkbox" id="private-event-toggle" formControlName="isPrivate"
+                                        class="sr-only">
+                                    <label for="private-event-toggle" class="pill-toggle">
+                                        <span class="pill-option public-option">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                        </span>
+                                        <span class="pill-option private-option">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                                </path>
+                                            </svg>
+                                        </span>
+                                        <div class="pill-slider"></div>
+                                    </label>
+                                </div>
+                                <div>
+                                    <strong>{{ formEvent.get('isPrivate')?.value ? 'PRIVADO' : 'PÚBLICO' }}</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -214,35 +219,34 @@
                         <label for="rangoInf" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Rango inferior(*)
                         </label>
-                        <input type="text" id="rangoInf" formControlName="lowerLimit" name="rangoInf"
+                        <input type="text" id="rangoInf" formControlName="minValue" name="rangoInf"
                             class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]" />
                     </div>
                     <div class="w-1/2">
                         <label for="rangoSup" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Rango superior(*)
                         </label>
-                        <input type="text" id="rangoSup" formControlName="upperLimit" name="rangoSup"
+                        <input type="text" id="rangoSup" formControlName="maxValue" name="rangoSup"
                             class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]" />
                     </div>
                 </div>
                 <div class="flex gap-2">
                     <div class="w-1/2">
-                        <label for="numberToGuess"
+                        <label for="targetNumber"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Nro a adivinar(*)
                         </label>
-                        <input type="text" id="numberToGuess" formControlName="numberToGuess" name="numberToGuess"
+                        <input type="text" id="targetNumber" formControlName="targetNumber" name="targetNumber"
                             class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]" />
                     </div>
                     <div class="w-1/2">
                         <label for="attempts" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Nro de intentos(*)
                         </label>
-                        <input type="number" min="1" [max]="maxAttempts" id="attempts"
-                            formControlName="quantityAttempts" name="attempts"
+                        <input type="number" min="1" [max]="maxAttempts" id="attempts" formControlName="maxAttempts"
+                            name="attempts"
                             class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]" />
-                        <div
-                            *ngIf="formEvent.get('quantityAttempts')?.invalid && formEvent.get('quantityAttempts')?.touched">
+                        <div *ngIf="formEvent.get('maxAttempts')?.invalid && formEvent.get('maxAttempts')?.touched">
                             <small class="text-red-600">Debés seleccionar una cantidad de intentos</small>
                         </div>
                     </div>

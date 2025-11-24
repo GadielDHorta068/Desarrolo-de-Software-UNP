@@ -149,7 +149,7 @@ export class EditEvent implements OnInit {
       currentEvent => {
         this.eventAux = currentEvent ? { ...currentEvent } : null;
         this.event = currentEvent;
-        // console.log("[edit-event] => evento seleccionado: ", this.event);
+        console.log("[edit-event] => evento seleccionado: ", this.event);
         if (this.event) {
           this.initForm();
           this.cdr.markForCheck();
@@ -166,6 +166,7 @@ export class EditEvent implements OnInit {
       this.eventService.getEventById("" + this.eventIdParam).subscribe(
         resp => {
           this.event = resp;
+          console.log("[edit-event] => info del evento recuperado: ", this.event);
           if (this.event) {
             this.eventAux = { ...this.event };
             this.initForm();
@@ -218,10 +219,10 @@ export class EditEvent implements OnInit {
       event.quantityOfNumbers = dataEvent.quantityOfNumbers;
     }
     if (dataEvent.drawType === EventTypes.GUESSING_CONTEST) {
-      event.numberToGuess = dataEvent.numberToGuess;
-      event.upperLimit = dataEvent.upperLimit;
-      event.lowerLimit = dataEvent.lowerLimit;
-      event.quantityAttempts = dataEvent.quantityAttempts;
+      event.targetNumber = dataEvent.targetNumber;
+      event.maxValue = dataEvent.maxValue;
+      event.minValue = dataEvent.minValue;
+      event.maxAttempts = dataEvent.maxAttempts;
     }
     return event as EventsCreate;
     // return {
@@ -275,13 +276,13 @@ export class EditEvent implements OnInit {
       priceRaffle: new FormControl({ value: this.event?.priceOfNumber, disabled: true }),
       quantityNumbersRaffle: new FormControl({ value: this.event?.quantityOfNumbers, disabled: true }),
       // propios de adivinanzas
-      numberToGuess: new FormControl({ value: "***", disabled: true }),
-      upperLimit: new FormControl({ value: this.event?.maxValue, disabled: true }),
-      lowerLimit: new FormControl({ value: this.event?.minValue, disabled: true }),
-      quantityAttempts: new FormControl({ value: this.event?.maxAttempts, disabled: false })
+      targetNumber: new FormControl({ value: "***", disabled: true }),
+      maxValue: new FormControl({ value: this.event?.maxValue, disabled: true }),
+      minValue: new FormControl({ value: this.event?.minValue, disabled: true }),
+      maxAttempts: new FormControl({ value: this.event?.maxAttempts, disabled: false })
     });
     if (this.event?.eventType == EventTypes.GUESSING_CONTEST) {
-      this.maxAttempts = this.calculateValue(this.formEvent.get('lowerLimit')?.value, this.formEvent.get('upperLimit')?.value);
+      this.maxAttempts = this.calculateValue(this.formEvent.get('minValue')?.value, this.formEvent.get('maxValue')?.value);
     }
   }
 
