@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { AuthGuard, GuestGuard } from './guards/auth.guard';
-
 export const routes: Routes = [
   {
     path: '',
@@ -197,6 +196,11 @@ export const routes: Routes = [
     path: 'transparency',
     loadComponent: () => import('./pages/legal/transparency.component').then(m => m.TransparencyComponent),
     title: 'Transparencia - Raffy'
+  },
+  {
+    path: 'guess-progress',
+    loadComponent: () => import('./pages/guessprogress/guessprogress').then(m => m.Guessprogress),
+    title: 'Adivina el número - Raffy',
   },
   {
     path: '**',

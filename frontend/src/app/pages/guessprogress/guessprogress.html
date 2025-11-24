@@ -1,15 +1,119 @@
-<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-    
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl w-full max-w-5xl mx-4 my-10 relative overflow-auto max-h-[90vh]">
+<!--DEBUG-->
+<!-- <div class="fixed bottom-0 left-0 bg-black text-white p-4 z-50">
+  <p>gamePhase: {{ gamePhase }}</p>
+  <p>showModalInscript: {{ showModalInscript }}</p>
+  <p>event: {{ event | json }}</p>
+</div> -->
 
-        <button (click)="closeModal()"
-            class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-        >
-        <div class="flex flex-col gap-4">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-white text-center">
-                Adivina el número
-            </h2>
-        </div>
-        </button>
+<!-- Fase de Inscripción -->
+<app-questionary 
+  *ngIf="gamePhase === 'registration' && showModalInscript" 
+  (close)="onInscriptionClosed()"
+  (onInscript)="onInscriptionSubmit($event)">
+</app-questionary>
+
+<!-- Fondo oscuro para fase de juego -->
+<div *ngIf="gamePhase === 'playing'" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
+  
+  <!-- Contenedor del modal -->
+  <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 relative">
+    
+    <!-- Botón cerrar -->
+    <button
+      (click)="closeModal()"
+      class="absolute top-4 right-4 text-gray-400 hover:text-gray-200 text-2xl"
+    >
+      ✕
+    </button>
+
+    <!-- Encabezado -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 mb-2">
+        ADIVINA EL NÚMERO
+      </h1>
+      <p class="text-gray-300">si puedes...</p>
     </div>
+
+    <div class="grid grid-cols-3 gap-4 mb-8">
+      <!-- Intentos -->
+      <div class="bg-gray-700 bg-opacity-50 rounded-lg p-4 text-center">
+        <p class="text-gray-300 text-sm mb-2">Intentos</p>
+        <p class="text-3xl font-bold text-yellow-400">{{ attemptCount }}/{{ maxAttempts }}</p>
+      </div>
+
+      <!-- Cronómetro -->
+      <div class="bg-gray-700 bg-opacity-50 rounded-lg p-4 text-center">
+        <p class="text-gray-300 text-sm mb-2">Tiempo</p>
+        <p class="text-3xl font-bold text-blue-400 font-mono">{{ getFormattedTime() }}</p>
+      </div>
+
+      <!-- Rango -->
+      <div class="bg-gray-700 bg-opacity-50 rounded-lg p-4 text-center">
+        <p class="text-gray-300 text-sm mb-2">Rango</p>
+        <p class="text-lg font-bold text-green-400">{{ minValue }} - {{ maxValue }}</p>
+      </div>
+    </div>
+
+    <!-- Números ingresados -->
+    <div class="bg-gray-700 bg-opacity-30 rounded-lg p-4 mb-6 min-h-16">
+      <p class="text-gray-300 text-sm mb-2">Números ingresados:</p>
+      <div class="flex flex-wrap gap-2">
+        <span *ngFor="let num of enteredNumbers.split(',')" class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
+          {{ num }}
+        </span>
+        <span *ngIf="!enteredNumbers" class="text-gray-500 italic">Ninguno aún...</span>
+      </div>
+    </div>
+
+    <!-- Input y botón -->
+    <div class="flex gap-2 mb-4">
+      <input
+        type="number"
+        [(ngModel)]="userGuess"
+        [min]="minValue"
+        [max]="maxValue"
+        placeholder="Ingresa un número"
+        (keyup.enter)="onGuessNumber()"
+        class="flex-1 px-4 py-3 rounded-lg border-2 border-gray-600 bg-gray-800 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+      />
+      <button
+        (click)="onGuessNumber()"
+        [disabled]="!userGuess || gamePhase !== 'playing'"
+        class="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition"
+      >
+        Enviar
+      </button>
+    </div>
+
+    <!-- Mensaje de resultado -->
+    <div *ngIf="resultMessage" 
+      class="p-4 rounded-lg mb-4"
+      [ngClass]="{
+        'bg-blue-900 bg-opacity-50 text-blue-200 border border-blue-500': resultMessageType === 'info',
+        'bg-green-900 bg-opacity-50 text-green-200 border border-green-500': resultMessageType === 'success',
+        'bg-red-900 bg-opacity-50 text-red-200 border border-red-500': resultMessageType === 'error'
+      }">
+      <p class="text-center">{{ resultMessage }}</p>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="text-center text-gray-400 text-sm">
+      <p>Máximo de intentos: {{ maxAttempts }}</p>
+      <p>Máximo de tiempo: 60 minutos</p>
+    </div>
+  </div>
+</div>
+
+<!-- Fase ganadora (opcional - mostrar mensaje o redireccionar) -->
+<div *ngIf="gamePhase === 'won' && !showModalInscript" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+  <div class="bg-gray-900 rounded-2xl p-8 text-center max-w-md">
+    <h2 class="text-2xl font-bold text-yellow-400 mb-4">Juego Finalizado</h2>
+    <p class="text-gray-300 mb-6">{{ resultMessage }}</p>
+    <button
+      (click)="closeModal()"
+      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg"
+    >
+      Cerrar
+    </button>
+  </div>
 </div>

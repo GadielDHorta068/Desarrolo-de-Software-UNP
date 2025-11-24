@@ -23,12 +23,18 @@ import com.desarrollo.raffy.model.GuessStatus;
 import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.StatusEvent;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import org.modelmapper.ModelMapper;
 
 @Controller
 @RequestMapping("/api/contest")
+@Tag(
+    name = "Participantes de Adivinar el número", 
+    description = "Gestión de inscripción: registro, chequeo de participación y verificación de números adivinados"
+)
 public class ContestParticipantController {
     
     @Autowired
@@ -41,6 +47,10 @@ public class ContestParticipantController {
     private ModelMapper modelMapper;
 
     @PostMapping("/{contestId}/participants")
+    @Operation(
+        summary = "Registrar un participante en un concurso de adivinar el número", 
+        description = "Registra un nuevo participante en el concurso especificado, creando un usuario si es necesario."
+    )
     public ResponseEntity<?> registerParticipant(
         @PathVariable("contestId") Long contestId,
         @Valid @RequestBody ParticipantRequestDTO dto,
@@ -82,6 +92,10 @@ public class ContestParticipantController {
     }
 
     @GetMapping("/check-participant/guess/{contestId}")
+    @Operation(
+        summary = "Verificar si un usuario ya participó en un concurso de adivinar el número", 
+        description = "Comprueba si un usuario, identificado por su correo electrónico, ya ha participado en el concurso especificado."
+    )
     public ResponseEntity<?> checkParticipation(
             @PathVariable("contestId") Long contestId,
             @RequestParam String email) {
@@ -98,6 +112,10 @@ public class ContestParticipantController {
      * Método para verificar si el usuario acierta o no el número ganador.
      */
     @GetMapping("/guess/{contestId}/check-number")
+    @Operation(
+        summary = "Verificar número adivinado en concurso de adivinar el número", 
+        description = "Compara el número adivinado por el participante con el número objetivo del concurso y devuelve si es mayor, menor o si ha ganado."
+    )
     public ResponseEntity<CheckGuessNumberDTO> checkGuessNumber(
             @PathVariable("contestId") Long contestId,
             @RequestParam("guessedNumber") int guessedNumber) {
