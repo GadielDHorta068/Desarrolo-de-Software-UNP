@@ -30,7 +30,7 @@ import jakarta.validation.constraints.Size;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Setter; 
 import lombok.AllArgsConstructor;
 
 import com.desarrollo.raffy.util.OnCreate;

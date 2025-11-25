@@ -61,7 +61,11 @@ public class GuessProgressService {
         gp.setUser(user);
         gp.setAttemptCount(dto.getAttemptCount());
         gp.setNumbersTried(dto.getNumbersTried());
-        gp.setAttemptTime(LocalDateTime.now());
+        if (dto.getLastAttemptTime() != null) {
+            gp.setAttemptTime(dto.getLastAttemptTime().toLocalDateTime());
+        } else {
+            gp.setAttemptTime(LocalDateTime.now());
+        }
         gp.setDurationSeconds(dto.getDurationSeconds());
         gp.setHasWon(dto.isHasWon());
 
