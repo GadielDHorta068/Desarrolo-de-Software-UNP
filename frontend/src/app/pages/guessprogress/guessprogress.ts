@@ -315,7 +315,7 @@ export class Guessprogress implements OnInit {
       attemptCount: this.attemptCount,
       numbersTried: this.enteredNumbers,
       hasWon: hasWon,
-      lastAttemptTime: new Date(),
+      lastAttemptTime: new Date().toISOString(),
       durationSeconds: this.elapsedTime
     };
 

@@ -2,7 +2,8 @@ export interface GuessProgressDTO {
     attemptCount: number;
     numbersTried: string;
     hasWon: boolean;
-    lastAttemptTime: Date;
+    // lastAttemptTime: Date;
+    lastAttemptTime: string;
     durationSeconds: number;
 }
 

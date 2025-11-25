@@ -99,6 +99,7 @@ export class AdminInscriptService {
             this.dataCurrentPlayerSubject.next(user);
             respInscript.status = 200;
             respInscript.isGuessing = true;
+            respInscript.allowed = !respInscript.alreadyParticipated;
           }
           return respInscript;
         }

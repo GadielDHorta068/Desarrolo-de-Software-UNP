@@ -94,6 +94,10 @@ export class AppComponent {
           }
           else {
             if (respInscript.isGuessing) {
+              if (!respInscript.allowed) {
+                this.notificationService.notifyError(respInscript.message);
+                return;
+              }
               this.notificationService.notifySuccess(respInscript.message + ". A jugar!")
               this.adminInscriptService.setOpenModalGuessing(true);
             }
