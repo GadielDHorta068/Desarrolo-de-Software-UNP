@@ -19,6 +19,8 @@ import { AdminInscriptService } from '../../services/admin/adminInscript';
 import { InviteLoginComponent } from '../../shared/components/invite-login/invite-login.component';
 import { ReportsFormComponent, ResumeService } from '../../shared/components/reports-form/reports-form.component';
 import { ReportService } from '../../services/report.service';
+import { GuessprogressService } from '../../services/guessprogress.service';
+import { DataPlayParticipantDTO } from '../../models/guessprogressDTO';
 
 @Component({
     selector: 'app-management-event',
@@ -100,7 +102,8 @@ export class ManagementEvent {
         private cdr: ChangeDetectorRef,
         private notificationService: NotificationService,
         private adminInscriptService: AdminInscriptService,
-        private reportsService: ReportService
+        private reportsService: ReportService,
+        private guessProgressService: GuessprogressService
     ) { }
 
     ngAfterViewInit() {
@@ -214,35 +217,49 @@ export class ManagementEvent {
     }
 
     loadParticipants(eventId: number, eventType: EventTypes): void {
-        this.eventService.getParticipantUsersByEventId(eventId, eventType, this.authService.getCurrentUserValue()?.email || "null").subscribe({
-            next: (data) => {
-                if (eventType === EventTypes.RAFFLES) {
-                    const map = new Map<string, { name: string; surname: string; email: string; numbers: number[]; position: number }>();
-                    (data as RaffleParticipantDTO[]).forEach(p => {
-                        const key = p.email;
-                        const existing = map.get(key);
-                        if (existing) {
-                            existing.numbers.push(p.number);
-                            existing.position = existing.position || p.position || 0;
-                        } else {
-                            map.set(key, { name: p.name, surname: p.surname, email: p.email, numbers: [p.number], position: p.position || 0 });
-                        }
-                    });
-                    this.raffleParticipantsGrouped = Array.from(map.values()).map(g => ({
-                        ...g,
-                        numbers: g.numbers.sort((a, b) => a - b)
-                    }));
-                    this.participants = [];
-                } else {
-                    this.participants = data;
-                    this.raffleParticipantsGrouped = [];
+        if (eventType == EventTypes.GUESSING_CONTEST) {
+            this.guessProgressService.getParticipants(eventId).subscribe({
+                next: (data) => {
+                    this.participants = this.parseDataPlayParticipants(data);
+                    this.cdr.detectChanges();
+                },
+                error: (err) => {
+                    console.error('Error al obtener participantes:', err);
+                    this.notificationService.notifyError('Error al obtener participantes');
                 }
-                this.cdr.detectChanges();
-            },
-            error: (err) => {
-                console.error('Error al obtener participantes:', err);
-            }
-        });
+            });
+        }
+        else {
+            this.eventService.getParticipantUsersByEventId(eventId, eventType, this.authService.getCurrentUserValue()?.email || "null").subscribe({
+                next: (data) => {
+                    if (eventType === EventTypes.RAFFLES) {
+                        const map = new Map<string, { name: string; surname: string; email: string; numbers: number[]; position: number }>();
+                        (data as RaffleParticipantDTO[]).forEach(p => {
+                            const key = p.email;
+                            const existing = map.get(key);
+                            if (existing) {
+                                existing.numbers.push(p.number);
+                                existing.position = existing.position || p.position || 0;
+                            } else {
+                                map.set(key, { name: p.name, surname: p.surname, email: p.email, numbers: [p.number], position: p.position || 0 });
+                            }
+                        });
+                        this.raffleParticipantsGrouped = Array.from(map.values()).map(g => ({
+                            ...g,
+                            numbers: g.numbers.sort((a, b) => a - b)
+                        }));
+                        this.participants = [];
+                    } else {
+                        this.participants = data;
+                        this.raffleParticipantsGrouped = [];
+                    }
+                    this.cdr.detectChanges();
+                },
+                error: (err) => {
+                    console.error('Error al obtener participantes:', err);
+                }
+            });
+        }
     }
 
     // devuelve el lugar en el podio
@@ -350,6 +367,16 @@ export class ManagementEvent {
         else {
             this.notificationService.notifyError(data.msg);
         }
+    }
+
+    private parseDataPlayParticipants(data: DataPlayParticipantDTO[]): RaffleParticipantDTO[] {
+        return data.map((item) => ({
+            name: item.name,
+            surname: item.surname,
+            email: item.email,
+            number: 0,
+            position: 0
+        })) as RaffleParticipantDTO[];
     }
 
 }

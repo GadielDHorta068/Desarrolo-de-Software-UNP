@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { ParticipantRequestDTO } from '../models/participantRequestDTO';
 import { CheckGuessNumberDTO } from '../models/checkGuessNumberDTO';
 import { GuessCheckResponseDTO } from '../models/guessCheckResponseDTO';
+import { DataPlayParticipantDTO } from '../models/guessprogressDTO';
 
 @Injectable({
   providedIn: 'root',
@@ -35,6 +36,13 @@ export class GuessprogressService {
     return this.http.get<CheckGuessNumberDTO>(
       `${this.apiUrl}/guess/${contestId}/check-number`,
       { params: { guessedNumber } }
+    );
+  }
+
+  // Recupera los participantes del evento
+  getParticipants(contestId: number): Observable<DataPlayParticipantDTO[]> {
+    return this.http.get<DataPlayParticipantDTO[]>(
+      `${this.apiUrl}/guess/${contestId}/participants`
     );
   }
 
