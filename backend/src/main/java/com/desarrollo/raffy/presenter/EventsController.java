@@ -428,17 +428,37 @@ public class EventsController {
     @Operation(summary = "Participantes del evento", description = "Lista participantes del evento sin datos sensibles")
     public ResponseEntity<?> getParticipantsByEventId(@PathVariable("eventId") Long eventId) {
         try {
-            List<Participant> participants = participantService.findParticipantsByEventId(eventId);
-            log.info("Número de participantes obtenidos: " + participants.size());
-            if (participants.isEmpty()) {
+            Events event = eventsService.getById(eventId);
+            if (event == null) {
+                return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
+            }
+
+            List<ParticipantDTO> response;
+
+            if (event instanceof Giveaways) {
+                List<Participant> participants = participantService.findParticipantsByEventId(eventId);
+                // log.info("Número de participantes obtenidos: " + participants.size());
+                if (participants.isEmpty()) {
+                    return new ResponseEntity<>("No se encontraron participantes para el evento con ID: " + eventId,
+                            HttpStatus.NOT_FOUND);
+                }
+                response = participants.stream()
+                        .map(this::toParticipantDTO)
+                        .toList();
+            } else if (event instanceof GuessingContest) {
+                List<GuessProgress> participants = guessProgressService.findGuessProgressesByContestId(eventId);
+                // log.info("Número de participantes obtenidos: " + participants.size());
+                if (participants.isEmpty()) {
+                    return new ResponseEntity<>("No se encontraron participantes para el evento con ID: " + eventId,
+                            HttpStatus.NOT_FOUND);
+                }
+                response = participants.stream()
+                        .map(this::toParticipantDTO)
+                        .toList();
+            } else {
                 return new ResponseEntity<>("No se encontraron participantes para el evento con ID: " + eventId,
                         HttpStatus.NOT_FOUND);
             }
-
-            // Crear DTOs para participantes (sin información sensible)
-            List<ParticipantDTO> response = participants.stream()
-                    .map(this::toParticipantDTO)
-                    .toList();
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -629,6 +649,17 @@ public class EventsController {
         dto.setPosition(participant.getPosition());
         dto.setEventId(participant.getEvent().getId());
         dto.setEventTitle(participant.getEvent().getTitle());
+        return dto;
+    }
+
+    private ParticipantDTO toParticipantDTO(GuessProgress gp) {
+        ParticipantDTO dto = new ParticipantDTO();
+        dto.setParticipantId(gp.getUser().getId());
+        dto.setName(gp.getUser().getName());
+        dto.setSurname(gp.getUser().getSurname());
+        dto.setPosition(gp.getPosition());
+        dto.setEventId(gp.getContest().getId());
+        dto.setEventTitle(gp.getContest().getTitle());
         return dto;
     }
 
