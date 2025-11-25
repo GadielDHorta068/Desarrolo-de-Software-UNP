@@ -86,6 +86,10 @@ export class ManagementEvent {
         return !isCreator && !this.event?.isUserRegistered && this.event?.statusEvent === StatusEvent.OPEN;
     }
 
+    get isAdmin(): boolean {
+        return this.authService.getCurrentUserValue()?.userType == "ADMIN";
+    }
+
     constructor(
         private adminEventService: AdminEventService,
         private handleDatePipe: HandleDatePipe,
@@ -97,9 +101,9 @@ export class ManagementEvent {
         private notificationService: NotificationService,
         private adminInscriptService: AdminInscriptService,
         private reportsService: ReportService
-    ) {}
+    ) { }
 
-    ngAfterViewInit(){
+    ngAfterViewInit() {
         this.adminEventService.winnersEvent$.subscribe(winners => {
             this.winners = winners;
         });
@@ -131,8 +135,8 @@ export class ManagementEvent {
                     this.initForm();
                     this.cdr.markForCheck();
 
-                    if(this.authService.isAuthenticated()){
-                        this.reportsService.hasReportedEvent(""+this.event?.id, ""+this.authService.getCurrentUserValue()?.email).subscribe(
+                    if (this.authService.isAuthenticated()) {
+                        this.reportsService.hasReportedEvent("" + this.event?.id, "" + this.authService.getCurrentUserValue()?.email).subscribe(
                             data => {
                                 this.hasReport = data;
                                 this.cdr.markForCheck();
@@ -185,19 +189,19 @@ export class ManagementEvent {
     }
 
 
-    async onInscript(){
+    async onInscript() {
         if (this.accessRestricted) {
             return;
         }
         const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
         // console.log("[onInscript] => estado del evento: ", respStatus);
-        if(!respStatus){
+        if (!respStatus) {
             this.notificationService.notifyError("No fue posible realizar la operación");
         }
-        else{
-            if(respStatus != StatusEvent.OPEN){
+        else {
+            if (respStatus != StatusEvent.OPEN) {
                 this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
-                if(this.event){
+                if (this.event) {
                     this.event.statusEvent = respStatus as StatusEvent;
                     this.cdr.detectChanges();
                 }
@@ -205,7 +209,7 @@ export class ManagementEvent {
         }
     }
 
-    goHome(){
+    goHome() {
         this.router.navigate(['/home']);
     }
 
@@ -296,7 +300,7 @@ export class ManagementEvent {
             this.loadParticipants(this.event.id, this.event.eventType);
         }
     }
-    
+
     // controles de pestaña
     isRegisteredTab(): boolean {
         return this.tab === this.TAB_REGISTERED;
@@ -311,39 +315,39 @@ export class ManagementEvent {
     }
 
     // le brinda al usuario la posibilidad de reportar un evento
-    onReport(){
+    onReport() {
         // invitar al usuario a que se loguee para crear el reporte
-        if(!this.authService.isAuthenticated()){
+        if (!this.authService.isAuthenticated()) {
             this.showInviteLogin = true;
             this.cdr.detectChanges();
         }
-        else{
+        else {
             // mostramos el modal de reportes
             this.showFormReport = true;
             this.cdr.detectChanges();
         }
     }
 
-    onReportClosed(){
+    onReportClosed() {
         this.showFormReport = false;
     }
 
-    onInviteClosed(data: any){
+    onInviteClosed(data: any) {
         this.showInviteLogin = false;
         this.cdr.detectChanges();
-        if(data?.redirect){
+        if (data?.redirect) {
             this.router.navigateByUrl("/login");
         }
     }
 
     // muestra el resultado del reporte del evento
-    resultReport(data: ResumeService){
+    resultReport(data: ResumeService) {
         // data.status == "OK" ? this.notificationService.notifySuccess(data.msg): this.notificationService.notifyError(data.msg);
-        if(data.status == "OK"){
+        if (data.status == "OK") {
             this.notificationService.notifySuccess(data.msg);
             this.hasReport = true;
         }
-        else{
+        else {
             this.notificationService.notifyError(data.msg);
         }
     }
