@@ -32,6 +32,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 
@@ -155,13 +156,16 @@ public class ContestParticipantController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{contestId}/participants")
+    @GetMapping("/guess/{contestId}/participants")
     @Operation(summary = "Obtener participantes de un concurso de adivinar el número", description = "Devuelve una lista de participantes inscritos en el concurso especificado.")
-    public ResponseEntity<?> getGuessProgressByContestId(
+    public ResponseEntity<List<GuessProgressResponseDTO>> getGuessProgressByContestId(
             @PathVariable("contestId") Long contestId) {
 
         List<GuessProgress> gpList = guessProgressService.findGuessProgressesByContestId(contestId);
-        return ResponseEntity.status(HttpStatus.OK).body(gpList);
+        List<GuessProgressResponseDTO> responseList = gpList.stream()
+                .map(gp -> modelMapper.map(gp, GuessProgressResponseDTO.class))
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
 }
