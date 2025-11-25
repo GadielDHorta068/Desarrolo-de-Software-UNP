@@ -300,7 +300,12 @@ export class EditEvent implements OnInit {
   }
 
   private parseDate(fecha: string): string {
-    const [dia, mes, anio] = fecha.split('-');
+    console.log("[edit-event] => fecha recibida: ", fecha);
+
+    const [dia, mes, anio] = fecha.split('/');
+    // if(!dia || !mes || !anio){
+    //   const [dia, mes, anio] = fecha.split('');
+    // }
 
     const diaFormateado = dia.padStart(2, '0');
     const mesFormateado = mes.padStart(2, '0');
