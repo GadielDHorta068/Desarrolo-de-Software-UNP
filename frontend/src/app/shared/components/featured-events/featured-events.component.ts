@@ -15,7 +15,7 @@ import { EventsTemp, EventTypes, StatusEvent } from '../../../models/events.mode
 export class FeaturedEventsComponent implements OnInit, OnDestroy {
     featuredEvents: EventsTemp[] = [];
     selectedType: EventTypes = EventTypes.GIVEAWAY;
-    eventTypes: EventTypes[] = [EventTypes.GIVEAWAY, EventTypes.RAFFLES];
+    eventTypes: EventTypes[] = [EventTypes.GIVEAWAY, EventTypes.GUESSING_CONTEST, EventTypes.RAFFLES];
     loadingFeatured = false;
     currentIndex = 0;
     autoplayMs = 4000;
@@ -100,6 +100,14 @@ export class FeaturedEventsComponent implements OnInit, OnDestroy {
         const c: any = ev.creator as any;
         if (!c) return '';
         return c.nickname || `${c.name || ''} ${c.surname || ''}`.trim();
+    }
+
+    getEventTypeLabel(t: EventTypes | undefined): string {
+        if (!t) return '';
+        if (t === EventTypes.GIVEAWAY) return 'Sorteo';
+        if (t === EventTypes.GUESSING_CONTEST) return 'Adivinanza';
+        if (t === EventTypes.RAFFLES) return 'Rifa';
+        return String(t);
     }
 
     statusClass(s: StatusEvent): string {
