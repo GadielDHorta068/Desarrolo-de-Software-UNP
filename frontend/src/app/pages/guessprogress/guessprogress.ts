@@ -334,8 +334,8 @@ export class Guessprogress implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error al registrar el juego:', err);
-        this.notificationService.notifyError('Error al registrar tu participación');
+        const message = this.getHttpErrorMessage(err) || 'Error al registrar tu participación';
+        this.notificationService.notifyError(message);
       }
     });
   }
@@ -356,5 +356,16 @@ export class Guessprogress implements OnInit {
   ngOnDestroy(): void {
     this.stopTimer();
     this.subscription?.unsubscribe();
+  }
+  private getHttpErrorMessage(err: any): string {
+    try {
+      if (!err) return '';
+      if (typeof err.error === 'string') return err.error;
+      if (err.error && typeof err.error.message === 'string') return err.error.message;
+      if (typeof err.message === 'string') return err.message;
+      return '';
+    } catch {
+      return '';
+    }
   }
 }

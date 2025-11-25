@@ -215,10 +215,8 @@ export class RafflesPanel implements OnInit {
         this.router.navigateByUrl("/event/management/" + response.id);
       },
       error: (error) => {
-        console.warn('[Eventos]: error al crear el evento: ', error);
-        // // NOTA: cuando la fecha esta errada no es un json la respuesta, corregir
-        this.notificationService.notifyError("Error al crear el evento. ", error.error);
-        // });
+        const message = this.getHttpErrorMessage(error) || "Error al crear el evento";
+        this.notificationService.notifyError(message);
       }
     });
   }
@@ -405,4 +403,15 @@ export class RafflesPanel implements OnInit {
     return Math.round(Math.log2(max - min + 1));
   }
 
+  private getHttpErrorMessage(err: any): string {
+    try {
+      if (!err) return '';
+      if (typeof err.error === 'string') return err.error;
+      if (err.error && typeof err.error.message === 'string') return err.error.message;
+      if (typeof err.message === 'string') return err.message;
+      return '';
+    } catch {
+      return '';
+    }
+  }
 }
