@@ -27,4 +27,4 @@ import { CommonModule } from '@angular/common';
   `,
   styles: []
 })
-export class FeaturesComponent {}
+export class FeaturesComponent { }
