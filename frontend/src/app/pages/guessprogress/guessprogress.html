@@ -67,13 +67,16 @@
     <!-- Input y botón -->
     <div class="flex gap-2 mb-4">
       <input type="number" [(ngModel)]="userGuess" [min]="minValue" [max]="maxValue" placeholder="Ingresa un número"
-        (keyup.enter)="onGuessNumber()"
+        (keyup.enter)="onGuessNumber()" [disabled]="gamePhase !== 'playing' || attemptCount >= maxAttempts"
         class="flex-1 px-4 py-3 rounded-lg border-2 border-gray-600 bg-gray-800 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
-      <button (click)="onGuessNumber()" [disabled]="!userGuess || gamePhase !== 'playing'"
+
+      <button (click)="onGuessNumber()"
+        [disabled]="!userGuess || gamePhase !== 'playing' || attemptCount >= maxAttempts"
         class="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition">
         Enviar
       </button>
     </div>
+
 
     <!-- Mensaje de resultado -->
     <div *ngIf="resultMessage" class="p-4 rounded-lg mb-4" [ngClass]="{

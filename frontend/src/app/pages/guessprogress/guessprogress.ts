@@ -52,6 +52,7 @@ export class Guessprogress implements OnInit {
   maxValue: number = 0;
 
   private subscription?: Subscription;
+  finalElapsedTime: number = 0;
 
   constructor(
     private eventService: EventsService,
@@ -186,6 +187,10 @@ export class Guessprogress implements OnInit {
 
 
   onGuessNumber(): void {
+    if (this.attemptCount >= this.maxAttempts || this.gamePhase !== 'playing') {
+      return;
+    }
+
     if (!this.userGuess || this.userGuess === null) {
       this.resultMessage = 'Por favor ingresa un número';
       this.resultMessageType = 'error';
@@ -204,7 +209,7 @@ export class Guessprogress implements OnInit {
     this.attemptCount++;
 
     // Verificar si ya excedió intentos
-    if (this.attemptCount >= this.maxAttempts) {
+    if (this.attemptCount > this.maxAttempts) {
       this.resultMessage = `Has excedido el máximo de ${this.maxAttempts} intentos`;
       this.resultMessageType = 'error';
       this.gamePhase = 'won'; // Terminar juego (perdió)
@@ -233,11 +238,18 @@ export class Guessprogress implements OnInit {
           this.stopTimer();
           this.showWinAnimation();
           this.finishGame(true);
+        } else if (this.attemptCount >= this.maxAttempts) {
+          // Se agotaron los intentos y no ganó
+          this.resultMessage = `¡Lo siento! Has agotado tus ${this.maxAttempts} intentos.`;
+          this.resultMessageType = 'error';
+          this.gamePhase = 'won'; // Game Over
+          this.stopTimer();
+          this.finishGame(false);
         }
 
         // Mostrar intentos restantes
         const remainingAttempts = this.maxAttempts - this.attemptCount;
-        if (response.status !== 'WIN' && remainingAttempts > 0) {
+        if (this.gamePhase === 'playing' && remainingAttempts > 0) {
           this.resultMessage += ` (Intentos restantes: ${remainingAttempts})`;
         }
 
@@ -251,6 +263,7 @@ export class Guessprogress implements OnInit {
         this.cdr.detectChanges();
       }
     });
+
   }
 
   private startTimer(): void {
@@ -273,15 +286,22 @@ export class Guessprogress implements OnInit {
   private stopTimer(): void {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
-      this.timerInterval = undefined;
+      this.timerInterval = null;
     }
+    this.finalElapsedTime = this.elapsedTime;
   }
 
   getFormattedTime(): string {
-    const minutes = Math.floor(this.elapsedTime / 60);
-    const seconds = this.elapsedTime % 60;
+    // Si el juego terminó, mostrar el tiempo final congelado
+    const timeToShow = (this.gamePhase !== 'playing' && this.finalElapsedTime != null)
+      ? this.finalElapsedTime
+      : this.elapsedTime;
+
+    const minutes = Math.floor(timeToShow / 60);
+    const seconds = timeToShow % 60;
     return `${this.pad(minutes)}:${this.pad(seconds)}`;
   }
+
 
   private pad(num: number): string {
     return num < 10 ? `0${num}` : `${num}`;

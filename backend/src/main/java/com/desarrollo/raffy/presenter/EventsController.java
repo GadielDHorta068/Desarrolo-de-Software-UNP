@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
+import com.desarrollo.raffy.model.GuessProgress;
 import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.StatusEvent;
@@ -29,6 +30,7 @@ import com.desarrollo.raffy.model.RaffleNumber;
 import com.desarrollo.raffy.Response;
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.FeaturedEventsService;
+import com.desarrollo.raffy.business.services.GuessProgressService;
 import com.desarrollo.raffy.business.services.ParticipantService;
 import com.desarrollo.raffy.business.services.RaffleNumberService;
 import com.desarrollo.raffy.business.services.UserMapper;
@@ -60,7 +62,6 @@ import com.desarrollo.raffy.dto.UserDTO;
 import com.desarrollo.raffy.dto.WinnerDTO;
 
 import com.desarrollo.raffy.exception.NoInscriptEventExeption;
-
 
 import org.modelmapper.ModelMapper;
 
@@ -101,27 +102,30 @@ public class EventsController {
     @Autowired
     private com.desarrollo.raffy.business.services.UrlService urlService;
 
+    @Autowired
+    private GuessProgressService guessProgressService;
 
     @PostMapping("/create/giveaway/{idUser}")
     @Operation(summary = "Crear sorteo (Giveaway)", description = "Crea un evento de tipo sorteo para el usuario creador")
     public ResponseEntity<?> createGiveaway(
-        @RequestBody Giveaways giveaways, 
-        @PathVariable("idUser") Long idUser) {
-        
+            @RequestBody Giveaways giveaways,
+            @PathVariable("idUser") Long idUser) {
+
         // Validaciones de fechas
         if (giveaways.getEndDate() == null) {
             return new ResponseEntity<>("Debe especificar la fecha de fin del evento", HttpStatus.BAD_REQUEST);
         }
         if (giveaways.getEndDate().isBefore(LocalDate.now())) {
-            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio",
+                    HttpStatus.BAD_REQUEST);
         }
-        
+
         Giveaways created = eventsService.create(giveaways, idUser);
 
         if (created != null) {
             auditLogsService.createAuditEvent(created);
             EventSummaryDTO dto = eventsService.getEventSummaryById(created.getId());
-            
+
             return new ResponseEntity<>(dto, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>("Error al crear el evento", HttpStatus.BAD_REQUEST);
@@ -131,35 +135,39 @@ public class EventsController {
     @PostMapping("/create/guessing-contest/{idUser}")
     @Operation(summary = "Crear concurso de adivinanza", description = "Crea un evento de tipo concurso de adivinanza para el usuario creador")
     public ResponseEntity<?> createGuessingContest(
-        @RequestBody GuessingContest guessingContest, 
-        @PathVariable("idUser") Long idUser) {
-        
+            @RequestBody GuessingContest guessingContest,
+            @PathVariable("idUser") Long idUser) {
+
         // Validaciones de fechas
         if (guessingContest.getEndDate() == null) {
             return new ResponseEntity<>("Debe especificar la fecha de fin del evento.", HttpStatus.BAD_REQUEST);
         }
         if (guessingContest.getEndDate().isBefore(LocalDate.now())) {
-            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio.",
+                    HttpStatus.BAD_REQUEST);
         }
 
-        if(guessingContest.getMaxValue() < guessingContest.getMinValue()){
-            return new ResponseEntity<>("El número mínimo no puede ser mayor que el número mayor.", HttpStatus.BAD_REQUEST);
-        }
-        
-        if(guessingContest.getMaxValue() == guessingContest.getMinValue()){
-            return new ResponseEntity<>("El número mínimo no puede ser igual que el número mayor.", HttpStatus.BAD_REQUEST);
+        if (guessingContest.getMaxValue() < guessingContest.getMinValue()) {
+            return new ResponseEntity<>("El número mínimo no puede ser mayor que el número mayor.",
+                    HttpStatus.BAD_REQUEST);
         }
 
-        if(guessingContest.getMaxValue() == 0 || guessingContest.getMinValue() == 0){
+        if (guessingContest.getMaxValue() == guessingContest.getMinValue()) {
+            return new ResponseEntity<>("El número mínimo no puede ser igual que el número mayor.",
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        if (guessingContest.getMaxValue() == 0 || guessingContest.getMinValue() == 0) {
             return new ResponseEntity<>("No puede ser 0 el máximo o mínimo.", HttpStatus.BAD_REQUEST);
         }
 
-        if((guessingContest.getMaxValue() < guessingContest.getTargetNumber()) || (guessingContest.getMinValue() > guessingContest.getTargetNumber())){
-            return new ResponseEntity<>("El número objetivo Estas fuera del rango." + 
-            " min: " + guessingContest.getMinValue() +
-            " max: " + guessingContest.getMaxValue() +
-            "objectivo: " + guessingContest.getTargetNumber(), 
-            HttpStatus.BAD_REQUEST);
+        if ((guessingContest.getMaxValue() < guessingContest.getTargetNumber())
+                || (guessingContest.getMinValue() > guessingContest.getTargetNumber())) {
+            return new ResponseEntity<>("El número objetivo Estas fuera del rango." +
+                    " min: " + guessingContest.getMinValue() +
+                    " max: " + guessingContest.getMaxValue() +
+                    "objectivo: " + guessingContest.getTargetNumber(),
+                    HttpStatus.BAD_REQUEST);
         }
 
         GuessingContest created = eventsService.create(guessingContest, idUser);
@@ -175,18 +183,18 @@ public class EventsController {
     @PostMapping("/create/raffle/{idUser}")
     @Operation(summary = "Crear rifa", description = "Crea un evento de tipo rifa para el usuario creador")
     public ResponseEntity<?> createRaffle(
-        @RequestBody Raffle aRaffle,
-        @PathVariable("idUser") Long idUser
-    ) {
-        
+            @RequestBody Raffle aRaffle,
+            @PathVariable("idUser") Long idUser) {
+
         // Validaciones de fechas
         if (aRaffle.getEndDate() == null) {
             return new ResponseEntity<>("Debe especificar la fecha de fin del evento", HttpStatus.BAD_REQUEST);
         }
         if (aRaffle.getEndDate().isBefore(LocalDate.now())) {
-            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("La fecha de fin debe ser posterior a la fecha de inicio",
+                    HttpStatus.BAD_REQUEST);
         }
-        
+
         Raffle newRaffle = eventsService.create(aRaffle, idUser);
         if (newRaffle != null) {
             auditLogsService.createAuditEvent(newRaffle);
@@ -203,10 +211,10 @@ public class EventsController {
         return ResponseEntity.ok("pong");
     }
 
-
     @GetMapping("/id/{id}")
     @Operation(summary = "Detalle de evento", description = "Obtiene el resumen del evento por ID. Respeta privacidad e invites")
-    public ResponseEntity<?> getById(@PathVariable @NotNull @Positive Long id, @RequestParam(required = false) String invite) {
+    public ResponseEntity<?> getById(@PathVariable @NotNull @Positive Long id,
+            @RequestParam(required = false) String invite) {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
         }
@@ -266,14 +274,13 @@ public class EventsController {
             @RequestBody Giveaways event) {
 
         Giveaways updatedEvent = eventsService.update(idEvent, event, idUser);
-        //Auditoría
+        // Auditoría
         auditLogsService.logAction(
-            idEvent,
-            updatedEvent.getCreator().getNickname(),
-            AuditActionType.EVENT_UPDATED,
-            String.format("El evento: '%s' se actualizó.", updatedEvent.getTitle())
-        );
-        //Fin auditoría
+                idEvent,
+                updatedEvent.getCreator().getNickname(),
+                AuditActionType.EVENT_UPDATED,
+                String.format("El evento: '%s' se actualizó.", updatedEvent.getTitle()));
+        // Fin auditoría
         eventsService.getEventSummaryById(updatedEvent.getId());
         return ResponseEntity.ok(updatedEvent);
     }
@@ -286,14 +293,13 @@ public class EventsController {
             @RequestBody GuessingContest event) {
 
         GuessingContest updatedEvent = eventsService.update(idEvent, event, idUser);
-        //Auditoría
+        // Auditoría
         auditLogsService.logAction(
-            idEvent,
-            updatedEvent.getCreator().getNickname(),
-            AuditActionType.EVENT_UPDATED,
-            String.format("El evento: '%s' se actualizó.", updatedEvent.getTitle())
-        );
-        //Fin auditoría
+                idEvent,
+                updatedEvent.getCreator().getNickname(),
+                AuditActionType.EVENT_UPDATED,
+                String.format("El evento: '%s' se actualizó.", updatedEvent.getTitle()));
+        // Fin auditoría
         eventsService.getEventSummaryById(updatedEvent.getId());
         return ResponseEntity.ok(updatedEvent);
     }
@@ -301,33 +307,31 @@ public class EventsController {
     @PutMapping("/update/raffle/{idEvent}/user/{idUser}")
     @Operation(summary = "Actualizar rifa", description = "Actualiza datos de una rifa existente")
     public ResponseEntity<?> updateRaffle(
-        @PathVariable Long idEvent,
-        @PathVariable Long idUser,
-        @RequestBody Raffle event
-    ){
+            @PathVariable Long idEvent,
+            @PathVariable Long idUser,
+            @RequestBody Raffle event) {
         Raffle updatedEvent = eventsService.update(idEvent, event, idUser);
-        //Auditoría
+        // Auditoría
         auditLogsService.logAction(
-            idEvent,
-            updatedEvent.getCreator().getNickname(),
-            AuditActionType.EVENT_UPDATED,
-            String.format("El evento: '%s' se actualizó.", updatedEvent.getTitle())
-        );
-        //Fin auditoría
+                idEvent,
+                updatedEvent.getCreator().getNickname(),
+                AuditActionType.EVENT_UPDATED,
+                String.format("El evento: '%s' se actualizó.", updatedEvent.getTitle()));
+        // Fin auditoría
         eventsService.getEventSummaryById(updatedEvent.getId());
         return ResponseEntity.ok(updatedEvent);
     }
 
-
     @GetMapping("/creator/{idCreator}")
     @Operation(summary = "Eventos por creador", description = "Lista eventos creados por un usuario")
-    public ResponseEntity<?> getEventsByCreator(@PathVariable Long idCreator){
+    public ResponseEntity<?> getEventsByCreator(@PathVariable Long idCreator) {
         List<Events> events = eventsService.findByEventsCreator(idCreator);
-        if(events.isEmpty()){
-            return new ResponseEntity<>("No se encontraron eventos para el creador con ID: " + idCreator, HttpStatus.NOT_FOUND);
+        if (events.isEmpty()) {
+            return new ResponseEntity<>("No se encontraron eventos para el creador con ID: " + idCreator,
+                    HttpStatus.NOT_FOUND);
         }
         List<EventSummaryDTO> response = events.stream()
-            .map(eventsService::toEventSummaryDTO).collect(Collectors.toList());
+                .map(eventsService::toEventSummaryDTO).collect(Collectors.toList());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -337,35 +341,37 @@ public class EventsController {
      */
     @GetMapping("/winners/event/{eventId}")
     @Operation(summary = "Ganadores del evento", description = "Obtiene los ganadores y envía notificaciones por correo")
-    public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable("eventId") Long eventId){
+    public ResponseEntity<?> getWinnersParticipantByEventId(@PathVariable("eventId") Long eventId) {
         try {
             // Obtener los ganadores del evento
             List<?> winners = eventsService.finalizedEvent(eventId);
-            //log.info("Número de ganadores obtenidos: " + winners.size());
-            
-            if(winners.isEmpty()){
-                return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
+            // log.info("Número de ganadores obtenidos: " + winners.size());
+
+            if (winners.isEmpty()) {
+                return new ResponseEntity<>("No se encontraron ganadores para el evento con ID: " + eventId,
+                        HttpStatus.NOT_FOUND);
             }
-            
+
             // Convertir la lista de participantes a WinnerDTO
             List<WinnerDTO> response = winners.stream()
-                .map(this::toWinnerDTO)
-                .filter(Objects::nonNull)
-                .toList();
-            //log.info("WinnerDTO generados: " + response.size());
-            
+                    .map(this::toWinnerDTO)
+                    .filter(Objects::nonNull)
+                    .toList();
+            // log.info("WinnerDTO generados: " + response.size());
+
             // Obtener la información del evento para enviar en los correos
-            //log.info("Obteniendo información del evento con ID: " + eventId);
+            // log.info("Obteniendo información del evento con ID: " + eventId);
             EventSummaryDTO event = eventsService.getEventSummaryById(eventId);
             if (event == null) {
                 log.warn("No se pudo obtener la información del evento con ID: " + eventId);
                 return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
             }
-            //log.info("Evento obtenido: " + event.getTitle() + " - Tipo: " + event.getEventType());
-            
+            // log.info("Evento obtenido: " + event.getTitle() + " - Tipo: " +
+            // event.getEventType());
+
             // Enviar correos a los ganadores con la plantilla personalizada
             String eventTypeStr = event.getEventType() != null ? event.getEventType().toString() : "GIVEAWAYS";
-            //log.info("Iniciando envío de correos a los ganadores...");
+            // log.info("Iniciando envío de correos a los ganadores...");
             try {
                 // Preparar datos de contacto del creador del evento
                 String creatorName = null;
@@ -375,31 +381,30 @@ public class EventsController {
                     String name = event.getCreator().getName();
                     String surname = event.getCreator().getSurname();
                     String nickname = event.getCreator().getNickname();
-                    String composedName = ((name != null ? name : "") + (surname != null ? (" " + surname) : "")).trim();
+                    String composedName = ((name != null ? name : "") + (surname != null ? (" " + surname) : ""))
+                            .trim();
                     creatorName = !composedName.isEmpty() ? composedName : (nickname != null ? nickname : null);
                     creatorEmail = event.getCreator().getEmail();
                     creatorPhone = event.getCreator().getCellphone();
                 }
 
                 emailService.sendWinnerEmails(
-                    response,
-                    event.getId(),
-                    event.getTitle(),
-                    eventTypeStr,
-                    creatorName,
-                    creatorEmail,
-                    creatorPhone
-                );
-                // Enviar resumen de contacto de ganadores al creador
-                try {
-                    emailService.sendWinnersContactToCreator(
                         response,
                         event.getId(),
                         event.getTitle(),
                         eventTypeStr,
                         creatorName,
-                        creatorEmail
-                    );
+                        creatorEmail,
+                        creatorPhone);
+                // Enviar resumen de contacto de ganadores al creador
+                try {
+                    emailService.sendWinnersContactToCreator(
+                            response,
+                            event.getId(),
+                            event.getTitle(),
+                            eventTypeStr,
+                            creatorName,
+                            creatorEmail);
                 } catch (Exception e) {
                     log.warn("No se pudo enviar el resumen de ganadores al creador: {}", e.getMessage());
                 }
@@ -407,37 +412,39 @@ public class EventsController {
             } catch (Exception e) {
                 log.error("Error al enviar correos a los ganadores: " + e.getMessage(), e);
                 // Continuar aunque falle el envío de correos
-            } 
-
+            }
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (IllegalStateException e) {
             return new ResponseEntity<>("Error al finalizar el evento", HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
-            return new ResponseEntity<>("Error al obtener los ganadores: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Error al obtener los ganadores: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        
+
     }
 
     @GetMapping("/participants/event/{eventId}")
     @Operation(summary = "Participantes del evento", description = "Lista participantes del evento sin datos sensibles")
-    public ResponseEntity<?> getParticipantsByEventId(@PathVariable("eventId") Long eventId){
+    public ResponseEntity<?> getParticipantsByEventId(@PathVariable("eventId") Long eventId) {
         try {
             List<Participant> participants = participantService.findParticipantsByEventId(eventId);
             log.info("Número de participantes obtenidos: " + participants.size());
-            if(participants.isEmpty()){
-                return new ResponseEntity<>("No se encontraron participantes para el evento con ID: " + eventId, HttpStatus.NOT_FOUND);
+            if (participants.isEmpty()) {
+                return new ResponseEntity<>("No se encontraron participantes para el evento con ID: " + eventId,
+                        HttpStatus.NOT_FOUND);
             }
-            
+
             // Crear DTOs para participantes (sin información sensible)
             List<ParticipantDTO> response = participants.stream()
-                .map(this::toParticipantDTO)
-                .toList();
+                    .map(this::toParticipantDTO)
+                    .toList();
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Error al obtener participantes: " + e.getMessage(), e);
-            return new ResponseEntity<>("Error al obtener los participantes: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Error al obtener los participantes: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -476,12 +483,22 @@ public class EventsController {
                         }
                     }
                 }
-            } else {
+            } else if (event instanceof Giveaways) {
                 List<Participant> participants = participantService.findParticipantsByEventId(eventId);
                 if (participants != null) {
                     for (Participant p : participants) {
                         if (p.getPosition() == position) {
                             winnerObj = p;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                List<GuessProgress> guessprogress = guessProgressService.findGuessProgressesByContestId(eventId);
+                if (guessprogress != null) {
+                    for (GuessProgress gp : guessprogress) {
+                        if (gp.getPosition() == position) {
+                            winnerObj = gp;
                             break;
                         }
                     }
@@ -528,17 +545,27 @@ public class EventsController {
             if (event instanceof Raffle) {
                 List<RaffleNumber> numbers = raffleNumberService.findRaffleNumbersById(eventId);
                 response = numbers.stream()
-                    .filter(n -> n.getPosition() > 0)
-                    .map(this::toWinnerDTO)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-            } else {
+                        .filter(n -> n.getPosition() > 0)
+                        .map(this::toWinnerDTO)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+            } else if (event instanceof Giveaways) {
                 List<Participant> participants = participantService.findParticipantsByEventId(eventId);
                 response = participants.stream()
-                    .filter(p -> p.getPosition() > 0)
-                    .map(this::toWinnerDTO)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                        .filter(p -> p.getPosition() > 0)
+                        .map(this::toWinnerDTO)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+            } else if (event instanceof GuessingContest) {
+                List<GuessProgress> guessprogress = guessProgressService.findGuessProgressesByContestId(eventId);
+                response = guessprogress.stream()
+                        .filter(p -> p.getPosition() > 0)
+                        .map(this::toWinnerDTO)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+            } else {
+                return new ResponseEntity<>("El evento no es un sorteo, rifa o juego de adivinanza",
+                        HttpStatus.BAD_REQUEST);
             }
 
             if (response == null || response.isEmpty()) {
@@ -553,7 +580,7 @@ public class EventsController {
 
     private WinnerDTO toWinnerDTO(Object winner) {
         WinnerDTO dto = new WinnerDTO();
-        if(winner instanceof Participant participant){
+        if (winner instanceof Participant participant) {
             dto.setParticipantId(participant.getParticipant().getId());
             dto.setName(participant.getParticipant().getName());
             dto.setSurname(participant.getParticipant().getSurname());
@@ -572,14 +599,26 @@ public class EventsController {
             dto.setEventId(raffleNumber.getRaffle().getId());
             dto.setEventTitle(raffleNumber.getRaffle().getTitle());
             dto.setRaffleNumber(raffleNumber.getNumber()); // Incluir el número de la rifa
-        } 
-        else {
+        } else if (winner instanceof GuessProgress guessProcess) {
+            dto.setParticipantId(guessProcess.getUser().getId());
+            dto.setName(guessProcess.getUser().getName());
+            dto.setSurname(guessProcess.getUser().getSurname());
+            dto.setEmail(guessProcess.getUser().getEmail());
+            dto.setPhone(guessProcess.getUser().getCellphone());
+            dto.setEventId(guessProcess.getContest().getId());
+            dto.setEventTitle(guessProcess.getContest().getTitle());
+            dto.setAttemptCount(guessProcess.getAttemptCount());
+            dto.setNumbersTried(guessProcess.getNumbersTried());
+            dto.setAttemptTime(guessProcess.getAttemptTime());
+            dto.setDurationSeconds(guessProcess.getDurationSeconds());
+            dto.setPosition(guessProcess.getPosition());
+        } else {
             log.warn("Tipo de ganador desconocido: {}", winner.getClass().getSimpleName());
             return null;
         }
-            
+
         return dto;
-            
+
     }
 
     private ParticipantDTO toParticipantDTO(Participant participant) {
@@ -606,13 +645,13 @@ public class EventsController {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
         }
-        
+
         // Verificar que el evento existe
         Events existingEvent = eventsService.getById(id);
         if (existingEvent == null) {
             return new ResponseEntity<>("Evento no encontrado", HttpStatus.NOT_FOUND);
         }
-        
+
         boolean deleted = eventsService.delete(id);
         if (deleted) {
             return new ResponseEntity<>("Evento eliminado exitosamente", HttpStatus.OK);
@@ -647,14 +686,16 @@ public class EventsController {
     public ResponseEntity<?> getByCategoryId(@PathVariable @NotNull @Positive Long categoryId) {
         List<EventSummaryDTO> events = eventsService.getEventSummariesByCategoryId(categoryId);
         if (events.isEmpty()) {
-            return new ResponseEntity<>("No se encontraron eventos para la categoría con ID: " + categoryId, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("No se encontraron eventos para la categoría con ID: " + categoryId,
+                    HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
-    //Mejorar para los filtros
-    //-------------------------- GADIEL, ESTOS SON LOS FILTROS --------------------------
-    
+    // Mejorar para los filtros
+    // -------------------------- GADIEL, ESTOS SON LOS FILTROS
+    // --------------------------
+
     @GetMapping("/active")
     @Operation(summary = "Eventos activos", description = "Lista eventos activos con filtros opcionales por tipo, categoría, fecha, ganadores y email")
     public ResponseEntity<?> getActiveEvents(
@@ -665,20 +706,18 @@ public class EventsController {
             @RequestParam(required = false) Integer winnerCount,
             @RequestParam(required = false) String emailUserRegister) {
 
-        
         if (start != null && end != null && !end.isAfter(start)) {
             return ResponseEntity.badRequest().body("La fecha de fin debe ser posterior a la fecha de inicio.");
 
         }
-        
+
         List<EventSummaryDTO> events = eventsService.getActiveEventSummaries(
-                type, categorie, start, end, winnerCount, emailUserRegister
-        );
+                type, categorie, start, end, winnerCount, emailUserRegister);
 
         return ResponseEntity.ok(events);
     }
-    //-------------------------- OBVIAMENTE ACA TERMINA LOS FILTROS --------------------------
-
+    // -------------------------- OBVIAMENTE ACA TERMINA LOS FILTROS
+    // --------------------------
 
     @GetMapping("/date-range")
     @Operation(summary = "Eventos por rango de fechas", description = "Lista eventos entre fechas especificadas")
@@ -687,7 +726,8 @@ public class EventsController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         // Validación de rango de fechas
         if (endDate.isBefore(startDate)) {
-            return new ResponseEntity<>("La fecha de inicio no puede ser posterior a la fecha de fin", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("La fecha de inicio no puede ser posterior a la fecha de fin",
+                    HttpStatus.BAD_REQUEST);
         }
         List<EventSummaryDTO> events = eventsService.getEventSummariesByDateRange(startDate, endDate);
         return new ResponseEntity<>(events, HttpStatus.OK);
@@ -715,18 +755,18 @@ public class EventsController {
         List<EventSummaryDTO> events = eventsService.searchEventSummariesByTitle(title);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
-    
+
     @GetMapping("/exists/{title}")
     @Operation(summary = "Verificar título", description = "Verifica existencia de un evento por título")
     public ResponseEntity<?> checkTitleExists(@PathVariable String title) {
         if (title == null || title.trim().isEmpty()) {
             return new ResponseEntity<>("El título es obligatorio", HttpStatus.BAD_REQUEST);
         }
-        
+
         boolean exists = eventsService.existsByTitle(title.trim());
         return new ResponseEntity<>(exists, HttpStatus.OK);
     }
-    
+
     @GetMapping("/participant/{userId}")
     @Operation(summary = "Eventos por participante", description = "Lista eventos en los que participa un usuario")
     public ResponseEntity<?> getEventsByParticipantId(@PathVariable @NotNull @Positive Long userId) {
@@ -744,101 +784,110 @@ public class EventsController {
     @PostMapping("/{eventId}/participants")
     @Operation(summary = "Inscribir participante", description = "Inscribe un usuario invitado a un evento (respeta privacidad e invite)")
     public ResponseEntity<Object> registerParticipantToGiveaway(
-        @Valid @RequestBody UserDTO aGuestUser,
-        @PathVariable("eventId") Long aEventId,
-        @RequestParam(required = false) String invite) {
+            @Valid @RequestBody UserDTO aGuestUser,
+            @PathVariable("eventId") Long aEventId,
+            @RequestParam(required = false) String invite) {
 
-            Events eventToParticipate = eventsService.getById(aEventId);
-            if (eventToParticipate == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        Events eventToParticipate = eventsService.getById(aEventId);
+        if (eventToParticipate == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("El evento con id " + aEventId + " no existe");
-            }
-            // controlamos que el evento no haya cerrado
-            if(eventToParticipate.getStatusEvent() != StatusEvent.OPEN){
-                throw new NoInscriptEventExeption("No es posible inscribirse a este evento");
-            }
+        }
+        // controlamos que el evento no haya cerrado
+        if (eventToParticipate.getStatusEvent() != StatusEvent.OPEN) {
+            throw new NoInscriptEventExeption("No es posible inscribirse a este evento");
+        }
 
-            // Privacidad: si es privado y el solicitante no es el creador, exigir invite válido
-            boolean isCreator = false;
-            try {
-                org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-                if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
-                    isCreator = eventToParticipate.getCreator() != null && eventToParticipate.getCreator().getId().equals(u.getId());
-                }
-            } catch (Exception e) { isCreator = false; }
-            if (eventToParticipate.isPrivate() && !isCreator) {
-                if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, aEventId) == null) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso restringido: Evento privado");
-                }
+        // Privacidad: si es privado y el solicitante no es el creador, exigir invite
+        // válido
+        boolean isCreator = false;
+        try {
+            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                    .getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
+                isCreator = eventToParticipate.getCreator() != null
+                        && eventToParticipate.getCreator().getId().equals(u.getId());
             }
+        } catch (Exception e) {
+            isCreator = false;
+        }
+        if (eventToParticipate.isPrivate() && !isCreator) {
+            if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, aEventId) == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso restringido: Evento privado");
+            }
+        }
 
-            User savedGuestUser = createOrUpdateUser(aGuestUser);
-            
-            // intento guardar la participacion del usuario
-            @SuppressWarnings("unused")
-            Participant created = participantService.registerToGiveaway(savedGuestUser, eventToParticipate);
-            
-            return Response.ok(null,"Inscripción exitosa");
-            // cambiar el null por un dto o manejar la referencia circular q hay entre giveaway y
-            //su organizador en caso de querer retornar el objeto Participant 
+        User savedGuestUser = createOrUpdateUser(aGuestUser);
+
+        // intento guardar la participacion del usuario
+        @SuppressWarnings("unused")
+        Participant created = participantService.registerToGiveaway(savedGuestUser, eventToParticipate);
+
+        return Response.ok(null, "Inscripción exitosa");
+        // cambiar el null por un dto o manejar la referencia circular q hay entre
+        // giveaway y
+        // su organizador en caso de querer retornar el objeto Participant
 
     }
 
     @GetMapping("/raffle/{eventId}/sold-numbers")
     @Operation(summary = "Números vendidos", description = "Lista números vendidos de una rifa (respeta privacidad e invite)")
-        public ResponseEntity<Object> getSoldNumbersById(@PathVariable("eventId") Long aRaffleId,
+    public ResponseEntity<Object> getSoldNumbersById(@PathVariable("eventId") Long aRaffleId,
             @RequestParam(required = false) String invite) {
+        try {
+            Events ev = eventsService.getById(aRaffleId);
+            boolean isCreator = false;
             try {
-                Events ev = eventsService.getById(aRaffleId);
-                boolean isCreator = false;
-                try {
-                    org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-                    if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
-                        isCreator = ev != null && ev.getCreator() != null && ev.getCreator().getId().equals(u.getId());
-                    }
-                } catch (Exception e) { isCreator = false; }
-                if (ev != null && ev.isPrivate() && !isCreator) {
-                    if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, aRaffleId) == null) {
-                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso restringido: Evento privado");
-                    }
+                org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                        .getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
+                    isCreator = ev != null && ev.getCreator() != null && ev.getCreator().getId().equals(u.getId());
                 }
-                List<Integer> someSoldNumbers = raffleNumberService.findSoldNumbersById(aRaffleId);
-                if (someSoldNumbers == null) {
-                    someSoldNumbers = Collections.emptyList();
-                }
-                // if(someSoldNumbers.size() > 0){
-                //     Set<String> validStatus = Set.of("pending", "approved");
-                //     // recupero los rafflNumber y en base al estado del pago de cada uno actualizo los disponibles
-                //     for (Integer number : someSoldNumbers) {
-                //         RaffleNumber rafNumber = raffleNumberService.findRaffleNumberByEventIdAndNumber(number, aRaffleId);
-                //         Payment payNumber = rafNumber.getPayment();
-                //         log.warn("[numbersSold] => Id pago: " + payNumber.getId().toString());
-                //         log.warn("[numbersSold] => Estado del pago: " + payNumber.getStatus());
-                //         // if((payNumber != null) && !payNumber.getStatus().equals("pending") && !payNumber.getStatus().equals("approved")){
-                //         if((payNumber != null) && !validStatus.contains(payNumber.getStatus())){
-                //             // aca sacamos el numero de los vendidos
-                //             someSoldNumbers.remove(Integer.valueOf(number));
-                //         }
-                //     }
-                // }
-                Set<String> validStatus = Set.of("pending", "approved");
-                someSoldNumbers.removeIf(number -> {
-                    RaffleNumber rafNumber = raffleNumberService.findRaffleNumberByEventIdAndNumber(number, aRaffleId);
-                    Payment payNumber = rafNumber.getPayment();
-                    return ((payNumber == null) || (payNumber != null) && !validStatus.contains(payNumber.getStatus()));
-                });
-
-
-
-                return ResponseEntity.ok(someSoldNumbers);
+            } catch (Exception e) {
+                isCreator = false;
             }
-            catch (IllegalArgumentException e) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            if (ev != null && ev.isPrivate() && !isCreator) {
+                if (invite == null || invite.isBlank()
+                        || urlService.getUrlByShortcodeAndEvent(invite, aRaffleId) == null) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso restringido: Evento privado");
+                }
+            }
+            List<Integer> someSoldNumbers = raffleNumberService.findSoldNumbersById(aRaffleId);
+            if (someSoldNumbers == null) {
+                someSoldNumbers = Collections.emptyList();
+            }
+            // if(someSoldNumbers.size() > 0){
+            // Set<String> validStatus = Set.of("pending", "approved");
+            // // recupero los rafflNumber y en base al estado del pago de cada uno
+            // actualizo los disponibles
+            // for (Integer number : someSoldNumbers) {
+            // RaffleNumber rafNumber =
+            // raffleNumberService.findRaffleNumberByEventIdAndNumber(number, aRaffleId);
+            // Payment payNumber = rafNumber.getPayment();
+            // log.warn("[numbersSold] => Id pago: " + payNumber.getId().toString());
+            // log.warn("[numbersSold] => Estado del pago: " + payNumber.getStatus());
+            // // if((payNumber != null) && !payNumber.getStatus().equals("pending") &&
+            // !payNumber.getStatus().equals("approved")){
+            // if((payNumber != null) && !validStatus.contains(payNumber.getStatus())){
+            // // aca sacamos el numero de los vendidos
+            // someSoldNumbers.remove(Integer.valueOf(number));
+            // }
+            // }
+            // }
+            Set<String> validStatus = Set.of("pending", "approved");
+            someSoldNumbers.removeIf(number -> {
+                RaffleNumber rafNumber = raffleNumberService.findRaffleNumberByEventIdAndNumber(number, aRaffleId);
+                Payment payNumber = rafNumber.getPayment();
+                return ((payNumber == null) || (payNumber != null) && !validStatus.contains(payNumber.getStatus()));
+            });
+
+            return ResponseEntity.ok(someSoldNumbers);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());
-            } 
-            catch (Exception e) {
-                e.printStackTrace();
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al obtener los números vendidos: " + e.getMessage());
         }
     }
@@ -846,58 +895,62 @@ public class EventsController {
     @PostMapping("/{eventId}/buy-raffle-number")
     @Operation(summary = "Comprar número de rifa", description = "Crea números de rifa comprados por un usuario invitado")
     public ResponseEntity<Object> buyRaffleNumber(
-        @Valid @RequestBody BuyRaffleNumberRequestDTO aBuyRequest,
-        @PathVariable("eventId") Long aEventId,
-        @RequestParam(required = false) String invite) {
+            @Valid @RequestBody BuyRaffleNumberRequestDTO aBuyRequest,
+            @PathVariable("eventId") Long aEventId,
+            @RequestParam(required = false) String invite) {
 
         // System.out.println("aBuyRequest: " + aBuyRequest);
-        // System.out.println("aBuyRequest.getAGuestUser(): " + aBuyRequest.getAGuestUser());
+        // System.out.println("aBuyRequest.getAGuestUser(): " +
+        // aBuyRequest.getAGuestUser());
         UserDTO aGuestUser = aBuyRequest.getAGuestUser();
-        
+
         // Buscar el evento (Raffle)
         Raffle eventToParticipate = (Raffle) eventsService.getById(aEventId);
         if (eventToParticipate == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("El evento con id " + aEventId + " no existe");
+                    .body("El evento con id " + aEventId + " no existe");
         }
         // controlamos que el evento no haya cerrado
-        if(eventToParticipate.getStatusEvent() != StatusEvent.OPEN){
+        if (eventToParticipate.getStatusEvent() != StatusEvent.OPEN) {
             throw new NoInscriptEventExeption("No es posible inscribirse a este evento");
         }
 
-        // Privacidad: si es privado y el solicitante no es el creador, exigir invite válido
+        // Privacidad: si es privado y el solicitante no es el creador, exigir invite
+        // válido
         boolean isCreator = false;
         try {
-            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                    .getContext().getAuthentication();
             if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
-                isCreator = eventToParticipate.getCreator() != null && eventToParticipate.getCreator().getId().equals(u.getId());
+                isCreator = eventToParticipate.getCreator() != null
+                        && eventToParticipate.getCreator().getId().equals(u.getId());
             }
-        } catch (Exception e) { isCreator = false; }
+        } catch (Exception e) {
+            isCreator = false;
+        }
         if (eventToParticipate.isPrivate() && !isCreator) {
             if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, aEventId) == null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso restringido: Evento privado");
             }
         }
-    
+
         // Buscar usuario existente o crear uno nuevo
         User savedGuestUser = createOrUpdateUser(aGuestUser);
-    
+
         // Crear los números comprados
         @SuppressWarnings("unused")
-        List<RaffleNumber> someBoughtRaffleNumbers = 
-            raffleNumberService.createRaffleNumbers(
+        List<RaffleNumber> someBoughtRaffleNumbers = raffleNumberService.createRaffleNumbers(
                 eventToParticipate,
                 savedGuestUser,
-                aBuyRequest.getSomeNumbersToBuy()
-            );
-    
+                aBuyRequest.getSomeNumbersToBuy());
+
         return Response.ok(null, "Números adquiridos exitosamente");
     }
 
     private User createOrUpdateUser(UserDTO aUserCandidate) {
         // User savedGuestUser;
         User userFromDb = userService.findByEmail(aUserCandidate.getEmail());
-        
+
         // chequea si ya existe el usuario en la base de datos
         if (userFromDb == null) {
             // si el usuario no existe:
@@ -910,32 +963,30 @@ public class EventsController {
 
             // Guarda el nuevo usuario
             return userService.save(guestUserToSave);
-        }
-        else {
+        } else {
             // si el usuario existe:
             // lo actualiza
             userFromDb.setName(aUserCandidate.getName());
             userFromDb.setSurname(aUserCandidate.getSurname());
             userFromDb.setCellphone(aUserCandidate.getCellphone());
-            
+
             // Guarda el usuario actualizado
             return userService.save(userFromDb);
         }
     }
 
-
     @GetMapping("/giveaways/search")
     public ResponseEntity<?> searchGiveawaysByDateRange(
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
-    ) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         if (endDate.isBefore(startDate)) {
-            return new ResponseEntity<>("La fecha de inicio no puede ser posterior a la fecha de fin", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("La fecha de inicio no puede ser posterior a la fecha de fin",
+                    HttpStatus.BAD_REQUEST);
         }
         var giveaways = eventsService.getByDateRange(startDate, endDate);
         var events = giveaways.stream()
-            .map(g -> modelMapper.map(g, EventSummaryDTO.class))
-            .toList();
+                .map(g -> modelMapper.map(g, EventSummaryDTO.class))
+                .toList();
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
@@ -970,44 +1021,44 @@ public class EventsController {
             return new ResponseEntity<>("Estado inválido: " + statusStr, HttpStatus.BAD_REQUEST);
         }
 
-        if(existingEvent.getStatusEvent() != StatusEvent.OPEN){
-            return new ResponseEntity<>("Solo se pueden cerrar eventos que estén en estado OPEN", HttpStatus.BAD_REQUEST);
+        if (existingEvent.getStatusEvent() != StatusEvent.OPEN) {
+            return new ResponseEntity<>("Solo se pueden cerrar eventos que estén en estado OPEN",
+                    HttpStatus.BAD_REQUEST);
         }
 
         try {
-                eventsService.closeEvent(idEvent);
+            eventsService.closeEvent(idEvent);
         } catch (Exception e) {
-            return new ResponseEntity<>("No se pudo cerrar el evento: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("No se pudo cerrar el evento: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
         EventSummaryDTO dto = eventsService.getEventSummaryById(idEvent);
         auditLogsService.logAction(
                 idEvent,
                 dto.getCreator().getNickname(),
-                AuditActionType.EVENT_CLOSED, 
-                String.format("El evento '%s' se cerró.", dto.getTitle())
-                );
+                AuditActionType.EVENT_CLOSED,
+                String.format("El evento '%s' se cerró.", dto.getTitle()));
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-
     // REFACTORIZAR LOS SIG DOS METODOS EN UNO
-    // QUE OBTENGAN EL TIPO DE EVENTO DE LA URL Y DECIDA COMO OBTENER LOS PARTICIPANTES
+    // QUE OBTENGAN EL TIPO DE EVENTO DE LA URL Y DECIDA COMO OBTENER LOS
+    // PARTICIPANTES
     @GetMapping("/{eventId}/get-users-participants")
     @Operation(summary = "Usuarios participantes", description = "Obtiene usuarios participantes de un evento")
     public ResponseEntity<Object> findUsersParticipantsByEventId(
-        @PathVariable("eventId") Long anEventId,
-        @RequestParam(required = false) String aUserEmail) {
-            try {
-                List<RaffleParticipantDTO> result = eventsService.getUsersParticipantsByEventId(anEventId, aUserEmail);
-                if (result == null || result.isEmpty()) {
-                    return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
-                }
-                                
-                return new ResponseEntity<>(result, HttpStatus.OK);
+            @PathVariable("eventId") Long anEventId,
+            @RequestParam(required = false) String aUserEmail) {
+        try {
+            List<RaffleParticipantDTO> result = eventsService.getUsersParticipantsByEventId(anEventId, aUserEmail);
+            if (result == null || result.isEmpty()) {
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
             }
-            catch (Exception e) {
-                return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-            }
+
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/{eventId}/get-raffle-owners")
@@ -1022,42 +1073,44 @@ public class EventsController {
 
             List<UserDTO> result = raffleOwners.stream().map(UserMapper::toDTO).toList();
             return new ResponseEntity<>(result, HttpStatus.OK);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        }    
+        }
     }
 
     @GetMapping("/{eventId}/get-raffle-participants")
     @Operation(summary = "Participantes de rifa", description = "Lista participantes asociados a números de rifa (respeta privacidad e invite)")
     public ResponseEntity<Object> getRaffleNumbersByRaffleIdAndUser(
-        @PathVariable("eventId") Long aRaffleId, 
-        @RequestParam(required = false) String aUserEmail,
-        @RequestParam(required = false) String invite) {
+            @PathVariable("eventId") Long aRaffleId,
+            @RequestParam(required = false) String aUserEmail,
+            @RequestParam(required = false) String invite) {
+        try {
+            Events ev = eventsService.getById(aRaffleId);
+            boolean isCreator = false;
             try {
-                Events ev = eventsService.getById(aRaffleId);
-                boolean isCreator = false;
-                try {
-                    org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-                    if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
-                        isCreator = ev != null && ev.getCreator() != null && ev.getCreator().getId().equals(u.getId());
-                    }
-                } catch (Exception e) { isCreator = false; }
-                if (ev != null && ev.isPrivate() && !isCreator) {
-                    if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, aRaffleId) == null) {
-                        return new ResponseEntity<>("Acceso restringido: Evento privado", HttpStatus.FORBIDDEN);
-                    }
+                org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                        .getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
+                    isCreator = ev != null && ev.getCreator() != null && ev.getCreator().getId().equals(u.getId());
                 }
-                List<RaffleParticipantDTO> result = raffleNumberService.findRaffleNumbersById(aRaffleId, aUserEmail);
-                if (result == null || result.isEmpty()) {
-                    return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+            } catch (Exception e) {
+                isCreator = false;
+            }
+            if (ev != null && ev.isPrivate() && !isCreator) {
+                if (invite == null || invite.isBlank()
+                        || urlService.getUrlByShortcodeAndEvent(invite, aRaffleId) == null) {
+                    return new ResponseEntity<>("Acceso restringido: Evento privado", HttpStatus.FORBIDDEN);
                 }
-                    return new ResponseEntity<>(result, HttpStatus.OK);
             }
-            catch (Exception e) {
-                return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            List<RaffleParticipantDTO> result = raffleNumberService.findRaffleNumbersById(aRaffleId, aUserEmail);
+            if (result == null || result.isEmpty()) {
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
             }
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
 
     @GetMapping("/featured")
     @Operation(summary = "Eventos destacados", description = "Lista eventos destacados por tipo")

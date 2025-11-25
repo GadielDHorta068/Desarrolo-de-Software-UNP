@@ -75,6 +75,7 @@ public class SecurityConfig {
                         .requestMatchers("/events/**").permitAll()
                         .requestMatchers("/categories/**").permitAll()
                         .requestMatchers("/api/images/**").permitAll()
+                        .requestMatchers("/api/contest/**").permitAll()
                         // Endpoints de URL abiertos explícitamente
                         .requestMatchers(HttpMethod.POST, "/url/save").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/url/save").permitAll()
