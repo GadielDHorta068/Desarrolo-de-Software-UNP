@@ -26,7 +26,7 @@ import { DataPlayParticipantDTO } from '../../models/guessprogressDTO';
     selector: 'app-management-event',
     imports: [CommonModule, RouterLink, ReactiveFormsModule, InfoEvent,
         EventShareCardComponent, ModalShareEvent,
-        TagPrize, InviteLoginComponent, ReportsFormComponent],
+        TagPrize, InviteLoginComponent, ReportsFormComponent, HandleDatePipe],
     templateUrl: './management-event.html',
     styleUrl: './management-event.css',
     providers: [HandleDatePipe]
@@ -173,11 +173,11 @@ export class ManagementEvent {
     }
 
     private parseDate(fecha: string): string {
-        const [dia, mes, anio] = fecha.split('-');
-
-        const diaFormateado = dia.padStart(2, '0');
-        const mesFormateado = mes.padStart(2, '0');
-
+        const parts = fecha ? fecha.split(/[\/-]/) : [];
+        if (parts.length < 3) return fecha;
+        const [dia, mes, anio] = parts;
+        const diaFormateado = (dia || '').padStart(2, '0');
+        const mesFormateado = (mes || '').padStart(2, '0');
         return `${anio}-${mesFormateado}-${diaFormateado}`;
     }
 

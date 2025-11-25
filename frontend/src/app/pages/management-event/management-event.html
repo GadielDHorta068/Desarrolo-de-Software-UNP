@@ -256,7 +256,7 @@
             </div>
             <div class="flex justify-between items-center">
               <span class="text-gray-600 dark:text-gray-400">Fecha de realizacion</span>
-              <span class="font-semibold text-gray-900 dark:text-white">{{ event?.endDate }}</span>
+              <span class="font-semibold text-gray-900 dark:text-white">{{ event?.endDate | handleDatePipe }}</span>
             </div>
           </div>
         </div>
