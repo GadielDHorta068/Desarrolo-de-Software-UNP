@@ -30,6 +30,8 @@ export class Guessprogress implements OnInit {
   //Estado del juego
   gamePhase: 'registration' | 'playing' | 'won' = 'registration';
   showModalInscript = false;
+  showResultsModal = false;
+  gameWon = false;
 
   //Variables del juego
   userGuess!: number;            // resultado ingresado de la entrada
@@ -236,7 +238,6 @@ export class Guessprogress implements OnInit {
           this.resultMessageType = 'success';
           this.gamePhase = 'won';
           this.stopTimer();
-          this.showWinAnimation();
           this.finishGame(true);
         } else if (this.attemptCount >= this.maxAttempts) {
           // Se agotaron los intentos y no ganó
@@ -310,6 +311,9 @@ export class Guessprogress implements OnInit {
   private finishGame(hasWon: boolean): void {
     if (!this.currentUser || !this.event) return;
 
+    // Guardar el estado de victoria
+    this.gameWon = hasWon;
+
     // Preparar DTO para guardar el progreso
     const guessProgressDTO = {
       attemptCount: this.attemptCount,
@@ -327,24 +331,30 @@ export class Guessprogress implements OnInit {
     // Registrar el resultado
     this.guessProgressService.registerEvent(this.event.id, participantRequestDTO).subscribe({
       next: (response) => {
+        // Mostrar modal de resultados
+        this.showResultsModal = true;
+        this.cdr.detectChanges();
+
         if (hasWon) {
           this.notificationService.notifySuccess('¡Felicidades! ¡Adivinaste el número!');
         } else {
-          this.notificationService.notifyError('No adivinaste el número, pero tu participación fue registrada');
+          this.notificationService.notifyInfo('No adivinaste el número, pero tu participación fue registrada');
         }
       },
       error: (err) => {
         const message = this.getHttpErrorMessage(err) || 'Error al registrar tu participación';
         this.notificationService.notifyError(message);
+        // Mostrar modal de resultados incluso si hay error
+        this.showResultsModal = true;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  showWinAnimation() {
-    console.log('¡Usuario ganó!');
+  closeResultsModal(): void {
+    this.showResultsModal = false;
+    this.closeModal();
   }
-
-
 
   closeModal(): void {
     this.stopTimer();

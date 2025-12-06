@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class NotificationService {
-    
-    constructor(private snackBar: MatSnackBar) {}
+
+    constructor(private snackBar: MatSnackBar) { }
 
     notifySuccess(message: string, action: string = 'X', duration: number = 2500) {
         this.snackBar.open(message, action, {
@@ -23,6 +23,24 @@ export class NotificationService {
             horizontalPosition: 'right',
             verticalPosition: 'top',
             panelClass: ['snackbar-error']
+        });
+    }
+
+    notifyWarning(message: string, action: string = 'X', duration: number = 2500) {
+        this.snackBar.open(message, action, {
+            duration: duration,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['snackbar-warning']
+        });
+    }
+
+    notifyInfo(message: string, action: string = 'X', duration: number = 2500) {
+        this.snackBar.open(message, action, {
+            duration: duration,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['snackbar-info']
         });
     }
 }

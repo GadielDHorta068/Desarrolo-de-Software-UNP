@@ -1,0 +1,22 @@
+<!-- Overlay -->
+<div *ngIf="isVisible" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+
+    <!-- Modal -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg w-full max-w-md p-6 relative">
+
+        <!-- Header -->
+        <h2 class="text-xl font-semibold mb-4">Reglas del evento</h2>
+
+        <!-- Body -->
+        <ul class="space-y-2 list-disc list-inside text-white-700">
+            <li *ngFor="let rule of rules">{{ rule }}</li>
+        </ul>
+
+        <!-- Footer -->
+        <div class="mt-6 flex justify-end">
+            <button class="px-4 py-2 bg-red-300 hover:bg-red-400 rounded-md text-sm" (click)="close()">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, input, Input, Output } from '@angular/core';
+import { Component, EventEmitter, input, Input, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -9,17 +9,20 @@ import { UserDTO } from '../../models/UserDTO';
 import { EventsService } from '../../services/events.service';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { EventRulesModal } from '../event-rules-modal/event-rules-modal';
+import { AdminEventService } from '../../services/admin/adminEvent.service';
 
 @Component({
     selector: 'app-questionary',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, EventRulesModal],
     templateUrl: './questionary.component.html',
     styleUrl: './questionary.component.css'
 })
 export class QuestionaryComponent {
 
     @Input() eventId!: number;
+    @Input() eventType: EventTypes | undefined;
 
     loggedUser?: UserDTO;
     @Output() onInscript = new EventEmitter<UserDTO>();
@@ -31,14 +34,25 @@ export class QuestionaryComponent {
 
     form!: FormGroup;
 
+    @ViewChild('rulesModal') rulesModal!: EventRulesModal;
+
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
         private eventService: EventsService,
         private activatedRoute: ActivatedRoute,
+        private adminEventService: AdminEventService
     ) { }
 
     ngOnInit() {
+        this.adminEventService.selectedEvent$.subscribe(event => {
+            if (event) {
+                this.event = event;
+                this.eventId = event.id;
+                this.eventType = event.eventType;
+            }
+        });
+
         this.initializeUserLogged();
         // Inicializar form reactivo
         this.form = this.fb.group({
@@ -140,4 +154,8 @@ export class QuestionaryComponent {
     get surnameControl() { return this.form.get('surname'); }
     get emailControl() { return this.form.get('email'); }
     get cellphoneControl() { return this.form.get('cellphone'); }
+
+    openRulesModal(): void {
+        this.rulesModal.open(this.eventType);
+    }
 }
