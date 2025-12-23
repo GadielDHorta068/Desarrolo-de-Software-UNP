@@ -47,6 +47,13 @@
     border-radius: 15px
   }
 
+  .snackbar-info .mdc-snackbar__surface {
+    background-color: #b67622d4 !important;
+    color: #fff !important;
+    margin-top: 50px;
+    border-radius: 15px
+  }
+
   .hs-carousel-pagination .hs-carousel-active {
     background-color: #1d4ed8;
     border-color: #1d4ed8;

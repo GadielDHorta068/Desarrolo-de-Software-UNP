@@ -86,6 +86,7 @@ export class AuthService {
   
   private isLoggingOut = false;
   isOperatorAdmin: boolean = false;
+  enabledTwoFactor: boolean = false;
 
   constructor(
     private http: HttpClient,
@@ -104,6 +105,11 @@ export class AuthService {
     if (token) {
       // Solo marcar como autenticado si hay token, sin hacer peticiones HTTP
       this.isAuthenticatedSubject.next(true);
+      console.log("[initAuth] => loguea con el token!");
+      console.log("[initAuth] => datos del usuario actual: ", this.currentUserSubject.value);
+      if(this.currentUserSubject.value?.nickname){
+        this.fetch2FAStatus(this.currentUserSubject.value.nickname);
+      }
     } else {
       // Asegurar que el estado esté limpio si no hay token
       this.clearAuthState();
@@ -127,6 +133,7 @@ export class AuthService {
       }).subscribe({
         next: (user) => {
           this.currentUserSubject.next(user);
+          this.fetch2FAStatus(user.nickname);
           this.isAuthenticatedSubject.next(true);
         },
         error: () => {
@@ -248,6 +255,8 @@ export class AuthService {
   private handleAuthSuccess(response: AuthResponse): void {
     localStorage.setItem(this.TOKEN_KEY, response.accessToken);
     localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
+
+    this.fetch2FAStatus(response.user.nickname);
     
     // Actualizar estado de forma síncrona para evitar problemas de timing
     setTimeout(() => {
@@ -264,6 +273,19 @@ export class AuthService {
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
+  }
+
+  private fetch2FAStatus(nickname: string): void {
+    this.get2FAStatus(nickname).subscribe({
+      next: (status) => {
+        this.enabledTwoFactor = !!status.twoFactorEnabled;
+        this.setEnabledTwoFactor(this.enabledTwoFactor);
+      },
+      error: () => {
+        this.enabledTwoFactor = false;
+        this.setEnabledTwoFactor(this.enabledTwoFactor);
+      }
+    });
   }
 
   /**
@@ -494,6 +516,13 @@ export class AuthService {
     return this.http.get<UserResponse[]>(`${this.API_URL}/users/search`, {
       params: { query }
     }).pipe(catchError(this.handleError));
+  }
+
+  getEnabledTwoFactor(): boolean {
+    return this.enabledTwoFactor;
+  }
+  setEnabledTwoFactor(isEnabled: boolean): void {
+    this.enabledTwoFactor = isEnabled;
   }
 
   /**

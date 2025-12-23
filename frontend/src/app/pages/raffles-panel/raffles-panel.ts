@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ViewChild, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { EventsCreate, EventsTemp, EventType, EventTypes, RaffleCreate } from '../../models/events.model';
 import { Category } from '../../services/category.service';
@@ -106,7 +106,7 @@ export function upperRangeValidator(lowerKey: string): ValidatorFn {
 
 @Component({
   selector: 'app-raffles-panel',
-  imports: [CommonModule, ReactiveFormsModule, LoaderImage],
+  imports: [CommonModule, ReactiveFormsModule, LoaderImage, RouterModule],
   templateUrl: './raffles-panel.html',
   styleUrl: './raffles-panel.css',
   standalone: true
@@ -115,6 +115,7 @@ export class RafflesPanel implements OnInit {
 
   formPanel: FormGroup;
   userCurrent: UserResponse | null = null;
+  enabledTwoFactor: boolean = true;
 
   categories: Category[] = [];
   types: EventType[] = [];
@@ -137,6 +138,7 @@ export class RafflesPanel implements OnInit {
   ) {
     this.initDateMin();
     this.userCurrent = this.authService.getCurrentUserValue();
+    this.enabledTwoFactor = this.authService.getEnabledTwoFactor();
     // console.log("[createEvent] => usuario actual: ", this.userCurrent);
 
     // Inicializar datos de configuración (categorías y tipos de eventos)

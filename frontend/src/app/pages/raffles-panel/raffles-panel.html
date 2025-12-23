@@ -1,4 +1,19 @@
 <div class="container">
+    @if (!enabledTwoFactor) {
+        <div class="flex items-center p-4 border border-orange-600 rounded-md mb-2 dark:bg-amber-900 bg-amber-900">
+            <svg class="w-6 h-6 mr-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L13.71 3.86a1 1 0 00-1.72 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v4m0 4h.01" />
+            </svg>
+            <span class="text-sm">
+                No tienes configurado 2FA como método de autenticación. Es necesaria esta configuración para crear eventos.
+            </span>
+            <!-- <button class="ml-2 text-yellow-500 hover:text-yellow-600 transition-all duration-300 dark:hover:text-yellow-400" [routerLink]="['/settings']">Ir a configuración</button> -->
+            <a [routerLink]="['/settings']" class="pl-1 text-yellow-500 hover:text-yellow-600 hover:underline transition-all duration-300 dark:hover:text-yellow-400">Ir a configuración</a>
+        </div>
+    }
     <div class="max-w-2xl mb-8">
         <h2
             class="mt-6 text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
@@ -287,17 +302,35 @@
                         </svg>
                         Nuevo evento
                     </button>
-                    <button *ngIf="!eventCreated" type="submit"
+                    <button *ngIf="!eventCreated" type="submit" [disabled]="!(formPanel.valid && enabledTwoFactor)"
                         [title]="formPanel.valid ? '': 'Existen campos obligatorios vacios o no válidos'"
-                        [ngStyle]="formPanel.valid ? {'opacity': '1'} : {'opacity': '0.6'}"
-                        class="group relative bg-gradient-to-r from-emerald-600 to-emerald-700 dark:from-emerald-500 dark:to-emerald-600 hover:from-emerald-700 hover:to-emerald-800 dark:hover:from-emerald-600 dark:hover:to-emerald-700 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                        <svg class="w-4 h-4 mr-2 inline-block group-hover:scale-110 transition-transform duration-300"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        Crear evento
-                    </button>
+                        class="
+                            group relative
+                            bg-gradient-to-r from-emerald-600 to-emerald-700
+                            dark:from-emerald-500 dark:to-emerald-600
+                            text-white px-5 py-3 rounded-xl text-sm font-semibold
+                            transition-all duration-300 transform
+                            focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2
+                            dark:focus:ring-offset-gray-800
+
+                            hover:from-emerald-700 hover:to-emerald-800
+                            dark:hover:from-emerald-600 dark:hover:to-emerald-700
+                            hover:scale-105 hover:shadow-lg
+
+                            disabled:opacity-50
+                            disabled:cursor-not-allowed
+                            disabled:from-gray-400 disabled:to-gray-500
+                            disabled:hover:scale-100
+                            disabled:hover:shadow-none
+                            disabled:hover:from-gray-400 disabled:hover:to-gray-500"
+                        >
+                            <svg class="w-4 h-4 mr-1 inline-block group-hover:scale-110 transition-transform duration-300"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                                </path>
+                            </svg>
+                            Crear evento
+                        </button>
                     <!-- <button type="submit" [title]="formPanel.valid ? '': 'Existen campos obligatorios vacios o no válidos'"
                 [ngStyle]="formPanel.valid ? {'opacity': '1', 'cursor':'pointer'} : {'opacity': '0.6', 'cursor': 'default'}"
                 class="bg-emerald-600 dark:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium"

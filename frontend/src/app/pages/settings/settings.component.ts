@@ -11,11 +11,14 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { MatDialog } from '@angular/material/dialog';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ImageCropperComponent, LoadingIndicator],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ImageCropperComponent, LoadingIndicator, ConfirmDialogComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })
@@ -84,7 +87,9 @@ export class SettingsComponent implements OnInit {
     private authService: AuthService,
     public router: Router,
     private cdr: ChangeDetectorRef,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private dialog: MatDialog,
+    private notificationService: NotificationService
   ) {
     this.initializeForms();
   }
@@ -423,6 +428,7 @@ export class SettingsComponent implements OnInit {
         },
         error: () => {
           this.is2FAEnabled = false;
+          this.authService.setEnabledTwoFactor(this.is2FAEnabled);
         }
       });
       return;
@@ -434,10 +440,12 @@ export class SettingsComponent implements OnInit {
     this.authService.get2FAStatus(nickname).subscribe({
       next: (status) => {
         this.is2FAEnabled = !!status.twoFactorEnabled;
+        this.authService.setEnabledTwoFactor(this.is2FAEnabled);
         this.cdr.detectChanges();
       },
       error: () => {
         this.is2FAEnabled = false;
+        this.authService.setEnabledTwoFactor(this.is2FAEnabled);
         this.cdr.detectChanges();
       }
     });
@@ -496,6 +504,7 @@ export class SettingsComponent implements OnInit {
         this.is2FALoading = false;
         if (response.verified) {
           this.is2FAEnabled = true;
+          this.authService.setEnabledTwoFactor(this.is2FAEnabled);
           this.showRecoveryCodes = true;
           this.cdr.detectChanges();
           this.twoFASuccessMessage = '¡2FA habilitado exitosamente! Guarda tus códigos de respaldo.';
@@ -506,11 +515,30 @@ export class SettingsComponent implements OnInit {
       },
       error: (error) => {
         this.is2FALoading = false;
+        this.authService.setEnabledTwoFactor(this.is2FAEnabled);
         console.error('Error verifying 2FA:', error);
         this.twoFAErrorMessage = error.error?.message || 'Error al verificar el código';
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // popup de confirmacion
+  openConfirmDisabled2fa(): void {
+    // const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    //   data: {
+    //     title: 'Configuración de 2FA',
+    //     message: 'Para deshabilitar 2FA se requiere un código de verificación (TOTP) o un código de respaldo. ¿Deseas continuar?'
+    //   }
+    // });
+
+    // dialogRef.afterClosed().subscribe((result) => {
+    //   if (result) {
+    //     this.disable2FA();
+    //   }
+    // });
+
+    this.notificationService.notifyInfo("Recuerde que para deshabilitar 2FA se requiere un código de verificación (TOTP) o un código de respaldo.")
   }
 
   disable2FA(): void {
@@ -519,10 +547,11 @@ export class SettingsComponent implements OnInit {
       return;
     }
 
-    if (!confirm('Para deshabilitar 2FA se requiere un código de verificación (TOTP) o un código de respaldo. ¿Deseas continuar?')) {
-      return;
-    }
-
+    // if (!confirm('Para deshabilitar 2FA se requiere un código de verificación (TOTP) o un código de respaldo. ¿Deseas continuar?')) {
+    //   return;
+    // }
+    // controlamos que el usuario tenga un codigo de verificacion o un codigo de respaldo
+    
     this.is2FALoading = true;
     this.twoFAErrorMessage = '';
 
@@ -534,9 +563,12 @@ export class SettingsComponent implements OnInit {
     } else if (recovery) {
       payload.recoveryCode = recovery.trim();
     } else {
+      // this.is2FALoading = false;
+      // this.twoFAErrorMessage = 'Ingresa el TOTP de 6 dígitos o un código de respaldo';
+      // this.cdr.detectChanges();
+      // return;
       this.is2FALoading = false;
-      this.twoFAErrorMessage = 'Ingresa el TOTP de 6 dígitos o un código de respaldo';
-      this.cdr.detectChanges();
+      this.notificationService.notifyInfo("Recuerda que para deshabilitar 2FA se requiere un código de verificación (TOTP) o un código de respaldo.")
       return;
     }
 
@@ -544,6 +576,7 @@ export class SettingsComponent implements OnInit {
       next: () => {
         this.is2FALoading = false;
         this.is2FAEnabled = false;
+        this.authService.setEnabledTwoFactor(this.is2FAEnabled);
         this.qrCodeData = null;
         this.recoveryCodes = [];
         this.showRecoveryCodes = false;

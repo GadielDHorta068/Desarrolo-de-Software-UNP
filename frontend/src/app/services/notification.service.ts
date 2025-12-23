@@ -25,4 +25,13 @@ export class NotificationService {
             panelClass: ['snackbar-error']
         });
     }
+
+    notifyInfo(message: string, action: string = 'X', duration?: number) {
+        this.snackBar.open(message, action, {
+            duration: duration ?? 4500,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+            panelClass: ['snackbar-info']
+        });
+    }
 }
