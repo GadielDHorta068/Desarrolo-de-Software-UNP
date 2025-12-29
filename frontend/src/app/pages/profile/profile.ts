@@ -14,11 +14,12 @@ import { Meta, Title } from '@angular/platform-browser';
 import { Reviews } from '../reviews/reviews';
 import { ReviewService } from '../../services/review.service';
 import { StarRatingComponent } from '../star-rating.component/star-rating.component';
+import { HandleTypePipe } from '../../pipes/handle-type.pipe';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, ClipboardModule, DrawCard, RouterModule, HandleStatusPipe, Reviews, StarRatingComponent],
+  imports: [CommonModule, HttpClientModule, ClipboardModule, DrawCard, RouterModule, HandleStatusPipe, Reviews, StarRatingComponent, HandleTypePipe],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
   animations: [

@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 w-screen">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Header -->
     <div class="mb-8">
@@ -20,28 +20,28 @@
     <!-- Tabs -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
       <div class="border-b border-gray-200 dark:border-gray-700">
-        <nav class="flex space-x-8 px-6" aria-label="Tabs">
+        <nav class="flex space-x-0 md:space-x-8 px-6" aria-label="Tabs">
           <button (click)="setActiveTab('profile')"
             [class]="isActiveTab('profile') ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
             class="py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-            <div class="flex items-center space-x-2">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="flex items-center space-x-2 min-w-0">
+              <svg class="h-5 w-5 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span>Perfil</span>
+              <span class="truncate">Perfil</span>
             </div>
           </button>
 
           <button (click)="setActiveTab('security')"
             [class]="isActiveTab('security') ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
             class="py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-            <div class="flex items-center space-x-2">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="flex items-center space-x-2 min-w-0">
+              <svg class="h-5 w-5 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span>Seguridad</span>
+              <span class="truncate">Seguridad</span>
             </div>
           </button>
 
@@ -49,24 +49,24 @@
           <button (click)="setActiveTab('transacciones')"
             [class]="isActiveTab('transacciones') ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
             class="py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-            <div class="flex items-center space-x-2">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="flex items-center space-x-2 min-w-0">
+              <svg class="h-5 w-5 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 16v-4m9-8h-4M4 12H0" />
               </svg>
-              <span>Transacciones</span>
+              <span class="truncate">Transacciones</span>
             </div>
           </button>
 
           <button (click)="setActiveTab('danger')"
             [class]="isActiveTab('danger') ? 'border-red-500 text-red-600 dark:text-red-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
             class="py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-            <div class="flex items-center space-x-2">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="flex items-center space-x-2 min-w-0">
+              <svg class="h-5 w-5 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
-              <span>Zona Peligrosa</span>
+              <span class="truncate">Zona Peligrosa</span>
             </div>
           </button>
         </nav>
