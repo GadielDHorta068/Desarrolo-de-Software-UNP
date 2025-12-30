@@ -44,10 +44,10 @@
         <p class="text-sm text-gray-800 dark:text-gray-200 font-medium">Categoría</p>
         <p class="text-sm text-gray-600 dark:text-gray-400">{{event?.categoryName || 'Sin categoría'}}</p>
       </div>
-      <div>
+      <!-- <div>
         <p class="text-sm text-gray-800 dark:text-gray-200 font-medium">Reputación del creador</p>
         <app-star-rating [rating]="avgScore"></app-star-rating>
-      </div>
+      </div> -->
     </div>
 
     <div class="flex items-center">
@@ -58,6 +58,19 @@
         [class.border]="event?.imageUrl"
         [class.border-gray-300]="event?.imageUrl">
     </div>
+  </div>
+
+  <div class="flex items-center px-6 pb-4">
+      <div class="flex-1">
+        <p class="text-sm text-gray-800 dark:text-gray-200 font-medium">Organizador</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400
+         transition-all duration-200 hover:scale-105 cursor-pointer" title="Ir al perfil"
+         (click)="goToProfile(event?.creator?.nickname)">@{{event?.creator?.nickname}}</p>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm text-gray-800 dark:text-gray-200 font-medium">Reputación</p>
+        <app-star-rating [rating]="avgScore"></app-star-rating>
+      </div>
   </div>
 
   <div class="action-row">

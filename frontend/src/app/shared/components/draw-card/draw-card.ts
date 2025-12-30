@@ -77,10 +77,12 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
                 this.reviewService.getAvgScoreByUserEmail(this.currentUser.email).subscribe({
                     next: (response) => {
                         this.avgScore = response;
+                        this.cdr.detectChanges();
                     },
                     error: (error) => {
                         console.error('Error al obtener promedio de reviews:', error);
                         this.avgScore = 0; // por si falla, mostrar nada o 0
+                        this.cdr.detectChanges();
                     }
                 });
               this.isAdmin = (this.currentUser.userType == "ADMIN");
@@ -220,6 +222,11 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
       this.isCreator = false;
     }
     this.cdr.detectChanges();
+  }
+
+  goToProfile(nickname: string|undefined): void {
+    if (!nickname) return;
+    this.router.navigate(['/profile', nickname]);
   }
   
 }
