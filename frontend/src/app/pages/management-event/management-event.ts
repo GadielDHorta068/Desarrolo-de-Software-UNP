@@ -21,21 +21,24 @@ import { ReportsFormComponent, ResumeService } from '../../shared/components/rep
 import { ReportService } from '../../services/report.service';
 import { GuessprogressService } from '../../services/guessprogress.service';
 import { DataPlayParticipantDTO } from '../../models/guessprogressDTO';
+import { LoadingIndicator } from '../../shared/components/loading-indicator/loading-indicator';
+import { HandleStatusPipe } from '../../pipes/handle-status.pipe';
 
 @Component({
     selector: 'app-management-event',
     imports: [CommonModule, RouterLink, ReactiveFormsModule, InfoEvent,
-        EventShareCardComponent, ModalShareEvent,
+        EventShareCardComponent, ModalShareEvent, LoadingIndicator,
         TagPrize, InviteLoginComponent, ReportsFormComponent, HandleDatePipe],
     templateUrl: './management-event.html',
     styleUrl: './management-event.css',
-    providers: [HandleDatePipe]
+    providers: [HandleDatePipe, HandleStatusPipe]
 })
 export class ManagementEvent {
     @ViewChild('modalShareEvent') modalShareEvent!: ModalShareEvent;
 
     showInviteLogin: boolean = false;
     showFormReport: boolean = false;
+    checkStatusLoading: boolean = false;
 
     // evento en contexto (debe ser seteado desde donde se quiere interactuar con el dato, por ej el boton de EDITAR)
     event!: EventsTemp | null;
@@ -85,6 +88,11 @@ export class ManagementEvent {
         if (this.event.isPrivate && !isCreator && (!invite || invite.trim().length === 0)) {
             return false;
         }
+        // VER ESTOO!!!!!!!!!! (06/01/2026)
+        // se debe contemplar que en una rifa el usuario pueda inscribirse mas de una vez, por lo que se debe verificar que el evento sea una rifa
+        // if (this.event.eventType === EventTypes.RAFFLES) {
+        //     return !isCreator && !this.event?.isUserRegistered && this.event?.statusEvent === StatusEvent.OPEN;
+        // }
         return !isCreator && !this.event?.isUserRegistered && this.event?.statusEvent === StatusEvent.OPEN;
     }
 
@@ -95,6 +103,7 @@ export class ManagementEvent {
     constructor(
         private adminEventService: AdminEventService,
         private handleDatePipe: HandleDatePipe,
+        private handleStatusPipe: HandleStatusPipe,
         private router: Router,
         private route: ActivatedRoute,
         private authService: AuthService,
@@ -193,17 +202,20 @@ export class ManagementEvent {
 
 
     async onInscript() {
+        this.checkStatusLoading = true;
         if (this.accessRestricted) {
             return;
         }
         const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
         // console.log("[onInscript] => estado del evento: ", respStatus);
+        this.checkStatusLoading = false;
         if (!respStatus) {
             this.notificationService.notifyError("No fue posible realizar la operación");
         }
         else {
             if (respStatus != StatusEvent.OPEN) {
-                this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
+                // this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
+                this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado:", this.handleStatusPipe.transform(respStatus));
                 if (this.event) {
                     this.event.statusEvent = respStatus as StatusEvent;
                     this.cdr.detectChanges();

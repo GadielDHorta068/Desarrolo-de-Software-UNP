@@ -299,6 +299,9 @@
   </div>
 </div>
 
+<app-loading-indicator [active]="checkStatusLoading" [type]="'overlay'" [message]="'Verificando estado...'"
+    [size]="'md'"></app-loading-indicator>
+
 <!-- Modals -->
 <app-modal-share-event #modalShareEvent [eventId]="event?.id"></app-modal-share-event>
 <app-invite-login *ngIf="showInviteLogin" (close)="onInviteClosed($event)"></app-invite-login>

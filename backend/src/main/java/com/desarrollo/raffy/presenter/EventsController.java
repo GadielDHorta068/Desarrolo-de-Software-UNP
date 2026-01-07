@@ -251,14 +251,25 @@ public class EventsController {
         if (id <= 0) {
             return new ResponseEntity<>("El ID debe ser un número positivo", HttpStatus.BAD_REQUEST);
         }
-        // VOLVER
         EventSummaryDTO event = eventsService.getEventSummaryById(id);
+        
         if (event != null) {
             Map<String, Object> eventData = new HashMap<>();
+            // controlamos la fecha del evento en base a la fecha actual y actualizamos su stado si es necesario
+            if((event.getStatusEvent() == StatusEvent.OPEN) && event.getEndDate().isBefore(LocalDate.now())) {
+                event.setStatusEvent(StatusEvent.CLOSED);       // refuerzo para que devuelva correctamente el estado del evento
+                eventsService.closeEvent(event.getId());
+                //Auditoría
+                auditLogsService.logAction(
+                event.getId(),
+                "Sistema",
+                AuditActionType.EVENT_CLOSED, 
+                String.format("El evento '%s' se cerró.", event.getTitle())
+                );
+                //Fin Auditoría
+            }
             eventData.put("id", id);
             eventData.put("status", event.getStatusEvent());
-            // eventData.put("status", "elEstado");
-            // return Response.response("OK", "Recurso encontrado", eventData);
             return Response.responseOk("Recurso encontrado", eventData);
             // return new ResponseEntity<>(eventData, HttpStatus.OK);
         } else {
@@ -887,24 +898,6 @@ public class EventsController {
             if (someSoldNumbers == null) {
                 someSoldNumbers = Collections.emptyList();
             }
-            // if(someSoldNumbers.size() > 0){
-            // Set<String> validStatus = Set.of("pending", "approved");
-            // // recupero los rafflNumber y en base al estado del pago de cada uno
-            // actualizo los disponibles
-            // for (Integer number : someSoldNumbers) {
-            // RaffleNumber rafNumber =
-            // raffleNumberService.findRaffleNumberByEventIdAndNumber(number, aRaffleId);
-            // Payment payNumber = rafNumber.getPayment();
-            // log.warn("[numbersSold] => Id pago: " + payNumber.getId().toString());
-            // log.warn("[numbersSold] => Estado del pago: " + payNumber.getStatus());
-            // // if((payNumber != null) && !payNumber.getStatus().equals("pending") &&
-            // !payNumber.getStatus().equals("approved")){
-            // if((payNumber != null) && !validStatus.contains(payNumber.getStatus())){
-            // // aca sacamos el numero de los vendidos
-            // someSoldNumbers.remove(Integer.valueOf(number));
-            // }
-            // }
-            // }
             Set<String> validStatus = Set.of("pending", "approved");
             someSoldNumbers.removeIf(number -> {
                 RaffleNumber rafNumber = raffleNumberService.findRaffleNumberByEventIdAndNumber(number, aRaffleId);
@@ -1133,7 +1126,9 @@ public class EventsController {
                     return new ResponseEntity<>("Acceso restringido: Evento privado", HttpStatus.FORBIDDEN);
                 }
             }
+            // cambiar parseo para poder verificar estado del pago
             List<RaffleParticipantDTO> result = raffleNumberService.findRaffleNumbersById(aRaffleId, aUserEmail);
+
             if (result == null || result.isEmpty()) {
                 return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
             }

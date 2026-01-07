@@ -96,18 +96,21 @@ public class RaffleNumberService {
         System.out.println("IGUALES? " + selectedRaffle.getCreator().getEmail().equals(aRequesterEmail));
 
         for (RaffleNumber rn : raffleNumbers) {
-            RaffleParticipantDTO participant = new RaffleParticipantDTO();
-            participant.setName(rn.getNumberOwner().getName());
-            participant.setSurname(rn.getNumberOwner().getSurname());
-            if (selectedRaffle.getCreator().getEmail().equals(aRequesterEmail)) {
-                participant.setEmail(rn.getNumberOwner().getEmail());
+            // vemos si tiene un pago asignado
+            if(isValidPay(rn)) {
+                RaffleParticipantDTO participant = new RaffleParticipantDTO();
+                participant.setName(rn.getNumberOwner().getName());
+                participant.setSurname(rn.getNumberOwner().getSurname());
+                if (selectedRaffle.getCreator().getEmail().equals(aRequesterEmail)) {
+                    participant.setEmail(rn.getNumberOwner().getEmail());
+                }
+                else {
+                    participant.setEmail(censorEmail(rn.getNumberOwner().getEmail()));
+                }
+                participant.setNumber(rn.getNumber());
+                participant.setPosition(rn.getPosition());
+                result.add(participant);
             }
-            else {
-                participant.setEmail(censorEmail(rn.getNumberOwner().getEmail()));
-            }
-            participant.setNumber(rn.getNumber());
-            participant.setPosition(rn.getPosition());
-            result.add(participant);
         }
         return result;    
     }
@@ -118,6 +121,13 @@ public class RaffleNumberService {
             return anEmail.substring(0, atIndex) + "****" + anEmail.substring(atIndex);
         }
         return anEmail.substring(0, atIndex) + "****" + anEmail.substring(atIndex);
+    }
+
+    // determina si el pago de una rifa es válido
+    private boolean isValidPay(RaffleNumber rafNumber) {
+        Set<String> validStatus = Set.of("pending", "approved");
+        Payment payment = rafNumber.getPayment();
+        return payment != null && validStatus.contains(payment.getStatus());
     }
 
     public List<Integer> findSoldNumbersById(Long aRaffleId) {
