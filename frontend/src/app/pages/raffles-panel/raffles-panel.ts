@@ -11,6 +11,8 @@ import { InfoModal } from '../../shared/components/modal-info/modal-info';
 import { LoaderImage } from '../../shared/components/loader-image/loader-image';
 import { ParseFileService } from '../../services/utils/parseFile.service';
 import { NotificationService } from '../../services/notification.service';
+import { Region } from '../../models/region';
+import { RegionService } from '../../services/region.service';
 
 @Component({
   selector: 'app-raffles-panel',
@@ -26,6 +28,8 @@ export class RafflesPanel implements OnInit {
 
   categories: Category[] = [];
   types: EventType[] = [];
+    regions: Region[] = [];
+  
   imageEvent: File|null = null;
   minDate?: string;
 
@@ -40,7 +44,8 @@ export class RafflesPanel implements OnInit {
     private parseFileService: ParseFileService,
     private cdr: ChangeDetectorRef,
     private router: Router,
-    private notificationService: NotificationService 
+    private notificationService: NotificationService,
+    private regionService: RegionService
   ){
     this.initDateMin();
     this.userCurrent = this.authService.getCurrentUserValue();
@@ -67,6 +72,11 @@ export class RafflesPanel implements OnInit {
       // console.log('Nuevo tipo de evento:', valor);
       this.updateAvailabilityControls(valor);
     });
+
+    this.regionService.getNonCountrieRegions().subscribe({
+            next: (res) => this.regions = res.data,
+            error: err => console.error(err)
+        });
   }
 
   ngOnInit(): void {
@@ -105,6 +115,7 @@ export class RafflesPanel implements OnInit {
     const dataNewEvent = this.getNewEvent(this.formPanel.value);
 
     // console.log("[crearSorteo] => datos del sorteo parseado: ", dataNewEvent);
+    // console.log("[creator ID] => ", creatorId);
     this.eventService.createEvent(""+creatorId, dataNewEvent, this.getEventTypeForCreate()).subscribe({
       next: (response) => {
         // console.log('[initConfig] => nuevo evento creado: ', response);
@@ -156,6 +167,7 @@ export class RafflesPanel implements OnInit {
       description: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
       image: new FormControl({value: null, disabled: false}),
       isPrivate: new FormControl({value: false, disabled: false}),
+      region: new FormControl({value: '', disabled: false}, {validators:[ Validators.required ]}),
       priceRaffle: new FormControl({value: '', disabled: false}),
       quantityNumbersRaffle: new FormControl({value: '', disabled: false})
     });
@@ -187,7 +199,10 @@ export class RafflesPanel implements OnInit {
       endDate: dataEvent.executionDate,
       winnersCount: dataEvent.winners,
       image: dataEvent.image,
-      isPrivate: !!dataEvent.isPrivate
+      isPrivate: !!dataEvent.isPrivate,
+      region: {
+        id: (dataEvent.region.id)     
+      }
     }
     if (isRaffle){
       event.quantityOfNumbers = dataEvent.quantityNumbersRaffle,
