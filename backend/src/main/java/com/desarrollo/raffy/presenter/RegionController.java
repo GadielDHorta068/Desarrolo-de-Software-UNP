@@ -38,6 +38,11 @@ public class RegionController {
         @PathVariable("userRegionId") Long userRegionId
     ) {
         boolean result = this.regionService.isUserRegionInsideEventRegion(eventRegionId, userRegionId);
-        return Response.ok(result);
+        if (result) {
+            return Response.ok(result);
+        }
+        else {
+            return Response.ok(result, "no puedes inscribirte a este evento ya que el premio no puede enviarse a tu ubicacion");
+        }
     }
 }
