@@ -3,6 +3,7 @@ package com.desarrollo.raffy.dto;
 import java.time.LocalDate;
 
 import com.desarrollo.raffy.model.EventTypes;
+import com.desarrollo.raffy.model.Region;
 import com.desarrollo.raffy.model.StatusEvent;
 
 import lombok.AllArgsConstructor;
@@ -29,4 +30,5 @@ public class EventSummaryDTO {
     private String imageUrl;
     private Boolean isUserRegistered; // Indica si el usuario actual está inscrito en el evento
     private Boolean isPrivate;
+    private Region region;
 }
