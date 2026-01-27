@@ -46,16 +46,35 @@
                 </div>
             </div>
 
-            <div>
-                <label for="region">Región</label>
-                <select id="region" formControlName="region" class="form-select">
-                    <option value="" disabled selected>Seleccione una región</option>
+        <!-- Región -->
+        <div>
+            <label for="region" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Región
+            </label>
 
-                    <option *ngFor="let r of regions" [ngValue]="r">
-                        {{ r.name }}
-                    </option>
-                </select>
+            <select
+            id="region"
+            formControlName="region"
+            (blur)="form.get('region')?.markAsTouched()"
+            class="w-full border rounded-lg px-3 py-2 bg-white text-gray-900 
+                    dark:bg-gray-800 dark:text-gray-100
+                    focus:ring focus:ring-red-300 focus:outline-none"
+            >
+                <option [ngValue]="null" disabled selected>
+                Seleccione una región
+                </option>
+
+                <option *ngFor="let r of regions" [ngValue]="r">
+                {{ r.name }}
+                </option>
+            </select>
+            <div *ngIf="form.get('region')?.invalid && form.get('region')?.touched"
+                class="text-red-600 text-sm mt-1">
+                    La región es obligatoria.
             </div>
+
+        </div>
+
 
             <!-- Celular -->
             <div>
