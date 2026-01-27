@@ -142,6 +142,29 @@
                         </div>
                     </div>
                     <div class="w-full md:w-1/2"></div>
+                    <!-- new -->
+                    <div class="w-full md:w-1/2">
+                        <label for="region" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Región (*)
+                        </label>
+
+                        <select 
+                            id="region"
+                            formControlName="region"
+                            (blur)="formPanel.get('region')?.markAsTouched()"
+                            class="bg-white dark:bg-gray-800 rounded-md px-4 py-2 w-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]">
+                            <option value="">Seleccione una región</option>
+                            <option *ngFor="let r of regions" [ngValue]="r">
+                                {{ r.name }}
+                            </option>
+                        </select>
+                        <div *ngIf="formPanel.get('region')?.invalid && formPanel.get('region')?.touched">
+                            <small class="text-red-600">Debés seleccionar un tipo</small>
+                        </div>                    
+                        <div *ngIf="formPanel.get('region')?.invalid && formPanel.get('region')?.touched">
+                            <small class="text-red-600">Debés seleccionar una región</small>
+                        </div>
+                    </div>
                 </div>
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full md:w-1/2">
