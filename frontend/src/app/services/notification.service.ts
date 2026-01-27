@@ -8,7 +8,7 @@ export class NotificationService {
     
     constructor(private snackBar: MatSnackBar) {}
 
-    notifySuccess(message: string, action: string = 'X', duration: number = 2500) {
+    notifySuccess(message: string, action: string = 'X', duration: number = 3500) {
         this.snackBar.open(message, action, {
             duration: duration,
             horizontalPosition: 'right',
@@ -17,7 +17,7 @@ export class NotificationService {
         });
     }
 
-    notifyError(message: string, action: string = 'X', duration: number = 2500) {
+    notifyError(message: string, action: string = 'X', duration: number = 3500) {
         this.snackBar.open(message, action, {
             duration: duration,
             horizontalPosition: 'right',
