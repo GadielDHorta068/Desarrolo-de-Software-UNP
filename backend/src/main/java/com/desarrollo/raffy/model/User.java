@@ -46,7 +46,7 @@ public abstract class User {
 
     @ManyToOne
     @JoinColumn(name = "region_id", nullable = true)
-    @NotNull(message = "la region es obligatoria")
+    // @NotNull(message = "la region es obligatoria")
     private Region region;
 
     @Column(nullable = true)

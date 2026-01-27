@@ -81,7 +81,7 @@ public abstract class Events {
 
     @ManyToOne
     @JoinColumn(name = "region_id", nullable = true)
-    @NotNull(message = "Debe seleccionar una region")
+    // @NotNull(message = "Debe seleccionar una region")
     private Region region;
 
     @NotNull(message = "El estado del evento no debe estar vacío")
@@ -125,7 +125,7 @@ public abstract class Events {
     @Column(name = "winners_count", nullable = false)
     private int winnersCount;
 
-    @Column(name = "is_private", nullable = false, columnDefinition = "boolean default false")
+    @Column(name = "is_private", nullable = false)
     @com.fasterxml.jackson.annotation.JsonProperty("isPrivate")
     private boolean isPrivate = false;
 
