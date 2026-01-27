@@ -41,15 +41,16 @@ export class QuestionaryComponent {
         private eventService: EventsService,
         private activatedRoute: ActivatedRoute,
         private regionService: RegionService
-    ) {}
+    ) {
+        // trae las provincias para la lista del questionary
+        this.regionService.getNonCountrieRegions().subscribe({
+            next: (res) => this.regions = res.data,
+            error: err => console.error(err)
+        });
+    }
 
     ngOnInit() {
         this.initializeUserLogged();
-
-        this.regionService.getAllRegions().subscribe({
-            next: (res) => this.regions = res.data,   // si tu Response tiene structure {data:..., message:...}
-            error: err => console.error(err)
-        });
         
         // Inicializar form reactivo
         this.form = this.fb.group({
