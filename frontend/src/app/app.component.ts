@@ -65,11 +65,20 @@ export class AppComponent {
     try {
       const respInscript: any = await this.adminInscriptService.onInscript(data);
       if(respInscript.status == 200){
+        // console.log('DATA:', respInscript.data);
+        // console.log('TYPE:', typeof respInscript.data);
         if(respInscript.redirectPay){
           this.router.navigate(['/event/payment']);
         }
         else{
-          this.notificationService.notifySuccess(respInscript.message)
+            if (respInscript.data == false) {
+                this.notificationService.notifyError(respInscript.message);        
+                // console.log("ROJO")
+            }
+            else {
+                this.notificationService.notifySuccess(respInscript.message);
+                // console.log("VERDE")
+            }
         }
       }
       else{
