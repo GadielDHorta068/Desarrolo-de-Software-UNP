@@ -37,7 +37,7 @@ public interface GuessProgressRepository extends JpaRepository<GuessProgress, Lo
         SELECT gp FROM GuessProgress gp
         WHERE gp.contest.id = :eventId
         AND gp.hasWon = TRUE
-        ORDER BY gp.attemptCount ASC, gp.durationSeconds, gp.attemptTime ASC
+        ORDER BY gp.attemptCount, gp.durationSeconds, gp.attemptTime ASC
     """)
     List<GuessProgress> getWinnersOrdered(@Param("eventId") Long eventId);
 

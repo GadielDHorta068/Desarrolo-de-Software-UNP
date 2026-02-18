@@ -342,7 +342,19 @@ export class Profile implements OnInit, OnDestroy {
     this.eventsSubscription = this.eventsService.getAllByCreator(userId.toString()).subscribe({
       next: (events) => {
         const viewingOwnProfile = this.isOwner;
-        this.userEvents = (events || []).filter(e => viewingOwnProfile ? true : !e.isPrivate);
+        const toTimestamp = (date?: number[]) => {
+          if (!date || date.length < 3) return 0;
+          const [y, m, d] = date;
+          return new Date(y, (m || 1) - 1, d || 1).getTime();
+        };
+        this.userEvents = (events || [])
+          .filter(e => viewingOwnProfile ? true : !e.isPrivate)
+          .sort((a, b) => {
+            const ta = toTimestamp(a.startDate);
+            const tb = toTimestamp(b.startDate);
+            if (ta !== tb) return tb - ta;
+            return (b.id || 0) - (a.id || 0);
+          });
         this.createdEventsCount = events?.length || 0;
         this.winnersTotalCount = (events || []).reduce((sum, e) => sum + (e.winnersCount || 0), 0);
         this.cdr.detectChanges();

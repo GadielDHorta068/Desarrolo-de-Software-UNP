@@ -93,3 +93,5 @@
 
 <app-raffle-numbers *ngIf="showRaffleModal" (closeRaffleNumberModal)="onRaffleClosed()"
   (proceedToInscript)="onProceedToQuestionary($event)"></app-raffle-numbers>
+
+<app-guessprogress *ngIf="showGuessModal" (closeGuessProgressModal)="onGuessClosed()"></app-guessprogress>

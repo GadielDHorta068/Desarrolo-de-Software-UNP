@@ -13,15 +13,36 @@ import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker';
-import { MatNativeDateModule, MatOptionModule } from '@angular/material/core';
+import { MatNativeDateModule, MatOptionModule, MAT_DATE_LOCALE, DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+
+class EsArDateAdapter extends NativeDateAdapter {
+  override format(date: Date, displayFormat: any): string {
+    return new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+  }
+}
+
+const ES_AR_DATE_FORMATS = {
+  parse: { dateInput: 'DD/MM/YYYY' },
+  display: {
+    dateInput: 'DD/MM/YYYY',
+    monthYearLabel: 'MM/YYYY',
+    dateA11yLabel: 'DD/MM/YYYY',
+    monthYearA11yLabel: 'MMMM YYYY'
+  }
+};
 
 @Component({
   selector: 'app-public-events',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, DrawCard, MatFormFieldModule, MatInputModule, MatDatepickerModule, MatNativeDateModule, MatAutocompleteModule, MatOptionModule],
   templateUrl: './public-events.html',
-  styleUrl: './public-events.css'
+  styleUrl: './public-events.css',
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'es-AR' },
+    { provide: DateAdapter, useClass: EsArDateAdapter, deps: [MAT_DATE_LOCALE] },
+    { provide: MAT_DATE_FORMATS, useValue: ES_AR_DATE_FORMATS }
+  ]
 })
 export class PublicEvents implements OnInit, AfterViewInit {
   events: EventsTemp[] = [];

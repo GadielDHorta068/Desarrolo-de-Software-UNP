@@ -10,7 +10,7 @@ export enum StatusEvent {
 
 export enum EventTypes {
     GIVEAWAY = 'GIVEAWAYS',     // sorteo
-    CONTEST = 'CONTEST',
+    GUESSING_CONTEST = "GUESSING_CONTEST",
     TOURNAMENT = 'TOURNAMENT',
     RAFFLES = 'RAFFLES'         // rifa
 }
@@ -64,8 +64,14 @@ export interface EventsTemp {
     creator: Creator,
     imageUrl?: string; // Campo opcional para la imagen en base64
     isUserRegistered?: boolean; // Indica si el usuario actual está inscrito en el evento
+    // propio de rifas
     quantityOfNumbers: number;
     priceOfNumber: number;
+    // propio de adivinanzas
+    targetNumber: number;
+    minValue: number;
+    maxValue: number;
+    maxAttempts: number;
     isPrivate?: boolean;
 }
 // de momento no usamos extensiones sino un solo modelo de eventos con todos los atr (A.T)
@@ -89,6 +95,11 @@ export interface EventsCreate {
     region: {
         id: number;
     }
+    // propio de adivinanzas
+    targetNumber: number;
+    minValue: number;
+    maxValue: number;
+    maxAttempts: number;
 }
 // de momento no usamos extensiones sino un solo modelo de eventos con todos los atr (A.T)
 export interface RaffleCreate extends EventsCreate {
@@ -108,5 +119,5 @@ export interface RaffleParticipantDTO {
     surname: string;
     email: string;
     number: number;
-    position:number;
+    position: number;
 }

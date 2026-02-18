@@ -1,6 +1,8 @@
 package com.desarrollo.raffy.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,9 +13,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GuessProgressDTO {
 
-    private int attemptCount;               // Cantidad total de intentos
-    private String numbersTried;            // Lista de números separados por coma
-    private boolean hasWon;                 // Si adivinó o no
-    private LocalDateTime lastAttemptTime;  // Fecha y hora del intento
-    private Long durationSeconds;          // Duración total en segundos
+    private int attemptCount;
+    private String numbersTried;
+    private boolean hasWon;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
+    private OffsetDateTime lastAttemptTime;
+    private Long durationSeconds;
 }

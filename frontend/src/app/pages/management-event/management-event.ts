@@ -19,12 +19,14 @@ import { AdminInscriptService } from '../../services/admin/adminInscript';
 import { InviteLoginComponent } from '../../shared/components/invite-login/invite-login.component';
 import { ReportsFormComponent, ResumeService } from '../../shared/components/reports-form/reports-form.component';
 import { ReportService } from '../../services/report.service';
+import { GuessprogressService } from '../../services/guessprogress.service';
+import { DataPlayParticipantDTO } from '../../models/guessprogressDTO';
 
 @Component({
     selector: 'app-management-event',
     imports: [CommonModule, RouterLink, ReactiveFormsModule, InfoEvent,
         EventShareCardComponent, ModalShareEvent,
-        TagPrize, InviteLoginComponent, ReportsFormComponent],
+        TagPrize, InviteLoginComponent, ReportsFormComponent, HandleDatePipe],
     templateUrl: './management-event.html',
     styleUrl: './management-event.css',
     providers: [HandleDatePipe]
@@ -86,6 +88,10 @@ export class ManagementEvent {
         return !isCreator && !this.event?.isUserRegistered && this.event?.statusEvent === StatusEvent.OPEN;
     }
 
+    get isAdmin(): boolean {
+        return this.authService.getCurrentUserValue()?.userType == "ADMIN";
+    }
+
     constructor(
         private adminEventService: AdminEventService,
         private handleDatePipe: HandleDatePipe,
@@ -96,10 +102,11 @@ export class ManagementEvent {
         private cdr: ChangeDetectorRef,
         private notificationService: NotificationService,
         private adminInscriptService: AdminInscriptService,
-        private reportsService: ReportService
-    ) {}
+        private reportsService: ReportService,
+        private guessProgressService: GuessprogressService
+    ) { }
 
-    ngAfterViewInit(){
+    ngAfterViewInit() {
         this.adminEventService.winnersEvent$.subscribe(winners => {
             this.winners = winners;
         });
@@ -131,8 +138,8 @@ export class ManagementEvent {
                     this.initForm();
                     this.cdr.markForCheck();
 
-                    if(this.authService.isAuthenticated()){
-                        this.reportsService.hasReportedEvent(""+this.event?.id, ""+this.authService.getCurrentUserValue()?.email).subscribe(
+                    if (this.authService.isAuthenticated()) {
+                        this.reportsService.hasReportedEvent("" + this.event?.id, "" + this.authService.getCurrentUserValue()?.email).subscribe(
                             data => {
                                 this.hasReport = data;
                                 this.cdr.markForCheck();
@@ -166,11 +173,11 @@ export class ManagementEvent {
     }
 
     private parseDate(fecha: string): string {
-        const [dia, mes, anio] = fecha.split('-');
-
-        const diaFormateado = dia.padStart(2, '0');
-        const mesFormateado = mes.padStart(2, '0');
-
+        const parts = fecha ? fecha.split(/[\/-]/) : [];
+        if (parts.length < 3) return fecha;
+        const [dia, mes, anio] = parts;
+        const diaFormateado = (dia || '').padStart(2, '0');
+        const mesFormateado = (mes || '').padStart(2, '0');
         return `${anio}-${mesFormateado}-${diaFormateado}`;
     }
 
@@ -185,19 +192,19 @@ export class ManagementEvent {
     }
 
 
-    async onInscript(){
+    async onInscript() {
         if (this.accessRestricted) {
             return;
         }
         const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
         // console.log("[onInscript] => estado del evento: ", respStatus);
-        if(!respStatus){
+        if (!respStatus) {
             this.notificationService.notifyError("No fue posible realizar la operación");
         }
-        else{
-            if(respStatus != StatusEvent.OPEN){
+        else {
+            if (respStatus != StatusEvent.OPEN) {
                 this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
-                if(this.event){
+                if (this.event) {
                     this.event.statusEvent = respStatus as StatusEvent;
                     this.cdr.detectChanges();
                 }
@@ -205,40 +212,54 @@ export class ManagementEvent {
         }
     }
 
-    goHome(){
+    goHome() {
         this.router.navigate(['/home']);
     }
 
     loadParticipants(eventId: number, eventType: EventTypes): void {
-        this.eventService.getParticipantUsersByEventId(eventId, eventType, this.authService.getCurrentUserValue()?.email || "null").subscribe({
-            next: (data) => {
-                if (eventType === EventTypes.RAFFLES) {
-                    const map = new Map<string, { name: string; surname: string; email: string; numbers: number[]; position: number }>();
-                    (data as RaffleParticipantDTO[]).forEach(p => {
-                        const key = p.email;
-                        const existing = map.get(key);
-                        if (existing) {
-                            existing.numbers.push(p.number);
-                            existing.position = existing.position || p.position || 0;
-                        } else {
-                            map.set(key, { name: p.name, surname: p.surname, email: p.email, numbers: [p.number], position: p.position || 0 });
-                        }
-                    });
-                    this.raffleParticipantsGrouped = Array.from(map.values()).map(g => ({
-                        ...g,
-                        numbers: g.numbers.sort((a, b) => a - b)
-                    }));
-                    this.participants = [];
-                } else {
-                    this.participants = data;
-                    this.raffleParticipantsGrouped = [];
+        if (eventType == EventTypes.GUESSING_CONTEST) {
+            this.guessProgressService.getParticipants(eventId).subscribe({
+                next: (data) => {
+                    this.participants = this.parseDataPlayParticipants(data);
+                    this.cdr.detectChanges();
+                },
+                error: (err) => {
+                    console.error('Error al obtener participantes:', err);
+                    this.notificationService.notifyError('Error al obtener participantes');
                 }
-                this.cdr.detectChanges();
-            },
-            error: (err) => {
-                console.error('Error al obtener participantes:', err);
-            }
-        });
+            });
+        }
+        else {
+            this.eventService.getParticipantUsersByEventId(eventId, eventType, this.authService.getCurrentUserValue()?.email || "null").subscribe({
+                next: (data) => {
+                    if (eventType === EventTypes.RAFFLES) {
+                        const map = new Map<string, { name: string; surname: string; email: string; numbers: number[]; position: number }>();
+                        (data as RaffleParticipantDTO[]).forEach(p => {
+                            const key = p.email;
+                            const existing = map.get(key);
+                            if (existing) {
+                                existing.numbers.push(p.number);
+                                existing.position = existing.position || p.position || 0;
+                            } else {
+                                map.set(key, { name: p.name, surname: p.surname, email: p.email, numbers: [p.number], position: p.position || 0 });
+                            }
+                        });
+                        this.raffleParticipantsGrouped = Array.from(map.values()).map(g => ({
+                            ...g,
+                            numbers: g.numbers.sort((a, b) => a - b)
+                        }));
+                        this.participants = [];
+                    } else {
+                        this.participants = data;
+                        this.raffleParticipantsGrouped = [];
+                    }
+                    this.cdr.detectChanges();
+                },
+                error: (err) => {
+                    console.error('Error al obtener participantes:', err);
+                }
+            });
+        }
     }
 
     // devuelve el lugar en el podio
@@ -296,7 +317,7 @@ export class ManagementEvent {
             this.loadParticipants(this.event.id, this.event.eventType);
         }
     }
-    
+
     // controles de pestaña
     isRegisteredTab(): boolean {
         return this.tab === this.TAB_REGISTERED;
@@ -311,41 +332,51 @@ export class ManagementEvent {
     }
 
     // le brinda al usuario la posibilidad de reportar un evento
-    onReport(){
+    onReport() {
         // invitar al usuario a que se loguee para crear el reporte
-        if(!this.authService.isAuthenticated()){
+        if (!this.authService.isAuthenticated()) {
             this.showInviteLogin = true;
             this.cdr.detectChanges();
         }
-        else{
+        else {
             // mostramos el modal de reportes
             this.showFormReport = true;
             this.cdr.detectChanges();
         }
     }
 
-    onReportClosed(){
+    onReportClosed() {
         this.showFormReport = false;
     }
 
-    onInviteClosed(data: any){
+    onInviteClosed(data: any) {
         this.showInviteLogin = false;
         this.cdr.detectChanges();
-        if(data?.redirect){
+        if (data?.redirect) {
             this.router.navigateByUrl("/login");
         }
     }
 
     // muestra el resultado del reporte del evento
-    resultReport(data: ResumeService){
+    resultReport(data: ResumeService) {
         // data.status == "OK" ? this.notificationService.notifySuccess(data.msg): this.notificationService.notifyError(data.msg);
-        if(data.status == "OK"){
+        if (data.status == "OK") {
             this.notificationService.notifySuccess(data.msg);
             this.hasReport = true;
         }
-        else{
+        else {
             this.notificationService.notifyError(data.msg);
         }
+    }
+
+    private parseDataPlayParticipants(data: DataPlayParticipantDTO[]): RaffleParticipantDTO[] {
+        return data.map((item) => ({
+            name: item.name,
+            surname: item.surname,
+            email: item.email,
+            number: 0,
+            position: 0
+        })) as RaffleParticipantDTO[];
     }
 
 }

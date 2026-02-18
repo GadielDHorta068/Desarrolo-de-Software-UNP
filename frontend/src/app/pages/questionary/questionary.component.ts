@@ -1,4 +1,4 @@
-import { Component, EventEmitter, input, Input, Output } from '@angular/core';
+import { Component, EventEmitter, input, Input, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -11,27 +11,32 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Region } from '../../models/region';
 import { RegionService } from '../../services/region.service';
+import { AdminEventService } from '../../services/admin/adminEvent.service';
+import { EventRulesModal } from '../event-rules-modal/event-rules-modal';
 
 @Component({
-  selector: 'app-questionary',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './questionary.component.html',
-  styleUrl: './questionary.component.css'
+    selector: 'app-questionary',
+    standalone: true,
+    imports: [CommonModule, ReactiveFormsModule, EventRulesModal],
+    templateUrl: './questionary.component.html',
+    styleUrl: './questionary.component.css'
 })
 export class QuestionaryComponent {
 
-  @Input() eventId!: number;
+    @Input() eventId!: number;
+    @Input() eventType: EventTypes | undefined;
 
-  loggedUser?: UserDTO;
-  @Output() onInscript = new EventEmitter<UserDTO>();
-  @Output() close = new EventEmitter<void>();
+    loggedUser?: UserDTO;
+    @Output() onInscript = new EventEmitter<UserDTO>();
+    @Output() close = new EventEmitter<void>();
 
-  event!: EventsTemp | null;
-  allEventTypes = EventTypes;
-  allEventStates = StatusEvent;
+    event!: EventsTemp | null;
+    allEventTypes = EventTypes;
+    allEventStates = StatusEvent;
 
-  form!: FormGroup;
+    form!: FormGroup;
+
+    @ViewChild('rulesModal') rulesModal!: EventRulesModal;
 
   regions: Region[] = [];
 
@@ -40,7 +45,8 @@ export class QuestionaryComponent {
         private authService: AuthService,
         private eventService: EventsService,
         private activatedRoute: ActivatedRoute,
-        private regionService: RegionService
+        private regionService: RegionService,
+        private adminEventService: AdminEventService
     ) {
         // trae las provincias para la lista del questionary
         this.regionService.getNonCountrieRegions().subscribe({
@@ -50,6 +56,14 @@ export class QuestionaryComponent {
     }
 
     ngOnInit() {
+        this.adminEventService.selectedEvent$.subscribe(event => {
+            if (event) {
+                this.event = event;
+                this.eventId = event.id;
+                this.eventType = event.eventType;
+            }
+        });
+
         this.initializeUserLogged();
         
         // Inicializar form reactivo
@@ -62,12 +76,12 @@ export class QuestionaryComponent {
         });
 
         if (this.loggedUser) {
-          // Procesar el número de teléfono antes de hacer patchValue
-          const processedUser = { ...this.loggedUser };
-          if (processedUser.cellphone) {
-            processedUser.cellphone = this.normalizePhoneNumber(processedUser.cellphone);
-          }
-          this.form.patchValue(processedUser);
+            // Procesar el número de teléfono antes de hacer patchValue
+            const processedUser = { ...this.loggedUser };
+            if (processedUser.cellphone) {
+                processedUser.cellphone = this.normalizePhoneNumber(processedUser.cellphone);
+            }
+            this.form.patchValue(processedUser);
         }
     }
 
@@ -85,7 +99,7 @@ export class QuestionaryComponent {
                 console.log("userLogged: ", this.loggedUser);
             }
             else {
-                console.error('error al obtener el userLogged');
+                console.warn('error al obtener el userLogged'); //.error
             }
     }
 
@@ -102,7 +116,7 @@ export class QuestionaryComponent {
         const normalizedDigits = this.normalizePhoneNumber(input.value || '');
         this.form.get('cellphone')?.setValue(normalizedDigits, { emitEvent: false });
     }
-    
+
     onConfirmInscription(): void {
         // Forzamos validación visual si el usuario intenta enviar sin completar
         if (this.form.invalid) {
@@ -129,12 +143,12 @@ export class QuestionaryComponent {
     // Método privado para normalizar números de teléfono
     private normalizePhoneNumber(phoneNumber: string): string {
         const digits = (phoneNumber || '').replace(/\D/g, ''); // solo dígitos
-        
+
         // Si el número tiene 12 dígitos y empieza con "54", recortar los primeros 2 dígitos
         if (digits.length === 12 && digits.startsWith('54')) {
             return digits.substring(2); // Remover los primeros 2 dígitos (54)
         }
-        
+
         // Si tiene más de 10 dígitos, tomar solo los primeros 10
         return digits.slice(0, 10);
     }
@@ -155,4 +169,8 @@ export class QuestionaryComponent {
     get surnameControl() { return this.form.get('surname'); }
     get emailControl() { return this.form.get('email'); }
     get cellphoneControl() { return this.form.get('cellphone'); }
+
+    openRulesModal(): void {
+        this.rulesModal.open(this.eventType);
+    }
 }

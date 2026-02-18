@@ -21,9 +21,9 @@ export class configService {
   constructor(
     private categoryService: CategoryService,
     private eventService: EventsService
-  ) {}
+  ) { }
 
-  initData(){
+  initData() {
     // recuperamos todos las categorias
     this.categoryService.getAll().subscribe({
       next: (response) => {
@@ -40,7 +40,6 @@ export class configService {
     // recuperamos todos los tipos de eventos
     this.eventService.getTypesEvent().subscribe({
       next: (response) => {
-        console.log('[initConfig] => tipos de eventos recuperados: ', response);
         this.setTypesEvent(this.parseTypeEvents(response));
         console.log('[initConfig] => tipos de eventos recuperados: ', this.typeEventsSubject.getValue());
       },
@@ -52,21 +51,21 @@ export class configService {
     });
   }
 
-  public setCategories(categories: Category[]|null){
+  public setCategories(categories: Category[] | null) {
     this.categoriesSubject.next(categories ? categories : []);
   }
 
-  public getCategories(){
+  public getCategories() {
     const categories = this.categoriesSubject.getValue();
     return categories ? categories : [];
   }
 
-  public setTypesEvent(types: EventType[]|null){
+  public setTypesEvent(types: EventType[] | null) {
     this.typeEventsSubject.next(types ? types : []);
   }
 
-  public parseTypeEvents(nameEvents: string[]){
-    if(nameEvents){
+  public parseTypeEvents(nameEvents: string[]) {
+    if (nameEvents) {
       const objTypes = nameEvents.map(name => this.getObjcType(name));
       console.log("[typeEvent] => array de objetos: ", objTypes);
       return objTypes;
@@ -75,7 +74,7 @@ export class configService {
   }
 
   // devuelve todos los tipos de eventos recuperados del server
-  public getEventTypes(){
+  public getEventTypes() {
     const types = this.typeEventsSubject.getValue();
     return types ? types : [];
   }
@@ -84,17 +83,17 @@ export class configService {
   //   return this.categories;
   // }
 
-  private getObjcType(codeType: string){
+  private getObjcType(codeType: string) {
     let name: string = "";
-    if(codeType == "GIVEAWAYS"){
+    if (codeType == "GIVEAWAYS") {
       name = "SORTEO";
     }
-    if(codeType == "GUESSING_CONTEST"){
+    if (codeType == "GUESSING_CONTEST") {
       name = "ADIVINANZAS";
     }
-    if(codeType == "RAFFLES"){
+    if (codeType == "RAFFLES") {
       name = "RIFA";
     }
-    return {code: codeType, name: name};
+    return { code: codeType, name: name };
   }
 }

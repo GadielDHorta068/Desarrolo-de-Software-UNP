@@ -9,11 +9,13 @@ import { CommonModule } from '@angular/common';
 import { AdminInscriptService } from './services/admin/adminInscript';
 import { NotificationService } from './services/notification.service';
 import { UserDTO } from './models/UserDTO';
+import { EventTypes } from './models/events.model';
+import { Guessprogress } from './pages/guessprogress/guessprogress';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, HeaderComponent, QuestionaryComponent, RaffleNumbersComponent, LoadingIndicator],
+  imports: [CommonModule, RouterOutlet, RouterLink, HeaderComponent, QuestionaryComponent, RaffleNumbersComponent, LoadingIndicator, Guessprogress],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   animations: [slideInAnimation],
@@ -25,8 +27,9 @@ export class AppComponent {
 
   showModalInscript: boolean = false;
   showRaffleModal: boolean = false;
+  showGuessModal: boolean = false;
   redirectingToPayment: boolean = false;
-  
+
   constructor(
     private contexts: ChildrenOutletContexts,
     private cdr: ChangeDetectorRef,
@@ -44,53 +47,89 @@ export class AppComponent {
       this.showRaffleModal = resp;
       this.cdr.markForCheck();
     })
+
+    this.adminInscriptService.openGuessing$.subscribe(resp => {
+      this.showGuessModal = resp;
+      this.cdr.markForCheck();
+    })
   }
-  
-  openModalRaffle(){
+
+  openModalRaffle() {
     this.showRaffleModal = !this.showRaffleModal;
   }
-  openModalInscript(){
+  openModalInscript() {
     this.showModalInscript = !this.showModalInscript;
   }
 
-  onRaffleClosed(){
+  openModalGuess() {
+    this.showGuessModal = !this.showGuessModal;
+    this.cdr.detectChanges();
+  }
+
+  onRaffleClosed() {
     this.adminInscriptService.setOpenModalRaffle(false);
   }
-  onInscriptClosed(){
+  onInscriptClosed() {
     this.adminInscriptService.setOpenModalInscript(false);
   }
 
-  async onQuestionarySubmit(data: UserDTO){
-    this.redirectingToPayment = true;
-    try {
-      const respInscript: any = await this.adminInscriptService.onInscript(data);
-      if(respInscript.status == 200){
-        // console.log('DATA:', respInscript.data);
-        // console.log('TYPE:', typeof respInscript.data);
-        if(respInscript.redirectPay){
-          this.router.navigate(['/event/payment']);
-        }
-        else{
-            if (respInscript.data == false) {
-                this.notificationService.notifyError(respInscript.message);        
-                // console.log("ROJO")
-            }
-            else {
-                this.notificationService.notifySuccess(respInscript.message);
-                // console.log("VERDE")
-            }
-        }
-      }
-      else{
-        this.notificationService.notifyError("Ha ocurrido un error en la inscripcion al evento.");
-      }
-    } finally {
-      this.redirectingToPayment = false;
-      this.cdr.markForCheck();
-    }
+  onGuessClosed() {
+    this.adminInscriptService.setOpenModalGuessing(false);
   }
-  
-  onProceedToQuestionary(data: any){
+
+    async onQuestionarySubmit(data: UserDTO) {
+        this.redirectingToPayment = true;
+
+        try {
+            const resp: any = await this.adminInscriptService.onInscript(data);
+
+            // 1️⃣ Error genérico
+            if (!resp || resp.status !== 200) {
+            this.notificationService.notifyError(
+                "Ha ocurrido un error en la inscripción al evento."
+            );
+            return;
+            }
+
+            // 2️⃣ Región (bloqueante total)
+            if (resp.data === false) {
+            this.notificationService.notifyError(resp.message);
+            return;
+            }
+
+            // 3️⃣ Rifa → redirección
+            if (resp.redirectPay) {
+            this.router.navigate(['/event/payment']);
+            return;
+            }
+
+            // 4️⃣ Guessing contest
+            if (resp.isGuessing) {
+            if (!resp.allowed) {
+                this.notificationService.notifyError(resp.message);
+                return;
+            }
+
+            this.notificationService.notifySuccess(
+                resp.message + ". ¡A jugar!"
+            );
+            this.adminInscriptService.setOpenModalGuessing(true);
+            return;
+            }
+
+            // 5️⃣ Caso normal
+            this.notificationService.notifySuccess(
+            resp.message + ". ¡Gracias por inscribirse!"
+            );
+
+        } finally {
+            this.redirectingToPayment = false;
+            this.cdr.markForCheck();
+        }
+        }
+
+
+  onProceedToQuestionary(data: any) {
     this.adminInscriptService.toBuyNumbersRaffle(data);
   }
 
