@@ -3,11 +3,10 @@ import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
+import { StatusEvent } from '../models/events.model';
 
 // {
 //         "id": 1,
-//         "eventId": 25,
-//         "eventName": "El evento",
 //         "mailUserReport": "alex6tc90@gmail.com",
 //         "reason": "Porque se me canta",
 //         "statusReport": "EARRING",
@@ -15,25 +14,59 @@ import { Observable } from 'rxjs';
 //     }
 export interface Report {
   id: Number,
-  eventId: Number,
-  eventName: string,
   mailUserReport: string,
   reason: string,
-  statusReport: string,
-  timestamp: string
+  statusReport: StatusReport,
+  createdAt: string
 }
 
 // {
 //   "eventId": 25,
 //   "mailUserReport": "alex6tc90@gmail.com",
-//   "eventName": "El evento",
 //   "reason": "Porque se me canta"
 // }
 export interface InformReport {
   eventId: Number,
-  eventName: string,
   mailUserReport: string,
   reason: string
+}
+
+export interface AdminEventReport {
+  id: Number,
+  eventId: Number,
+  eventTitle: string,
+  eventDate: string,
+  statusEvent: StatusEvent,
+  statusReport: StatusReport,
+  totalReports: Number,
+  score: Number,
+  createdAt: string,
+  adminNotes: string | null,
+  reports: ReviewReportDTO[] | null,
+}
+
+export enum StatusReport {
+  EARRING = 'EARRING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED'
+}
+
+export interface MessageResponse {
+  message: string;
+}
+
+export interface OrganizerEventReport {
+  eventId: Number,
+  eventTitle: string,
+  statusEvent: StatusEvent
+}
+
+export interface ReviewReportDTO{
+  id: Number,
+  mailUserReport: string,
+  reason: string,
+  statusReport: StatusReport,
+  createdAt: string
 }
 
 
@@ -41,28 +74,55 @@ export interface InformReport {
   providedIn: 'root'
 })
 export class ReportService {
-   private apiUrl = `${environment.apiUrl}/reports`;
+   private apiUrl = `${environment.apiUrl}/api/reports`;
 
   constructor(
     private http: HttpClient,
     private authService: AuthService
   ){}
 
-  getReportsByEvent(eventId: string): Observable<Report[]> {
+   // crea un reporte con los datos recibidos
+  informReport(informReport: InformReport): Observable<InformReport> {
     const headers = this.getAuthHeaders();
-    return this.http.get<Report[]>(`${this.apiUrl}/review/event/${eventId}`, { headers });
+    return this.http.post<InformReport>(`${this.apiUrl}`, informReport, { headers });
   }
 
-  // crea un reporte con los datos recibidos
-  informReport(informReport: InformReport): Observable<Report[]> {
+  // Obtener los reportes agrupados por evento para el admin
+  getAllReportedEvents() : Observable<AdminEventReport[]> {
     const headers = this.getAuthHeaders();
-    return this.http.post<Report[]>(`${this.apiUrl}/create`, informReport, { headers });
+    return this.http.get<AdminEventReport[]>(`${this.apiUrl}/event`, { headers });
+  }
+
+  // Obtener los detalles (reportes individuales) de un evento específico para el admin
+  getEventReportDetails(eventId: string): Observable<AdminEventReport>{
+    const headers = this.getAuthHeaders();
+    return this.http.get<AdminEventReport>(`${this.apiUrl}/event/${eventId}`, { headers });
+  }
+
+  // Notificar al creador del evento sobre el reporte
+  notifyCreatorAboutReports(eventId: string, adminMessage: string): Observable<MessageResponse> {
+    const headers = this.getAuthHeaders();
+    return this.http.post<MessageResponse>(
+      `${this.apiUrl}/event/${eventId}/notify-creator?adminMessage=${encodeURIComponent(adminMessage)}`,
+       {},
+       { headers });
+  }
+
+  makeFinalDecisionOnEvent(eventId: string, finalStatusReport: StatusReport, adminMessage: string): Observable<OrganizerEventReport>{
+    const headers = this.getAuthHeaders();
+    return this.http.put<OrganizerEventReport>(
+      `${this.apiUrl}/event/${eventId}/final-decision?finalStatusReport=${finalStatusReport}&adminMessage=${encodeURIComponent(adminMessage)}`, 
+      {}, 
+      { headers });
   }
 
   // resolve report
-  resolveReport(reportId: string, eventId: string, status: string): Observable<Report> {
+  reviewReport(reportId: string, status: StatusReport): Observable<ReviewReportDTO> {
     const headers = this.getAuthHeaders();
-    return this.http.put<Report>(`${this.apiUrl}/review?reportId=${reportId}&eventId=${eventId}&status=${status}`, { headers });
+    return this.http.put<ReviewReportDTO>(
+      `${this.apiUrl}/${reportId}/review?status=${status}`, 
+      {}, 
+      { headers });
   }
 
   // determina si el usuario ya ha reportado el evento

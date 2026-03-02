@@ -27,7 +27,8 @@
         </div>
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            <div class="card group cursor-pointer" *ngFor="let guide of quickGuides">
+            <a *ngFor="let guide of quickGuides" [routerLink]="guide.route"
+            class="card group cursor-pointer hover:shadow-xl transition-all duration-300 block">
                 <div
                     [class]="'w-12 h-12 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ' + guide.iconBg">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,7 +48,7 @@
                         <span>{{ step }}</span>
                     </li>
                 </ul>
-            </div>
+            </a>
         </div>
     </div>
 </section>

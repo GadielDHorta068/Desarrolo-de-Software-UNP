@@ -154,4 +154,20 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
 
         // --------- Fin de Métodos para el destacada de cada tipo ---------
 
+        /**
+     * Método para obtener la cantidad de eventos bloqueados del organizador
+     * @param creatorId
+     * @return
+     */
+    @Query("SELECT COUNT(e) FROM Events e WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.BLOCKED AND e.creator.id = :creatorId")
+    int countBlockedByCreatorId(@Param("creatorId") Long creatorId);
+
+    /**
+     * Método para obtener la cantidad de eventos finalizados del organizador
+     * @param creatorId
+     * @return
+     */
+    @Query("SELECT COUNT(e) FROM Events e WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.FINALIZED AND e.creator.id = :creatorId")
+    int countFinalizedByCreatorId(@Param("creatorId") Long creatorId);
+
 }

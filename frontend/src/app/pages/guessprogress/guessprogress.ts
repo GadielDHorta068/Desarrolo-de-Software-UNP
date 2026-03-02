@@ -26,6 +26,7 @@ export class Guessprogress implements OnInit {
 
   event!: EventsTemp | null;
   allEventStates = StatusEvent;
+  loading = true;
 
   //Estado del juego
   gamePhase: 'registration' | 'playing' | 'won' = 'registration';
@@ -128,7 +129,7 @@ export class Guessprogress implements OnInit {
     this.maxValue = 100;
     this.maxAttempts = 10;
     this.gamePhase = 'registration';
-    this.showModalInscript = true; // ← Esto es lo importante
+    this.showModalInscript = true;
     this.cdr.detectChanges();
   }
 
@@ -311,6 +312,9 @@ export class Guessprogress implements OnInit {
   private finishGame(hasWon: boolean): void {
     if (!this.currentUser || !this.event) return;
 
+    // Mostrar pantalla de carga inmediatamente
+    this.loading = true;
+    this.cdr.detectChanges();
     // Guardar el estado de victoria
     this.gameWon = hasWon;
 
@@ -331,10 +335,10 @@ export class Guessprogress implements OnInit {
     // Registrar el resultado
     this.guessProgressService.registerEvent(this.event.id, participantRequestDTO).subscribe({
       next: (response) => {
-        // Mostrar modal de resultados
+        // Ocultar loading y mostrar resultado
+        this.loading = false;
         this.showResultsModal = true;
         this.cdr.detectChanges();
-
         if (hasWon) {
           this.notificationService.notifySuccess('¡Felicidades! ¡Adivinaste el número!');
         } else {
@@ -342,11 +346,10 @@ export class Guessprogress implements OnInit {
         }
       },
       error: (err) => {
+        this.loading = false;
+        this.cdr.detectChanges();
         const message = this.getHttpErrorMessage(err) || 'Error al registrar tu participación';
         this.notificationService.notifyError(message);
-        // Mostrar modal de resultados incluso si hay error
-        this.showResultsModal = true;
-        this.cdr.detectChanges();
       }
     });
   }

@@ -1,0 +1,254 @@
+<!-- Event Reports View -->
+<section aria-labelledby="reports-title" class="max-w-5xl mx-auto px-4 py-6">
+  <!-- Loading Screen -->
+  <div *ngIf="isloading" class="flex items-center justify-center h-96">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+      <p class="text-gray-600 font-medium">Cargando detalles del evento...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isloading && errorMessage" class="rounded-md border border-red-300 bg-red-50 p-4">
+    <p class="text-red-800">{{ errorMessage }}</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isloading && !errorMessage">
+    <header class="mb-6">
+      <h1 id="reports-title" class="text-2xl font-semibold black">
+        Reportes del evento
+      </h1>
+      <p class="mt-2 text-sm text-black-700">
+        Lista de reportes realizados por usuarios sobre el evento.
+      </p>
+    </header>
+
+    <!-- Event Info Card -->
+    <div class="mb-4 rounded-md border border-gray-500 bg-white-800 p-4 shadow-lg">
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <dt class="text-xs font-semibold text-black-800">Evento</dt>
+          <dd class="text-sm font-medium text-black-900">{{ eventReport?.eventTitle }}</dd>
+        </div>
+        
+        <div>
+          <dt class="text-xs font-semibold text-black-800">Fecha del evento</dt>
+          <dd class="text-sm text-black-900">{{ eventReport?.eventDate | handleDatePipe:'short' }}</dd>
+        </div>
+
+        <div>
+          <dt class="text-xs font-semibold text-black-800">Estado del evento</dt>
+          <dd class="text-sm">
+            <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs bg-blue-50 text-blue-700 border border-blue-200">
+            {{ eventReport?.statusEvent | handleTypePipe }}
+            </span>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="text-xs font-semibold text-black-800">Creador del evento</dt>
+          <dd class="text-sm text-black-900">
+            <div>{{ nicknameCreator }}</div>
+            <div class="text-xs text-black-900">{{ emailCreator }}</div>
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Reports -->
+    <div class="mb-6 rounded-md border border-gray-500 bg-white-800 p-4 shadow-lg">
+      <h3 class="text-sm font-semibold text-black-900 mb-4">Resumen de reportes</h3>
+      <dl class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div>
+          <dt class="text-xs text-black-500">Total de reportes</dt>
+          <dd class="text-2xl font-bold text-black-900">
+            {{ eventReport && eventReport.reports ? eventReport.reports.length : 0 }}
+          </dd>
+        </div>
+
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm bg-green-50 text-green-700 border border-green-200">
+            <span class="w-2 h-2 bg-green-600 rounded-full"></span>
+            <dt class="text-xs font-medium">Aprobados</dt>
+            <dd class="font-bold">{{ countAproved }}</dd>
+          </div>
+        </div>
+
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm bg-yellow-50 text-yellow-700 border border-yellow-200">
+            <span class="w-2 h-2 bg-yellow-600 rounded-full"></span>
+            <dt class="text-xs font-medium">Pendientes</dt>
+            <dd class="font-bold">{{ countEarring }}</dd>
+          </div>
+        </div>
+
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm bg-red-50 text-red-700 border border-red-200">
+            <span class="w-2 h-2 bg-red-600 rounded-full"></span>
+            <dt class="text-xs font-medium">Rechazados</dt>
+            <dd class="font-bold">{{ countRejected }}</dd>
+          </div>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Reports List -->
+    <div class="mb-4 rounded-md border border-gray-500 bg-white-800 overflow-hidden">
+      <div *ngIf="paginatedReports.length > 0">
+        <div *ngFor="let report of paginatedReports" class="border-b border-gray-100 last:border-b-0 p-4">
+          <app-info-report [report]="report"></app-info-report>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="paginatedReports.length === 0" class="p-8 text-center">
+        <p class="text-sm text-gray-600">No hay reportes para este evento.</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="mt-4 flex items-center justify-between" aria-label="Paginación">
+      <p class="text-xs text-black-600">
+          Página {{ currentPage }} de {{ totalPages }} ({{ eventReport?.reports?.length || 0 }} reportes totales)
+      </p>
+      <div class="inline-flex gap-2">
+        <button 
+          (click)="previousPage()"
+          [disabled]="currentPage === 1"
+          class="rounded-md border border-gray-600 px-3 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          aria-label="Anterior">
+          ← Anterior
+        </button>
+        <button 
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+          class="rounded-md border border-gray-600 px-3 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          aria-label="Siguiente">
+          Siguiente →
+        </button>
+      </div>
+    </nav>
+
+    <!-- Action Buttons -->
+    <div class="mt-6 flex gap-3">
+      <button 
+        (click)="openNotifyModal()"
+        class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+        📧 Notificar al creador
+      </button>
+      <button 
+        (click)="openFinalDecisionModal()"
+        class="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors">
+        ⚖️ Decisión final
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Modal: Notify Creator -->
+<div *ngIf="showNotifyModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="rounded-lg bg-white p-6 min-w-96 shadow-lg">
+    <h2 class="text-lg font-bold text-gray-900 mb-4">Notificar al creador</h2>
+    
+    <div class="mb-4">
+      <p class="text-sm text-gray-600">
+        <strong>Creador:</strong> {{ nicknameCreator }}<br>
+        <strong>Email:</strong> {{ emailCreator }}
+      </p>
+    </div>
+
+    <div class="mb-4">
+      <label for="notifyMessage" class="block text-sm font-medium text-gray-600 mb-2">
+        Notas del administrador
+      </label>
+      <textarea 
+        id="notifyMessage"
+        [(ngModel)]="notifyMessage"
+        class="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:border-blue-500"
+        rows="4"
+        placeholder="Escribe el mensaje para el creador..."></textarea>
+    </div>
+
+    <div class="flex gap-3 justify-end">
+      <button 
+        (click)="closeNotifyModal()"
+        [disabled]="isSubmitting"
+        class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+        Cancelar
+      </button>
+      <button 
+        (click)="notifyCreator(notifyMessage)"
+        [disabled]="isSubmitting || !notifyMessage.trim()"
+        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+        {{ isSubmitting ? 'Enviando...' : 'Enviar notificación' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Final Decision -->
+<div *ngIf="showFinalDecisionModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="rounded-lg bg-white p-6 min-w-96 shadow-lg">
+    <h2 class="text-lg font-bold text-gray-900 mb-4">Tomar decisión final</h2>
+    
+    <div class="mb-4">
+      <p class="text-sm text-gray-600 mb-4">
+        Selecciona el estado final del evento reportado.
+      </p>
+
+      <div class="space-y-2 mb-4">
+        <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+          <input 
+            type="radio" 
+            [value]="'REJECTED'"
+            [(ngModel)]="finalDecisionStatus"
+            class="w-4 h-4">
+          <div>
+            <p class="text-sm font-medium text-green-700">✓ Aprobar evento</p>
+            <p class="text-xs text-gray-700">El evento se considera válido y se mantiene activo</p>
+          </div>
+        </label>
+
+        <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+          <input 
+            type="radio" 
+            [value]="'APPROVED'"
+            [(ngModel)]="finalDecisionStatus"
+            class="w-4 h-4">
+          <div>
+            <p class="text-sm font-medium text-red-700">✗ Rechazar evento</p>
+            <p class="text-xs text-gray-700">El evento será bloqueado y no estará disponible</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label for="decisionMessage" class="block text-sm font-medium text-gray-700 mb-2">
+        Mensaje (opcional)
+      </label>
+      <textarea 
+        id="decisionMessage"
+        [(ngModel)]="finalDecisionMessage"
+        class="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-500"
+        rows="3"
+        placeholder="Proporciona contexto de tu decisión..."></textarea>
+    </div>
+
+    <div class="flex gap-3 justify-end">
+      <button 
+        (click)="closeFinalDecisionModal()"
+        [disabled]="isSubmitting"
+        class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+        Cancelar
+      </button>
+      <button 
+        (click)="makeFinalDecision(finalDecisionStatus, finalDecisionMessage)"
+        [disabled]="isSubmitting || !finalDecisionStatus"
+        class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
+        {{ isSubmitting ? 'Procesando...' : 'Aplicar decisión' }}
+      </button>
+    </div>
+  </div>
+</div>

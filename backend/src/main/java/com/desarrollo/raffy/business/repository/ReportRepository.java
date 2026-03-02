@@ -18,9 +18,9 @@ public interface ReportRepository extends JpaRepository<Report, Long>{
     @Query("""
     SELECT r FROM Report r        
     WHERE r.statusReport = COALESCE(:status, r.statusReport)
-    AND r.timestamp >= COALESCE(:start, r.timestamp)
-    AND r.timestamp <= COALESCE(:end, r.timestamp)
-    ORDER BY r.timestamp DESC
+    AND r.createAt >= COALESCE(:start, r.createAt)
+    AND r.createAt <= COALESCE(:end, r.createAt)
+    ORDER BY r.createAt DESC
     """)
     List<Report> findAllReportFilter(
         @Param("status") StatusReport status,
@@ -30,6 +30,36 @@ public interface ReportRepository extends JpaRepository<Report, Long>{
 
     boolean existsByEventIdAndMailUserReport(Long eventId, String mainUserReport);
 
-    @Query("SELECT r FROM Report r WHERE r.eventId = :eventId")
+    @Query("SELECT r FROM Report r WHERE r.event.id = :eventId")
     Optional<List<Report>> findbyeventId(@Param("eventId") Long eventId);
+
+    @Query("SELECT COUNT(r) FROM Report r WHERE r.event.id = :eventId")
+    int countByEventId(@Param("eventId") Long eventId);
+
+    @Query("SELECT COUNT(r) FROM Report r WHERE r.event.creator.id = :creatorId")
+    int countAllEventId(@Param("creatorId") Long creatorId);
+
+   /*  @Query("""
+    SELECT new com.desarrollo.raffy.dto.report.AdminEventReportDTO(
+        e.id,
+        e.title,
+        e.startDate,
+        e.statusEvent,
+        COUNT(r)
+    )
+    FROM Events e
+    LEFT JOIN Report r ON r.event.id = e.id
+    WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
+    GROUP BY e.id, e.title, e.startDate, e.statusEvent
+    HAVING COUNT(r) > 0
+    ORDER BY COUNT(r) DESC
+    """)
+    List<AdminEventReportDTO> findAllEventsWithReportSummary(); */
+
+    @Query("""
+    SELECT COUNT(r) FROM Report r 
+    WHERE r.event.creator.id = :creatorId 
+    AND r.event.statusEvent = com.desarrollo.raffy.model.StatusEvent.BLOCKED
+    """)
+    int countTotalReportsByCreatorBlockedEvents(@Param("creatorId") Long creatorId);
 }

@@ -8,6 +8,7 @@ interface QuickGuide {
   iconPath: string;
   iconBg: string;
   steps: string[];
+  route: string;
 }
 
 interface FAQ {
@@ -51,7 +52,8 @@ export class HelpComponent implements OnInit {
         'Completa los detalles del evento',
         'Configura premios y participación',
         'Publica y comparte tu sorteo'
-      ]
+      ],
+      route: '/help/create-event'
     },
     {
       title: '¿Cómo invitar participantes?',
@@ -64,7 +66,8 @@ export class HelpComponent implements OnInit {
         'Comparte en redes sociales',
         'Envía invitaciones via email o chat',
         'Monitorea los participantes en tiempo real'
-      ]
+      ],
+      route: '/help/invite-participants'
     },
     {
       title: '¿Cómo auditar un evento?',
@@ -77,7 +80,8 @@ export class HelpComponent implements OnInit {
         'Revisa el registro blockchain',
         'Verifica participantes y resultados',
         'Descarga el reporte de auditoría'
-      ]
+      ],
+      route: ''
     },
     {
       title: 'Configurar pagos online',
@@ -90,7 +94,8 @@ export class HelpComponent implements OnInit {
         'Activa pagos online en tu evento',
         'Los participantes pagan automáticamente',
         'Recibe fondos con solo 3% de comisión'
-      ]
+      ],
+      route: ''
     },
     {
       title: 'Integrar con redes sociales',
@@ -103,7 +108,8 @@ export class HelpComponent implements OnInit {
         'Define requisitos (seguir, comentar, etc.)',
         'Conecta tu cuenta de Instagram',
         'RAFFIFY valida requisitos automáticamente'
-      ]
+      ],
+      route: ''
     },
     {
       title: 'Ver resultados y ganadores',
@@ -116,7 +122,8 @@ export class HelpComponent implements OnInit {
         'La ruleta selecciona ganadores aleatoriamente',
         'Los ganadores reciben notificación',
         'Comparte los resultados públicamente'
-      ]
+      ],
+      route: ''
     }
   ];
 
