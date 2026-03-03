@@ -5,6 +5,7 @@ import com.desarrollo.raffy.model.Url;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.desarrollo.raffy.util.LinkTransform;
+import java.net.URI;
 import java.time.LocalDateTime;
 
 @Service
@@ -32,7 +33,8 @@ public class UrlService {
 
     public Url saveUrlForEvent(Long eventId, String url) {
         String shortcode = LinkTransform.shortenUrl("event-" + eventId + "-" + System.currentTimeMillis());
-        String target = String.format("%s/event/management/%d?invite=%s", frontendUrl, eventId, shortcode);
+        String baseUrl = resolveFrontendBaseUrl(url);
+        String target = String.format("%s/event/management/%d?invite=%s", baseUrl, eventId, shortcode);
 
         Url existing = urlRepository.findByOriginalUrl(target);
         if (existing != null) {
@@ -79,6 +81,47 @@ public class UrlService {
      */
     public String convertLinkToQr(String link) {
         return LinkTransform.linkToQr(link);
+    }
+
+    public String buildEventInviteShortLink(String shortcode) {
+        return String.format("%s/invite/%s", resolveFrontendBaseUrl(null), shortcode);
+    }
+
+    public String buildEventInviteShortLink(String shortcode, String requestUrl) {
+        return String.format("%s/invite/%s", resolveFrontendBaseUrl(requestUrl), shortcode);
+    }
+
+    private String resolveFrontendBaseUrl(String requestUrl) {
+        String originFromRequest = extractOrigin(requestUrl);
+        if (originFromRequest != null && !originFromRequest.isBlank()) {
+            return originFromRequest;
+        }
+        return normalizeBaseUrl(frontendUrl);
+    }
+
+    private String normalizeBaseUrl(String baseUrl) {
+        String normalized = baseUrl != null ? baseUrl.trim() : "";
+        if (normalized.endsWith("/")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized;
+    }
+
+    private String extractOrigin(String absoluteUrl) {
+        if (absoluteUrl == null || absoluteUrl.isBlank()) {
+            return null;
+        }
+        try {
+            URI uri = URI.create(absoluteUrl.trim());
+            if (uri.getScheme() == null || uri.getHost() == null) {
+                return null;
+            }
+            int port = uri.getPort();
+            String authority = port >= 0 ? uri.getHost() + ":" + port : uri.getHost();
+            return normalizeBaseUrl(uri.getScheme() + "://" + authority);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     /**

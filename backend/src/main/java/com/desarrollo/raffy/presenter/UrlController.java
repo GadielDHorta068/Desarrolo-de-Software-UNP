@@ -41,8 +41,10 @@ public class UrlController {
     @Operation(summary = "Guardar URL para evento", description = "Guarda una URL asociada a un evento y devuelve el QR")
     public Map<String, Object> saveUrlForEvent(@PathVariable Long eventId, @RequestBody String url) {
         Map<String, Object> map = new HashMap<>();
-        map.put("url", urlService.saveUrlForEvent(eventId, url));
-        map.put("qr", urlService.convertLinkToQr(url));
+        Url savedUrl = urlService.saveUrlForEvent(eventId, url);
+        String shortInviteLink = urlService.buildEventInviteShortLink(savedUrl.getShortcode(), url);
+        map.put("url", savedUrl);
+        map.put("qr", urlService.convertLinkToQr(shortInviteLink));
         return map;
     }
 
