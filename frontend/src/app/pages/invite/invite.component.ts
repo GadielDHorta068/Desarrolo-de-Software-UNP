@@ -22,8 +22,7 @@ export class InviteRedirectComponent implements OnInit {
 
   ngOnInit(): void {
     const shortcode = this.route.snapshot.paramMap.get('shortcode') || '';
-    // Same-origin sin prefijo /api
-    this.apiRedirectUrl = `/url/redirect/${shortcode}`;
+    this.apiRedirectUrl = `/api/url/redirect/${shortcode}`;
     // Reemplaza la URL actual para evitar volver con back
     window.location.replace(this.apiRedirectUrl);
   }

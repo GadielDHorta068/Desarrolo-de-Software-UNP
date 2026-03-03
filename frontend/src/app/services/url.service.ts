@@ -6,7 +6,7 @@ import { SaveUrlResponse, Url } from '../models/url.model';
 
 @Injectable({ providedIn: 'root' })
 export class UrlService {
-  private apiUrl = `${environment.apiUrl}/url`;
+  private apiUrl = `${environment.apiUrl}/api/url`;
 
   constructor(private http: HttpClient) {}
 

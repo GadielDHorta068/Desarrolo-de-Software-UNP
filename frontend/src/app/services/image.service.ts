@@ -16,7 +16,7 @@ export interface ImageUploadResponse {
   providedIn: 'root'
 })
 export class ImageService {
-  private readonly API_URL = `${environment.apiUrl}/images`;
+  private readonly API_URL = `${environment.apiUrl}/api/images`;
 
   constructor(private http: HttpClient) {}
 
