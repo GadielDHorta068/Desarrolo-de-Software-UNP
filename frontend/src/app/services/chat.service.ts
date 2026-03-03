@@ -18,6 +18,7 @@ export class ChatService {
   public messages$ = this.messagesSubject.asObservable();
   private messageIds = new Set<number>();
   private activePeerId: number | null = null;
+  private currentUserId: number | null = null;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -26,9 +27,15 @@ export class ChatService {
     this.activePeerId = id;
   }
 
+  setCurrentUserId(id: number | null): void {
+    this.currentUserId = id;
+  }
+
   private isForActivePeer(m: Message): boolean {
-    if (this.activePeerId == null) return true;
-    return m.remitenteId === this.activePeerId || m.destinatarioId === this.activePeerId;
+    if (this.activePeerId == null || this.currentUserId == null) return false;
+    const isIncomingForActivePeer = m.remitenteId === this.activePeerId && m.destinatarioId === this.currentUserId;
+    const isOutgoingToActivePeer = m.remitenteId === this.currentUserId && m.destinatarioId === this.activePeerId;
+    return isIncomingForActivePeer || isOutgoingToActivePeer;
   }
 
   // Convierte formatos de fecha (ISO, epoch, arreglo [y,m,d,h,mm,ss]) a ISO string

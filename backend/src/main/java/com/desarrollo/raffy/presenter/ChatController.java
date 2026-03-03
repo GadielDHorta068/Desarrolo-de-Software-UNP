@@ -29,27 +29,30 @@ public class ChatController {
     @SuppressWarnings("null")
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(Message payload, Authentication authentication) {
-        // Identificar remitente desde el contexto de seguridad
+        if (authentication == null || payload == null || payload.getDestinatarioId() == null) {
+            return;
+        }
         String currentEmail = authentication.getName();
         Optional<User> currentUserOpt = userRepository.findByEmail(currentEmail);
         if (currentUserOpt.isEmpty()) {
-            return; // No se pudo resolver el usuario autenticado
+            return;
         }
 
         User currentUser = currentUserOpt.get();
+        if (currentUser.getId().equals(payload.getDestinatarioId())) {
+            return;
+        }
+        Optional<User> recipientOpt = userRepository.findById(payload.getDestinatarioId());
+        if (recipientOpt.isEmpty()) {
+            return;
+        }
         payload.setRemitenteId(currentUser.getId());
         payload.setFechaEnvio(LocalDateTime.now());
         payload.setLeido(false);
 
-        // Persistir mensaje
         Message saved = messageRepository.save(payload);
 
-        // Obtener email/username del destinatario para enrutamiento de usuario
-        @SuppressWarnings("null")
-        Optional<User> recipientOpt = userRepository.findById(saved.getDestinatarioId());
-        if (recipientOpt.isPresent()) {
-            String recipientEmail = recipientOpt.get().getEmail();
-            messagingTemplate.convertAndSendToUser(recipientEmail, "/queue/private-messages", saved);
-        }
+        String recipientEmail = recipientOpt.get().getEmail();
+        messagingTemplate.convertAndSendToUser(recipientEmail, "/queue/private-messages", saved);
     }
 }

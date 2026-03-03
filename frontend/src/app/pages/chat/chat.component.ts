@@ -21,6 +21,9 @@ import { Observable, Subscription, take } from 'rxjs';
     </div>
 
     <div class="flex-1 overflow-y-auto p-4 space-y-3" id="messages" #messagesContainer>
+      <div *ngIf="isSelfChat" class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200">
+        No puedes iniciar un chat contigo mismo.
+      </div>
       <ng-container *ngFor="let msg of messages | async; trackBy: trackByMessage">
         <div [ngClass]="msg.remitenteId === myUserId ? 'flex justify-end' : 'flex justify-start'">
           <div class="max-w-[70%] px-4 py-2 rounded-2xl" [ngClass]="msg.remitenteId === myUserId ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-bl-sm'">
@@ -34,8 +37,8 @@ import { Observable, Subscription, take } from 'rxjs';
     </div>
 
     <form (ngSubmit)="send()" class="border-t border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
-      <input [(ngModel)]="newMessage" name="message" type="text" placeholder="Escribe un mensaje..." class="flex-1 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      <button type="submit" class="px-5 py-2 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-700">Enviar</button>
+      <input [(ngModel)]="newMessage" [disabled]="isSelfChat" name="message" type="text" placeholder="Escribe un mensaje..." class="flex-1 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" />
+      <button type="submit" [disabled]="isSelfChat" class="px-5 py-2 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">Enviar</button>
     </form>
   </div>
   `
@@ -43,6 +46,7 @@ import { Observable, Subscription, take } from 'rxjs';
 export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   destinatarioId!: number;
   myUserId?: number;
+  isSelfChat = false;
   messages!: Observable<Message[]>;
   newMessage = '';
   private sub?: Subscription;
@@ -54,36 +58,40 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.messages = this.chat.messages$;
-    // Suscribirse a cambios de mensajes para autoscroll
     this.messagesSub = this.chat.messages$.subscribe(() => this.scheduleScroll());
-    // Obtener el ID del destinatario de forma síncrona y arrancar flujo
     const id = Number(this.route.snapshot.paramMap.get('userId'));
     this.destinatarioId = id;
-    // Establecer conversación activa en el servicio para filtrar mensajes
-    this.chat.setActivePeer(this.destinatarioId);
-
-    // Cargar usuario actual sin bloquear el resto
+    this.chat.clearMessages();
+    if (!Number.isFinite(id) || id <= 0) {
+      this.chat.setActivePeer(null);
+      this.chat.disconnect();
+      return;
+    }
     this.sub = this.authService.getCurrentUser().pipe(take(1)).subscribe(user => {
       this.myUserId = user.id;
-    });
-
-    // Limpiar y precargar datos del destinatario e historial en paralelo
-    this.chat.clearMessages();
-    this.authService.getUserById(id).pipe(take(1)).subscribe(peer => { this.peerUser = peer; this.cdr.detectChanges(); });
-
-    this.chat.loadHistory(id).pipe(take(1)).subscribe({
-      next: history => { this.chat.appendMessages(history); this.cdr.detectChanges(); this.scheduleScroll(); },
-      error: () => {},
-      complete: () => {
-        // Conectar WS después de intentar cargar historial, exitoso o no
-        this.chat.connect();
-        // Marcar como leído tras abrir (después de cargar y conectar)
-        this.chat.markAsRead(this.destinatarioId).pipe(take(1)).subscribe({
-          next: () => {},
-          error: () => {}
-        });
-        this.scheduleScroll();
+      this.chat.setCurrentUserId(user.id);
+      if (this.destinatarioId === user.id) {
+        this.isSelfChat = true;
+        this.peerUser = user;
+        this.chat.setActivePeer(null);
+        this.chat.disconnect();
+        this.cdr.detectChanges();
+        return;
       }
+      this.chat.setActivePeer(this.destinatarioId);
+      this.authService.getUserById(id).pipe(take(1)).subscribe(peer => { this.peerUser = peer; this.cdr.detectChanges(); });
+      this.chat.loadHistory(id).pipe(take(1)).subscribe({
+        next: history => { this.chat.appendMessages(history); this.cdr.detectChanges(); this.scheduleScroll(); },
+        error: () => {},
+        complete: () => {
+          this.chat.connect();
+          this.chat.markAsRead(this.destinatarioId).pipe(take(1)).subscribe({
+            next: () => {},
+            error: () => {}
+          });
+          this.scheduleScroll();
+        }
+      });
     });
   }
 
@@ -94,8 +102,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
   send(): void {
     const content = this.newMessage.trim();
-    if (!content) return;
-    // Incluir remitenteId para que el mensaje optimista se muestre del lado correcto
+    if (!content || this.isSelfChat || this.myUserId == null || this.destinatarioId === this.myUserId) return;
     this.chat.sendMessage({ contenido: content, destinatarioId: this.destinatarioId, remitenteId: this.myUserId });
     this.newMessage = '';
   }
@@ -103,8 +110,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
     this.messagesSub?.unsubscribe();
-    // Evitar duplicación de suscripciones al salir
     this.chat.setActivePeer(null);
+    this.chat.setCurrentUserId(null);
     this.chat.disconnect();
   }
 
@@ -113,10 +120,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private scheduleScroll(): void {
-    // Esperar al siguiente frame para que el DOM se haya pintado
     requestAnimationFrame(() => {
       this.scrollToBottom();
-      // Fallback por si aún no se calculó el layout completo
       setTimeout(() => this.scrollToBottom(), 50);
     });
   }

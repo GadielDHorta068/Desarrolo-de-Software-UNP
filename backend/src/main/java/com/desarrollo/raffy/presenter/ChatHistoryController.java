@@ -34,10 +34,19 @@ public class ChatHistoryController {
     @GetMapping("/history/{destinatarioId}")
     public ResponseEntity<List<Message>> getHistory(@PathVariable("destinatarioId") Long destinatarioId,
                                                     Authentication authentication) {
+        if (authentication == null || destinatarioId == null) {
+            return ResponseEntity.badRequest().build();
+        }
         String currentEmail = authentication.getName();
         User currentUser = userRepository.findByEmail(currentEmail).orElse(null);
         if (currentUser == null) {
             return ResponseEntity.status(401).build();
+        }
+        if (currentUser.getId().equals(destinatarioId)) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (userRepository.findById(destinatarioId).isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
 
         List<Message> history = messageRepository.findConversation(currentUser.getId(), destinatarioId);
@@ -47,10 +56,16 @@ public class ChatHistoryController {
     @PutMapping("/mark-read/{peerId}")
     @Transactional
     public ResponseEntity<?> markConversationAsRead(@PathVariable("peerId") Long peerId, Authentication authentication) {
+        if (authentication == null || peerId == null) {
+            return ResponseEntity.badRequest().build();
+        }
         String currentEmail = authentication.getName();
         User currentUser = userRepository.findByEmail(currentEmail).orElse(null);
         if (currentUser == null) {
             return ResponseEntity.status(401).build();
+        }
+        if (currentUser.getId().equals(peerId)) {
+            return ResponseEntity.badRequest().build();
         }
         int updated = messageRepository.markAsRead(currentUser.getId(), peerId);
         return ResponseEntity.ok().body(updated);
