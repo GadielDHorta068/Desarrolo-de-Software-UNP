@@ -302,15 +302,44 @@ export class EditEvent implements OnInit {
   private parseDate(fecha: string): string {
     console.log("[edit-event] => fecha recibida: ", fecha);
 
-    const [dia, mes, anio] = fecha.split('/');
-    // if(!dia || !mes || !anio){
-    //   const [dia, mes, anio] = fecha.split('');
-    // }
+    if (!fecha || fecha.trim() === '') {
+      return '';
+    }
 
-    const diaFormateado = dia.padStart(2, '0');
-    const mesFormateado = mes.padStart(2, '0');
+    // Intenta parsear formato: "04 de marzo de 2026, 00:00:00" o "dd/mm/yyyy, hh:mm:ss"
+    let fechaParte = fecha;
+    
+    // Si contiene coma, toma solo la parte de la fecha
+    if (fecha.includes(',')) {
+      fechaParte = fecha.split(',')[0].trim();
+    }
 
-    return `${anio}-${mesFormateado}-${diaFormateado}`;
+    // Intenta formato con nombres de meses: "04 de marzo de 2026"
+    const mesesES: { [key: string]: string } = {
+      'enero': '01', 'febrero': '02', 'marzo': '03', 'abril': '04',
+      'mayo': '05', 'junio': '06', 'julio': '07', 'agosto': '08',
+      'septiembre': '09', 'octubre': '10', 'noviembre': '11', 'diciembre': '12'
+    };
+
+    const formatoLargo = fechaParte.match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/);
+    if (formatoLargo) {
+      const [, dia, mes, anio] = formatoLargo;
+      const mesNumerico = mesesES[mes.toLowerCase()];
+      if (mesNumerico) {
+        return `${anio}-${mesNumerico}-${dia.padStart(2, '0')}`;
+      }
+    }
+
+    // Intenta formato: "dd/mm/yyyy"
+    const [dia, mes, anio] = fechaParte.split('/');
+    if (dia && mes && anio) {
+      const diaFormateado = dia.padStart(2, '0');
+      const mesFormateado = mes.padStart(2, '0');
+      return `${anio}-${mesFormateado}-${diaFormateado}`;
+    }
+
+    console.warn("[edit-event] => formato de fecha no reconocido: ", fecha);
+    return '';
   }
 
   public onDiscardChanges() {
