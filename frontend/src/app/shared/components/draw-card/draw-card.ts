@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, input, Input, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
-import { EventsTemp, EventTypes, StatusEvent } from '../../../models/events.model';
+import { EventsTemp, StatusEvent } from '../../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { HandleStatusPipe } from '../../../pipes/handle-status.pipe';
 import { HandleIconTypePipe } from '../../../pipes/handle-icon-type.pipe';
@@ -13,7 +13,6 @@ import { Subscription } from 'rxjs';
 import { InfoModal, ModalInfo } from '../modal-info/modal-info';
 import { EventsService } from '../../../services/events.service';
 import { NotificationService } from '../../../services/notification.service';
-import { DataStatusEvent } from '../../../models/response.model';
 import { AdminInscriptService } from '../../../services/admin/adminInscript';
 import { ReviewService } from '../../../services/review.service';
 import { StarRatingComponent } from '../../../pages/star-rating.component/star-rating.component';
@@ -22,18 +21,16 @@ import { StarRatingComponent } from '../../../pages/star-rating.component/star-r
   selector: 'app-draw-card',
   imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, HandleDatePipe, ModalDrawInfo, ModalInfo, StarRatingComponent, LoadingIndicator],
   templateUrl: './draw-card.html',
-  styleUrl: './draw-card.css'
+  styleUrl: './draw-card.css',
+  providers: [HandleStatusPipe]
 })
 export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
-
-  // private handleStatusPipe = inject(HandleStatusPipe);
 
   @ViewChild('modalInfo') modalInfoRef!: ModalInfo;
   dataModal: InfoModal = {title: "Administración del evento", message: ""};
 
   userCurrent: UserResponse|null = null;
-    avgScore: number = 0;
-  // @Input() event!: Events|null;
+  avgScore: number = 0;
   @Input() event!: EventsTemp|null;
   customBackground = input<string>('bg-white');
 
@@ -57,12 +54,11 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     private cdr: ChangeDetectorRef,
     private eventsService: EventsService,
     private notificationService: NotificationService,
-    private eventService: EventsService,
     private adminInscriptService: AdminInscriptService,
-    private reviewService: ReviewService
+    private reviewService: ReviewService,
+    private handleStatusPipe: HandleStatusPipe
   ){
     this.userCurrent = this.authService.getCurrentUserValue();
-    // console.log("[card-event] => usuario actual: ", this.userCurrent);
   }
 
   ngOnInit() {
@@ -73,20 +69,8 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
         if (isAuth) {
           this.authService.getCurrentUser().subscribe({
             next: (user) => {
-                this.currentUser = user;
-                this.reviewService.getAvgScoreByUserEmail(this.currentUser.email).subscribe({
-                    next: (response) => {
-                        this.avgScore = response;
-                        this.cdr.detectChanges();
-                    },
-                    error: (error) => {
-                        console.error('Error al obtener promedio de reviews:', error);
-                        this.avgScore = 0; // por si falla, mostrar nada o 0
-                        this.cdr.detectChanges();
-                    }
-                });
+              this.currentUser = user;
               this.isAdmin = (this.currentUser.userType == "ADMIN");
-              // console.log('[userActual] => es admin: ', this.isAdmin);
             },
             error: (error) => {
               console.error('[userActual] => Error obteniendo usuario actual:', error);
@@ -98,6 +82,14 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
         }
       }
     );
+
+    // recuperamos la reputacion del creador del evento
+    if(this.event) {
+      this.reviewService.getOrFetchAvgScore(this.event.creator.email).then((score) => {
+        this.avgScore = score;
+        this.cdr.detectChanges();
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -151,12 +143,14 @@ export class DrawCard implements OnInit, OnDestroy, AfterViewInit {
     this.adminEventService.setSelectedEvent(this.event);
     try {
       const respStatus = await this.adminInscriptService.checkStatusEventToInscript();
+      this.isActionLoading = false;
       if (!respStatus) {
         this.notificationService.notifyError("No fue posible realizar la operación");
         return;
       }
       if (respStatus != StatusEvent.OPEN) {
-        this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
+        // this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado: ", respStatus);
+        this.notificationService.notifyError("No fue posible realizar la operación. El evento se encuentra en estado:", this.handleStatusPipe.transform(respStatus));
         if (this.event) {
           this.event.statusEvent = respStatus as StatusEvent;
           this.cdr.detectChanges();

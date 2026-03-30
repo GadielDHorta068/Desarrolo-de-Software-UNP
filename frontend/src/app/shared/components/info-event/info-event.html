@@ -167,6 +167,26 @@
             </div>
         </div>
 
+        <!-- Datos del creador -->
+        <div class="info-item">
+            <div class="info-label">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 11c1.933 0 3.5-1.791 3.5-4S13.933 3 12 3s-3.5 1.791-3.5 4S10.067 11 12 11zm-6 9c0-2.761 2.686-5 6-5m6 0l1.5 1.5L22 14"
+                    />
+                </svg>
+                <span>Información del creador</span>
+            </div>
+            <div class="info-value">
+                <span>{{event?.creator?.name}} {{event?.creator?.surname}}
+                    <b class="cursor-pointer transition-all duration-300 ease-out hover:scale-110 hover:text-emerald-600" (click)="goToProfile(event?.creator?.nickname)">(@{{event?.creator?.nickname}})</b>
+                </span>
+            </div>
+        </div>
+
         <!-- Creator Reputation -->
         <div class="info-item">
             <div class="info-label">

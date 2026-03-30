@@ -88,12 +88,8 @@ export class ManagementEvent {
         if (this.event.isPrivate && !isCreator && (!invite || invite.trim().length === 0)) {
             return false;
         }
-        // VER ESTOO!!!!!!!!!! (06/01/2026)
-        // se debe contemplar que en una rifa el usuario pueda inscribirse mas de una vez, por lo que se debe verificar que el evento sea una rifa
-        // if (this.event.eventType === EventTypes.RAFFLES) {
-        //     return !isCreator && !this.event?.isUserRegistered && this.event?.statusEvent === StatusEvent.OPEN;
-        // }
-        return !isCreator && !this.event?.isUserRegistered && this.event?.statusEvent === StatusEvent.OPEN;
+        // se permite que en una rifa el usuario pueda inscribirse mas de una vez (REVISAR)
+        return !isCreator && (!this.event?.isUserRegistered || (this.event?.isUserRegistered && this.event.eventType === EventTypes.RAFFLES)) && this.event?.statusEvent === StatusEvent.OPEN;
     }
 
     get isAdmin(): boolean {

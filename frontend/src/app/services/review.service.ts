@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { reviewFromFrontToBackDTO } from '../models/review/reviewFromFrontToBackDTO';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from './auth.service';
@@ -12,6 +12,13 @@ import { reviewFromBacktoFrontDTO } from '../models/review/reviewFromBacktoFront
 export class ReviewService {
 
     private apiUrl = `${environment.apiUrl}/reviews`;
+    
+    // private avgUsersScore: Record<string, number> = {
+    //     "mail1@gmail.com": 4,
+    //     "mail2@gmail.com": 3,
+    //     "mail3@gmail.com": 5
+    // };
+    private avgUsersScore: Record<string, number> = {};
 
     constructor(
         private http: HttpClient,
@@ -47,5 +54,18 @@ export class ReviewService {
             aReview,
             { headers }
         );
+    }
+
+    // segunda version de recuperacion de puntuacion de un usuario, usamos una especie de cache para evitar multiples llamadas
+    async getOrFetchAvgScore(email: string): Promise<number> {
+        // revisamos si existe en el record
+        if (email in this.avgUsersScore) {
+            return this.avgUsersScore[email];
+        }
+
+        // si no existe vamos al server
+        const scoreFromServer = await firstValueFrom(this.getAvgScoreByUserEmail(email));
+        this.avgUsersScore[email] = scoreFromServer;
+        return scoreFromServer;
     }
 }
