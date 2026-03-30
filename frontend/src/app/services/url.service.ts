@@ -6,7 +6,6 @@ import { SaveUrlResponse, Url } from '../models/url.model';
 
 @Injectable({ providedIn: 'root' })
 export class UrlService {
-  // post pull se quito /api y dejo de funcionar el qr para compartir, se volvio a agregar @by A.T
   private apiUrl = `${environment.apiUrl}/api/url`;
 
   constructor(private http: HttpClient) {}

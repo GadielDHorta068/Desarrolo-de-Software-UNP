@@ -681,6 +681,58 @@ public class EmailService {
             """,eventTitle, status, reason);
     }
 
+    public void sendEmailToCreateReporter(
+                                String emailReport,
+                                String eventTitle,
+                                String reason){
+    if (emailReport == null || emailReport.isBlank()) return;
+    String subject = "Tu reporte ha sido recibido - Raffify";
+    String htmlContent = generateCreateReportTemplate(eventTitle, reason);
+
+    String textBody = "Hola,\n\n" +
+                     "Le informamos que tu reporte para el evento \"" + eventTitle + "\" ha sido recibido.\n\n" +
+                     reason + "." + "\n\n" +
+                     "Se le informará una vez hecho la revisión. Gracias por ayudarnos a mantener la comunidad segura y confiable.\n\n" +
+                     "Si tienes alguna pregunta, no dudes en contactarnos.\n\n" +
+                     "Saludos,\n" +
+                     "Equipo de Raffify";
+
+    try {
+        sendEmailWithInlineResources(
+            emailReport, 
+            subject, 
+            htmlContent, 
+            emailTemplateService.getDefaultInlineResources());
+    } catch (Exception e) {
+        sendEmail(emailReport, subject, textBody);
+    }
+}
+
+    private String generateCreateReportTemplate(String eventTitle, String reason){
+        return String.format(
+            """
+            <!DOCTYPE html>
+            <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Estado de su reporte - Raffify</title>
+                </head>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                        <h2 style="color: #2c3e50;">Estado de su reporte</h2>
+                        <p>Estimado usuario,</p>
+                        <p>Le informamos que su reporte para el evento <strong>%s</strong> ha sido recibido.</p>
+                        <p><strong>Motivo del reporte:</strong> %s</p>
+                        <p style="margin-top: 30px;">Se le informará una vez hecho la revisión. Gracias por ayudarnos a mantener la comunidad segura y confiable.</p>
+                        <p>Atentamente,<br/>El equipo de Raffify</p>
+                        <p style="font-size: 0.9em; color: #888;">Este es un correo automático, por favor no responda.</p>
+                    </div>
+                </body>
+            </html>
+            """,
+            eventTitle, reason);
+    }
+
     /**
      * 
      * @param to
@@ -725,6 +777,105 @@ public class EmailService {
                                    "Número de intentos: " + attemptCount + " de " + attemptEvent + "\n\n" +
                                    "Gracias por participar en Raffify.");
         }
+    }
+
+    public void sendEventReportNotificationToCreator(
+        String creatorEmail,
+        String creatorName,
+        Long eventId,
+        String eventTitle,
+        int TotalReports,
+        String recommendation) {
+
+            if(creatorEmail == null || creatorEmail.isBlank()) return;
+            String eventUrl = frontendUrl + "/event/management/" + eventId;
+            String htmlContent = generateEventReportNotificationTemplate(
+                creatorName, 
+                eventTitle, 
+                TotalReports, 
+                recommendation, 
+                eventUrl);
+            
+            String subject = "Tu evento tiene reportes -Acción requerida";
+            try {
+                sendEmailWithInlineResources(
+                    creatorEmail, 
+                    subject, 
+                    htmlContent, emailTemplateService.getDefaultInlineResources());
+            } catch (Exception e) {
+                System.err.println("Error al enviar notificación de reportes: " + e.getMessage());
+            }
+    }
+    private String generateEventReportNotificationTemplate(
+        String creatorName,
+        String eventTitle,
+        int totalReports,
+        String recommendation,
+        String eventUrl
+
+    ){
+        return String.format(
+            """
+            <!DOCTYPE html>
+            <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Notificación de Reportes - Raffify</title>
+                </head>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                        
+                        <h2 style="color: #e74c3c;"> Notificación Importante</h2>
+                        
+                        <p>Hola <strong>%s</strong>,</p>
+                        
+                        <p>El equipo de moderación de <strong>Raffify</strong> ha detectado reportes en tu evento:</p>
+                        
+                        <div style="background-color: #ecf0f1; padding: 15px; border-left: 4px solid #e74c3c; margin: 20px 0;">
+                            <p style="margin: 5px 0;"><strong>Evento:</strong> %s</p>
+                            <p style="margin: 5px 0;"><strong>Reportes recibidos:</strong> %d</p>
+                        </div>
+                        
+                        <h3 style="color: #2c3e50;">Cambios a realizar</h3>
+                        
+                        <p style="background-color: #fff3cd; padding: 10px; border-radius: 4px; border-left: 4px solid #ffc107;">
+                            %s
+                        </p>
+                        
+                        <h3 style="color: #2c3e50;">¿Qué puedes hacer?</h3>
+                        <ul style="line-height: 1.8;">
+                            <li>Realiza los ajustes necesarios en tu evento si es requirido</li>
+                            <li>Contacta con nuestro equipo de soporte si tienes dudas</li>
+                        </ul>
+                        
+                        <a href="%s" style="display: inline-block; background-color: #3498db; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin-top: 20px;">
+                            Ver Detalles del Evento
+                        </a>
+                        
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+                        
+                        <p style="font-size: 0.9em; color: #666;">
+                            <strong>Nota:</strong> Este es un comunicado automático del equipo de moderación de Raffify. 
+                        </p>
+                        
+                        <p style="font-size: 0.9em; color: #888;">
+                            Si tienes preguntas o deseas disputar estos reportes, responde a este correo o contacta a nuestro equipo de soporte.
+                        </p>
+                        
+                        <p style="margin-top: 20px; color: #888;">
+                            Atentamente,<br/>
+                            <strong>Equipo de Moderación - Raffify</strong>
+                        </p>
+                    </div>
+                </body>
+            </html>
+            """,
+            creatorName,
+            eventTitle,
+            totalReports,
+            recommendation,
+            eventUrl
+        );
     }
 
    
@@ -780,6 +931,86 @@ public class EmailService {
             this.attachments = attachments;
             this.inlineResources = inlineResources;
         }
+    }
+
+    public void sendFinalDecisionNotification(
+            String creatorEmail, 
+            String creatorName, 
+            String eventTitle, 
+            StatusReport finalReport,
+            String message) {
+        
+            if(creatorEmail == null || creatorEmail.isBlank()) return;
+            String htmlContent = generateFinalDecisionNotificationTemplate(
+                creatorName, 
+                eventTitle,  
+                message
+                );
+            
+            String subject = "Decisión final";
+            try {
+                sendEmailWithInlineResources(
+                    creatorEmail, 
+                    subject, 
+                    htmlContent, emailTemplateService.getDefaultInlineResources());
+            } catch (Exception e) {
+                System.err.println("Error al enviar notificación de reportes: " + e.getMessage());
+            }
+    }
+
+    private String generateFinalDecisionNotificationTemplate(
+        String creatorName,
+        String eventTitle,
+        String message
+
+    ){
+        return String.format(
+            """
+            <!DOCTYPE html>
+            <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Notificación de Reportes - Raffify</title>
+                </head>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                        
+                        <h2 style="color: #e74c3c;"> Notificación Importante</h2>
+                        
+                        <p>Hola <strong>%s</strong>,</p>
+                        
+                        <p>El equipo de moderación de <strong>Raffify</strong> ha llegado a una decisión:</p>
+                        
+                        <div style="background-color: #ecf0f1; padding: 15px; border-left: 4px solid #e74c3c; margin: 20px 0;">
+                            <p style="margin: 5px 0;"><strong>Evento:</strong> %s</p>
+                        </div>
+                                                
+                        <p style="background-color: #fff3cd; padding: 10px; border-radius: 4px; border-left: 4px solid #ffc107;">
+                            %s
+                        </p>
+                        
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+                        
+                        <p style="font-size: 0.9em; color: #666;">
+                            <strong>Nota:</strong> Este es un comunicado automático del equipo de moderación de Raffify. 
+                        </p>
+                        
+                        <p style="font-size: 0.9em; color: #888;">
+                            Si tienes preguntas o deseas disputar esta decisión, responde a este correo o contacta a nuestro equipo de soporte.
+                        </p>
+                        
+                        <p style="margin-top: 20px; color: #888;">
+                            Atentamente,<br/>
+                            <strong>Equipo de Moderación - Raffify</strong>
+                        </p>
+                    </div>
+                </body>
+            </html>
+            """,
+            creatorName,
+            eventTitle,
+            message
+        );
     }
 
 }

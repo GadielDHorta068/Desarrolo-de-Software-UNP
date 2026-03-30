@@ -50,7 +50,6 @@ export class ReportsFormComponent {
     onReport(){
         let dataReport = {
           eventId: this.form.get("idEvent")?.value,
-          eventName: this.form.get("titleEvent")?.value,
           mailUserReport: this.form.get("email")?.value,
           reason: this.form.get("description")?.value
         } as InformReport;
@@ -63,6 +62,7 @@ export class ReportsFormComponent {
             }
           },
           error => {
+            console.error("Error al crear reporte:", error);
             let msgResponse = this.parseServerError(error?.error?.message) || "No fue posible crear el reporte";
             this.informReport.emit({status: "ERROR", msg: msgResponse} as ResumeService);
             this.close.emit();

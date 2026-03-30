@@ -1,9 +1,7 @@
 package com.desarrollo.raffy.model;
 
 import java.time.LocalDate;
-import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,8 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 
 import jakarta.persistence.PrePersist;
@@ -34,7 +30,6 @@ import lombok.Setter;
 import lombok.AllArgsConstructor;
 
 import com.desarrollo.raffy.util.OnCreate;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -84,14 +79,14 @@ public abstract class Events {
     @Column(name = "status_event", nullable = false)
     private StatusEvent statusEvent;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    /* @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(
         name = "event_participants",
         joinColumns = @JoinColumn(name = "event_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     @JsonIgnore
-    private List<User> participants;
+    private List<User> participants; */
 
     @NotNull(message = "Debe especificar el tipo de evento")
     @Enumerated(EnumType.STRING)

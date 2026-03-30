@@ -1,24 +1,27 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { StatusReport } from '../services/report.service';
 
 @Pipe({
-  name: 'handleReportStatusPipe'
+  name: 'handleReportStatusPipe',
+  standalone: true
 })
 export class HandleReportStatusPipe implements PipeTransform {
 
-  transform( code: string|undefined ): string {
-    let newStatus: string = "Desconocido";
-    switch(code as string){
+  transform( code: StatusReport |string|undefined ): string {
+    if(!code) return "Desconocido";
+    const codeStr = String(code).toUpperCase();
+    switch(codeStr){
       case 'EARRING':
-        newStatus = 'PENDIENTE';
+        return 'PENDIENTE';
         break;
       case 'APPROVED':
-        newStatus = 'APROBADO';
+        return 'APROBAR';
         break;
       case 'REJECTED':
-        newStatus = 'RECHAZADO';
+        return 'DESESTIMAR';
+      default:
+        return 'Desconocido';
     }
-
-    return newStatus;
   }
 
 }

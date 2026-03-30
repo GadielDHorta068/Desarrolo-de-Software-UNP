@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard, GuestGuard } from './guards/auth.guard';
+import { HelpComponent } from './pages/help/help.component';
+import { CreateEventComponent } from './pages/help/create/create-event.component/create-event.component';
 export const routes: Routes = [
   {
     path: '',
@@ -111,9 +113,14 @@ export const routes: Routes = [
     title: 'Eventos reportados - Raffy'
   },
   {
-    path: 'event/:eventId/reports',
-    loadComponent: () => import('./pages/reports/reports').then(m => m.Reports),
-    title: 'Lista de reportes - Raffy'
+    path: 'admin/reports',
+    loadComponent: () => import('./pages/report/report-list.component/report-list.component').then(m => m.ReportListComponent),
+    title: 'Reportes Pendientes - Raffy'
+  },
+  {
+    path: 'admin/reports/:eventId',
+    loadComponent: () => import('./pages/report/report-details/report-details.component').then(m => m.ReportDetails),
+    title: 'Detalles del Evento Reportado - Raffy'
   },
   {
     path: 'winners/:eventId',
@@ -163,14 +170,14 @@ export const routes: Routes = [
     title: 'Centro de Ayuda - Raffy'
   },
   {
-    path: 'docs',
-    loadComponent: () => import('./pages/docs/docs.component').then(m => m.DocsComponent),
-    title: 'Documentación - Raffy'
+    path: 'help/create-event',
+    loadComponent: () => import('./pages/help/create/create-event.component/create-event.component').then(m => m.CreateEventComponent),
+    title: 'Crear Evento - Raffy'
   },
   {
-    path: 'contact',
-    loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent),
-    title: 'Contacto - Raffy'
+    path: 'help/invite-participants',
+    loadComponent: () => import('./pages/help/invite/invite-participant.component/invite-participant.component').then(m => m.InviteParticipantComponent),
+    title: 'Invitar Participantes - Raffy'
   },
   {
     path: 'status',

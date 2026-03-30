@@ -1,60 +1,61 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { EventTypes } from '../models/events.model';
+import { EventTypes, StatusEvent } from '../models/events.model';
 import { AuditActionType } from '../models/auditevent.model';
 
 @Pipe({
-  name: 'handleTypePipe'
+  name: 'handleTypePipe',
+  standalone: true
 })
 export class HandleTypePipe implements PipeTransform {
 
-  transform(value: string | EventTypes | AuditActionType | undefined): string {
+  transform(value: string | EventTypes | AuditActionType | StatusEvent | undefined): string {
     if (!value) return 'Desconocido';
 
-    // Mapping para EventTypes
-    if (Object.values(EventTypes).includes(value as EventTypes)) {
-      switch (value as EventTypes) {
-        case EventTypes.GIVEAWAY:
+    const valueStr = String(value).toUpperCase();
+
+    // Mapping para EventTypes/StatusEvent
+    if (['GIVEAWAYS', 'RAFFLES', 'GUESSING_CONTEST', 'UNKNOWN', 'BLOCKED', 'CLOSED', 'OPEN', 'FINALIZED'].includes(valueStr)) {
+      switch (valueStr) {
+        case 'GIVEAWAYS':
           return 'SORTEO';
-        case EventTypes.RAFFLES:
+        case 'RAFFLES':
           return 'RIFA';
-        case EventTypes.GUESSING_CONTEST:
+        case 'GUESSING_CONTEST':
           return 'ADIVINANZAS';
+        case 'UNKNOWN':
+          return 'Desconocido';
+        case 'OPEN':
+          return 'Abierto';
+        case 'FINALIZED':
+          return 'Finalizado';
+        case 'BLOCKED':
+          return 'Bloqueado';
+        case 'CLOSED':
+          return 'Cerrado';
         default:
           return 'Desconocido';
       }
     }
+
+    
+    
     // Mapping para AuditActionType
-    if (Object.values(AuditActionType).includes(value as AuditActionType)) {
-      switch (value as AuditActionType) {
-        case AuditActionType.EVENT_CREATED:
-          return 'Evento Creado';
-        case AuditActionType.EVENT_UPDATED:
-          return 'Evento Actualizado';
-        case AuditActionType.EVENT_EXECUTED:
-          return 'Evento Ejecutado';
-        case AuditActionType.EVENT_CLOSED:
-          return 'Evento Cerrado';
-        case AuditActionType.EVENT_FINALIZED:
-          return 'Evento Finalizado';
-        case AuditActionType.USER_REGISTERED:
-          return 'Usuario Registrado';
-        case AuditActionType.USER_REGISTERED_FAILED:
-          return 'Registro de Usuario Fallido';
-        case AuditActionType.USER_UNREGISTERED:
-          return 'Usuario Dado de Baja';
-        case AuditActionType.NUMBER_PURCHASED:
-          return 'Número Comprado';
-        case AuditActionType.NUMBER_PURCHASED_FAILED:
-          return 'Compra de Número Fallida';
-        case AuditActionType.ERROR_OCURRED:
-          return 'Error Ocurrido';
-        case AuditActionType.SYSTEM_EVENT:
-          return 'Evento del Sistema';
-        default:
-          return 'Desconocido'
-      }
-    }
-    return 'Desconocido';
+    const auditActions: Record<string, string> = {
+      'EVENT_CREATED': 'Evento Creado',
+      'EVENT_UPDATED': 'Evento Actualizado',
+      'EVENT_EXECUTED': 'Evento Ejecutado',
+      'EVENT_CLOSED': 'Evento Cerrado',
+      'EVENT_FINALIZED': 'Evento Finalizado',
+      'USER_REGISTERED': 'Usuario Registrado',
+      'USER_REGISTERED_FAILED': 'Registro Fallido',
+      'USER_UNREGISTERED': 'Usuario Dado de Baja',
+      'NUMBER_PURCHASED': 'Número Comprado',
+      'NUMBER_PURCHASED_FAILED': 'Compra Fallida',
+      'ERROR_OCURRED': 'Error Ocurrido',
+      'SYSTEM_EVENT': 'Evento del Sistema',
+    };
+
+    return auditActions[valueStr] || 'Desconocido';
   }
 
 }
