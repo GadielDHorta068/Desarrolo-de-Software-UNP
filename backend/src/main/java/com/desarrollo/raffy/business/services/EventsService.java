@@ -224,6 +224,31 @@ public class EventsService {
         return toEventSummaryDTO(event);
     }
 
+    /**
+     * Determina si un usuario participa en un evento específico
+     * @param eventId ID del evento
+     * @param userId ID del usuario
+     * @return true si el usuario participa en el evento
+     */
+    public boolean isUserParticipant(Long eventId, Long userId) {
+        Events event = eventsRepository.findById(eventId)
+            .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+
+        RegisteredUser user = registeredUserRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        boolean participates = participantRepository.existsByParticipantAndEvent(user, event);
+
+        if (!participates && event instanceof Raffle) {
+            participates = eventsRepository.existsRaffleParticipation((Raffle) event, user);
+        }
+        if (!participates && event instanceof GuessingContest) {
+            participates = eventsRepository.existsGuessAttempt((GuessingContest) event, user);
+        }
+
+        return participates;
+    }
+
     public EventSummaryDTO toEventSummaryDTO(Events event) {
         EventSummaryDTO dto;
         if(event instanceof Giveaways){

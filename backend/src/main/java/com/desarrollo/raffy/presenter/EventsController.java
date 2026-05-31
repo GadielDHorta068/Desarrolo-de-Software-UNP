@@ -225,16 +225,23 @@ public class EventsController {
 
         if (eventEntity.isPrivate()) {
             boolean isCreator = false;
+            boolean isParticipant = false;
             try {
+                // determinamos si es el creador
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 if (auth != null && auth.getPrincipal() instanceof com.desarrollo.raffy.model.RegisteredUser u) {
                     isCreator = eventEntity.getCreator() != null && eventEntity.getCreator().getId().equals(u.getId());
+                    if (!isCreator) {
+                        isParticipant = eventsService.isUserParticipant(id, u.getId());
+                    }
                 }
             } catch (Exception e) {
                 isCreator = false;
+                isParticipant = false;
             }
 
-            if (!isCreator) {
+            if (!isCreator && !isParticipant) {
+                // agregamos que no sea participante del mismo
                 if (invite == null || invite.isBlank() || urlService.getUrlByShortcodeAndEvent(invite, id) == null) {
                     return new ResponseEntity<>("Acceso restringido: Evento privado", HttpStatus.FORBIDDEN);
                 }
@@ -244,6 +251,7 @@ public class EventsController {
         EventSummaryDTO dto = eventsService.getEventSummaryById(id);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
+
 
     @GetMapping("/status/id/{id}")
     @Operation(summary = "Estado de evento", description = "Obtiene el estado actual del evento por ID")

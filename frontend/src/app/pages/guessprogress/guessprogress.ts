@@ -7,7 +7,6 @@ import { ActivatedRoute } from '@angular/router';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
 import { EventsTemp, EventTypes, StatusEvent } from '../../models/events.model';
 import { GuessprogressService } from '../../services/guessprogress.service';
-import { QuestionaryComponent } from '../questionary/questionary.component';
 import { UserDTO } from '../../models/UserDTO';
 import { NotificationService } from '../../services/notification.service';
 import { AdminInscriptService } from '../../services/admin/adminInscript';
@@ -15,7 +14,7 @@ import { AdminInscriptService } from '../../services/admin/adminInscript';
 @Component({
   selector: 'app-guessprogress',
   standalone: true,
-  imports: [CommonModule, FormsModule, QuestionaryComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './guessprogress.html',
   styleUrl: './guessprogress.css'
 })

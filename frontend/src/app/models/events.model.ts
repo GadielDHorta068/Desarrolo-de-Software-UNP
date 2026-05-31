@@ -29,6 +29,7 @@ export interface Events {
     description: string;
     startDate: string;
     endDate: string;
+    isPrivate: boolean;
     category: {
         id: number;
         name: string;

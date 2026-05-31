@@ -123,6 +123,7 @@ export class ManagementEvent {
         // revisamos si los datos del evento ya fueron seteados desde la lista de eventos
         if (!this.event) {
             const invite = this.route.snapshot.queryParamMap.get('invite') || undefined;
+            // TODO: aca podria consultar si esta inscrito al evento para poder acceder a los detalles
             this.eventService.getEventById("" + this.eventIdParam, invite || undefined).subscribe({
                 next: (resp) => {
                     this.adminEventService.setSelectedEvent(resp);

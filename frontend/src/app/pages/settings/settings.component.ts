@@ -11,14 +11,12 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog';
-import { MatDialog } from '@angular/material/dialog';
 import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ImageCropperComponent, LoadingIndicator, ConfirmDialogComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ImageCropperComponent, LoadingIndicator],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })
@@ -88,7 +86,6 @@ export class SettingsComponent implements OnInit {
     public router: Router,
     private cdr: ChangeDetectorRef,
     private paymentService: PaymentService,
-    private dialog: MatDialog,
     private notificationService: NotificationService
   ) {
     this.initializeForms();
