@@ -9,6 +9,7 @@ import { EventsService } from '../events.service';
 import { DataStatusEvent } from '../../models/response.model';
 import { AdminPaymentService, DataPayment } from './adminPayment.service';
 import { AuthService } from '../auth.service';
+import { RegionService } from '../region.service';
 import { GuessprogressService } from '../guessprogress.service';
 
 
@@ -44,6 +45,7 @@ export class AdminInscriptService {
     private eventService: EventsService,
     private adminPaymentService: AdminPaymentService,
     private authService: AuthService,
+    private regionService: RegionService,
     private guessProgressService: GuessprogressService
   ) {
     this.adminEventService.selectedEvent$.subscribe(
@@ -65,8 +67,17 @@ export class AdminInscriptService {
   }
 
   // inscribe al usuario al evento seleccionado
-  async onInscript(user: UserDTO): Promise<void> {
+  async onInscript(user: UserDTO): Promise<any> {
     if (!this.event) return;
+
+    const regionResp = await this.checkRegion(this.event.region.id, user.region.id);
+    console.log(regionResp);
+
+    // si no esta incluida la region del usuario en la region del evento se frena el proceso de inscripcion
+    if (regionResp.data == false) {
+        // console.log("MYLOG: region false");
+        return regionResp;
+    }
 
     try {
       if (this.event.eventType === EventTypes.RAFFLES) {
@@ -172,4 +183,16 @@ export class AdminInscriptService {
     }
     return null;
   }
+
+    async checkRegion(eventRegionId: number, userRegionId: number): Promise<any> {
+        try {
+            const fv = await  firstValueFrom(
+                this.regionService.isUserRegionInsideEventRegion(eventRegionId, userRegionId)
+            );
+            return fv;
+        } catch (error) {
+            console.log(error);
+            return error;
+        }
+    }
 }

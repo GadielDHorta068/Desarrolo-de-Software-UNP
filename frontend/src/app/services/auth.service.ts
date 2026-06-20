@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
+import { Region } from '../models/region';
 
 export interface LoginRequest {
   email: string;
@@ -34,6 +35,7 @@ export interface UserResponse {
   name: string;
   surname: string;
   email: string;
+  region: Region;
   cellphone?: string;
   nickname: string;
   userType: string;

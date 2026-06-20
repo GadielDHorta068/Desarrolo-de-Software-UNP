@@ -1,3 +1,5 @@
+import { Region } from "./region";
+
 export enum StatusEvent {
     ACTIVE = 'ACTIVE',
     OPEN = 'OPEN',
@@ -58,6 +60,7 @@ export interface EventsTemp {
     winnersCount: number;
     categoryId: number,
     categoryName: Category,
+    region: Region,
     creator: Creator,
     imageUrl?: string; // Campo opcional para la imagen en base64
     isUserRegistered?: boolean; // Indica si el usuario actual está inscrito en el evento
@@ -89,6 +92,9 @@ export interface EventsCreate {
     quantityOfNumbers: number;
     priceOfNumber: number;
     isPrivate?: boolean;
+    region: {
+        id: number;
+    }
     // propio de adivinanzas
     targetNumber: number;
     minValue: number;

@@ -9,8 +9,10 @@ import { UserDTO } from '../../models/UserDTO';
 import { EventsService } from '../../services/events.service';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { EventRulesModal } from '../event-rules-modal/event-rules-modal';
+import { Region } from '../../models/region';
+import { RegionService } from '../../services/region.service';
 import { AdminEventService } from '../../services/admin/adminEvent.service';
+import { EventRulesModal } from '../event-rules-modal/event-rules-modal';
 
 @Component({
     selector: 'app-questionary',
@@ -36,13 +38,22 @@ export class QuestionaryComponent {
 
     @ViewChild('rulesModal') rulesModal!: EventRulesModal;
 
+  regions: Region[] = [];
+
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
         private eventService: EventsService,
         private activatedRoute: ActivatedRoute,
+        private regionService: RegionService,
         private adminEventService: AdminEventService
-    ) { }
+    ) {
+        // trae las provincias para la lista del questionary
+        this.regionService.getNonCountrieRegions().subscribe({
+            next: (res) => this.regions = res.data,
+            error: err => console.error(err)
+        });
+    }
 
     ngOnInit() {
         this.adminEventService.selectedEvent$.subscribe(event => {
@@ -54,11 +65,13 @@ export class QuestionaryComponent {
         });
 
         this.initializeUserLogged();
+        
         // Inicializar form reactivo
         this.form = this.fb.group({
             name: ['', Validators.required],
             surname: ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
+            region: [null, Validators.required],
             cellphone: ['']
         });
 
@@ -74,19 +87,20 @@ export class QuestionaryComponent {
 
     private initializeUserLogged(): void {
         const currentUser = this.authService.getCurrentUserValue();
-        if (currentUser) {
-            const userDto: UserDTO = {
-                name: currentUser.name ?? '',
-                surname: currentUser.surname ?? '',
-                email: currentUser.email ?? '',
-                cellphone: currentUser.cellphone ?? ''
-            };
-            this.loggedUser = userDto;
-            console.log("userLogged: ", this.loggedUser);
-        }
-        else {
-            console.warn('error al obtener el userLogged');
-        }
+            if (currentUser) {
+                const userDto: UserDTO = {
+                    name: currentUser.name ?? '',
+                    surname: currentUser.surname ?? '',
+                    email: currentUser.email ?? '',
+                    region: currentUser.region ?? '',
+                    cellphone: currentUser.cellphone ?? ''
+                };
+                this.loggedUser = userDto;
+                console.log("userLogged: ", this.loggedUser);
+            }
+            else {
+                console.warn('error al obtener el userLogged'); //.error
+            }
     }
 
     validatePhoneInput(event: KeyboardEvent) {
@@ -118,6 +132,7 @@ export class QuestionaryComponent {
             name: this.form.value.name,
             surname: this.form.value.surname,
             email: this.form.value.email,
+            region: this.form.value.region,
             cellphone: cellphone
         };
 

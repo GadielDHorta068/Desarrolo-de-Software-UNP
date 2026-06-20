@@ -77,44 +77,57 @@ export class AppComponent {
     this.adminInscriptService.setOpenModalGuessing(false);
   }
 
-  async onQuestionarySubmit(data: UserDTO) {
-    this.redirectingToPayment = true;
-    try {
-      const respInscript: any = await this.adminInscriptService.onInscript(data);
-      if (respInscript.status == 200) {
-        // if (respInscript.redirectPay) {
-        //   this.router.navigate(['/event/payment']);
-        // }
-        // else {
-        //   this.notificationService.notifySuccess(respInscript.message)
-        // }
-        if (respInscript.status == 200) {
-          if (respInscript.redirectPay) {
+    async onQuestionarySubmit(data: UserDTO) {
+        this.redirectingToPayment = true;
+
+        try {
+            const resp: any = await this.adminInscriptService.onInscript(data);
+
+            // 1️⃣ Error genérico
+            if (!resp || resp.status !== 200) {
+            this.notificationService.notifyError(
+                "Ha ocurrido un error en la inscripción al evento."
+            );
+            return;
+            }
+
+            // 2️⃣ Región (bloqueante total)
+            if (resp.data === false) {
+            this.notificationService.notifyError(resp.message);
+            return;
+            }
+
+            // 3️⃣ Rifa → redirección
+            if (resp.redirectPay) {
             this.router.navigate(['/event/payment']);
-          }
-          else {
-            if (respInscript.isGuessing) {
-              if (!respInscript.allowed) {
-                this.notificationService.notifyError(respInscript.message);
+            return;
+            }
+
+            // 4️⃣ Guessing contest
+            if (resp.isGuessing) {
+            if (!resp.allowed) {
+                this.notificationService.notifyError(resp.message);
                 return;
-              }
-              this.notificationService.notifySuccess(respInscript.message + ". A jugar!")
-              this.adminInscriptService.setOpenModalGuessing(true);
             }
-            else {
-              this.notificationService.notifySuccess(respInscript.message + ". Gracias por inscribirse!")
+
+            this.notificationService.notifySuccess(
+                resp.message + ". ¡A jugar!"
+            );
+            this.adminInscriptService.setOpenModalGuessing(true);
+            return;
             }
-          }
+
+            // 5️⃣ Caso normal
+            this.notificationService.notifySuccess(
+            resp.message + ". ¡Gracias por inscribirse!"
+            );
+
+        } finally {
+            this.redirectingToPayment = false;
+            this.cdr.markForCheck();
         }
-      }
-      else {
-        this.notificationService.notifyError("Ha ocurrido un error en la inscripcion al evento.");
-      }
-    } finally {
-      this.redirectingToPayment = false;
-      this.cdr.markForCheck();
-    }
-  }
+        }
+
 
   onProceedToQuestionary(data: any) {
     this.adminInscriptService.toBuyNumbersRaffle(data);
