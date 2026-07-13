@@ -8,12 +8,12 @@ import { TagCategory } from '../tag-category/tag-category';
 import { HandleStatusPipe } from '../../../pipes/handle-status.pipe';
 import { WinnerDTO } from '../../../models/winner.model';
 import { TagPrize } from '../tag-prize/tag-prize';
-import { StarRatingComponent } from '../../../pages/star-rating.component/star-rating.component';
+import { StarDisplayComponent } from '../../../pages/star-display.component/star-display.component';
 import { ReviewService } from '../../../services/review.service';
 
 @Component({
   selector: 'app-info-event',
-  imports: [CommonModule, HandleDatePipe, HandleTypePipe, HandleIconTypePipe, HandleStatusPipe, TagCategory, TagPrize, StarRatingComponent],
+  imports: [CommonModule, HandleDatePipe, HandleTypePipe, HandleIconTypePipe, HandleStatusPipe, TagCategory, TagPrize, StarDisplayComponent],
   templateUrl: './info-event.html',
   styleUrl: './info-event.css'
 })
