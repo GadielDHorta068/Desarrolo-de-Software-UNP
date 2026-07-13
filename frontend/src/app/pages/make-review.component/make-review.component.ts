@@ -6,13 +6,18 @@ import { reviewFromFrontToBackDTO } from '../../models/review/reviewFromFrontToB
 import { DeliveryStatus } from '../../models/review/DeliveryStatus';
 import { ReviewService } from '../../services/review.service';
 import { NotificationService } from '../../services/notification.service';
+import { StarRatingComponent } from '../star-rating.component/star-rating.component';
 
 @Component({
-  selector: 'app-make-review',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './make-review.component.html',
-  styleUrl: './make-review.component.css'
+    selector: 'app-make-review',
+    standalone: true,
+    imports: [
+        CommonModule,
+        FormsModule,
+        StarRatingComponent
+    ],
+    templateUrl: './make-review.component.html',
+    styleUrl: './make-review.component.css'
 })
 export class MakeReviewComponent {
     deliveryStatus = DeliveryStatus;

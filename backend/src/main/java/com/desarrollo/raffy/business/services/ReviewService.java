@@ -105,7 +105,7 @@ public class ReviewService {
         Review newReview = new Review();
         newReview.setUser(optionalUser.get());
         newReview.setEvent(optionalEvent.get());
-        newReview.setScore(aReviewFromFrontToBackDTO.getScore() / 2);
+        newReview.setScore(aReviewFromFrontToBackDTO.getScore());
         newReview.setDelivery(aReviewFromFrontToBackDTO.getDelivery());
         newReview.setComment(aReviewFromFrontToBackDTO.getComment());
 

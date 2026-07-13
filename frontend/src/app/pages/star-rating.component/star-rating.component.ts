@@ -1,5 +1,5 @@
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-star-rating',
@@ -9,13 +9,53 @@ import { Component, Input } from '@angular/core';
   styleUrl: './star-rating.component.css'
 })
 export class StarRatingComponent {
-    @Input() rating!: number;
-    stars = [1, 2, 3, 4, 5];
+    @Input() rating = 0;
+    @Input() readonly = true;
 
-    getStarType(index: number): 'full' | 'half' | 'empty' {
-        const starNumber = index + 1;
-        if (this.rating >= starNumber) return  'full';
-        if (this.rating >= starNumber - 0.5 ) return 'half';
-        return 'empty';
+    @Output() ratingChange = new EventEmitter<number>();
+
+    stars = [1, 2, 3, 4, 5];
+    hoverRating = 0;
+
+    get currentRating(): number {
+        return this.hoverRating || this.rating;
     }
+    
+    setRating(value: number) {
+        if (this.readonly) return;
+
+        this.rating = value;
+        this.ratingChange.emit(value);
+    }
+
+    // getStarType(index: number): 'full' | 'half' | 'empty' {
+    //     const starNumber = index + 1;
+    //     const currentRating = this.hoverRating || this.rating;
+
+    //     console.log({
+    //         hover: this.hoverRating,
+    //         rating: this.rating,
+    //         current: currentRating,
+    //         star: starNumber
+    //     });
+
+    //     if (currentRating >= starNumber) return  'full';
+    //     if (currentRating >= starNumber - 0.5 ) return 'half';
+      
+    //     return 'empty';
+    // }
+
+    setHover(value: number): void {
+        if (this.readonly) return;
+
+        this.hoverRating = value;
+        // console.log("hover:", this.hoverRating);
+    }
+
+    clearHover(): void {
+        if (this.readonly) return;
+
+        this.hoverRating = 0;
+    }
+
 }
