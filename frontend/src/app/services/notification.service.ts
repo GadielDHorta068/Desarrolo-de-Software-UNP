@@ -26,7 +26,7 @@ export class NotificationService {
         });
     }
 
-    notifyWarning(message: string, action: string = 'X', duration: number = 2500) {
+    notifyWarning(message: string, action: string = 'X', duration: number = 3500) {
         this.snackBar.open(message, action, {
             duration: duration,
             horizontalPosition: 'right',
@@ -35,7 +35,7 @@ export class NotificationService {
         });
     }
 
-    notifyInfo(message: string, action: string = 'X', duration: number = 2500) {
+    notifyInfo(message: string, action: string = 'X', duration: number = 3500) {
         this.snackBar.open(message, action, {
             duration: duration,
             horizontalPosition: 'right',

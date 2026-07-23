@@ -7,6 +7,8 @@ import { DeliveryStatus } from '../../models/review/DeliveryStatus';
 import { ReviewService } from '../../services/review.service';
 import { NotificationService } from '../../services/notification.service';
 import { StarRatingComponent } from '../star-rating.component/star-rating.component';
+import { AwardAlignment } from '../../models/review/AwardAlignment';
+import { CommunicationRating } from '../../models/review/CommunicationRating';
 
 @Component({
     selector: 'app-make-review',
@@ -21,13 +23,17 @@ import { StarRatingComponent } from '../star-rating.component/star-rating.compon
 })
 export class MakeReviewComponent {
     deliveryStatus = DeliveryStatus;
+    awardAlignmentOptions = AwardAlignment;
+    communicationRatingOptions = CommunicationRating;
     
     review: reviewFromFrontToBackDTO = {
-    email: '',
-    score: 0,
-    comment: '',
-    delivery: this.deliveryStatus.A_TIEMPO,
-  };
+        email: '',
+        score: 0,
+        comment: '',
+        delivery: null!,
+        awardAlingment: null!,
+        communicationRating: null!
+    };
     
     eventId!: string;
 
@@ -51,9 +57,20 @@ export class MakeReviewComponent {
                 this.notifyService.notifySuccess(response.message);
             },
             error: (error) => {
-                this.notifyService.notifyError(error.error.message);
-                console.error(error.message);
+                if (error.status === 409) {
+                    this.notifyService.notifyWarning(error.error.message);    
+                } else {
+                    this.notifyService.notifyError(error.error.message);
+                }
+
+                console.error(error);
             }
         });
     }
+
+    onDeliveryChange(): void {
+    if (this.review.delivery === DeliveryStatus.NO_RECIBIDO) {
+        this.review.awardAlingment = null;
+    }
+}
 }

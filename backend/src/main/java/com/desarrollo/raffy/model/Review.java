@@ -47,10 +47,28 @@ public class Review {
     @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
     private User user;
     
+    // new
+
     @NotNull(message = "la puntualidad de delivery es obligatorio")
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery", nullable = false)
     private DeliveryStatus delivery;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "award_alignment")
+    private AwardAlignment awardAlingment;
+    
+    @NotNull(message = "la calificacion de la comunicacion con el organizador es obligatoria")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "comuincation_rating", nullable = false)
+    private CommunicationRating communicationRating;
+    
+    
+
+
+    // end new
+
+
     
     @NotNull(message = "la puntuacion es obligatoria")
     @Column(name = "score", nullable = false)

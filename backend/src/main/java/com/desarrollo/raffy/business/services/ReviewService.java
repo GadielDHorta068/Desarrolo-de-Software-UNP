@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.desarrollo.raffy.model.DeliveryStatus;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.Raffle;
@@ -21,6 +22,7 @@ import com.desarrollo.raffy.business.repository.UserRepository;
 import com.desarrollo.raffy.dto.ReviewFromBackToFrontDTO;
 import com.desarrollo.raffy.dto.ReviewFromFrontToBackDTO;
 import com.desarrollo.raffy.exception.NotAllowedToReviewException;
+import com.desarrollo.raffy.exception.ReviewAlreadyExistsException;
 import com.desarrollo.raffy.model.User;
 
 
@@ -68,6 +70,8 @@ public class ReviewService {
             reviewToFront.setEventTitle(r.getEvent().getTitle());
             reviewToFront.setScore(r.getScore());
             reviewToFront.setDelivery(r.getDelivery());
+            reviewToFront.setAwardAlingment(r.getAwardAlingment());
+            reviewToFront.setCommunicationRating(r.getCommunicationRating());
             reviewToFront.setComment(r.getComment());
             result.add(reviewToFront);
         }
@@ -88,6 +92,12 @@ public class ReviewService {
             throw new IllegalArgumentException("Usuario o evento no encontrados");
         }
 
+        if (this.reviewRepository.existsByUserAndEvent(optionalUser.get(), optionalEvent.get())) {
+            throw new ReviewAlreadyExistsException(
+              "Ya enviaste una reseña para este evento."
+            );
+        }
+
         List<String> winnersEmails;
         if (optionalEvent.get() instanceof Giveaways) {
             winnersEmails = participantRepository.findWinnerEmailsByEventId(aEventId);
@@ -105,8 +115,13 @@ public class ReviewService {
         Review newReview = new Review();
         newReview.setUser(optionalUser.get());
         newReview.setEvent(optionalEvent.get());
-        newReview.setScore(aReviewFromFrontToBackDTO.getScore());
         newReview.setDelivery(aReviewFromFrontToBackDTO.getDelivery());
+        newReview.setAwardAlingment(aReviewFromFrontToBackDTO.getAwardAlingment());
+        if (aReviewFromFrontToBackDTO.getDelivery() == DeliveryStatus.NO_RECIBIDO) {
+            newReview.setAwardAlingment(null);
+        }
+        newReview.setCommunicationRating(aReviewFromFrontToBackDTO.getCommunicationRating());
+        newReview.setScore(aReviewFromFrontToBackDTO.getScore());
         newReview.setComment(aReviewFromFrontToBackDTO.getComment());
 
         return reviewRepository.save(newReview);

@@ -46,7 +46,22 @@
     margin-top: 50px;
     border-radius: 15px
   }
+  
+    .snackbar-warning .mdc-snackbar__surface {
+        background-color: #f5c20b !important;
+        color: #fff !important;
+        margin-top: 50px;
+        border-radius: 15px;
+    }
 
+    .snackbar-info .mdc-snackbar__surface {
+      background-color: #3b82f6 !important;
+      color: #fff !important;
+      margin-top: 50px;
+      border-radius: 15px;
+    }
+    /* snackbars end*/
+    
   .hs-carousel-pagination .hs-carousel-active {
     background-color: #1d4ed8;
     border-color: #1d4ed8;
