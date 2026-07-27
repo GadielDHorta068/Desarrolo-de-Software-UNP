@@ -98,6 +98,26 @@ public class UrlService {
     }
 
     /**
+     * Crear una URL de uso único para hacer una review
+     * @param anEventId ID del evento a reseniar
+     * @return URL de uso único creada
+     */
+    public Url createSingleUseReviewUrl(Long anEventId) {
+        Url newUrl = new Url();
+        String reviewUrl = frontendUrl + "/eventos/" + anEventId + "/review";
+        newUrl.setOriginalUrl(reviewUrl);
+        newUrl.setShortcode(LinkTransform.shortenUrl(reviewUrl + System.currentTimeMillis())); // Añadir timestamp para hacerlo único
+        newUrl.setClickCount(0);
+        newUrl.setCreatedAt(LocalDateTime.now());
+        newUrl.setIsSingleUse(true);
+        newUrl.setIsUsed(false);
+        newUrl.setEventId(anEventId);
+        
+        
+        return urlRepository.save(newUrl);
+    }
+
+    /**
      * Obtener una URL de uso único por su shortcode
      * @param shortcode Shortcode de la URL
      * @return URL encontrada o null si no existe
@@ -115,6 +135,19 @@ public class UrlService {
         if (url != null && url.getEventId() != null && url.getEventId().equals(eventId)) {
             return url;
         }
+        return null;
+    }
+
+    public Url getSingleUseUrlByShortcodeAndEvent(String shortcode, Long eventId) {
+        Url url = urlRepository.findByShortcode(shortcode);
+        
+        if (url != null
+                && Boolean.TRUE.equals(url.getIsSingleUse())
+                && url.getEventId() != null
+                && url.getEventId().equals(eventId)) {
+            return url;
+        }
+    
         return null;
     }
 

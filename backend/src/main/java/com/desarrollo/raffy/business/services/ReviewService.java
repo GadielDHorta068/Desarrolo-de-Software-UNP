@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.Review;
+import com.desarrollo.raffy.model.Url;
 import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.ParticipantRepository;
 import com.desarrollo.raffy.business.repository.RaffleNumberRepository;
@@ -22,7 +24,9 @@ import com.desarrollo.raffy.business.repository.UserRepository;
 import com.desarrollo.raffy.dto.ReviewFromBackToFrontDTO;
 import com.desarrollo.raffy.dto.ReviewFromFrontToBackDTO;
 import com.desarrollo.raffy.exception.NotAllowedToReviewException;
+import com.desarrollo.raffy.exception.ResourceNotFoundException;
 import com.desarrollo.raffy.exception.ReviewAlreadyExistsException;
+import com.desarrollo.raffy.exception.ConflictException;
 import com.desarrollo.raffy.model.User;
 
 
@@ -49,6 +53,9 @@ public class ReviewService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UrlService urlService;
 
     public List<ReviewFromBackToFrontDTO> findReviewsByEventCreatorEmail(String creatorEmail) {
         List<Review> reviews = new ArrayList<>();
@@ -124,6 +131,21 @@ public class ReviewService {
         newReview.setScore(aReviewFromFrontToBackDTO.getScore());
         newReview.setComment(aReviewFromFrontToBackDTO.getComment());
 
-        return reviewRepository.save(newReview);
+        // deshabilitar el link de review
+
+        Url url = urlService.getSingleUseUrlByShortcodeAndEvent(aReviewFromFrontToBackDTO.getUrlShortcode(), aEventId);
+        
+        if (url == null) {
+            throw new ResourceNotFoundException("El enlace de la reseña no es válido.");
+        }
+        if (Boolean.TRUE.equals(url.getIsUsed())) {
+            throw new ConflictException("Este enlace ya fue utilizado.");
+        }
+
+        Review savedReview = reviewRepository.save(newReview);
+
+        urlService.markSingleUseUrlAsUsed(url.getShortcode());
+
+        return savedReview;
     }
 }

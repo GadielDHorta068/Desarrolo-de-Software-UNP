@@ -133,7 +133,7 @@ export const routes: Routes = [
     title: 'Detalle de Auditoría - Raffy'
   },
   {
-    path: 'eventos/:eventId/review',
+    path: 'eventos/:eventId/review/:shortcode',
     loadComponent: () => import('./pages/make-review.component/make-review.component').then(m => m.MakeReviewComponent),
     title: 'Stars'
   },

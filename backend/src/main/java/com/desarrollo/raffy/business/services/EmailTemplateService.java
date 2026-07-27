@@ -195,6 +195,7 @@ public class EmailTemplateService {
      * @param eventTitle Título del evento
      * @param eventType  Tipo de evento (GIVEAWAY o GUESSING_CONTEST)
      * @param eventUrl   URL para ver el evento
+     * @param reviewUrl  URL para hacer la review del evento
      * @return HTML de la plantilla
      */
     public String generateWinnerNotificationTemplate(String winnerName,
@@ -202,6 +203,7 @@ public class EmailTemplateService {
             String eventTitle,
             String eventType,
             String eventUrl,
+            String reviewUrl,
             String creatorName,
             String creatorEmail,
             String creatorPhone) {
@@ -258,6 +260,19 @@ public class EmailTemplateService {
                     .append("</p>");
         }
         msg.append("</div>");
+        // bloque con el link de la review
+        msg.append("<p>")
+            .append("Una vez que recibas tu premio, podés dejar una reseña para ayudar a otros usuarios.")
+            .append("</p>");
+
+        msg.append("<p>")
+           .append("<a href=\"")
+           .append(escapeHtml(reviewUrl))
+           .append("\">")
+           .append("⭐ Dejar una reseña")
+           .append("</a>")
+           .append("</p>");
+
 
         String actionText = "Ver detalles del " + eventTypeText;
         String actionUrl = eventUrl;

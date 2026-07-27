@@ -21,4 +21,5 @@ public class ReviewFromFrontToBackDTO {
     private AwardAlignment awardAlingment;
     private CommunicationRating communicationRating;
     private String comment;
+    private String urlShortcode;
 }

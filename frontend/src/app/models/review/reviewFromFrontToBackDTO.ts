@@ -8,5 +8,6 @@ export interface reviewFromFrontToBackDTO {
     awardAlingment: AwardAlignment | null,
     communicationRating: CommunicationRating | null,
     score: number,
-    comment: string
+    comment: string,
+    urlShortcode: string
 }

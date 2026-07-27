@@ -32,7 +32,8 @@ export class MakeReviewComponent {
         comment: '',
         delivery: null!,
         awardAlingment: null!,
-        communicationRating: null!
+        communicationRating: null!,
+        urlShortcode: null!
     };
     
     eventId!: string;
@@ -46,6 +47,14 @@ export class MakeReviewComponent {
 
     ngOnInit() {
         this.eventId = this.route.snapshot.paramMap.get('eventId')!;
+        const shortcode = this.route.snapshot.paramMap.get('shortcode');
+
+        if (!shortcode) {
+            this.notifyService.notifyError('El enlace de la reseña no es válido.');
+            return;
+        }
+
+        this.review.urlShortcode = shortcode;
     }
 
 
