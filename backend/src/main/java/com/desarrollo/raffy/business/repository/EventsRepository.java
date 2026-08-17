@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.desarrollo.raffy.model.Events;
+import com.desarrollo.raffy.model.Region;
 import com.desarrollo.raffy.model.StatusEvent;
 import com.desarrollo.raffy.model.User;
 import com.desarrollo.raffy.model.EventTypes;
@@ -34,12 +35,14 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
         SELECT e FROM Events e
         JOIN FETCH e.category c
         JOIN FETCH e.creator cr
+        LEFT JOIN FETCH e.region r
         WHERE e.statusEvent = com.desarrollo.raffy.model.StatusEvent.OPEN
         AND e.eventType = COALESCE(:type, e.eventType)
         AND c.id = COALESCE(:catId, c.id)
         AND e.startDate >= COALESCE(:start, e.startDate)
         AND e.endDate <= COALESCE(:end, e.endDate)
         AND e.winnersCount = COALESCE(:winnerCount, e.winnersCount)
+        AND (:regionId IS NULL OR r.id = :regionId)
         AND (:email IS NULL OR cr.email <> :email)
         AND e.isPrivate = FALSE      
         ORDER BY e.startDate DESC
@@ -50,6 +53,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
         @Param("start") LocalDate start,
         @Param("end") LocalDate end,
         @Param("winnerCount") Integer winnerCount,
+        @Param("regionId") Long regionId,
         @Param("email") String email);
     
     // Buscar eventos por rango de fechas

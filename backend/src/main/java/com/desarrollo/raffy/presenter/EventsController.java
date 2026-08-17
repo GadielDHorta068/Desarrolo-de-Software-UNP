@@ -27,6 +27,7 @@ import com.desarrollo.raffy.business.services.AuditLogsService;
 import com.desarrollo.raffy.business.services.EmailService;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RaffleNumber;
+import com.desarrollo.raffy.model.Region;
 import com.desarrollo.raffy.Response;
 import com.desarrollo.raffy.business.services.EventsService;
 import com.desarrollo.raffy.business.services.FeaturedEventsService;
@@ -746,6 +747,7 @@ public class EventsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
             @RequestParam(required = false) Integer winnerCount,
+            @RequestParam(required = false) Long regionId,
             @RequestParam(required = false) String emailUserRegister) {
 
         if (start != null && end != null && !end.isAfter(start)) {
@@ -754,7 +756,7 @@ public class EventsController {
         }
 
         List<EventSummaryDTO> events = eventsService.getActiveEventSummaries(
-                type, categorie, start, end, winnerCount, emailUserRegister);
+            type, categorie, start, end, winnerCount, regionId, emailUserRegister);
 
         return ResponseEntity.ok(events);
     }

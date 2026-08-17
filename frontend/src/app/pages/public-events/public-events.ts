@@ -9,12 +9,14 @@ import { Category, CategoryService } from '../../services/category.service';
 import { DrawCard } from '../../shared/components/draw-card/draw-card';
 import { AuthService } from '../../services/auth.service';
 import { Subject, of, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, catchError, map } from 'rxjs/operators';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatNativeDateModule, MatOptionModule, MAT_DATE_LOCALE, DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { Region } from '../../models/region';
+import { RegionService } from '../../services/region.service';
 
 class EsArDateAdapter extends NativeDateAdapter {
   override format(date: Date, displayFormat: any): string {
@@ -48,6 +50,7 @@ export class PublicEvents implements OnInit, AfterViewInit {
   events: EventsTemp[] = [];
   filteredEvents: EventsTemp[] = [];
   visibleEvents: EventsTemp[] = [];
+  regions: Region[] = [];
   loading = true;
   error = '';
   public StatusEvent = StatusEvent;
@@ -66,6 +69,7 @@ export class PublicEvents implements OnInit, AfterViewInit {
   filterStart?: string; // YYYY-MM-DD
   filterEnd?: string;   // YYYY-MM-DD
   filterWinners?: number | null;
+  filterRegion?: Region | null;
 
   // modal de invitación
   showLoginModal = false;
@@ -82,6 +86,7 @@ export class PublicEvents implements OnInit, AfterViewInit {
 
   constructor(
     private eventsService: EventsService,
+    private RegionService: RegionService,
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
     private router: Router,
@@ -90,6 +95,17 @@ export class PublicEvents implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.userLogged = this.authService.isAuthenticated();
+    
+    this.getRegions().subscribe({
+      next: (regions) => {
+        this.regions = regions;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.warn('[PublicEvents] No se pudieron cargar regiones:', err);
+      }
+    });
+    
     // cargar categorías existentes (endpoint público)
     this.categoryService.getAll().subscribe({
       next: (cats) => {
@@ -166,6 +182,7 @@ export class PublicEvents implements OnInit, AfterViewInit {
       start: this.filterStart || undefined,
       end: this.filterEnd || undefined,
       winnerCount: this.filterWinners ?? undefined,
+      region: this.filterRegion || undefined,
       //Solo enviar email si el usuario está autentificado
       ...(this.userLogged && this.authService.getCurrentUserValue()?.email ? {
         emailUserRegister: this.authService.getCurrentUserValue()?.email
@@ -377,6 +394,18 @@ export class PublicEvents implements OnInit, AfterViewInit {
     const date = event.value || null;
     this.filterEnd = date ? this.formatDate(date) : undefined;
     this.onFiltersChanged();
+  }
+
+  public onRegionSelected(region: Region): void {
+    this.filterRegion = region;
+    this.onFiltersChanged();
+  }
+
+  //Lista de Regiones para el filtro de eventos
+  public getRegions(): Observable<Region[]> {
+    return this.RegionService.getNonCountrieRegions().pipe(
+      map((res: any) => Array.isArray(res) ? res : (res?.data ?? []))
+    );
   }
 
   public toDateObj(iso?: string): Date | null {

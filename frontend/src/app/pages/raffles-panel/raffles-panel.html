@@ -322,7 +322,7 @@
                         </svg>
                         Nuevo evento
                     </button>
-                    <button *ngIf="!eventCreated" type="submit" [disabled]="!(formPanel.valid && enabledTwoFactor)"
+                    <button *ngIf="!eventCreated" type="submit" [disabled]="!(formPanel.valid)"
                         [title]="formPanel.valid ? '': 'Existen campos obligatorios vacios o no válidos'" class="
                             group relative
                             bg-gradient-to-r from-emerald-600 to-emerald-700

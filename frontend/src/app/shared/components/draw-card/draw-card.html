@@ -44,6 +44,10 @@
         <p class="text-sm text-gray-800 dark:text-gray-200 font-medium">Categoría</p>
         <p class="text-sm text-gray-600 dark:text-gray-400">{{event?.categoryName || 'Sin categoría'}}</p>
       </div>
+      <div>
+        <p class="text-sm text-gray-800 dark:text-gray-200 font-medium">Ubicación</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">{{event?.region?.name || 'Ubicación no especificada'}}</p>
+      </div>
       <!-- <div>
         <p class="text-sm text-gray-800 dark:text-gray-200 font-medium">Reputación del creador</p>
         <app-star-rating [rating]="avgScore"></app-star-rating>

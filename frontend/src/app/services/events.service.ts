@@ -6,6 +6,7 @@ import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { UserDTO } from '../models/UserDTO';
 import { Response } from '../models/response.model';
+import { Region } from '../models/region';
 
 @Injectable({
   providedIn: 'root'
@@ -197,6 +198,7 @@ export class EventsService {
     start?: string; // formato ISO: YYYY-MM-DD
     end?: string;   // formato ISO: YYYY-MM-DD
     winnerCount?: number;
+    region?: Region;
     emailUserRegister?: string;
   } = {}): Observable<EventsTemp[]> {
     const params: any = {};
@@ -205,6 +207,11 @@ export class EventsService {
     if (options.start) params['start'] = options.start;
     if (options.end) params['end'] = options.end;
     if (options.winnerCount !== undefined && options.winnerCount !== null) params['winnerCount'] = options.winnerCount;
+    if (options.region) {
+      // Accept either a Region object or a numeric id
+      const regionId = (typeof options.region === 'number') ? options.region : (options.region as any).id;
+      if (regionId !== undefined && regionId !== null) params['regionId'] = String(regionId);
+    }
     if (options.emailUserRegister) params['emailUserRegister'] = options.emailUserRegister;
     console.log('Fetching active events with params:', params);
     return this.http.get<EventsTemp[]>(`${this.apiUrl}/active`, { params });

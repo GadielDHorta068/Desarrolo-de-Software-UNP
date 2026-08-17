@@ -26,6 +26,7 @@ import com.desarrollo.raffy.model.EventTypes;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Participant;
 import com.desarrollo.raffy.model.RaffleNumber;
+import com.desarrollo.raffy.model.Region;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.Raffle;
@@ -380,6 +381,7 @@ public class EventsService {
         LocalDate start, 
         LocalDate end, 
         Integer winnerCount,
+        Long regionId,
         String emailUserRegister){
         // Resolver opcionalmente el nombre de categoría a su ID para evitar problemas
         // con funciones de texto sobre tipos binarios y asegurar consulta indexada.
@@ -395,7 +397,7 @@ public class EventsService {
             }
         }
         
-        return eventsRepository.findActiveEvents(type, categoryId, start, end, winnerCount, emailUserRegister)
+        return eventsRepository.findActiveEvents(type, categoryId, start, end, winnerCount, regionId, emailUserRegister)
             .stream()
             .map(this::toEventSummaryDTO)
             .collect(Collectors.toList());

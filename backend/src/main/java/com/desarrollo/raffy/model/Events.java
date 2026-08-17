@@ -76,22 +76,12 @@ public abstract class Events {
 
     @ManyToOne
     @JoinColumn(name = "region_id", nullable = true)
-    // @NotNull(message = "Debe seleccionar una region")
     private Region region;
 
     @NotNull(message = "El estado del evento no debe estar vacío")
     @Enumerated(EnumType.STRING)
     @Column(name = "status_event", nullable = false)
     private StatusEvent statusEvent;
-
-    /* @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "event_participants",
-        joinColumns = @JoinColumn(name = "event_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    @JsonIgnore
-    private List<User> participants; */
 
     @NotNull(message = "Debe especificar el tipo de evento")
     @Enumerated(EnumType.STRING)

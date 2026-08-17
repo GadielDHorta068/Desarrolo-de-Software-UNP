@@ -73,6 +73,14 @@
             <mat-datepicker #pickerEnd></mat-datepicker>
           </mat-form-field>
         </div>
+        <!-- Filtrar las regiones mostrando solo el nombre-->
+        <div class="filter-region">
+          <label for="region">Ubicación</label>
+          <select id="region" [ngModel]="filterRegion" (ngModelChange)="onRegionSelected($event)">
+            <option [ngValue]="null">Todas</option>
+            <option *ngFor="let region of regions" [ngValue]="region">{{ region.name }}</option>
+          </select>
+        </div>
         <div class="filter-winners">
           <label for="winners">Ganadores</label>
           <input id="winners" type="number" min="1" [(ngModel)]="filterWinners" (ngModelChange)="onFiltersChanged()" />
