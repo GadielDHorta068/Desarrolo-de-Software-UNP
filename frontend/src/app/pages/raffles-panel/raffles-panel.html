@@ -1,5 +1,5 @@
 <div class="container">
-    @if (!enabledTwoFactor) {
+    <!-- @if (!enabledTwoFactor) {
         <div class="flex items-center p-4 border border-orange-600 rounded-md mb-2 dark:bg-amber-900 bg-amber-900">
             <svg class="w-6 h-6 mr-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -10,10 +10,10 @@
             <span class="text-sm">
                 No tienes configurado 2FA como método de autenticación. Es necesaria esta configuración para crear eventos.
             </span>
-            <!-- <button class="ml-2 text-yellow-500 hover:text-yellow-600 transition-all duration-300 dark:hover:text-yellow-400" [routerLink]="['/settings']">Ir a configuración</button> -->
+             <button class="ml-2 text-yellow-500 hover:text-yellow-600 transition-all duration-300 dark:hover:text-yellow-400" [routerLink]="['/settings']">Ir a configuración</button> 
             <a [routerLink]="['/settings']" class="pl-1 text-yellow-500 hover:text-yellow-600 hover:underline transition-all duration-300 dark:hover:text-yellow-400">Ir a configuración</a>
         </div>
-    }
+    }-->
     <div class="max-w-2xl mb-8">
         <h2
             class="mt-6 text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
@@ -152,10 +152,7 @@
                             Región (*)
                         </label>
 
-                        <select 
-                            id="region"
-                            formControlName="region"
-                            (blur)="formPanel.get('region')?.markAsTouched()"
+                        <select id="region" formControlName="region" (blur)="formPanel.get('region')?.markAsTouched()"
                             class="bg-white dark:bg-gray-800 rounded-md px-4 py-2 w-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[1.02]">
                             <option value="">Seleccione una región</option>
                             <option *ngFor="let r of regions" [ngValue]="r">
@@ -164,7 +161,7 @@
                         </select>
                         <div *ngIf="formPanel.get('region')?.invalid && formPanel.get('region')?.touched">
                             <small class="text-red-600">Debés seleccionar un tipo</small>
-                        </div>                    
+                        </div>
                         <div *ngIf="formPanel.get('region')?.invalid && formPanel.get('region')?.touched">
                             <small class="text-red-600">Debés seleccionar una región</small>
                         </div>
@@ -326,8 +323,7 @@
                         Nuevo evento
                     </button>
                     <button *ngIf="!eventCreated" type="submit" [disabled]="!(formPanel.valid && enabledTwoFactor)"
-                        [title]="formPanel.valid ? '': 'Existen campos obligatorios vacios o no válidos'"
-                        class="
+                        [title]="formPanel.valid ? '': 'Existen campos obligatorios vacios o no válidos'" class="
                             group relative
                             bg-gradient-to-r from-emerald-600 to-emerald-700
                             dark:from-emerald-500 dark:to-emerald-600
@@ -345,15 +341,14 @@
                             disabled:from-gray-400 disabled:to-gray-500
                             disabled:hover:scale-100
                             disabled:hover:shadow-none
-                            disabled:hover:from-gray-400 disabled:hover:to-gray-500"
-                        >
-                            <svg class="w-4 h-4 mr-1 inline-block group-hover:scale-110 transition-transform duration-300"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                                </path>
-                            </svg>
-                            Crear evento
-                        </button>
+                            disabled:hover:from-gray-400 disabled:hover:to-gray-500">
+                        <svg class="w-4 h-4 mr-1 inline-block group-hover:scale-110 transition-transform duration-300"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                        Crear evento
+                    </button>
                     <!-- <button type="submit" [title]="formPanel.valid ? '': 'Existen campos obligatorios vacios o no válidos'"
                 [ngStyle]="formPanel.valid ? {'opacity': '1', 'cursor':'pointer'} : {'opacity': '0.6', 'cursor': 'default'}"
                 class="bg-emerald-600 dark:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium"
