@@ -16,9 +16,18 @@
   <!-- Main Content -->
   <div *ngIf="!isloading && !errorMessage">
     <header class="mb-6">
-      <h1 id="reports-title" class="text-2xl font-semibold black">
-        Reportes del evento
-      </h1>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <h1 id="reports-title" class="text-2xl font-semibold black">
+          Reportes del evento
+        </h1>
+        <!-- return to List Events-->
+        <button 
+        (click)="goBackToList()" 
+        class="mt-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition sm:mt-2 sm:justify-self-end"
+        >
+          Volver a la lista de reportes
+        </button>
+      </div>
       <p class="mt-2 text-sm text-black-700">
         Lista de reportes realizados por usuarios sobre el evento.
       </p>

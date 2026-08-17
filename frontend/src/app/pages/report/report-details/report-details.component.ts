@@ -223,4 +223,8 @@ export class ReportDetails implements OnInit{
     this.countRejected = 0;
     this.loadEventDetails();
   }
+
+  goBackToList(){
+    window.history.back();
+  }
 }
