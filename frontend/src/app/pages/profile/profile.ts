@@ -381,7 +381,6 @@ export class Profile implements OnInit, OnDestroy {
     this.joinedSubscription = this.eventsService.getEventsByParticipantId(userId).subscribe({
       next: (events) => {
         this.joinedEvents = events || [];
-        console.log("[debugEvents] => eventos del particpante: ", this.joinedEvents);
         this.joinedLoading = false;
         this.participatedEventsCount = this.joinedEvents.length;
         this.cdr.detectChanges();
