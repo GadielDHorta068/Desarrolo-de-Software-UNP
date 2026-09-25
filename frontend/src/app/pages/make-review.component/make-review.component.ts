@@ -6,23 +6,35 @@ import { reviewFromFrontToBackDTO } from '../../models/review/reviewFromFrontToB
 import { DeliveryStatus } from '../../models/review/DeliveryStatus';
 import { ReviewService } from '../../services/review.service';
 import { NotificationService } from '../../services/notification.service';
+import { StarRatingComponent } from '../star-rating.component/star-rating.component';
+import { AwardAlignment } from '../../models/review/AwardAlignment';
+import { CommunicationRating } from '../../models/review/CommunicationRating';
 
 @Component({
-  selector: 'app-make-review',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './make-review.component.html',
-  styleUrl: './make-review.component.css'
+    selector: 'app-make-review',
+    standalone: true,
+    imports: [
+        CommonModule,
+        FormsModule,
+        StarRatingComponent
+    ],
+    templateUrl: './make-review.component.html',
+    styleUrl: './make-review.component.css'
 })
 export class MakeReviewComponent {
     deliveryStatus = DeliveryStatus;
+    awardAlignmentOptions = AwardAlignment;
+    communicationRatingOptions = CommunicationRating;
     
     review: reviewFromFrontToBackDTO = {
-    email: '',
-    score: 0,
-    comment: '',
-    delivery: this.deliveryStatus.A_TIEMPO,
-  };
+        email: '',
+        score: 0,
+        comment: '',
+        delivery: null!,
+        awardAlingment: null!,
+        communicationRating: null!,
+        urlShortcode: null!
+    };
     
     eventId!: string;
 
@@ -35,6 +47,14 @@ export class MakeReviewComponent {
 
     ngOnInit() {
         this.eventId = this.route.snapshot.paramMap.get('eventId')!;
+        const shortcode = this.route.snapshot.paramMap.get('shortcode');
+
+        if (!shortcode) {
+            this.notifyService.notifyError('El enlace de la reseña no es válido.');
+            return;
+        }
+
+        this.review.urlShortcode = shortcode;
     }
 
 
@@ -46,9 +66,20 @@ export class MakeReviewComponent {
                 this.notifyService.notifySuccess(response.message);
             },
             error: (error) => {
-                this.notifyService.notifyError(error.error.message);
-                console.error(error.message);
+                if (error.status === 409) {
+                    this.notifyService.notifyWarning(error.error.message);    
+                } else {
+                    this.notifyService.notifyError(error.error.message);
+                }
+
+                console.error(error);
             }
         });
     }
+
+    onDeliveryChange(): void {
+    if (this.review.delivery === DeliveryStatus.NO_RECIBIDO) {
+        this.review.awardAlingment = null;
+    }
+}
 }
