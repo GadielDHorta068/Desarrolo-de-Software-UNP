@@ -1,5 +1,7 @@
 package com.desarrollo.raffy.dto;
 
+import com.desarrollo.raffy.model.AwardAlignment;
+import com.desarrollo.raffy.model.CommunicationRating;
 import com.desarrollo.raffy.model.DeliveryStatus;
 
 import lombok.Data;
@@ -20,5 +22,7 @@ public class ReviewFromBackToFrontDTO {
     private String nickname;
     private Double score;
     private DeliveryStatus delivery;
+    private AwardAlignment awardAlingment;
+    private CommunicationRating communicationRating;
     private String comment;
 }

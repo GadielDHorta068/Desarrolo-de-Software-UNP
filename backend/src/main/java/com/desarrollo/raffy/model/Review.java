@@ -52,6 +52,16 @@ public class Review {
     @Column(name = "delivery", nullable = false)
     private DeliveryStatus delivery;
     
+    @Enumerated(EnumType.STRING)
+    @Column(name = "award_alignment")
+    private AwardAlignment awardAlingment;
+    
+    @NotNull(message = "la calificacion de la comunicacion con el organizador es obligatoria")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "comuincation_rating", nullable = false)
+    private CommunicationRating communicationRating;
+    
+
     @NotNull(message = "la puntuacion es obligatoria")
     @Column(name = "score", nullable = false)
     @Min(0)
