@@ -15,11 +15,11 @@ import { EventsService } from '../../../services/events.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AdminInscriptService } from '../../../services/admin/adminInscript';
 import { ReviewService } from '../../../services/review.service';
-import { StarRatingComponent } from '../../../pages/star-rating.component/star-rating.component';
+import { StarDisplayComponent } from '../../../pages/star-display.component/star-display.component';
 
 @Component({
   selector: 'app-draw-card',
-  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, HandleDatePipe, ModalDrawInfo, ModalInfo, StarRatingComponent, LoadingIndicator],
+  imports: [CommonModule, HandleStatusPipe, HandleIconTypePipe, HandleDatePipe, ModalDrawInfo, ModalInfo, StarDisplayComponent, LoadingIndicator],
   templateUrl: './draw-card.html',
   styleUrl: './draw-card.css',
   providers: [HandleStatusPipe]
