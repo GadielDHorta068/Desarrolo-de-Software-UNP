@@ -18,6 +18,7 @@ import com.desarrollo.raffy.Response;
 import com.desarrollo.raffy.business.services.ReviewService;
 import com.desarrollo.raffy.dto.ReviewFromBackToFrontDTO;
 import com.desarrollo.raffy.dto.ReviewFromFrontToBackDTO;
+import com.desarrollo.raffy.exception.ReviewAlreadyExistsException;
 import com.desarrollo.raffy.model.Review;
 
 import lombok.extern.slf4j.Slf4j;
@@ -80,6 +81,8 @@ public class ReviewController {
             return Response.ok(null, "Review creada con éxito");
         } catch (IllegalArgumentException e) {
             return Response.error(e, e.getMessage()); // error controlado (400)
+        } catch (ReviewAlreadyExistsException raeExc) {
+            return Response.conflict(null, raeExc.getMessage());
         } catch (Exception e) {
             String msgError = "Ocurrió un error inesperado al crear la review";
             if(e.getMessage() != null){
