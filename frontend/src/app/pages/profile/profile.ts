@@ -13,13 +13,13 @@ import { HandleStatusPipe } from '../../pipes/handle-status.pipe';
 import { Meta, Title } from '@angular/platform-browser';
 import { Reviews } from '../reviews/reviews';
 import { ReviewService } from '../../services/review.service';
-import { StarRatingComponent } from '../star-rating.component/star-rating.component';
-import { HandleTypePipe } from '../../pipes/handle-type.pipe';
+import { StarDisplayComponent } from '../star-display.component/star-display.component';
+
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, ClipboardModule, DrawCard, RouterModule, HandleStatusPipe, Reviews, StarRatingComponent, HandleTypePipe],
+  imports: [CommonModule, HttpClientModule, ClipboardModule, DrawCard, RouterModule, HandleStatusPipe, Reviews, StarDisplayComponent],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
   animations: [
