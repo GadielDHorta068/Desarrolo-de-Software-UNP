@@ -26,7 +26,7 @@
         <div class="d-flex" style="align-content: end;">
             <label>Puntuación: </label>
             <!-- <strong>{{review?.score}} estrellas</strong> -->
-             <app-star-rating [rating]="(review && review.score !== null) ? +review.score : 0"></app-star-rating>
+             <app-star-display [rating]="(review && review.score !== null) ? +review.score : 0"></app-star-display>
         </div>
     </div>
 </div>
