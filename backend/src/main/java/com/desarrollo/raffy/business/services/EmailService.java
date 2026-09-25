@@ -2,6 +2,7 @@ package com.desarrollo.raffy.business.services;
 
 import com.desarrollo.raffy.dto.WinnerDTO;
 import com.desarrollo.raffy.model.StatusReport;
+import com.desarrollo.raffy.model.Url;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -32,6 +33,9 @@ public class EmailService {
 
     @Autowired
     private EmailTemplateService emailTemplateService;
+
+    @Autowired
+    private UrlService urlService;
 
     @Value("${app.from.email}")
     private String fromEmail;
@@ -109,6 +113,9 @@ public class EmailService {
                 // Construir el nombre completo del ganador
                 String winnerFullName = winner.getName() + " " + winner.getSurname();
                 
+                Url url = urlService.createSingleUseReviewUrl(eventId);
+                String reviewUrl = url.getOriginalUrl() + "/" + url.getShortcode();
+
                 // Generar la plantilla HTML
                 String htmlContent = emailTemplateService.generateWinnerNotificationTemplate(
                     winnerFullName,
@@ -116,6 +123,7 @@ public class EmailService {
                     eventTitle,
                     eventType,
                     eventUrl,
+                    reviewUrl,
                     creatorName,
                     creatorEmail,
                     creatorPhone
