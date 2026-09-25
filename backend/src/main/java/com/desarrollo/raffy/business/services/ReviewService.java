@@ -5,14 +5,17 @@ import java.util.Optional;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.desarrollo.raffy.model.DeliveryStatus;
 import com.desarrollo.raffy.model.Events;
 import com.desarrollo.raffy.model.Giveaways;
 import com.desarrollo.raffy.model.Raffle;
 import com.desarrollo.raffy.model.RegisteredUser;
 import com.desarrollo.raffy.model.Review;
+import com.desarrollo.raffy.model.Url;
 import com.desarrollo.raffy.business.repository.EventsRepository;
 import com.desarrollo.raffy.business.repository.ParticipantRepository;
 import com.desarrollo.raffy.business.repository.RaffleNumberRepository;
@@ -21,6 +24,9 @@ import com.desarrollo.raffy.business.repository.UserRepository;
 import com.desarrollo.raffy.dto.ReviewFromBackToFrontDTO;
 import com.desarrollo.raffy.dto.ReviewFromFrontToBackDTO;
 import com.desarrollo.raffy.exception.NotAllowedToReviewException;
+import com.desarrollo.raffy.exception.ResourceNotFoundException;
+import com.desarrollo.raffy.exception.ReviewAlreadyExistsException;
+import com.desarrollo.raffy.exception.ConflictException;
 import com.desarrollo.raffy.model.User;
 
 
@@ -48,6 +54,9 @@ public class ReviewService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UrlService urlService;
+
     public List<ReviewFromBackToFrontDTO> findReviewsByEventCreatorEmail(String creatorEmail) {
         List<Review> reviews = new ArrayList<>();
         reviewRepository.findReviewsByEventCreatorEmail(creatorEmail).forEach(review -> reviews.add(review));
@@ -68,6 +77,8 @@ public class ReviewService {
             reviewToFront.setEventTitle(r.getEvent().getTitle());
             reviewToFront.setScore(r.getScore());
             reviewToFront.setDelivery(r.getDelivery());
+            reviewToFront.setAwardAlingment(r.getAwardAlingment());
+            reviewToFront.setCommunicationRating(r.getCommunicationRating());
             reviewToFront.setComment(r.getComment());
             result.add(reviewToFront);
         }
@@ -88,6 +99,12 @@ public class ReviewService {
             throw new IllegalArgumentException("Usuario o evento no encontrados");
         }
 
+        if (this.reviewRepository.existsByUserAndEvent(optionalUser.get(), optionalEvent.get())) {
+            throw new ReviewAlreadyExistsException(
+              "Ya enviaste una reseña para este evento."
+            );
+        }
+
         List<String> winnersEmails;
         if (optionalEvent.get() instanceof Giveaways) {
             winnersEmails = participantRepository.findWinnerEmailsByEventId(aEventId);
@@ -105,10 +122,30 @@ public class ReviewService {
         Review newReview = new Review();
         newReview.setUser(optionalUser.get());
         newReview.setEvent(optionalEvent.get());
-        newReview.setScore(aReviewFromFrontToBackDTO.getScore() / 2);
         newReview.setDelivery(aReviewFromFrontToBackDTO.getDelivery());
+        newReview.setAwardAlingment(aReviewFromFrontToBackDTO.getAwardAlingment());
+        if (aReviewFromFrontToBackDTO.getDelivery() == DeliveryStatus.NO_RECIBIDO) {
+            newReview.setAwardAlingment(null);
+        }
+        newReview.setCommunicationRating(aReviewFromFrontToBackDTO.getCommunicationRating());
+        newReview.setScore(aReviewFromFrontToBackDTO.getScore());
         newReview.setComment(aReviewFromFrontToBackDTO.getComment());
 
-        return reviewRepository.save(newReview);
+        // deshabilitar el link de review
+
+        Url url = urlService.getSingleUseUrlByShortcodeAndEvent(aReviewFromFrontToBackDTO.getUrlShortcode(), aEventId);
+        
+        if (url == null) {
+            throw new ResourceNotFoundException("El enlace de la reseña no es válido.");
+        }
+        if (Boolean.TRUE.equals(url.getIsUsed())) {
+            throw new ConflictException("Este enlace ya fue utilizado.");
+        }
+
+        Review savedReview = reviewRepository.save(newReview);
+
+        urlService.markSingleUseUrlAsUsed(url.getShortcode());
+
+        return savedReview;
     }
 }
