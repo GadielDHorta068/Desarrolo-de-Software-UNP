@@ -300,8 +300,8 @@ public class ReportService {
         eventsRepository.save(event);
 
         String message = finalStatusReport == StatusReport.APPROVED
-            ? "Tu evento ha sido bloqueado debido a múltiples reportes verificados."
-            : "Los reportes sobre tu evento han sido revisados y rechazados. Tu evento permanece activo.";
+            ? "Tu evento ha sido bloqueado debido a múltiples reportes verificados./n" + AdminMessage
+            : "Los reportes sobre tu evento han sido revisados y rechazados. Tu evento permanece activo./n" + AdminMessage ;
 
         emailService.sendFinalDecisionNotification(
             event.getCreator().getEmail(),
