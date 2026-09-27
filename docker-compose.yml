@@ -55,6 +55,9 @@ services:
       DATABASE_PROVIDER: postgresql 
       TWOFA_API_URL: http://twofa:8080
       FRONTEND_URL: https://raffyfy.argcloud.com.ar
+      # Envío de correos vía Resend: definir RESEND_API_KEY en el .env de la raíz (no versionado)
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      APP_FROM_EMAIL: "${APP_FROM_EMAIL:-Rafify <no-reply@raffyfy.argcloud.com.ar>}"
     ports:
       - "${APP_PORT:-8080}:8080"
     volumes: []
@@ -66,7 +69,7 @@ services:
     restart: unless-stopped
     
   evolution-api:
-    image: atendai/evolution-api:latest
+    image: evoapicloud/evolution-api:v2.3.7
     container_name: evolution-api
     environment:
       # Clave de autenticación requerida por Evolution API (header 'apikey')

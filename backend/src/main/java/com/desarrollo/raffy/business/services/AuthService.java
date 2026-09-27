@@ -73,9 +73,15 @@ public class AuthService {
 
             RegisteredUser savedUser = userRepository.save(user);
             
-            // Enviar correo de bienvenida con plantilla profesional
+            // Enviar correo de bienvenida con plantilla profesional.
+            // Un fallo en el envío no debe impedir el registro del usuario.
             String userName = savedUser.getName() + " " + savedUser.getSurname();
-            emailService.sendWelcomeEmailWithTemplate(savedUser.getEmail(), userName, null);
+            try {
+                emailService.sendWelcomeEmailWithTemplate(savedUser.getEmail(), userName, null);
+            } catch (RuntimeException e) {
+                System.err.println("⚠️ No se pudo enviar el correo de bienvenida a " + savedUser.getEmail()
+                        + ": " + e.getMessage());
+            }
 
             // Generar tokens
             String accessToken = jwtService.generateToken(savedUser);
