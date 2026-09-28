@@ -66,6 +66,6 @@ export class ReviewService {
         // si no existe vamos al server
         const scoreFromServer = await firstValueFrom(this.getAvgScoreByUserEmail(email));
         this.avgUsersScore[email] = scoreFromServer;
-        return scoreFromServer;
+        return scoreFromServer ?? 0;
     }
 }

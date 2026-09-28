@@ -5,7 +5,6 @@ import { EventsTemp } from '../../../models/events.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InfoReport } from '../../../shared/components/info-report/info-report';
-import { HandleReportStatusPipe } from '../../../pipes/handle-report-status.pipe';
 import { HandleTypePipe } from '../../../pipes/handle-type.pipe';
 import { HandleDatePipe } from '../../../pipes/handle-date.pipe';
 import { EventsService } from '../../../services/events.service';
@@ -13,7 +12,7 @@ import { AdminEventService } from '../../../services/admin/adminEvent.service';
 
 @Component({
   selector: 'app-reports',
-  imports: [CommonModule, FormsModule, InfoReport, HandleReportStatusPipe, HandleTypePipe, HandleDatePipe],
+  imports: [CommonModule, FormsModule, InfoReport, HandleTypePipe, HandleDatePipe],
   templateUrl: './report-details.component.html',
   styleUrl: './report-details.component.css'
 })

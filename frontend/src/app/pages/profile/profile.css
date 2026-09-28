@@ -69,3 +69,6 @@
   opacity: 0.65;
   cursor: not-allowed;
 }
+.privacy-icon {
+  @apply inline-flex items-center justify-center w-8 h-8 rounded-full border shadow-sm;
+}
