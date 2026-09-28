@@ -51,8 +51,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587 # Puerto para TLS (recomendado)
-    username: ${MAIL_USERNAME:rafifyteam@gmail.com}
-    password: ${MAIL_PASSWORD:srjxaijwhjcvsxoi} # ¡SIN ESPACIOS!
+    username: ${MAIL_USERNAME:raffytestteam@gmail.com}
+    password: ${MAIL_PASSWORD:chwouvfqxbplayno} # ¡SIN ESPACIOS!
     properties:
       mail:
         debug: true
