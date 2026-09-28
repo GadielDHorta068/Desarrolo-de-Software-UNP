@@ -1,5 +1,5 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ChangeDetectorRef, Component, OnInit, Input } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AdminEventReport, Report, ReportService, ReviewReportDTO, StatusReport } from '../../../services/report.service';
 import { EventsTemp } from '../../../models/events.model';
 import { CommonModule } from '@angular/common';
@@ -9,6 +9,7 @@ import { HandleReportStatusPipe } from '../../../pipes/handle-report-status.pipe
 import { HandleTypePipe } from '../../../pipes/handle-type.pipe';
 import { HandleDatePipe } from '../../../pipes/handle-date.pipe';
 import { EventsService } from '../../../services/events.service';
+import { AdminEventService } from '../../../services/admin/adminEvent.service';
 
 @Component({
   selector: 'app-reports',
@@ -19,7 +20,7 @@ import { EventsService } from '../../../services/events.service';
 export class ReportDetails implements OnInit{
 
   eventIdParam!: Number;
-  event!: EventsTemp|null;
+  @Input() event!: EventsTemp|null;
   eventReport: AdminEventReport|null = null;
   titleEvent: string = "";
   emailCretor: string = "";
@@ -47,9 +48,11 @@ export class ReportDetails implements OnInit{
   isSubmitting: boolean = false;
 
   constructor(
+    private router: Router,
     private route: ActivatedRoute,
     private reportService: ReportService,
     private eventService: EventsService,
+    private adminEventService: AdminEventService,
     private cdr: ChangeDetectorRef
   ){}
 
@@ -226,5 +229,10 @@ export class ReportDetails implements OnInit{
 
   goBackToList(){
     window.history.back();
+  }
+
+  public redirectToEventManagement() {
+    this.adminEventService.setSelectedEvent(this.event);
+    this.router.navigate([`/event/management/${this.event?.id}`]);
   }
 }
