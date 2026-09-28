@@ -53,10 +53,11 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- Mail -->
+        <!-- Resend (envío de correos vía API HTTP) -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
+            <groupId>com.resend</groupId>
+            <artifactId>resend-java</artifactId>
+            <version>4.26.0</version>
         </dependency>
 
         <!--Lombok-->

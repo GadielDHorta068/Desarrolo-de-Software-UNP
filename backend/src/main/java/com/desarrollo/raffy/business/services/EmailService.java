@@ -4,32 +4,28 @@ import com.desarrollo.raffy.dto.WinnerDTO;
 import com.desarrollo.raffy.model.StatusReport;
 import com.desarrollo.raffy.model.Url;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamSource;
+import com.resend.Resend;
+import com.resend.core.exception.ResendException;
+import com.resend.services.emails.model.CreateEmailOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 /**
- * Servicio para el envío de correos electrónicos.
+ * Servicio para el envío de correos electrónicos mediante la API de Resend.
  */
 @Service
 public class EmailService {
 
     @Autowired
-    private JavaMailSender emailSender;
+    private Resend resend;
 
     @Autowired
     private EmailTemplateService emailTemplateService;
@@ -51,13 +47,8 @@ public class EmailService {
      * @param verificationToken el token de verificación a incluir en el correo.
      */
     public void sendVerificationEmail(String to, String verificationToken) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(to);
-        message.setSubject("Verificación de Email - Rafify");
-        
         String verificationUrl = frontendUrl + "/verify-email?token=" + verificationToken;
-        
+
         String messageText = "Hola,\n\n" +
                 "Gracias por registrarte en Rafify.\n\n" +
                 "Para completar tu registro, por favor haz clic en el siguiente enlace:\n" +
@@ -66,10 +57,19 @@ public class EmailService {
                 "Si no te registraste en Rafify, puedes ignorar este email.\n\n" +
                 "Saludos,\n" +
                 "El equipo de Rafify";
-        
-        message.setText(messageText);
-        
-        emailSender.send(message);
+
+        CreateEmailOptions options = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(to)
+                .subject("Verificación de Email - Rafify")
+                .text(messageText)
+                .build();
+
+        try {
+            send(options);
+        } catch (ResendException e) {
+            throw new RuntimeException("Error al enviar correo de verificación: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -228,11 +228,6 @@ public class EmailService {
      * @param token el token de restablecimiento a incluir en el correo.
      */
     public void sendPasswordResetEmail(String to, String token) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(to);
-        message.setSubject("Restablecimiento de Contraseña - Rafify");
-
         String resetUrl = frontendUrl + "/reset-password?token=" + token;
 
         String messageText = "Hola,\n\n" +
@@ -244,9 +239,18 @@ public class EmailService {
                 "Saludos,\n" +
                 "El equipo de Rafify";
 
-        message.setText(messageText);
+        CreateEmailOptions options = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(to)
+                .subject("Restablecimiento de Contraseña - Rafify")
+                .text(messageText)
+                .build();
 
-        emailSender.send(message);
+        try {
+            send(options);
+        } catch (ResendException e) {
+            throw new RuntimeException("Error al enviar correo de restablecimiento: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -319,22 +323,48 @@ public class EmailService {
      * @param text Cuerpo del mensaje.
      */
     public void sendEmail(String to, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        
-        message.setFrom(fromEmail);
-        
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
+        CreateEmailOptions options = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(to)
+                .subject(subject)
+                .text(text)
+                .build();
 
         try {
-            emailSender.send(message);
+            send(options);
             System.out.println("Correo enviado a: " + to + " con el asunto: " + subject + " y el texto: " + text);
         } catch (Exception e) {
             throw new RuntimeException("Error al enviar correo: " + e.getMessage());
         }
     }
 
+    /**
+     * Envía el correo mediante la API de Resend.
+     * @param options opciones de creación del correo (Resend)
+     */
+    private void send(CreateEmailOptions options) throws ResendException {
+        resend.emails().send(options);
+    }
+
+    /**
+     * Convierte contenido en memoria a un adjunto de Resend (codificado en base64).
+     * @param fileName nombre del archivo adjunto
+     * @param content contenido en bytes
+     * @param contentType tipo de contenido (MIME)
+     * @param contentId identificador para referenciar el adjunto como recurso inline (cid), o null
+     * @return adjunto listo para agregar a las opciones de creación del correo
+     */
+    private static com.resend.services.emails.model.Attachment toResendAttachment(String fileName,
+                                                                                  byte[] content,
+                                                                                  String contentType,
+                                                                                  String contentId) {
+        return com.resend.services.emails.model.Attachment.builder()
+                .fileName(fileName)
+                .content(Base64.getEncoder().encodeToString(content))
+                .contentType(contentType)
+                .contentId(contentId)
+                .build();
+    }
 
     /**
      * Envía un correo con contenido HTML.
@@ -344,21 +374,16 @@ public class EmailService {
      */
     public void sendHtmlEmail(String to, String subject, String html) {
         try {
-            // Para correos HTML sin adjuntos, usar modo no-multipart evita encabezados y límites innecesarios
-            MimeMessage mimeMessage = emailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, StandardCharsets.UTF_8.name());
-            helper.setFrom(fromEmail);
-            helper.setTo(to);
-            helper.setSubject(subject);
-            // Indicar explícitamente que el cuerpo es HTML
-            helper.setText(html, true);
+            CreateEmailOptions options = CreateEmailOptions.builder()
+                    .from(fromEmail)
+                    .to(to)
+                    .subject(subject)
+                    .html(html)
+                    .build();
 
-            // No establecer manualmente Content-Type/MIME-Version.
-            // JavaMail los genera correctamente según la estructura del mensaje.
-
-            emailSender.send(mimeMessage);
+            send(options);
             System.out.println("✅ Correo HTML enviado correctamente a: " + to);
-        } catch (MessagingException e) {
+        } catch (ResendException e) {
             System.err.println("❌ Error al enviar correo HTML: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Error al enviar correo HTML: " + e.getMessage(), e);
@@ -383,18 +408,21 @@ public class EmailService {
                                         byte[] attachmentBytes,
                                         String contentType) {
         try {
-            MimeMessage mimeMessage = emailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
-            helper.setFrom(fromEmail);
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(body, isHtml);
+            CreateEmailOptions.Builder builder = CreateEmailOptions.builder()
+                    .from(fromEmail)
+                    .to(to)
+                    .subject(subject);
 
-            InputStreamSource source = new ByteArrayResource(attachmentBytes);
-            helper.addAttachment(attachmentFilename, source, contentType);
+            if (isHtml) {
+                builder.html(body);
+            } else {
+                builder.text(body);
+            }
 
-            emailSender.send(mimeMessage);
-        } catch (MessagingException e) {
+            builder.addAttachment(toResendAttachment(attachmentFilename, attachmentBytes, contentType, null));
+
+            send(builder.build());
+        } catch (ResendException e) {
             throw new RuntimeException("Error al enviar correo con adjunto: " + e.getMessage(), e);
         }
     }
@@ -412,30 +440,24 @@ public class EmailService {
                                              String html,
                                              Map<String, InlineResource> inlineResources) {
         try {
-            MimeMessage mimeMessage = emailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
-            helper.setFrom(fromEmail);
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(html, true);
+            CreateEmailOptions.Builder builder = CreateEmailOptions.builder()
+                    .from(fromEmail)
+                    .to(to)
+                    .subject(subject)
+                    .html(html);
 
             if (inlineResources != null) {
                 for (Map.Entry<String, InlineResource> entry : inlineResources.entrySet()) {
                     InlineResource res = entry.getValue();
                     if (res != null && res.content != null && res.content.length > 0) {
-                        try {
-                            helper.addInline(entry.getKey(), new ByteArrayResource(res.content), res.contentType);
-                        } catch (Exception e) {
-                            System.err.println("Error al agregar recurso inline " + entry.getKey() + ": " + e.getMessage());
-                            // Continuar sin este recurso
-                        }
+                        builder.addAttachment(toResendAttachment(entry.getKey(), res.content, res.contentType, entry.getKey()));
                     }
                 }
             }
 
-            emailSender.send(mimeMessage);
+            send(builder.build());
             System.out.println("Correo HTML enviado exitosamente a: " + to);
-        } catch (MessagingException e) {
+        } catch (ResendException e) {
             System.err.println("Error al enviar correo con recursos inline: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Error al enviar correo con recursos inline: " + e.getMessage(), e);
@@ -452,32 +474,28 @@ public class EmailService {
             throw new IllegalArgumentException("Debe proveer textBody o htmlBody");
         }
         try {
-            MimeMessage mimeMessage = emailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
+            CreateEmailOptions.Builder builder = CreateEmailOptions.builder()
+                    .from(fromEmail)
+                    .subject(email.subject);
 
-            helper.setFrom(fromEmail);
-            setAddresses(helper, email);
-            helper.setSubject(email.subject);
+            setAddresses(builder, email);
 
             if (email.htmlBody != null && !email.htmlBody.isBlank()) {
-                if (email.textBody != null && !email.textBody.isBlank()) {
-                    helper.setText(email.textBody, email.htmlBody);
-                } else {
-                    helper.setText(email.htmlBody, true);
-                }
-            } else {
-                helper.setText(email.textBody, false);
+                builder.html(email.htmlBody);
+            }
+            if (email.textBody != null && !email.textBody.isBlank()) {
+                builder.text(email.textBody);
             }
 
             if (email.priority != null) {
                 // 1 (Alta) .. 5 (Baja)
-                mimeMessage.setHeader("X-Priority", String.valueOf(email.priority));
+                builder.addHeader("X-Priority", String.valueOf(email.priority));
             }
 
             if (email.attachments != null) {
                 for (Attachment attachment : email.attachments) {
                     if (attachment != null && attachment.content != null) {
-                        helper.addAttachment(attachment.filename, new ByteArrayResource(attachment.content), attachment.contentType);
+                        builder.addAttachment(toResendAttachment(attachment.filename, attachment.content, attachment.contentType, null));
                     }
                 }
             }
@@ -485,29 +503,29 @@ public class EmailService {
             if (email.inlineResources != null) {
                 for (InlineResource res : email.inlineResources) {
                     if (res != null && res.content != null && res.contentId != null) {
-                        helper.addInline(res.contentId, new ByteArrayResource(res.content), res.contentType);
+                        builder.addAttachment(toResendAttachment(res.contentId, res.content, res.contentType, res.contentId));
                     }
                 }
             }
 
-            emailSender.send(mimeMessage);
-        } catch (MessagingException e) {
+            send(builder.build());
+        } catch (ResendException e) {
             throw new RuntimeException("Error al enviar correo avanzado: " + e.getMessage(), e);
         }
     }
 
-    private void setAddresses(MimeMessageHelper helper, EmailMessage email) throws MessagingException {
+    private void setAddresses(CreateEmailOptions.Builder builder, EmailMessage email) {
         if (email.to != null && !email.to.isEmpty()) {
-            helper.setTo(email.to.toArray(String[]::new));
+            builder.to(email.to);
         }
         if (email.cc != null && !email.cc.isEmpty()) {
-            helper.setCc(email.cc.toArray(String[]::new));
+            builder.cc(email.cc);
         }
         if (email.bcc != null && !email.bcc.isEmpty()) {
-            helper.setBcc(email.bcc.toArray(String[]::new));
+            builder.bcc(email.bcc);
         }
         if (email.replyTo != null && !email.replyTo.isBlank()) {
-            helper.setReplyTo(email.replyTo);
+            builder.replyTo(email.replyTo);
         }
     }
 

@@ -47,32 +47,13 @@ spring:
     livereload:
       enabled: true
       port: 35729
-  # Configuración del Correo Electrónico
-  mail:
-    host: smtp.gmail.com
-    port: 587 # Puerto para TLS (recomendado)
-    # username: ${MAIL_USERNAME:rafifyteam@gmail.com}
-    # password: ${MAIL_PASSWORD:srjxaijwhjcvsxoi} # ¡SIN ESPACIOS!
-    username: ${MAIL_USERNAME:raffytestteam@gmail.com}
-    password: ${MAIL_PASSWORD:chwouvfqxbplayno} # ¡SIN ESPACIOS!
-    properties:
-      mail:
-        debug: true
-        smtp:
-          auth: true
-          starttls:
-            enable: true # Debe ser TRUE para el puerto 587
-            required: true # Recomendado para seguridad
-          ssl:
-            trust: smtp.gmail.com
-            enable: false # Debe ser FALSE para el puerto 587
   server:
     port: ${APP_PORT:-8080}
 
   # Propiedades de la app usadas por EmailService
 app:
   from:
-    email: ${APP_FROM_EMAIL:${MAIL_USERNAME:rafifyteam@gmail.com}}
+    email: "${APP_FROM_EMAIL:Rafify <no-reply@raffyfy.argcloud.com.ar>}"
   frontend:
     url: ${FRONTEND_URL:http://localhost:4200}
 
@@ -95,6 +76,10 @@ app:
         enabled: true
       defaults:
         enabled: true
+
+# Configuración de Resend para el envío de correos (la API key se define por variable de entorno, nunca en el repo)
+resend:
+  api-key: ${RESEND_API_KEY:}
 
 # Configuración de BCrypt para hashing seguro de contraseñas
 bcrypt:
