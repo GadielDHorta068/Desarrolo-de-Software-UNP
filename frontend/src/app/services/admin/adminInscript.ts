@@ -70,11 +70,20 @@ export class AdminInscriptService {
   async onInscript(user: UserDTO): Promise<any> {
     if (!this.event) return;
 
-    const regionResp = await this.checkRegion(this.event.region.id, user.region.id);
-    console.log(regionResp);
+    // si no tiene region no controlo la ubicacion
+    let eventWithRegion = true;
+    if(!this.event?.region?.id){
+      eventWithRegion = false;
+    }
+
+    let regionResp:any = null;
+    if(eventWithRegion){
+      regionResp = await this.checkRegion(this.event.region.id, user.region.id);
+      console.log(regionResp);
+    }
 
     // si no esta incluida la region del usuario en la region del evento se frena el proceso de inscripcion
-    if (regionResp.data == false) {
+    if ((regionResp?.data == false) && eventWithRegion) {
         // console.log("MYLOG: region false");
         return regionResp;
     }

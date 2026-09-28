@@ -56,14 +56,15 @@ export class ReportsFormComponent {
         // console.log("[reportes] => datos del reporte recuperados: ", dataReport);
         this.reportService.informReport(dataReport).subscribe(
           (resp: any) => {
-            if(resp.id){
+            if(resp.id || resp.eventTitle){
               this.informReport.emit({status: "OK", msg: "El reporte fue creado exitosamente"} as ResumeService);
               this.close.emit();
             }
           },
           error => {
-            console.error("Error al crear reporte:", error);
-            let msgResponse = this.parseServerError(error?.error?.message) || "No fue posible crear el reporte";
+            console.error("Error al creregistrar el reporte:", error);
+            // let msgResponse = this.parseServerError(error?.error?.message ?? error?.message) || "No fue posible crear el reporte";
+            let msgResponse = "No fue posible crear el reporte." + (error?.error?.message ?? "");
             this.informReport.emit({status: "ERROR", msg: msgResponse} as ResumeService);
             this.close.emit();
           }
