@@ -88,7 +88,7 @@ public interface EventsRepository extends JpaRepository<Events, Long> {
     List<Events> findGuessingByUserId(@Param("userId") Long userId);
 
     // Verificar participación del usuario en una rifa específica
-    @Query("SELECT CASE WHEN COUNT(rn) > 0 THEN TRUE ELSE FALSE END FROM RaffleNumber rn WHERE rn.raffle = :raffle AND rn.numberOwner = :user")
+    @Query("SELECT CASE WHEN COUNT(rn) > 0 THEN TRUE ELSE FALSE END FROM RaffleNumber rn WHERE rn.raffle = :raffle AND rn.numberOwner = :user AND rn.payment IS NOT NULL")
     boolean existsRaffleParticipation(@Param("raffle") com.desarrollo.raffy.model.Raffle raffle, @Param("user") com.desarrollo.raffy.model.User user);
 
     // Verificar intentos del usuario en un concurso de adivinanzas específico

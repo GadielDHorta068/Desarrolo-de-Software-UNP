@@ -163,6 +163,10 @@ export class RafflesPanel implements OnInit {
     // inicializacion del form de creacion de eventos
     this.formPanel = this.initForm();
 
+    if(this.enabledTwoFactor === false) {
+      this.formPanel.disable();
+    }
+
     this.formPanel.get('drawType')?.valueChanges.subscribe(valor => {
       // console.log('Nuevo tipo de evento:', valor);
       this.updateAvailabilityControls(valor);
