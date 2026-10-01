@@ -11,3 +11,14 @@
 .chip-private { @apply bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200 border border-red-200 dark:border-red-700; }
 .chip-public { @apply bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200 border border-green-200 dark:border-green-700; }
 .icon-circle { @apply w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-md; }
+
+/* .image-preview {
+  margin-left: auto;
+  margin-right: auto;
+  max-height: 140px;
+  min-width: 120px;
+  border-radius: 0.75rem;
+  border-width: 1px;
+  object-fit: cover;
+  display: block;
+} */
