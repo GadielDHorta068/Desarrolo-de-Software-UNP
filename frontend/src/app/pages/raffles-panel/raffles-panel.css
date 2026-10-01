@@ -74,7 +74,7 @@
 /* Espaciado y separación visual de secciones, coherente con edit-event */
 .bg-white,
 :host-context(.dark) .bg-gray-800 {
-  margin-bottom: 2rem;
+  /* margin-bottom: 1rem; */
   position: relative;
 }
 

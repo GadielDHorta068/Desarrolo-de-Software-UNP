@@ -151,7 +151,7 @@
                     </div> -->
                 </div>
                 <div class="flex flex-col md:flex-row gap-4">
-                    <div class="w-full md:w-1/2">
+                    <div class="w-full md:w-1/2 mb-1">
                         <label for="region" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Región (*)
                         </label>
@@ -163,9 +163,6 @@
                                 {{ r.name }}
                             </option>
                         </select>
-                        <div *ngIf="formPanel.get('region')?.invalid && formPanel.get('region')?.touched">
-                            <small class="text-red-600">Debés seleccionar un tipo</small>
-                        </div>
                         <div *ngIf="formPanel.get('region')?.invalid && formPanel.get('region')?.touched">
                             <small class="text-red-600">Debés seleccionar una región</small>
                         </div>
