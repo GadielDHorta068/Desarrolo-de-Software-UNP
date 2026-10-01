@@ -1,5 +1,5 @@
 <div class="container">
-    @if (!enabledTwoFactor) {
+    @if (enabledTwoFactor === false) {
     <div class="flex items-center p-4 border border-orange-600 rounded-md mb-2 dark:bg-amber-900 bg-amber-900">
         <svg class="w-6 h-6 mr-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

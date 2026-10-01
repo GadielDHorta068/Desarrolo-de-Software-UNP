@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ViewChild, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { EventsCreate, EventsTemp, EventType, EventTypes, RaffleCreate } from '../../models/events.model';
@@ -117,7 +118,7 @@ export class RafflesPanel implements OnInit {
 
   formPanel: FormGroup;
   userCurrent: UserResponse | null = null;
-  enabledTwoFactor: boolean = true;
+  enabledTwoFactor: boolean | null = null;
 
   categories: Category[] = [];
   types: EventType[] = [];
@@ -143,7 +144,6 @@ export class RafflesPanel implements OnInit {
   ){
     this.initDateMin();
     this.userCurrent = this.authService.getCurrentUserValue();
-    this.enabledTwoFactor = this.authService.getEnabledTwoFactor();
     // console.log("[createEvent] => usuario actual: ", this.userCurrent);
 
     // Inicializar datos de configuración (categorías y tipos de eventos)
@@ -163,9 +163,17 @@ export class RafflesPanel implements OnInit {
     // inicializacion del form de creacion de eventos
     this.formPanel = this.initForm();
 
-    if(this.enabledTwoFactor === false) {
-      this.formPanel.disable();
-    }
+    this.authService.enabledTwoFactor$.pipe(takeUntilDestroyed()).subscribe(status => {
+      this.enabledTwoFactor = status;
+      if (!this.eventCreated) {
+        if (status === true) {
+          this.formPanel.enable({ emitEvent: false });
+        } else {
+          this.formPanel.disable({ emitEvent: false });
+        }
+      }
+      this.cdr.markForCheck();
+    });
 
     this.formPanel.get('drawType')?.valueChanges.subscribe(valor => {
       // console.log('Nuevo tipo de evento:', valor);
@@ -404,7 +412,9 @@ export class RafflesPanel implements OnInit {
 
   resetForm() {
     this.eventCreated = false;
-    this.formPanel.enable();
+    if (this.enabledTwoFactor === true) {
+      this.formPanel.enable();
+    }
     this.formPanel.reset({
       winners: 1
     });

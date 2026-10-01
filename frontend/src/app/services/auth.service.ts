@@ -85,6 +85,9 @@ export class AuthService {
   
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+
+  private enabledTwoFactorSubject = new BehaviorSubject<boolean | null>(null);
+  public enabledTwoFactor$ = this.enabledTwoFactorSubject.asObservable();
   
   private isLoggingOut = false;
   isOperatorAdmin: boolean = false;
@@ -108,10 +111,7 @@ export class AuthService {
       // Solo marcar como autenticado si hay token, sin hacer peticiones HTTP
       this.isAuthenticatedSubject.next(true);
       console.log("[initAuth] => loguea con el token!");
-      console.log("[initAuth] => datos del usuario actual: ", this.currentUserSubject.value);
-      if(this.currentUserSubject.value?.nickname){
-        this.fetch2FAStatus(this.currentUserSubject.value.nickname);
-      }
+      // El usuario se recupera después con initializeUserData().
     } else {
       // Asegurar que el estado esté limpio si no hay token
       this.clearAuthState();
@@ -191,6 +191,7 @@ export class AuthService {
       tap(user => {
         this.currentUserSubject.next(user);
         this.isAuthenticatedSubject.next(true);
+        this.fetch2FAStatus(user.nickname);
       }),
       catchError(this.handleError)
     );
@@ -258,13 +259,9 @@ export class AuthService {
     localStorage.setItem(this.TOKEN_KEY, response.accessToken);
     localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
 
+    this.currentUserSubject.next(response.user);
+    this.isAuthenticatedSubject.next(true);
     this.fetch2FAStatus(response.user.nickname);
-    
-    // Actualizar estado de forma síncrona para evitar problemas de timing
-    setTimeout(() => {
-      this.currentUserSubject.next(response.user);
-      this.isAuthenticatedSubject.next(true);
-    }, 0);
   }
 
   /**
@@ -275,17 +272,24 @@ export class AuthService {
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
+    this.enabledTwoFactor = false;
+    this.enabledTwoFactorSubject.next(null);
   }
 
   private fetch2FAStatus(nickname: string): void {
+    this.enabledTwoFactor = false;
+    this.enabledTwoFactorSubject.next(null);
     this.get2FAStatus(nickname).subscribe({
       next: (status) => {
-        this.enabledTwoFactor = !!status.twoFactorEnabled;
-        this.setEnabledTwoFactor(this.enabledTwoFactor);
+        if (this.getToken() && this.currentUserSubject.value?.nickname === nickname) {
+          this.setEnabledTwoFactor(!!status.twoFactorEnabled);
+        }
       },
       error: () => {
-        this.enabledTwoFactor = false;
-        this.setEnabledTwoFactor(this.enabledTwoFactor);
+        // Una consulta fallida no implica que el usuario tenga 2FA deshabilitado.
+        if (this.getToken() && this.currentUserSubject.value?.nickname === nickname) {
+          this.enabledTwoFactorSubject.next(null);
+        }
       }
     });
   }
@@ -525,6 +529,7 @@ export class AuthService {
   }
   setEnabledTwoFactor(isEnabled: boolean): void {
     this.enabledTwoFactor = isEnabled;
+    this.enabledTwoFactorSubject.next(isEnabled);
   }
 
   /**
