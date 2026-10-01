@@ -1,7 +1,9 @@
-// En desarrollo, usamos same-origin con prefijo '/api' y el dev-server
-// de Angular se encarga de la redirección al backend vía proxy.
+// Si la app se sirve directo desde el dev-server (:4200), se llama al backend
+// en el puerto 8080 del mismo host. Detrás de Nginx (localhost:80 o un túnel
+// como ngrok/Cloudflare) se usa same-origin y Nginx reenvía las rutas al backend.
+const isDevServer = typeof window !== 'undefined' && window.location.port === '4200';
+
 export const environment = {
   production: false,
-  // Same-origin sin prefijo /api
-  apiUrl: 'http://localhost:8080'
+  apiUrl: isDevServer ? `${window.location.protocol}//${window.location.hostname}:8080` : ''
 };
