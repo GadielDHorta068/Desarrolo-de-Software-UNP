@@ -26,7 +26,9 @@ export class AuditList {
   dateFrom?: Date;
   dateTo?: Date;
   showModal = false;
+  emptyParticipantsModal = false;
   selectedEventParticipants: AuditParticipant[] = [];
+  selectedAuditMessage = '';
   eventTypes = Object.values(EventTypes);
   seed: number | null = null;
 
@@ -87,15 +89,29 @@ export class AuditList {
   }
 
   showParticipants(audit: AuditEvent) {
-    this.selectedEventParticipants = audit.participants || [];
+    const participants = audit.participants || [];
+    this.selectedEventParticipants = participants;
     this.seed = audit.seed || null;
+
+    if (participants.length === 0) {
+      this.selectedAuditMessage = 'Evento no finalizado: para mostrar participantes, el evento debe estar finalizado.';
+      this.emptyParticipantsModal = true;
+      this.showModal = true;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.selectedAuditMessage = '';
+    this.emptyParticipantsModal = false;
     this.showModal = true;
     this.cdr.detectChanges();
   }
 
   closeModal() {
     this.showModal = false;
+    this.emptyParticipantsModal = false;
     this.selectedEventParticipants = [];
+    this.selectedAuditMessage = '';
     this.cdr.detectChanges();
   }
 
