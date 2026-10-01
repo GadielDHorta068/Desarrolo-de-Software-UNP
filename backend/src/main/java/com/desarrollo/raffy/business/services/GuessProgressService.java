@@ -19,6 +19,7 @@ import com.desarrollo.raffy.model.GuessProgress;
 import com.desarrollo.raffy.model.GuessingContest;
 import com.desarrollo.raffy.model.GuestUser;
 import com.desarrollo.raffy.model.User;
+import com.desarrollo.raffy.model.auditlog.AuditActionType;
 
 @Service
 public class GuessProgressService {
@@ -44,6 +45,9 @@ public class GuessProgressService {
     @Autowired
     private EvolutionService evolutionService;
 
+    @Autowired
+    private AuditLogsService auditLogsService;
+
     @Value("${evolution.defaultInstance:raffy}")
     private String defaultEvolutionInstance;
 
@@ -68,6 +72,15 @@ public class GuessProgressService {
         }
         gp.setDurationSeconds(dto.getDurationSeconds());
         gp.setHasWon(dto.isHasWon());
+
+        auditLogsService.logAction(
+                        eventId, 
+                        user.getName(),
+                        AuditActionType.USER_REGISTERED, 
+                        String.format("Usuario %s %s registrado en el concurso %s", 
+                                        user.getName(), 
+                                        user.getSurname(), 
+                                        contest.getTitle()));
 
         // Enviar correo de notificación
         emailService.sendGuessProgressEmail(
