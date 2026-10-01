@@ -11,6 +11,7 @@ import { NotificationService } from './services/notification.service';
 import { UserDTO } from './models/UserDTO';
 import { EventTypes } from './models/events.model';
 import { Guessprogress } from './pages/guessprogress/guessprogress';
+import { RegionService } from './services/region.service';
 
 @Component({
   selector: 'app-root',
@@ -35,7 +36,8 @@ export class AppComponent {
     private cdr: ChangeDetectorRef,
     private adminInscriptService: AdminInscriptService,
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private regionService: RegionService
   ) {
     // Removido initData() - ahora se llama solo en las páginas que lo necesitan
     this.adminInscriptService.openInscription$.subscribe(resp => {
@@ -52,6 +54,8 @@ export class AppComponent {
       this.showGuessModal = resp;
       this.cdr.markForCheck();
     })
+
+    this.regionService.getOnlyRegions().subscribe();
   }
 
   openModalRaffle() {

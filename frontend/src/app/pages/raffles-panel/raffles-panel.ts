@@ -172,8 +172,8 @@ export class RafflesPanel implements OnInit {
       this.updateAvailabilityControls(valor);
     });
 
-    this.regionService.getNonCountrieRegions().subscribe({
-            next: (res) => this.regions = res.data,
+    this.regionService.getOnlyRegions().subscribe({
+            next: (res) => this.regions = res,
             error: err => console.error(err)
         });
   }

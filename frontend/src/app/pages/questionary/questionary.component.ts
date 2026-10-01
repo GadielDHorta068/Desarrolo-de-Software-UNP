@@ -48,9 +48,8 @@ export class QuestionaryComponent {
         private regionService: RegionService,
         private adminEventService: AdminEventService
     ) {
-        // trae las provincias para la lista del questionary
-        this.regionService.getNonCountrieRegions().subscribe({
-            next: (res) => this.regions = res.data,
+        this.regionService.getOnlyRegions().subscribe({
+            next: (res) => this.regions = res,
             error: err => console.error(err)
         });
     }

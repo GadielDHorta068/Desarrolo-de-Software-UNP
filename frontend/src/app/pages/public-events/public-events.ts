@@ -91,20 +91,18 @@ export class PublicEvents implements OnInit, AfterViewInit {
     private authService: AuthService,
     private router: Router,
     private categoryService: CategoryService
-  ){}
+  ){
+    this.RegionService.getOnlyRegions().subscribe({
+      next: (res) => {
+        this.regions = res;
+        this.cdr.detectChanges();
+      },
+      error: err => console.error(err)
+    });
+  }
 
   ngOnInit(): void {
     this.userLogged = this.authService.isAuthenticated();
-    
-    this.getRegions().subscribe({
-      next: (regions) => {
-        this.regions = regions;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.warn('[PublicEvents] No se pudieron cargar regiones:', err);
-      }
-    });
     
     // cargar categorías existentes (endpoint público)
     this.categoryService.getAll().subscribe({
@@ -399,13 +397,6 @@ export class PublicEvents implements OnInit, AfterViewInit {
   public onRegionSelected(region: Region): void {
     this.filterRegion = region;
     this.onFiltersChanged();
-  }
-
-  //Lista de Regiones para el filtro de eventos
-  public getRegions(): Observable<Region[]> {
-    return this.RegionService.getNonCountrieRegions().pipe(
-      map((res: any) => Array.isArray(res) ? res : (res?.data ?? []))
-    );
   }
 
   public toDateObj(iso?: string): Date | null {
